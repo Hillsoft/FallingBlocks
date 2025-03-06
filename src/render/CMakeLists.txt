@@ -24,3 +24,8 @@ add_library(render.vulkansurface STATIC "VulkanSurface.cpp" "VulkanSurface.hpp")
 target_link_libraries(render.vulkansurface
 	render.glfw_wrapper.window
 	render.vulkaninstance)
+
+add_library(render.vulkanswapchain STATIC "VulkanSwapChain.cpp" "VulkanSwapChain.hpp")
+target_link_libraries(render.vulkanswapchain
+	render.glfw_wrapper.window
+	util.debug)
