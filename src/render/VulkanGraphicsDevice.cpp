@@ -123,7 +123,9 @@ std::unique_ptr<PhysicalDeviceInfo> choosePhysicalDevice(
 
 } // namespace
 
-VulkanGraphicsDevice::VulkanGraphicsDevice(VkDevice device) : device_(device) {}
+VulkanGraphicsDevice::VulkanGraphicsDevice(
+    VkDevice device, VkQueue graphicsQueue)
+    : device_(device), graphicsQueue_(graphicsQueue) {}
 
 VulkanGraphicsDevice::~VulkanGraphicsDevice() {
   cleanup();
@@ -131,15 +133,15 @@ VulkanGraphicsDevice::~VulkanGraphicsDevice() {
 
 VulkanGraphicsDevice::VulkanGraphicsDevice(
     VulkanGraphicsDevice&& other) noexcept
-    : device_(other.device_) {
+    : device_(other.device_), graphicsQueue_(other.graphicsQueue_) {
   other.device_ = nullptr;
+  other.graphicsQueue_ = nullptr;
 }
 
 VulkanGraphicsDevice& VulkanGraphicsDevice::operator=(
-    VulkanGraphicsDevice&& other) {
-  cleanup();
-  device_ = other.device_;
-  other.device_ = nullptr;
+    VulkanGraphicsDevice&& other) noexcept {
+  std::swap(device_, other.device_);
+  std::swap(graphicsQueue_, other.graphicsQueue_);
 
   return *this;
 }
@@ -192,7 +194,14 @@ VulkanGraphicsDevice VulkanGraphicsDevice::make(VulkanInstance& instance) {
     throw std::runtime_error{"Failed to create logical device"};
   }
 
-  return {device};
+  VkQueue graphicsQueue;
+  vkGetDeviceQueue(
+      device,
+      physicalDevice->queueFamilies.graphicsFamily.value(),
+      0,
+      &graphicsQueue);
+
+  return {device, graphicsQueue};
 }
 
 } // namespace tetris::render

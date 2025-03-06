@@ -14,16 +14,17 @@ class VulkanGraphicsDevice {
   VulkanGraphicsDevice& operator=(const VulkanGraphicsDevice& other) = delete;
 
   VulkanGraphicsDevice(VulkanGraphicsDevice&& other) noexcept;
-  VulkanGraphicsDevice& operator=(VulkanGraphicsDevice&& other);
+  VulkanGraphicsDevice& operator=(VulkanGraphicsDevice&& other) noexcept;
 
   static VulkanGraphicsDevice make(VulkanInstance& instance);
 
  private:
-  VulkanGraphicsDevice(VkDevice device);
+  VulkanGraphicsDevice(VkDevice device, VkQueue graphicsQueue);
 
   void cleanup();
 
   VkDevice device_;
+  VkQueue graphicsQueue_;
 };
 
 } // namespace tetris::render
