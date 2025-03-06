@@ -5,7 +5,8 @@ target_link_libraries(render.glfwapplication
 	render.glfw_wrapper.window
 	render.vulkangraphicsdevice
 	render.vulkaninstance
-	render.vulkansurface)
+	render.vulkansurface
+	render.vulkanswapchain)
 
 add_library(render.validationlayers INTERFACE "validationLayers.hpp")
 
@@ -28,4 +29,6 @@ target_link_libraries(render.vulkansurface
 add_library(render.vulkanswapchain STATIC "VulkanSwapChain.cpp" "VulkanSwapChain.hpp")
 target_link_libraries(render.vulkanswapchain
 	render.glfw_wrapper.window
+	render.vulkangraphicsdevice
+	render.vulkansurface
 	util.debug)

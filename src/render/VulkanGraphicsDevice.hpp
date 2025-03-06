@@ -47,6 +47,8 @@ class VulkanGraphicsDevice {
 
   const PhysicalDeviceInfo& physicalInfo() const { return *physicalInfo_; }
 
+  VkDevice getRawDevice() { return device_; }
+
  private:
   VulkanGraphicsDevice(
       VkDevice device,

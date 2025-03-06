@@ -22,7 +22,8 @@ glfw::Window makeWindow() {
 GLFWApplication::GLFWApplication()
     : vulkan_(),
       surface_(vulkan_, makeWindow()),
-      graphics_(VulkanGraphicsDevice::make(vulkan_, surface_)) {}
+      graphics_(VulkanGraphicsDevice::make(vulkan_, surface_)),
+      swapChain_(surface_, graphics_) {}
 
 GLFWApplication::~GLFWApplication() {
   glfwTerminate();
