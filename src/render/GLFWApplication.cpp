@@ -20,15 +20,16 @@ glfw::Window makeWindow() {
 } // namespace
 
 GLFWApplication::GLFWApplication()
-    : graphics(VulkanGraphicsDevice::make(vulkan)),
-      surface(vulkan, makeWindow()) {}
+    : vulkan_(),
+      graphics_(VulkanGraphicsDevice::make(vulkan_)),
+      surface_(vulkan_, makeWindow()) {}
 
 GLFWApplication::~GLFWApplication() {
   glfwTerminate();
 }
 
 void GLFWApplication::run() {
-  while (!surface.window().shouldClose()) {
+  while (!surface_.window().shouldClose()) {
     glfwPollEvents();
   }
 }
