@@ -17,14 +17,9 @@ namespace {
 constexpr std::array<const char*, 1> requiredDeviceExtensions{
     VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
-struct QueueFamilyIndices {
-  std::optional<uint32_t> graphicsFamily;
-  std::optional<uint32_t> presentFamily;
-};
-
-QueueFamilyIndices findQueueFamilies(
+VulkanGraphicsDevice::QueueFamilyIndices findQueueFamilies(
     VkPhysicalDevice device, VulkanSurface& surface) {
-  QueueFamilyIndices indices;
+  VulkanGraphicsDevice::QueueFamilyIndices indices;
 
   uint32_t queueFamilyCount;
   vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
@@ -48,15 +43,9 @@ QueueFamilyIndices findQueueFamilies(
   return indices;
 }
 
-struct SwapChainSupportDetails {
-  VkSurfaceCapabilitiesKHR capabilities;
-  std::vector<VkSurfaceFormatKHR> formats;
-  std::vector<VkPresentModeKHR> presentModes;
-};
-
-SwapChainSupportDetails getSwapChainSupportDetails(
+VulkanGraphicsDevice::SwapChainSupportDetails getSwapChainSupportDetails(
     VkPhysicalDevice device, VulkanSurface& surface) {
-  SwapChainSupportDetails details;
+  VulkanGraphicsDevice::SwapChainSupportDetails details;
 
   vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
       device, surface.getRawSurface(), &details.capabilities);
@@ -87,26 +76,11 @@ SwapChainSupportDetails getSwapChainSupportDetails(
   return details;
 }
 
-bool isSwapChainAdequate(const SwapChainSupportDetails& swapChainSupport) {
+bool isSwapChainAdequate(
+    const VulkanGraphicsDevice::SwapChainSupportDetails& swapChainSupport) {
   return !swapChainSupport.formats.empty() &&
       !swapChainSupport.presentModes.empty();
 }
-
-struct PhysicalDeviceInfo {
-  explicit PhysicalDeviceInfo(VkPhysicalDevice device, VulkanSurface& surface)
-      : device(device) {
-    vkGetPhysicalDeviceProperties(device, &properties);
-    vkGetPhysicalDeviceFeatures(device, &features);
-    queueFamilies = findQueueFamilies(device, surface);
-    swapChainSupport = getSwapChainSupportDetails(device, surface);
-  }
-
-  VkPhysicalDevice device;
-  VkPhysicalDeviceProperties properties;
-  VkPhysicalDeviceFeatures features;
-  QueueFamilyIndices queueFamilies;
-  SwapChainSupportDetails swapChainSupport;
-};
 
 std::vector<VkPhysicalDevice> enumerateDevices(VulkanInstance& instance) {
   uint32_t physicalDeviceCount;
@@ -146,7 +120,7 @@ bool deviceHasRequiredExtensionSupport(VkPhysicalDevice device) {
   return true;
 }
 
-bool isDeviceSuitable(const PhysicalDeviceInfo& device) {
+bool isDeviceSuitable(const VulkanGraphicsDevice::PhysicalDeviceInfo& device) {
   if (!device.features.geometryShader) {
     return false;
   }
@@ -166,7 +140,8 @@ bool isDeviceSuitable(const PhysicalDeviceInfo& device) {
   return true;
 }
 
-int deviceSuitabilityHeuristic(const PhysicalDeviceInfo& device) {
+int deviceSuitabilityHeuristic(
+    const VulkanGraphicsDevice::PhysicalDeviceInfo& device) {
   if (!isDeviceSuitable(device)) {
     return 0;
   }
@@ -184,15 +159,18 @@ int deviceSuitabilityHeuristic(const PhysicalDeviceInfo& device) {
   return score;
 }
 
-std::unique_ptr<PhysicalDeviceInfo> choosePhysicalDevice(
+std::unique_ptr<VulkanGraphicsDevice::PhysicalDeviceInfo> choosePhysicalDevice(
     VulkanInstance& instance, VulkanSurface& surface) {
   std::vector<VkPhysicalDevice> devices = enumerateDevices(instance);
 
-  std::vector<std::pair<std::unique_ptr<PhysicalDeviceInfo>, int>>
+  std::vector<
+      std::pair<std::unique_ptr<VulkanGraphicsDevice::PhysicalDeviceInfo>, int>>
       rankedDevices;
   rankedDevices.reserve(devices.size());
   for (const auto& device : devices) {
-    auto deviceInfo = std::make_unique<PhysicalDeviceInfo>(device, surface);
+    auto deviceInfo =
+        std::make_unique<VulkanGraphicsDevice::PhysicalDeviceInfo>(
+            device, surface);
     int suitabilityHeuristic = deviceSuitabilityHeuristic(*deviceInfo);
     if (suitabilityHeuristic > 0) {
       rankedDevices.emplace_back(std::move(deviceInfo), suitabilityHeuristic);
@@ -231,7 +209,8 @@ struct VkDeviceQueueCreateInfoWrapper {
 };
 
 void makeQueueCreateInfo(
-    VkDeviceQueueCreateInfoWrapper& result, const QueueFamilyIndices& indices) {
+    VkDeviceQueueCreateInfoWrapper& result,
+    const VulkanGraphicsDevice::QueueFamilyIndices& indices) {
   DEBUG_ASSERT(result.createInfo.size() == 0);
   DEBUG_ASSERT(indices.graphicsFamily.has_value());
   DEBUG_ASSERT(indices.presentFamily.has_value());
@@ -251,11 +230,24 @@ void makeQueueCreateInfo(
 
 } // namespace
 
+VulkanGraphicsDevice::PhysicalDeviceInfo::PhysicalDeviceInfo(
+    VkPhysicalDevice device, VulkanSurface& surface)
+    : device(device) {
+  vkGetPhysicalDeviceProperties(device, &properties);
+  vkGetPhysicalDeviceFeatures(device, &features);
+  queueFamilies = findQueueFamilies(device, surface);
+  swapChainSupport = getSwapChainSupportDetails(device, surface);
+}
+
 VulkanGraphicsDevice::VulkanGraphicsDevice(
-    VkDevice device, VkQueue graphicsQueue, VkQueue presentQueue)
+    VkDevice device,
+    VkQueue graphicsQueue,
+    VkQueue presentQueue,
+    std::unique_ptr<PhysicalDeviceInfo> physicalInfo)
     : device_(device),
       graphicsQueue_(graphicsQueue),
-      presentQueue_(presentQueue) {}
+      presentQueue_(presentQueue),
+      physicalInfo_(std::move(physicalInfo)) {}
 
 VulkanGraphicsDevice::~VulkanGraphicsDevice() {
   cleanup();
@@ -265,7 +257,8 @@ VulkanGraphicsDevice::VulkanGraphicsDevice(
     VulkanGraphicsDevice&& other) noexcept
     : device_(other.device_),
       graphicsQueue_(other.graphicsQueue_),
-      presentQueue_(other.presentQueue_) {
+      presentQueue_(other.presentQueue_),
+      physicalInfo_(std::move(other.physicalInfo_)) {
   other.device_ = nullptr;
   other.graphicsQueue_ = nullptr;
   other.presentQueue_ = nullptr;
@@ -276,6 +269,7 @@ VulkanGraphicsDevice& VulkanGraphicsDevice::operator=(
   std::swap(device_, other.device_);
   std::swap(graphicsQueue_, other.graphicsQueue_);
   std::swap(presentQueue_, other.presentQueue_);
+  std::swap(physicalInfo_, other.physicalInfo_);
 
   return *this;
 }
@@ -339,7 +333,7 @@ VulkanGraphicsDevice VulkanGraphicsDevice::make(
       0,
       &presentQueue);
 
-  return {device, graphicsQueue, presentQueue};
+  return {device, graphicsQueue, presentQueue, std::move(physicalDevice)};
 }
 
 } // namespace tetris::render
