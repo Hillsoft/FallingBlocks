@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <optional>
 #include <vector>
 #include <GLFW/glfw3.h>
 
@@ -9,15 +10,40 @@ namespace tetris::render {
 
 namespace {
 
+struct QueueFamilyIndices {
+  std::optional<uint32_t> graphicsFamily;
+};
+
+QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) {
+  QueueFamilyIndices indices;
+
+  uint32_t queueFamilyCount;
+  vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+  std::vector<VkQueueFamilyProperties> queueFamilies{queueFamilyCount};
+  vkGetPhysicalDeviceQueueFamilyProperties(
+      device, &queueFamilyCount, queueFamilies.data());
+
+  for (int i = 0; i < queueFamilies.size(); i++) {
+    if ((queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) > 0) {
+      indices.graphicsFamily = i;
+    }
+  }
+
+  return indices;
+}
+
 struct PhysicalDeviceInfo {
   explicit PhysicalDeviceInfo(VkPhysicalDevice device) : device(device) {
     vkGetPhysicalDeviceProperties(device, &properties);
     vkGetPhysicalDeviceFeatures(device, &features);
+    queueFamilies = findQueueFamilies(device);
   }
 
   VkPhysicalDevice device;
   VkPhysicalDeviceProperties properties;
   VkPhysicalDeviceFeatures features;
+  QueueFamilyIndices queueFamilies;
 };
 
 std::vector<VkPhysicalDevice> enumerateDevices(VulkanInstance& instance) {
@@ -32,8 +58,19 @@ std::vector<VkPhysicalDevice> enumerateDevices(VulkanInstance& instance) {
   return physicalDevices;
 }
 
-int deviceSuitabilityHeuristic(const PhysicalDeviceInfo& device) {
+bool isDeviceSuitable(const PhysicalDeviceInfo& device) {
   if (!device.features.geometryShader) {
+    return false;
+  }
+  if (!device.queueFamilies.graphicsFamily.has_value()) {
+    return false;
+  }
+
+  return true;
+}
+
+int deviceSuitabilityHeuristic(const PhysicalDeviceInfo& device) {
+  if (!isDeviceSuitable(device)) {
     return 0;
   }
 
