@@ -6,6 +6,9 @@
 #include <vector>
 #include <GLFW/glfw3.h>
 
+#include "render/validationLayers.hpp"
+#include "util/debug.hpp"
+
 namespace tetris::render {
 
 namespace {
@@ -120,12 +123,76 @@ std::unique_ptr<PhysicalDeviceInfo> choosePhysicalDevice(
 
 } // namespace
 
-VulkanGraphicsDevice makeGraphicsDevice(VulkanInstance& instance) {
+VulkanGraphicsDevice::VulkanGraphicsDevice(VkDevice device) : device_(device) {}
+
+VulkanGraphicsDevice::~VulkanGraphicsDevice() {
+  cleanup();
+}
+
+VulkanGraphicsDevice::VulkanGraphicsDevice(
+    VulkanGraphicsDevice&& other) noexcept
+    : device_(other.device_) {
+  other.device_ = nullptr;
+}
+
+VulkanGraphicsDevice& VulkanGraphicsDevice::operator=(
+    VulkanGraphicsDevice&& other) {
+  cleanup();
+  device_ = other.device_;
+  other.device_ = nullptr;
+
+  return *this;
+}
+
+void VulkanGraphicsDevice::cleanup() {
+  if (device_ != nullptr) {
+    vkDestroyDevice(device_, nullptr);
+    device_ = nullptr;
+  }
+}
+
+VulkanGraphicsDevice VulkanGraphicsDevice::make(VulkanInstance& instance) {
   std::unique_ptr<PhysicalDeviceInfo> physicalDevice =
       choosePhysicalDevice(instance);
+  DEBUG_ASSERT(physicalDevice != nullptr);
   std::cout << "Using graphics device " << physicalDevice->properties.deviceName
             << "\n";
-  return {};
+
+  VkDeviceQueueCreateInfo queueCreateInfo{};
+  queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+  queueCreateInfo.queueFamilyIndex =
+      physicalDevice->queueFamilies.graphicsFamily.value();
+  queueCreateInfo.queueCount = 1;
+
+  float queuePriority = 1.0f;
+  queueCreateInfo.pQueuePriorities = &queuePriority;
+
+  VkPhysicalDeviceFeatures deviceFeatures{};
+
+  VkDeviceCreateInfo createInfo{};
+  createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+  createInfo.pQueueCreateInfos = &queueCreateInfo;
+  createInfo.queueCreateInfoCount = 1;
+  createInfo.pEnabledFeatures = &deviceFeatures;
+
+  createInfo.enabledExtensionCount = 0;
+
+  if (kEnableValidationLayers) {
+    createInfo.enabledLayerCount =
+        static_cast<uint32_t>(kValidationLayers.size());
+    createInfo.ppEnabledLayerNames = kValidationLayers.data();
+  } else {
+    createInfo.enabledLayerCount = 0;
+  }
+
+  VkDevice device;
+  VkResult result =
+      vkCreateDevice(physicalDevice->device, &createInfo, nullptr, &device);
+  if (result != VK_SUCCESS) {
+    throw std::runtime_error{"Failed to create logical device"};
+  }
+
+  return {device};
 }
 
 } // namespace tetris::render

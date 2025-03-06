@@ -20,7 +20,7 @@ glfw::Window makeWindow() {
 } // namespace
 
 GLFWApplication::GLFWApplication()
-    : window_(makeWindow()), graphics(makeGraphicsDevice(vulkan)) {}
+    : window_(makeWindow()), graphics(VulkanGraphicsDevice::make(vulkan)) {}
 
 GLFWApplication::~GLFWApplication() {
   glfwTerminate();

@@ -5,18 +5,11 @@
 #include <stdexcept>
 #include <vector>
 
+#include "render/validationLayers.hpp"
+
 namespace tetris::render {
 
 namespace {
-
-constexpr std::array<const char*, 1> kValidationLayers{
-    "VK_LAYER_KHRONOS_validation"};
-
-#ifdef NDEBUG
-constexpr bool kEnableValidationLayers = false;
-#else
-constexpr bool kEnableValidationLayers = true;
-#endif
 
 bool checkValidationLayers() {
   // Check supported
