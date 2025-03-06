@@ -13,7 +13,7 @@
 
 namespace util {
 
-void debugAssert(
+inline void debugAssert(
     bool condition,
     std::string_view conditionText,
     std::source_location location) {
