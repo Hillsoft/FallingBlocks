@@ -2,7 +2,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "render/VulkanInstance.h"
+#include "render/VulkanInstance.hpp"
 
 namespace tetris::render {
 

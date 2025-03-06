@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "render/GLFWApplication.h"
+#include "render/GLFWApplication.hpp"
 
 int main() {
   tetris::render::GLFWApplication vulkan{};

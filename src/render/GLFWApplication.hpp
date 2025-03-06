@@ -1,8 +1,8 @@
 #pragma once
 
-#include "render/VulkanGraphicsDevice.h"
-#include "render/VulkanInstance.h"
-#include "render/VulkanSurface.h"
+#include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanInstance.hpp"
+#include "render/VulkanSurface.hpp"
 
 namespace tetris::render {
 

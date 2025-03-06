@@ -1,4 +1,4 @@
-#include "render/VulkanSurface.h"
+#include "render/VulkanSurface.hpp"
 
 #include <stdexcept>
 #include <utility>

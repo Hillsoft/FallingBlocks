@@ -1,4 +1,4 @@
-#include "render/glfw_wrapper/Window.h"
+#include "render/glfw_wrapper/Window.hpp"
 
 #include <stdexcept>
 

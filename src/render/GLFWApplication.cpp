@@ -1,10 +1,10 @@
-#include "render/GLFWApplication.h"
+#include "render/GLFWApplication.hpp"
 
 #include <iostream>
 #include <stdexcept>
 #include <GLFW/glfw3.h>
 
-#include "render/glfw_wrapper/Window.h"
+#include "render/glfw_wrapper/Window.hpp"
 
 namespace tetris::render {
 

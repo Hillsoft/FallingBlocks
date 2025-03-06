@@ -1,7 +1,7 @@
 #pragma once
 
-#include "render/VulkanInstance.h"
-#include "render/glfw_wrapper/Window.h"
+#include "render/VulkanInstance.hpp"
+#include "render/glfw_wrapper/Window.hpp"
 
 namespace tetris::render {
 
