@@ -48,18 +48,64 @@ QueueFamilyIndices findQueueFamilies(
   return indices;
 }
 
+struct SwapChainSupportDetails {
+  VkSurfaceCapabilitiesKHR capabilities;
+  std::vector<VkSurfaceFormatKHR> formats;
+  std::vector<VkPresentModeKHR> presentModes;
+};
+
+SwapChainSupportDetails getSwapChainSupportDetails(
+    VkPhysicalDevice device, VulkanSurface& surface) {
+  SwapChainSupportDetails details;
+
+  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+      device, surface.getRawSurface(), &details.capabilities);
+
+  uint32_t formatCount;
+  vkGetPhysicalDeviceSurfaceFormatsKHR(
+      device, surface.getRawSurface(), &formatCount, nullptr);
+
+  if (formatCount != 0) {
+    details.formats.resize(formatCount);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(
+        device, surface.getRawSurface(), &formatCount, details.formats.data());
+  }
+
+  uint32_t presentModeCount;
+  vkGetPhysicalDeviceSurfacePresentModesKHR(
+      device, surface.getRawSurface(), &presentModeCount, nullptr);
+
+  if (presentModeCount != 0) {
+    details.presentModes.resize(presentModeCount);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(
+        device,
+        surface.getRawSurface(),
+        &presentModeCount,
+        details.presentModes.data());
+  }
+
+  return details;
+}
+
+bool isSwapChainAdequate(const SwapChainSupportDetails& swapChainSupport) {
+  return !swapChainSupport.formats.empty() &&
+      !swapChainSupport.presentModes.empty();
+}
+
 struct PhysicalDeviceInfo {
   explicit PhysicalDeviceInfo(VkPhysicalDevice device, VulkanSurface& surface)
       : device(device) {
     vkGetPhysicalDeviceProperties(device, &properties);
     vkGetPhysicalDeviceFeatures(device, &features);
     queueFamilies = findQueueFamilies(device, surface);
+    swapChainSupport = getSwapChainSupportDetails(device, surface);
   }
 
   VkPhysicalDevice device;
   VkPhysicalDeviceProperties properties;
   VkPhysicalDeviceFeatures features;
   QueueFamilyIndices queueFamilies;
+  SwapChainSupportDetails swapChainSupport;
 };
 
 std::vector<VkPhysicalDevice> enumerateDevices(VulkanInstance& instance) {
@@ -111,6 +157,9 @@ bool isDeviceSuitable(const PhysicalDeviceInfo& device) {
     return false;
   }
   if (!deviceHasRequiredExtensionSupport(device.device)) {
+    return false;
+  }
+  if (!isSwapChainAdequate(device.swapChainSupport)) {
     return false;
   }
 
