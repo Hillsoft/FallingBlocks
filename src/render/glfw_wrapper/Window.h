@@ -17,6 +17,8 @@ class Window {
 
   bool shouldClose() const;
 
+  GLFWwindow* getRawWindow() { return window_; }
+
  private:
   GLFWwindow* window_;
 };

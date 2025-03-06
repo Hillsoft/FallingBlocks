@@ -4,7 +4,8 @@ add_library(render.glfwapplication STATIC "GLFWApplication.cpp" "GLFWApplication
 target_link_libraries(render.glfwapplication
 	render.glfw_wrapper.window
 	render.vulkangraphicsdevice
-	render.vulkaninstance)
+	render.vulkaninstance
+	render.vulkansurface)
 
 add_library(render.validationlayers INTERFACE "validationLayers.hpp")
 
@@ -17,3 +18,8 @@ target_link_libraries(render.vulkangraphicsdevice
 add_library(render.vulkaninstance STATIC "VulkanInstance.cpp" "VulkanInstance.h")
 target_link_libraries(render.vulkaninstance INTERFACE
 	render.validationlayers)
+
+add_library(render.vulkansurface STATIC "VulkanSurface.cpp" "VulkanSurface.h")
+target_link_libraries(render.vulkansurface
+	render.glfw_wrapper.window
+	render.vulkaninstance)
