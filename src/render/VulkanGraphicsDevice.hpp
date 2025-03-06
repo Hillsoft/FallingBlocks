@@ -45,7 +45,7 @@ class VulkanGraphicsDevice {
   static VulkanGraphicsDevice make(
       VulkanInstance& instance, VulkanSurface& surface);
 
-  const PhysicalDeviceInfo& phyiscalInfo() const { return *physicalInfo_; }
+  const PhysicalDeviceInfo& physicalInfo() const { return *physicalInfo_; }
 
  private:
   VulkanGraphicsDevice(
