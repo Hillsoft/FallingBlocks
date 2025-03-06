@@ -12,6 +12,7 @@ add_library(render.validationlayers INTERFACE "validationLayers.hpp")
 add_library(render.vulkangraphicsdevice STATIC "VulkanGraphicsDevice.cpp" "VulkanGraphicsDevice.hpp")
 target_link_libraries(render.vulkangraphicsdevice
 	render.vulkaninstance
+	render.vulkansurface
 	render.validationlayers
 	util.debug)
 

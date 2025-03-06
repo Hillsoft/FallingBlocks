@@ -27,8 +27,8 @@ class GLFWApplication {
 
   [[no_unique_address]] GLFWLifetimeScope lifetimeScope_;
   VulkanInstance vulkan_{};
-  VulkanGraphicsDevice graphics_;
   VulkanSurface surface_;
+  VulkanGraphicsDevice graphics_;
 };
 
 } // namespace tetris::render

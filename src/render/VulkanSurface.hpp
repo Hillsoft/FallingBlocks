@@ -19,6 +19,8 @@ class VulkanSurface {
   glfw::Window& window() { return window_; }
   const glfw::Window& window() const { return window_; }
 
+  VkSurfaceKHR getRawSurface() { return surface_; }
+
  private:
   VulkanInstance* instance_;
   glfw::Window window_;
