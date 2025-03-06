@@ -14,6 +14,9 @@ namespace tetris::render {
 
 namespace {
 
+constexpr std::array<const char*, 1> requiredDeviceExtensions{
+    VK_KHR_SWAPCHAIN_EXTENSION_NAME};
+
 struct QueueFamilyIndices {
   std::optional<uint32_t> graphicsFamily;
   std::optional<uint32_t> presentFamily;
@@ -71,6 +74,32 @@ std::vector<VkPhysicalDevice> enumerateDevices(VulkanInstance& instance) {
   return physicalDevices;
 }
 
+bool deviceHasRequiredExtensionSupport(VkPhysicalDevice device) {
+  uint32_t extensionCount;
+  vkEnumerateDeviceExtensionProperties(
+      device, nullptr, &extensionCount, nullptr);
+
+  std::vector<VkExtensionProperties> availableExtensions{extensionCount};
+  vkEnumerateDeviceExtensionProperties(
+      device, nullptr, &extensionCount, availableExtensions.data());
+
+  for (const auto& required : requiredDeviceExtensions) {
+    bool found = false;
+    for (const auto& available : availableExtensions) {
+      if (strcmp(required, available.extensionName) == 0) {
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 bool isDeviceSuitable(const PhysicalDeviceInfo& device) {
   if (!device.features.geometryShader) {
     return false;
@@ -79,6 +108,9 @@ bool isDeviceSuitable(const PhysicalDeviceInfo& device) {
     return false;
   }
   if (!device.queueFamilies.presentFamily.has_value()) {
+    return false;
+  }
+  if (!deviceHasRequiredExtensionSupport(device.device)) {
     return false;
   }
 
@@ -226,7 +258,9 @@ VulkanGraphicsDevice VulkanGraphicsDevice::make(
       static_cast<uint32_t>(queueCreateInfo.createInfo.size());
   createInfo.pEnabledFeatures = &deviceFeatures;
 
-  createInfo.enabledExtensionCount = 0;
+  createInfo.enabledExtensionCount =
+      static_cast<uint32_t>(requiredDeviceExtensions.size());
+  createInfo.ppEnabledExtensionNames = requiredDeviceExtensions.data();
 
   if (kEnableValidationLayers) {
     createInfo.enabledLayerCount =
