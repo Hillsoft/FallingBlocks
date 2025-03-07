@@ -26,7 +26,8 @@ GLFWApplication::GLFWApplication()
 #endif
       surface_(vulkan_, makeWindow()),
       graphics_(VulkanGraphicsDevice::make(vulkan_, surface_)),
-      swapChain_(surface_, graphics_) {
+      swapChain_(surface_, graphics_),
+      swapChainImageViews_(swapChain_.getImageViews()) {
 }
 
 GLFWApplication::~GLFWApplication() {

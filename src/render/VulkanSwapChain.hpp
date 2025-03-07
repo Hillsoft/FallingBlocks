@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanImageView.hpp"
 #include "render/VulkanSurface.hpp"
 
 namespace tetris::render {
@@ -18,9 +19,12 @@ class VulkanSwapChain {
   VulkanSwapChain(VulkanSwapChain&& other) noexcept;
   VulkanSwapChain& operator=(VulkanSwapChain&& other) noexcept;
 
+  std::vector<VulkanImageView> getImageViews() const;
+
  private:
   VulkanGraphicsDevice* graphicsDevice_;
   VkSwapchainKHR swapChain_;
+  VkFormat imageFormat_;
   std::vector<VkImage> swapChainImages_;
 };
 

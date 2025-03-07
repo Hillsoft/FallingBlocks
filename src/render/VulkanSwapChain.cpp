@@ -126,6 +126,7 @@ VulkanSwapChain::VulkanSwapChain(
   }
 
   swapChain_ = swapChain;
+  imageFormat_ = surfaceFormat.format;
 
   vkGetSwapchainImagesKHR(
       graphicsDevice.getRawDevice(), swapChain, &imageCount, nullptr);
@@ -153,6 +154,17 @@ VulkanSwapChain::~VulkanSwapChain() {
   if (swapChain_ != nullptr) {
     vkDestroySwapchainKHR(graphicsDevice_->getRawDevice(), swapChain_, nullptr);
   }
+}
+
+std::vector<VulkanImageView> VulkanSwapChain::getImageViews() const {
+  std::vector<VulkanImageView> result;
+  result.reserve(swapChainImages_.size());
+
+  for (const auto& swapImage : swapChainImages_) {
+    result.emplace_back(*graphicsDevice_, swapImage, imageFormat_);
+  }
+
+  return result;
 }
 
 } // namespace tetris::render

@@ -2,6 +2,7 @@
 
 #include "render/VulkanDebugMessenger.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanImageView.hpp"
 #include "render/VulkanInstance.hpp"
 #include "render/VulkanSurface.hpp"
 #include "render/VulkanSwapChain.hpp"
@@ -35,6 +36,7 @@ class GLFWApplication {
   VulkanSurface surface_;
   VulkanGraphicsDevice graphics_;
   VulkanSwapChain swapChain_;
+  std::vector<VulkanImageView> swapChainImageViews_;
 };
 
 } // namespace tetris::render

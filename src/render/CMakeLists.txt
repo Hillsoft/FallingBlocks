@@ -5,6 +5,7 @@ target_link_libraries(render.glfwapplication
 	render.glfw_wrapper.window
 	render.vulkandebugmessenger
 	render.vulkangraphicsdevice
+	render.vulkanimageview
 	render.vulkaninstance
 	render.vulkansurface
 	render.vulkanswapchain)
@@ -40,5 +41,6 @@ add_library(render.vulkanswapchain STATIC "VulkanSwapChain.cpp" "VulkanSwapChain
 target_link_libraries(render.vulkanswapchain
 	render.glfw_wrapper.window
 	render.vulkangraphicsdevice
+	render.vulkanimageview
 	render.vulkansurface
 	util.debug)
