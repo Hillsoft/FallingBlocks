@@ -118,10 +118,8 @@ VulkanInstance::VulkanInstance() {
     throw std::runtime_error{"Not all required extensions are available"};
   }
 
-  createInfo.enabledExtensionCount = glfwExtensionCount;
-  createInfo.ppEnabledExtensionNames = glfwExtensions;
-
-  createInfo.enabledLayerCount = 0;
+  createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+  createInfo.ppEnabledExtensionNames = extensions.data();
 
   VkResult result = vkCreateInstance(&createInfo, nullptr, &instance_);
   if (result != VK_SUCCESS) {
