@@ -23,6 +23,10 @@ target_link_libraries(render.vulkangraphicsdevice
 	render.validationlayers
 	util.debug)
 
+add_library(render.vulkanimageview STATIC "VulkanImageView.cpp" "VulkanImageView.hpp")
+target_link_libraries(render.vulkanimageview
+	render.vulkangraphicsdevice)
+
 add_library(render.vulkaninstance STATIC "VulkanInstance.cpp" "VulkanInstance.hpp")
 target_link_libraries(render.vulkaninstance INTERFACE
 	render.validationlayers)
