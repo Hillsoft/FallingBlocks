@@ -31,6 +31,19 @@ add_test("${name}" "${name}")
 # gtest_discover_tests("${name}")
 endfunction()
 
+set(SHADER_OUTPUT "")
+function(add_shader SRCNAME DSTNAME)
+set(SRCPATH "${CMAKE_SOURCE_DIR}/src/shaders/${SRCNAME}")
+set(DSTPATH "${CMAKE_CURRENT_BINARY_DIR}/shaders/${DSTNAME}")
+add_custom_command(
+	OUTPUT "${DSTPATH}"
+	MAIN_DEPENDENCY "${SRCPATH}"
+	COMMAND "glslc" "${SRCPATH}" -o "${DSTPATH}"
+)
+list(APPEND SHADER_OUTPUT "${DSTPATH}")
+set(SHADER_OUTPUT "${SHADER_OUTPUT}" PARENT_SCOPE)
+endfunction()
+
 link_libraries(glfw)
 link_libraries(Vulkan::Vulkan)
 
@@ -38,5 +51,10 @@ include_directories(src)
 
 # Add source to this project's executable.
 add_subdirectory(src)
+
+add_shader("vertex.glsl" "vertex.spv")
+add_shader("fragment.glsl" "fragment.spv")
+add_custom_target(shader_bytecode DEPENDS ${SHADER_OUTPUT})
+add_dependencies(FallingBlocks shader_bytecode)
 
 # TODO: Add tests and install targets if needed.
