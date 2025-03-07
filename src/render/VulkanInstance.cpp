@@ -48,12 +48,35 @@ std::vector<VkExtensionProperties> getSupportedExtensions() {
   return extensions;
 }
 
+bool validateRequiredExtensions(
+    const std::vector<const char*>& requiredExtensions,
+    const std::vector<VkExtensionProperties>& availableExtensions =
+        getSupportedExtensions()) {
+  for (const char* requested : requiredExtensions) {
+    bool extensionFound = false;
+
+    for (const auto& available : availableExtensions) {
+      if (strcmp(available.extensionName, requested) == 0) {
+        extensionFound = true;
+        break;
+      }
+    }
+
+    if (!extensionFound) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 } // namespace
 
 VulkanInstance::VulkanInstance() {
   std::cout << "Initialising Vulkan\n";
   std::cout << "Available Vulkan extensions:\n";
-  for (const auto& extension : getSupportedExtensions()) {
+  const auto supportedExtensions = getSupportedExtensions();
+  for (const auto& extension : supportedExtensions) {
     std::cout << "  " << extension.extensionName << "\n";
   }
 
@@ -84,6 +107,16 @@ VulkanInstance::VulkanInstance() {
   uint32_t glfwExtensionCount = 0;
   const char** glfwExtensions =
       glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+  std::vector<const char*> extensions{
+      glfwExtensions, glfwExtensions + glfwExtensionCount};
+  if (kEnableValidationLayers) {
+    extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+  }
+
+  if (!validateRequiredExtensions(extensions, supportedExtensions)) {
+    throw std::runtime_error{"Not all required extensions are available"};
+  }
 
   createInfo.enabledExtensionCount = glfwExtensionCount;
   createInfo.ppEnabledExtensionNames = glfwExtensions;
