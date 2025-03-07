@@ -70,8 +70,8 @@ VulkanDebugMessenger::VulkanDebugMessenger(VulkanInstance& instance)
 
 VulkanDebugMessenger::~VulkanDebugMessenger() {
   if (debugMessenger_ != nullptr) {
-    // destroyDebugUtilsMessengerEXT(
-    //  instance_->getRawInstance(), debugMessenger_, nullptr);
+    destroyDebugUtilsMessengerEXT(
+        instance_->getRawInstance(), debugMessenger_, nullptr);
   }
 }
 
