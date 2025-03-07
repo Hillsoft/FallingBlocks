@@ -21,9 +21,13 @@ glfw::Window makeWindow() {
 
 GLFWApplication::GLFWApplication()
     : vulkan_(),
+#ifndef NDEBUG
+      debugMessenger_(vulkan_),
+#endif
       surface_(vulkan_, makeWindow()),
       graphics_(VulkanGraphicsDevice::make(vulkan_, surface_)),
-      swapChain_(surface_, graphics_) {}
+      swapChain_(surface_, graphics_) {
+}
 
 GLFWApplication::~GLFWApplication() {
   glfwTerminate();

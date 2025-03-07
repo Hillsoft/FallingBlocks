@@ -1,5 +1,6 @@
 #pragma once
 
+#include "render/VulkanDebugMessenger.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanInstance.hpp"
 #include "render/VulkanSurface.hpp"
@@ -28,6 +29,9 @@ class GLFWApplication {
 
   [[no_unique_address]] GLFWLifetimeScope lifetimeScope_;
   VulkanInstance vulkan_{};
+#ifndef NDEBUG
+  VulkanDebugMessenger debugMessenger_;
+#endif
   VulkanSurface surface_;
   VulkanGraphicsDevice graphics_;
   VulkanSwapChain swapChain_;
