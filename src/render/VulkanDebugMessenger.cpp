@@ -15,6 +15,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
     void* pUserData) {
   std::cerr << "Validation layer error: " << pCallbackData->pMessage
             << std::endl;
+  std::abort();
 
   return VK_FALSE;
 }
