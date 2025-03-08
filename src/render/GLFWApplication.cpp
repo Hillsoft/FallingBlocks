@@ -20,21 +20,6 @@ glfw::Window makeWindow() {
   return glfw::Window{800, 600, "Vulkan"};
 }
 
-std::vector<VulkanFrameBuffer> makeFrameBuffers(
-    VulkanGraphicsDevice& device,
-    VulkanRenderPass& renderPass,
-    std::vector<VulkanImageView>& imageViews,
-    VkExtent2D extent) {
-  std::vector<VulkanFrameBuffer> result;
-  result.reserve(imageViews.size());
-
-  for (auto& v : imageViews) {
-    result.emplace_back(device, renderPass, v, extent);
-  }
-
-  return result;
-}
-
 std::vector<VulkanCommandBuffer> makeCommandBuffers(
     VulkanGraphicsDevice& device, VulkanCommandPool& commandPool) {
   std::vector<VulkanCommandBuffer> commandBuffers;
@@ -68,20 +53,14 @@ GLFWApplication::GLFWApplication()
 #endif
       surface_(vulkan_, makeWindow()),
       graphics_(VulkanGraphicsDevice::make(vulkan_, surface_)),
-      swapChain_(surface_, graphics_),
-      swapChainImageViews_(swapChain_.getImageViews()),
       vertexShader_(graphics_, std::filesystem::path{"shaders"} / "vertex.spv"),
       fragmentShader_(graphics_, "shaders/fragment.spv"),
       pipeline_(
           graphics_,
-          swapChain_.getImageFormat(),
+          graphics_.physicalInfo().swapChainSupport.preferredFormat.format,
           vertexShader_,
           fragmentShader_),
-      frameBuffers_(makeFrameBuffers(
-          graphics_,
-          pipeline_.getRenderPass(),
-          swapChainImageViews_,
-          swapChain_.getSwapchainExtent())),
+      presentStack_(graphics_, surface_, pipeline_.getRenderPass()),
       commandPool_(graphics_),
       commandBuffers_(makeCommandBuffers(graphics_, commandPool_)),
       synchronisationSets_(makeSynchronisationSets(graphics_)) {
@@ -119,20 +98,20 @@ void GLFWApplication::run() {
 void GLFWApplication::drawFrame() {
   synchronisationSets_[currentFrame].inFlightFence.waitAndReset();
 
-  uint32_t imageIndex = swapChain_.getNextImageIndex(
+  uint32_t imageIndex = presentStack_.getNextImageIndex(
       &synchronisationSets_[currentFrame].imageAvailableSemaphore, nullptr);
 
   commandBuffers_[currentFrame].runRenderPass(
-      pipeline_, frameBuffers_[imageIndex], [](VkCommandBuffer buffer) {
-        vkCmdDraw(buffer, 3, 1, 0, 0);
-      });
+      pipeline_,
+      presentStack_.getFrameBuffer(imageIndex),
+      [](VkCommandBuffer buffer) { vkCmdDraw(buffer, 3, 1, 0, 0); });
 
   commandBuffers_[currentFrame].submit(
       {&synchronisationSets_[currentFrame].imageAvailableSemaphore},
       {&synchronisationSets_[currentFrame].renderFinishedSemaphore},
       &synchronisationSets_[currentFrame].inFlightFence);
 
-  swapChain_.present(
+  presentStack_.present(
       imageIndex, &synchronisationSets_[currentFrame].renderFinishedSemaphore);
 
   currentFrame = (currentFrame + 1) % kMaxFramesInFlight;

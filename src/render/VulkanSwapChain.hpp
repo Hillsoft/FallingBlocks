@@ -25,7 +25,6 @@ class VulkanSwapChain {
 
   uint32_t getNextImageIndex(VulkanSemaphore* semaphore, VulkanFence* fence);
 
-  VkFormat getImageFormat() const { return imageFormat_; }
   VkExtent2D getSwapchainExtent() const { return extent_; }
 
   void present(uint32_t imageIndex, VulkanSemaphore* waitSemaphore);
@@ -33,7 +32,6 @@ class VulkanSwapChain {
  private:
   VulkanGraphicsDevice* graphicsDevice_;
   VkSwapchainKHR swapChain_;
-  VkFormat imageFormat_;
   VkExtent2D extent_;
   VkQueue queue_;
   std::vector<VkImage> swapChainImages_;

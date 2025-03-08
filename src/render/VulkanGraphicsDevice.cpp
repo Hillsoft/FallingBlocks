@@ -43,6 +43,19 @@ VulkanGraphicsDevice::QueueFamilyIndices findQueueFamilies(
   return indices;
 }
 
+VkSurfaceFormatKHR chooseSwapSurfaceFormat(
+    const std::vector<VkSurfaceFormatKHR>& availableFormats) {
+  for (const auto& availableFormat : availableFormats) {
+    if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB &&
+        availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+      return availableFormat;
+    }
+  }
+
+  DEBUG_ASSERT(availableFormats.size() > 0);
+  return availableFormats[0];
+}
+
 VulkanGraphicsDevice::SwapChainSupportDetails getSwapChainSupportDetails(
     VkPhysicalDevice device, VulkanSurface& surface) {
   VulkanGraphicsDevice::SwapChainSupportDetails details;
@@ -72,6 +85,8 @@ VulkanGraphicsDevice::SwapChainSupportDetails getSwapChainSupportDetails(
         &presentModeCount,
         details.presentModes.data());
   }
+
+  details.preferredFormat = chooseSwapSurfaceFormat(details.formats);
 
   return details;
 }

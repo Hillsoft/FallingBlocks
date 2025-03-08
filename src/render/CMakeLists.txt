@@ -7,15 +7,13 @@ target_link_libraries(render.glfwapplication
 	render.vulkancommandpool
 	render.vulkandebugmessenger
 	render.vulkanfence
-	render.vulkanframebuffer
 	render.vulkangraphicsdevice
 	render.vulkangraphicspipeline
-	render.vulkanimageview
 	render.vulkaninstance
+	render.vulkanpresentstack
 	render.vulkansemaphore
 	render.vulkanshader
-	render.vulkansurface
-	render.vulkanswapchain)
+	render.vulkansurface)
 
 add_library(render.validationlayers INTERFACE "validationLayers.hpp")
 
@@ -75,6 +73,15 @@ target_link_libraries(render.vulkaninstance INTERFACE
 add_library(render.vulkanpipelinelayout STATIC "VulkanPipelineLayout.cpp" "VulkanPipelineLayout.hpp")
 target_link_libraries(render.vulkanpipelinelayout
 	render.vulkangraphicsdevice)
+
+add_library(render.vulkanpresentstack STATIC "VulkanPresentStack.cpp" "VulkanPresentStack.hpp")
+target_link_libraries(render.vulkanpresentstack
+	render.vulkanframebuffer
+	render.vulkangraphicsdevice
+	render.vulkanimageview
+	render.vulkanrenderpass
+	render.vulkansurface
+	render.vulkanswapchain)
 
 add_library(render.vulkanrenderpass STATIC "VulkanRenderPass.cpp" "VulkanRenderPass.hpp")
 target_link_libraries(render.vulkanrenderpass

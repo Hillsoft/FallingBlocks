@@ -21,6 +21,7 @@ class VulkanGraphicsDevice {
     VkSurfaceCapabilitiesKHR capabilities;
     std::vector<VkSurfaceFormatKHR> formats;
     std::vector<VkPresentModeKHR> presentModes;
+    VkSurfaceFormatKHR preferredFormat;
   };
 
   struct PhysicalDeviceInfo {

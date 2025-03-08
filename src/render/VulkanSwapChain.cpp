@@ -13,19 +13,6 @@ namespace tetris::render {
 
 namespace {
 
-VkSurfaceFormatKHR chooseSwapSurfaceFormat(
-    const std::vector<VkSurfaceFormatKHR>& availableFormats) {
-  for (const auto& availableFormat : availableFormats) {
-    if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB &&
-        availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
-      return availableFormat;
-    }
-  }
-
-  DEBUG_ASSERT(availableFormats.size() > 0);
-  return availableFormats[0];
-}
-
 VkPresentModeKHR chooseSwapPresentMode(
     const std::vector<VkPresentModeKHR>& availablePresentModes) {
   for (const auto& availablePresentMode : availablePresentModes) {
@@ -73,8 +60,7 @@ VulkanSwapChain::VulkanSwapChain(
   const VulkanGraphicsDevice::SwapChainSupportDetails& swapChainSupport =
       graphicsDevice.physicalInfo().swapChainSupport;
 
-  VkSurfaceFormatKHR surfaceFormat =
-      chooseSwapSurfaceFormat(swapChainSupport.formats);
+  VkSurfaceFormatKHR surfaceFormat = swapChainSupport.preferredFormat;
   VkPresentModeKHR presentMode =
       chooseSwapPresentMode(swapChainSupport.presentModes);
   VkExtent2D extent =
@@ -127,7 +113,6 @@ VulkanSwapChain::VulkanSwapChain(
   }
 
   swapChain_ = swapChain;
-  imageFormat_ = surfaceFormat.format;
   extent_ = extent;
 
   vkGetSwapchainImagesKHR(
@@ -143,7 +128,6 @@ VulkanSwapChain::VulkanSwapChain(
 VulkanSwapChain::VulkanSwapChain(VulkanSwapChain&& other) noexcept
     : graphicsDevice_(other.graphicsDevice_),
       swapChain_(other.swapChain_),
-      imageFormat_(other.imageFormat_),
       extent_(other.extent_),
       queue_(other.queue_),
       swapChainImages_(std::move(other.swapChainImages_)) {
@@ -153,7 +137,6 @@ VulkanSwapChain::VulkanSwapChain(VulkanSwapChain&& other) noexcept
 VulkanSwapChain& VulkanSwapChain::operator=(VulkanSwapChain&& other) noexcept {
   std::swap(graphicsDevice_, other.graphicsDevice_);
   std::swap(swapChain_, other.swapChain_);
-  std::swap(imageFormat_, other.imageFormat_);
   std::swap(extent_, other.extent_);
   std::swap(queue_, other.queue_);
   std::swap(swapChainImages_, other.swapChainImages_);
@@ -172,7 +155,11 @@ std::vector<VulkanImageView> VulkanSwapChain::getImageViews() const {
   result.reserve(swapChainImages_.size());
 
   for (const auto& swapImage : swapChainImages_) {
-    result.emplace_back(*graphicsDevice_, swapImage, imageFormat_);
+    result.emplace_back(
+        *graphicsDevice_,
+        swapImage,
+        graphicsDevice_->physicalInfo()
+            .swapChainSupport.preferredFormat.format);
   }
 
   return result;
