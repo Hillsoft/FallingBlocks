@@ -1,5 +1,6 @@
 #include "render/GLFWApplication.hpp"
 
+#include <chrono>
 #include <iostream>
 #include <stdexcept>
 #include <GLFW/glfw3.h>
@@ -68,8 +69,24 @@ GLFWApplication::~GLFWApplication() {
 
 void GLFWApplication::run() {
   while (!surface_.window().shouldClose()) {
-    glfwPollEvents();
-    drawFrame();
+    std::chrono::microseconds maxFrameTime{0};
+    std::chrono::microseconds totalFrameTime{0};
+
+    for (int i = 0; i < 1000 && !surface_.window().shouldClose(); i++) {
+      auto start = std::chrono::high_resolution_clock::now();
+      glfwPollEvents();
+      drawFrame();
+      auto end = std::chrono::high_resolution_clock::now();
+
+      std::chrono::microseconds curFrameTime =
+          std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+      totalFrameTime += curFrameTime;
+      maxFrameTime = std::max(maxFrameTime, curFrameTime);
+    }
+
+    std::cout << "FPS: " << 1000000.0f / (totalFrameTime / 1000).count()
+              << "\nAverage frame time: " << totalFrameTime / 1000
+              << "\nMax frame time: " << maxFrameTime << "\n";
   }
 
   vkDeviceWaitIdle(graphics_.getRawDevice());
