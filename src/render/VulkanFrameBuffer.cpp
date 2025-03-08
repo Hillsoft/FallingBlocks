@@ -9,7 +9,7 @@ VulkanFrameBuffer::VulkanFrameBuffer(
     VulkanRenderPass& renderPass,
     VulkanImageView& imageView,
     VkExtent2D extent)
-    : device_(&device), frameBuffer_(nullptr) {
+    : device_(&device), extent_(extent), frameBuffer_(nullptr) {
   VkImageView myImageView = imageView.getRawImageView();
 
   VkFramebufferCreateInfo framebufferInfo{};

@@ -23,8 +23,12 @@ class VulkanFrameBuffer {
   VulkanFrameBuffer(VulkanFrameBuffer&& other) noexcept;
   VulkanFrameBuffer& operator=(VulkanFrameBuffer&& other) noexcept;
 
+  VkFramebuffer getRawFrameBuffer() { return frameBuffer_; }
+  VkExtent2D getExtent() const { return extent_; }
+
  private:
   VulkanGraphicsDevice* device_;
+  VkExtent2D extent_;
   VkFramebuffer frameBuffer_;
 };
 

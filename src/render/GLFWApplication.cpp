@@ -55,7 +55,8 @@ GLFWApplication::GLFWApplication()
           pipeline_.getRenderPass(),
           swapChainImageViews_,
           swapChain_.getSwapchainExtent())),
-      commandPool_(graphics_) {
+      commandPool_(graphics_),
+      commandBuffer_(graphics_, commandPool_) {
 }
 
 GLFWApplication::~GLFWApplication() {

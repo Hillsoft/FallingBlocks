@@ -3,6 +3,7 @@ add_subdirectory(glfw_wrapper)
 add_library(render.glfwapplication STATIC "GLFWApplication.cpp" "GLFWApplication.hpp")
 target_link_libraries(render.glfwapplication
 	render.glfw_wrapper.window
+	render.vulkancommandbuffer
 	render.vulkancommandpool
 	render.vulkandebugmessenger
 	render.vulkanframebuffer
@@ -15,6 +16,14 @@ target_link_libraries(render.glfwapplication
 	render.vulkanswapchain)
 
 add_library(render.validationlayers INTERFACE "validationLayers.hpp")
+
+add_library(render.vulkancommandbuffer STATIC "VulkanCommandBuffer.cpp" "VulkanCommandBuffer.hpp")
+target_link_libraries(render.vulkancommandbuffer
+	render.vulkancommandpool
+	render.vulkanframebuffer
+	render.vulkangraphicsdevice
+	render.vulkangraphicspipeline
+	render.vulkanrenderpass)
 
 add_library(render.vulkancommandpool STATIC "VulkanCommandPool.cpp" "VulkanCommandPool.hpp")
 target_link_libraries(render.vulkancommandpool

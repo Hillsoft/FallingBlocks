@@ -17,6 +17,8 @@ class VulkanCommandPool {
   VulkanCommandPool(VulkanCommandPool&& other) noexcept;
   VulkanCommandPool& operator=(VulkanCommandPool&& other) noexcept;
 
+  VkCommandPool getRawCommandPool() { return commandPool_; }
+
  private:
   VulkanGraphicsDevice* device_;
   VkCommandPool commandPool_;

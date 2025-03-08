@@ -1,5 +1,6 @@
 #pragma once
 
+#include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanDebugMessenger.hpp"
 #include "render/VulkanFrameBuffer.hpp"
@@ -46,6 +47,7 @@ class GLFWApplication {
   VulkanGraphicsPipeline pipeline_;
   std::vector<VulkanFrameBuffer> frameBuffers_;
   VulkanCommandPool commandPool_;
+  VulkanCommandBuffer commandBuffer_;
 };
 
 } // namespace tetris::render
