@@ -1,3 +1,4 @@
+#include "VulkanSwapChain.hpp"
 #include "render/VulkanSwapChain.hpp"
 
 #include <algorithm>
@@ -166,6 +167,19 @@ std::vector<VulkanImageView> VulkanSwapChain::getImageViews() const {
   }
 
   return result;
+}
+
+uint32_t VulkanSwapChain::getNextImageIndex(
+    VulkanSemaphore* semaphore, VulkanFence* fence) {
+  uint32_t imageIndex;
+  vkAcquireNextImageKHR(
+      graphicsDevice_->getRawDevice(),
+      swapChain_,
+      UINT64_MAX,
+      semaphore != nullptr ? semaphore->getRawSemaphore() : nullptr,
+      fence != nullptr ? fence->getRawFence() : nullptr,
+      &imageIndex);
+  return imageIndex;
 }
 
 } // namespace tetris::render

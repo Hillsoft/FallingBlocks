@@ -2,8 +2,10 @@
 
 #include <GLFW/glfw3.h>
 
+#include "render/VulkanFence.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
+#include "render/VulkanSemaphore.hpp"
 #include "render/VulkanSurface.hpp"
 
 namespace tetris::render {
@@ -20,6 +22,8 @@ class VulkanSwapChain {
   VulkanSwapChain& operator=(VulkanSwapChain&& other) noexcept;
 
   std::vector<VulkanImageView> getImageViews() const;
+
+  uint32_t getNextImageIndex(VulkanSemaphore* semaphore, VulkanFence* fence);
 
   VkFormat getImageFormat() const { return imageFormat_; }
   VkExtent2D getSwapchainExtent() const { return extent_; }
