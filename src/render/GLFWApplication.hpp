@@ -29,6 +29,12 @@ class GLFWApplication {
 
   void run();
 
+  struct PipelineSynchronisationSet {
+    VulkanSemaphore imageAvailableSemaphore;
+    VulkanSemaphore renderFinishedSemaphore;
+    VulkanFence inFlightFence;
+  };
+
  private:
   void drawFrame();
 
@@ -51,10 +57,10 @@ class GLFWApplication {
   VulkanGraphicsPipeline pipeline_;
   std::vector<VulkanFrameBuffer> frameBuffers_;
   VulkanCommandPool commandPool_;
-  VulkanCommandBuffer commandBuffer_;
-  VulkanSemaphore imageAvailableSemaphore_;
-  VulkanSemaphore renderFinishedSemaphore_;
-  VulkanFence inFlightFence_;
+  std::vector<VulkanCommandBuffer> commandBuffers_;
+  std::vector<PipelineSynchronisationSet> synchronisationSets_;
+
+  uint32_t currentFrame = 0;
 };
 
 } // namespace tetris::render

@@ -11,6 +11,8 @@ namespace tetris::render {
 
 namespace {
 
+constexpr int kMaxFramesInFlight = 2;
+
 glfw::Window makeWindow() {
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
   glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
@@ -28,6 +30,30 @@ std::vector<VulkanFrameBuffer> makeFrameBuffers(
 
   for (auto& v : imageViews) {
     result.emplace_back(device, renderPass, v, extent);
+  }
+
+  return result;
+}
+
+std::vector<VulkanCommandBuffer> makeCommandBuffers(
+    VulkanGraphicsDevice& device, VulkanCommandPool& commandPool) {
+  std::vector<VulkanCommandBuffer> commandBuffers;
+  commandBuffers.reserve(kMaxFramesInFlight);
+
+  for (int i = 0; i < kMaxFramesInFlight; i++) {
+    commandBuffers.emplace_back(device, commandPool);
+  }
+
+  return commandBuffers;
+}
+
+std::vector<GLFWApplication::PipelineSynchronisationSet>
+makeSynchronisationSets(VulkanGraphicsDevice& device) {
+  std::vector<GLFWApplication::PipelineSynchronisationSet> result;
+  result.reserve(kMaxFramesInFlight);
+
+  for (int i = 0; i < kMaxFramesInFlight; i++) {
+    result.emplace_back(device, device, VulkanFence{device, true});
   }
 
   return result;
@@ -57,10 +83,8 @@ GLFWApplication::GLFWApplication()
           swapChainImageViews_,
           swapChain_.getSwapchainExtent())),
       commandPool_(graphics_),
-      commandBuffer_(graphics_, commandPool_),
-      imageAvailableSemaphore_(graphics_),
-      renderFinishedSemaphore_(graphics_),
-      inFlightFence_(graphics_, true) {
+      commandBuffers_(makeCommandBuffers(graphics_, commandPool_)),
+      synchronisationSets_(makeSynchronisationSets(graphics_)) {
 }
 
 GLFWApplication::~GLFWApplication() {
@@ -93,22 +117,25 @@ void GLFWApplication::run() {
 }
 
 void GLFWApplication::drawFrame() {
-  inFlightFence_.waitAndReset();
+  synchronisationSets_[currentFrame].inFlightFence.waitAndReset();
 
-  uint32_t imageIndex =
-      swapChain_.getNextImageIndex(&imageAvailableSemaphore_, nullptr);
+  uint32_t imageIndex = swapChain_.getNextImageIndex(
+      &synchronisationSets_[currentFrame].imageAvailableSemaphore, nullptr);
 
-  commandBuffer_.runRenderPass(
+  commandBuffers_[currentFrame].runRenderPass(
       pipeline_, frameBuffers_[imageIndex], [](VkCommandBuffer buffer) {
         vkCmdDraw(buffer, 3, 1, 0, 0);
       });
 
-  commandBuffer_.submit(
-      {&imageAvailableSemaphore_},
-      {&renderFinishedSemaphore_},
-      &inFlightFence_);
+  commandBuffers_[currentFrame].submit(
+      {&synchronisationSets_[currentFrame].imageAvailableSemaphore},
+      {&synchronisationSets_[currentFrame].renderFinishedSemaphore},
+      &synchronisationSets_[currentFrame].inFlightFence);
 
-  swapChain_.present(imageIndex, &renderFinishedSemaphore_);
+  swapChain_.present(
+      imageIndex, &synchronisationSets_[currentFrame].renderFinishedSemaphore);
+
+  currentFrame = (currentFrame + 1) % kMaxFramesInFlight;
 }
 
 GLFWApplication::GLFWLifetimeScope::GLFWLifetimeScope() {
