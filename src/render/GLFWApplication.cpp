@@ -27,7 +27,14 @@ GLFWApplication::GLFWApplication()
       surface_(vulkan_, makeWindow()),
       graphics_(VulkanGraphicsDevice::make(vulkan_, surface_)),
       swapChain_(surface_, graphics_),
-      swapChainImageViews_(swapChain_.getImageViews()) {
+      swapChainImageViews_(swapChain_.getImageViews()),
+      vertexShader_(graphics_, std::filesystem::path{"shaders"} / "vertex.spv"),
+      fragmentShader_(graphics_, "shaders/fragment.spv"),
+      pipeline_(
+          graphics_,
+          swapChain_.getImageFormat(),
+          vertexShader_,
+          fragmentShader_) {
 }
 
 GLFWApplication::~GLFWApplication() {

@@ -21,10 +21,14 @@ class VulkanSwapChain {
 
   std::vector<VulkanImageView> getImageViews() const;
 
+  VkFormat getImageFormat() const { return imageFormat_; }
+  VkExtent2D getSwapchainExtent() const { return extent_; }
+
  private:
   VulkanGraphicsDevice* graphicsDevice_;
   VkSwapchainKHR swapChain_;
   VkFormat imageFormat_;
+  VkExtent2D extent_;
   std::vector<VkImage> swapChainImages_;
 };
 

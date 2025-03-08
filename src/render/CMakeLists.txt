@@ -5,8 +5,10 @@ target_link_libraries(render.glfwapplication
 	render.glfw_wrapper.window
 	render.vulkandebugmessenger
 	render.vulkangraphicsdevice
+	render.vulkangraphicspipeline
 	render.vulkanimageview
 	render.vulkaninstance
+	render.vulkanshader
 	render.vulkansurface
 	render.vulkanswapchain)
 
@@ -24,6 +26,13 @@ target_link_libraries(render.vulkangraphicsdevice
 	render.validationlayers
 	util.debug)
 
+add_library(render.vulkangraphicspipeline STATIC "VulkanGraphicsPipeline.cpp" "VulkanGraphicsPipeline.hpp")
+target_link_libraries(render.vulkangraphicspipeline
+	render.vulkangraphicsdevice
+	render.vulkanpipelinelayout
+	render.vulkanrenderpass
+	render.vulkanshader)
+
 add_library(render.vulkanimageview STATIC "VulkanImageView.cpp" "VulkanImageView.hpp")
 target_link_libraries(render.vulkanimageview
 	render.vulkangraphicsdevice)
@@ -31,6 +40,19 @@ target_link_libraries(render.vulkanimageview
 add_library(render.vulkaninstance STATIC "VulkanInstance.cpp" "VulkanInstance.hpp")
 target_link_libraries(render.vulkaninstance INTERFACE
 	render.validationlayers)
+
+add_library(render.vulkanpipelinelayout STATIC "VulkanPipelineLayout.cpp" "VulkanPipelineLayout.hpp")
+target_link_libraries(render.vulkanpipelinelayout
+	render.vulkangraphicsdevice)
+
+add_library(render.vulkanrenderpass STATIC "VulkanRenderPass.cpp" "VulkanRenderPass.hpp")
+target_link_libraries(render.vulkanrenderpass
+	render.vulkangraphicsdevice)
+
+add_library(render.vulkanshader STATIC "VulkanShader.cpp" "VulkanShader.hpp")
+target_link_libraries(render.vulkanshader
+	render.vulkangraphicsdevice
+	util.file)
 
 add_library(render.vulkansurface STATIC "VulkanSurface.cpp" "VulkanSurface.hpp")
 target_link_libraries(render.vulkansurface

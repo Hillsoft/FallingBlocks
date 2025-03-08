@@ -9,6 +9,8 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
+set(CMAKE_VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
+
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 set(CMAKE_CXX_STANDARD 20)
@@ -51,6 +53,10 @@ include_directories(src)
 
 # Add source to this project's executable.
 add_subdirectory(src)
+
+add_executable(FallingBlocks "src/main.cpp")
+target_link_libraries(FallingBlocks
+	render.glfwapplication)
 
 add_shader("vertex.glsl" "vertex.spv")
 add_shader("fragment.glsl" "fragment.spv")
