@@ -6,6 +6,7 @@ target_link_libraries(render.glfwapplication
 	render.vulkancommandbuffer
 	render.vulkancommandpool
 	render.vulkandebugmessenger
+	render.vulkanfence
 	render.vulkanframebuffer
 	render.vulkangraphicsdevice
 	render.vulkangraphicspipeline
@@ -35,6 +36,10 @@ add_library(render.vulkandebugmessenger STATIC "VulkanDebugMessenger.cpp" "Vulka
 target_link_libraries(render.vulkandebugmessenger
 	render.vulkaninstance
 	util.debug)
+
+add_library(render.vulkanfence STATIC "VulkanFence.cpp" "VulkanFence.hpp")
+target_link_libraries(render.vulkanfence
+	render.vulkangraphicsdevice)
 
 add_library(render.vulkanframebuffer STATIC "VulkanFrameBuffer.cpp" "VulkanFrameBuffer.hpp")
 target_link_libraries(render.vulkanframebuffer

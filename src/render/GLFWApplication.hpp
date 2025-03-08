@@ -3,6 +3,7 @@
 #include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanDebugMessenger.hpp"
+#include "render/VulkanFence.hpp"
 #include "render/VulkanFrameBuffer.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanGraphicsPipeline.hpp"
@@ -51,6 +52,7 @@ class GLFWApplication {
   VulkanCommandBuffer commandBuffer_;
   VulkanSemaphore imageAvailableSemaphore_;
   VulkanSemaphore renderFinishedSemaphore_;
+  VulkanFence inFlightFence_;
 };
 
 } // namespace tetris::render

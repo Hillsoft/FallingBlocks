@@ -58,7 +58,8 @@ GLFWApplication::GLFWApplication()
       commandPool_(graphics_),
       commandBuffer_(graphics_, commandPool_),
       imageAvailableSemaphore_(graphics_),
-      renderFinishedSemaphore_(graphics_) {
+      renderFinishedSemaphore_(graphics_),
+      inFlightFence_(graphics_, true) {
 }
 
 GLFWApplication::~GLFWApplication() {
