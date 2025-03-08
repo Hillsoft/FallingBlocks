@@ -17,6 +17,21 @@ glfw::Window makeWindow() {
   return glfw::Window{800, 600, "Vulkan"};
 }
 
+std::vector<VulkanFrameBuffer> makeFrameBuffers(
+    VulkanGraphicsDevice& device,
+    VulkanRenderPass& renderPass,
+    std::vector<VulkanImageView>& imageViews,
+    VkExtent2D extent) {
+  std::vector<VulkanFrameBuffer> result;
+  result.reserve(imageViews.size());
+
+  for (auto& v : imageViews) {
+    result.emplace_back(device, renderPass, v, extent);
+  }
+
+  return result;
+}
+
 } // namespace
 
 GLFWApplication::GLFWApplication()
@@ -34,7 +49,12 @@ GLFWApplication::GLFWApplication()
           graphics_,
           swapChain_.getImageFormat(),
           vertexShader_,
-          fragmentShader_) {
+          fragmentShader_),
+      frameBuffers_(makeFrameBuffers(
+          graphics_,
+          pipeline_.getRenderPass(),
+          swapChainImageViews_,
+          swapChain_.getSwapchainExtent())) {
 }
 
 GLFWApplication::~GLFWApplication() {

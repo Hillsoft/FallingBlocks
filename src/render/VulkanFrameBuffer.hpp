@@ -1,0 +1,31 @@
+#pragma once
+
+#include <GLFW/glfw3.h>
+
+#include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanImageView.hpp"
+#include "render/VulkanRenderPass.hpp"
+
+namespace tetris::render {
+
+class VulkanFrameBuffer {
+ public:
+  VulkanFrameBuffer(
+      VulkanGraphicsDevice& device,
+      VulkanRenderPass& renderPass,
+      VulkanImageView& imageView,
+      VkExtent2D extent);
+  ~VulkanFrameBuffer();
+
+  VulkanFrameBuffer(const VulkanFrameBuffer& other) = delete;
+  VulkanFrameBuffer& operator=(const VulkanFrameBuffer& other) = delete;
+
+  VulkanFrameBuffer(VulkanFrameBuffer&& other) noexcept;
+  VulkanFrameBuffer& operator=(VulkanFrameBuffer&& other) noexcept;
+
+ private:
+  VulkanGraphicsDevice* device_;
+  VkFramebuffer frameBuffer_;
+};
+
+} // namespace tetris::render

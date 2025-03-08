@@ -4,6 +4,7 @@ add_library(render.glfwapplication STATIC "GLFWApplication.cpp" "GLFWApplication
 target_link_libraries(render.glfwapplication
 	render.glfw_wrapper.window
 	render.vulkandebugmessenger
+	render.vulkanframebuffer
 	render.vulkangraphicsdevice
 	render.vulkangraphicspipeline
 	render.vulkanimageview
@@ -18,6 +19,12 @@ add_library(render.vulkandebugmessenger STATIC "VulkanDebugMessenger.cpp" "Vulka
 target_link_libraries(render.vulkandebugmessenger
 	render.vulkaninstance
 	util.debug)
+
+add_library(render.vulkanframebuffer STATIC "VulkanFrameBuffer.cpp" "VulkanFrameBuffer.hpp")
+target_link_libraries(render.vulkanframebuffer
+	render.vulkangraphicsdevice
+	render.vulkanimageview
+	render.vulkanrenderpass)
 
 add_library(render.vulkangraphicsdevice STATIC "VulkanGraphicsDevice.cpp" "VulkanGraphicsDevice.hpp")
 target_link_libraries(render.vulkangraphicsdevice

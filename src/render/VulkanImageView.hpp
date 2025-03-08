@@ -18,6 +18,8 @@ class VulkanImageView {
   VulkanImageView(VulkanImageView&& other) noexcept;
   VulkanImageView& operator=(VulkanImageView&& other) noexcept;
 
+  VkImageView getRawImageView() { return imageView_; }
+
  private:
   VulkanGraphicsDevice* device_;
   VkImageView imageView_;

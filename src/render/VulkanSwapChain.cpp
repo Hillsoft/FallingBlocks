@@ -127,6 +127,7 @@ VulkanSwapChain::VulkanSwapChain(
 
   swapChain_ = swapChain;
   imageFormat_ = surfaceFormat.format;
+  extent_ = extent;
 
   vkGetSwapchainImagesKHR(
       graphicsDevice.getRawDevice(), swapChain, &imageCount, nullptr);

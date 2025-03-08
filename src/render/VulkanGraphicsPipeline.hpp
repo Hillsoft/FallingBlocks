@@ -25,6 +25,8 @@ class VulkanGraphicsPipeline {
   VulkanGraphicsPipeline(VulkanGraphicsPipeline&& other) noexcept;
   VulkanGraphicsPipeline& operator=(VulkanGraphicsPipeline&& other) noexcept;
 
+  VulkanRenderPass& getRenderPass() { return renderPass_; }
+
  private:
   VulkanGraphicsDevice* device_;
   VulkanPipelineLayout pipelineLayout_;
