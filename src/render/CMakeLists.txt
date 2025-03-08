@@ -11,6 +11,7 @@ target_link_libraries(render.glfwapplication
 	render.vulkangraphicspipeline
 	render.vulkanimageview
 	render.vulkaninstance
+	render.vulkansemaphore
 	render.vulkanshader
 	render.vulkansurface
 	render.vulkanswapchain)
@@ -69,6 +70,10 @@ target_link_libraries(render.vulkanpipelinelayout
 
 add_library(render.vulkanrenderpass STATIC "VulkanRenderPass.cpp" "VulkanRenderPass.hpp")
 target_link_libraries(render.vulkanrenderpass
+	render.vulkangraphicsdevice)
+
+add_library(render.vulkansemaphore STATIC "VulkanSemaphore.cpp" "VulkanSemaphore.hpp")
+target_link_libraries(render.vulkansemaphore
 	render.vulkangraphicsdevice)
 
 add_library(render.vulkanshader STATIC "VulkanShader.cpp" "VulkanShader.hpp")

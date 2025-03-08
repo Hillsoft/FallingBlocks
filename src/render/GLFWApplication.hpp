@@ -8,6 +8,7 @@
 #include "render/VulkanGraphicsPipeline.hpp"
 #include "render/VulkanImageView.hpp"
 #include "render/VulkanInstance.hpp"
+#include "render/VulkanSemaphore.hpp"
 #include "render/VulkanShader.hpp"
 #include "render/VulkanSurface.hpp"
 #include "render/VulkanSwapChain.hpp"
@@ -48,6 +49,8 @@ class GLFWApplication {
   std::vector<VulkanFrameBuffer> frameBuffers_;
   VulkanCommandPool commandPool_;
   VulkanCommandBuffer commandBuffer_;
+  VulkanSemaphore imageAvailableSemaphore_;
+  VulkanSemaphore renderFinishedSemaphore_;
 };
 
 } // namespace tetris::render

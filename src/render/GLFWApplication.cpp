@@ -56,7 +56,9 @@ GLFWApplication::GLFWApplication()
           swapChainImageViews_,
           swapChain_.getSwapchainExtent())),
       commandPool_(graphics_),
-      commandBuffer_(graphics_, commandPool_) {
+      commandBuffer_(graphics_, commandPool_),
+      imageAvailableSemaphore_(graphics_),
+      renderFinishedSemaphore_(graphics_) {
 }
 
 GLFWApplication::~GLFWApplication() {
