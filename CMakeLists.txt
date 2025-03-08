@@ -1,7 +1,7 @@
 # CMakeList.txt : CMake project for Tetris, include source and define
 # project specific logic here.
 #
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.9)
 
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
@@ -11,7 +11,11 @@ endif()
 
 set(CMAKE_VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
 
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+include(CheckIPOSupported)
+check_ipo_supported(RESULT ipo_result)
+if (ipo_result)
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+endif()
 set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 set(CMAKE_CXX_STANDARD 20)
 
