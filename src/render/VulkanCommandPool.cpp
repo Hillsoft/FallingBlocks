@@ -5,7 +5,9 @@
 namespace tetris::render {
 
 VulkanCommandPool::VulkanCommandPool(VulkanGraphicsDevice& device)
-    : device_(&device), commandPool_(nullptr) {
+    : device_(&device),
+      queue_(device.getGraphicsQueue()),
+      commandPool_(nullptr) {
   VkCommandPoolCreateInfo poolInfo{};
   poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
   poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
@@ -27,14 +29,18 @@ VulkanCommandPool::~VulkanCommandPool() {
 }
 
 VulkanCommandPool::VulkanCommandPool(VulkanCommandPool&& other) noexcept
-    : device_(other.device_), commandPool_(other.commandPool_) {
+    : device_(other.device_),
+      queue_(other.queue_),
+      commandPool_(other.commandPool_) {
   other.device_ = nullptr;
+  other.queue_ = nullptr;
   other.commandPool_ = nullptr;
 }
 
 VulkanCommandPool& VulkanCommandPool::operator=(
     VulkanCommandPool&& other) noexcept {
   std::swap(device_, other.device_);
+  std::swap(queue_, other.queue_);
   std::swap(commandPool_, other.commandPool_);
 
   return *this;

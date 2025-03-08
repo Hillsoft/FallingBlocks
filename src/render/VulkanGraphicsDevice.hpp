@@ -48,6 +48,8 @@ class VulkanGraphicsDevice {
   const PhysicalDeviceInfo& physicalInfo() const { return *physicalInfo_; }
 
   VkDevice getRawDevice() { return device_; }
+  VkQueue getGraphicsQueue() { return graphicsQueue_; }
+  VkQueue getPresentQueue() { return presentQueue_; }
 
  private:
   VulkanGraphicsDevice(

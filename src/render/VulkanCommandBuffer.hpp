@@ -4,10 +4,12 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanCommandPool.hpp"
+#include "render/VulkanFence.hpp"
 #include "render/VulkanFrameBuffer.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanGraphicsPipeline.hpp"
 #include "render/VulkanRenderPass.hpp"
+#include "render/VulkanSemaphore.hpp"
 
 namespace tetris::render {
 
@@ -22,8 +24,14 @@ class VulkanCommandBuffer {
       VulkanFrameBuffer& frameBuffer,
       Fn&& fn);
 
+  void submit(
+      const std::vector<VulkanSemaphore*>& waitSemaphores,
+      const std::vector<VulkanSemaphore*>& signalSemaphores,
+      VulkanFence* signalFence);
+
  private:
   VkCommandBuffer commandBuffer_;
+  VkQueue queue_;
 };
 
 template <typename Fn>
@@ -31,6 +39,8 @@ void VulkanCommandBuffer::runRenderPass(
     VulkanGraphicsPipeline& graphicsPipeline,
     VulkanFrameBuffer& frameBuffer,
     Fn&& fn) {
+  vkResetCommandBuffer(commandBuffer_, 0);
+
   VkCommandBufferBeginInfo beginInfo{};
   beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
   beginInfo.flags = 0;
@@ -74,7 +84,7 @@ void VulkanCommandBuffer::runRenderPass(
   scissor.extent = frameBuffer.getExtent();
   vkCmdSetScissor(commandBuffer_, 0, 1, &scissor);
 
-  fn();
+  fn(commandBuffer_);
 
   vkCmdEndRenderPass(commandBuffer_);
 

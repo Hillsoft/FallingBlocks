@@ -22,10 +22,13 @@ add_library(render.validationlayers INTERFACE "validationLayers.hpp")
 add_library(render.vulkancommandbuffer STATIC "VulkanCommandBuffer.cpp" "VulkanCommandBuffer.hpp")
 target_link_libraries(render.vulkancommandbuffer
 	render.vulkancommandpool
+	render.vulkanfence
 	render.vulkanframebuffer
 	render.vulkangraphicsdevice
 	render.vulkangraphicspipeline
-	render.vulkanrenderpass)
+	render.vulkanrenderpass
+	render.vulkansemaphore
+	util.debug)
 
 add_library(render.vulkancommandpool STATIC "VulkanCommandPool.cpp" "VulkanCommandPool.hpp")
 target_link_libraries(render.vulkancommandpool
@@ -94,7 +97,9 @@ target_link_libraries(render.vulkansurface
 add_library(render.vulkanswapchain STATIC "VulkanSwapChain.cpp" "VulkanSwapChain.hpp")
 target_link_libraries(render.vulkanswapchain
 	render.glfw_wrapper.window
+	render.vulkanfence
 	render.vulkangraphicsdevice
 	render.vulkanimageview
+	render.vulkansemaphore
 	render.vulkansurface
 	util.debug)

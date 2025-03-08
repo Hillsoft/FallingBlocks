@@ -18,9 +18,11 @@ class VulkanCommandPool {
   VulkanCommandPool& operator=(VulkanCommandPool&& other) noexcept;
 
   VkCommandPool getRawCommandPool() { return commandPool_; }
+  VkQueue getQueue() { return queue_; }
 
  private:
   VulkanGraphicsDevice* device_;
+  VkQueue queue_;
   VkCommandPool commandPool_;
 };
 

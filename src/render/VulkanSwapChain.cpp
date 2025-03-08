@@ -1,4 +1,3 @@
-#include "VulkanSwapChain.hpp"
 #include "render/VulkanSwapChain.hpp"
 
 #include <algorithm>
@@ -69,7 +68,8 @@ VkExtent2D chooseSwapExtent(
 
 VulkanSwapChain::VulkanSwapChain(
     VulkanSurface& surface, VulkanGraphicsDevice& graphicsDevice)
-    : graphicsDevice_(&graphicsDevice) {
+    : graphicsDevice_(&graphicsDevice),
+      queue_(graphicsDevice.getPresentQueue()) {
   const VulkanGraphicsDevice::SwapChainSupportDetails& swapChainSupport =
       graphicsDevice.physicalInfo().swapChainSupport;
 
@@ -141,13 +141,22 @@ VulkanSwapChain::VulkanSwapChain(
 }
 
 VulkanSwapChain::VulkanSwapChain(VulkanSwapChain&& other) noexcept
-    : graphicsDevice_(other.graphicsDevice_), swapChain_(other.swapChain_) {
+    : graphicsDevice_(other.graphicsDevice_),
+      swapChain_(other.swapChain_),
+      imageFormat_(other.imageFormat_),
+      extent_(other.extent_),
+      queue_(other.queue_),
+      swapChainImages_(std::move(other.swapChainImages_)) {
   other.swapChain_ = nullptr;
 }
 
 VulkanSwapChain& VulkanSwapChain::operator=(VulkanSwapChain&& other) noexcept {
   std::swap(graphicsDevice_, other.graphicsDevice_);
   std::swap(swapChain_, other.swapChain_);
+  std::swap(imageFormat_, other.imageFormat_);
+  std::swap(extent_, other.extent_);
+  std::swap(queue_, other.queue_);
+  std::swap(swapChainImages_, other.swapChainImages_);
 
   return *this;
 }
@@ -180,6 +189,24 @@ uint32_t VulkanSwapChain::getNextImageIndex(
       fence != nullptr ? fence->getRawFence() : nullptr,
       &imageIndex);
   return imageIndex;
+}
+
+void VulkanSwapChain::present(
+    uint32_t imageIndex, VulkanSemaphore* waitSemaphore) {
+  VkPresentInfoKHR presentInfo{};
+  presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+  VkSemaphore rawWaitSemaphore;
+  if (waitSemaphore != nullptr) {
+    presentInfo.waitSemaphoreCount = 1;
+    rawWaitSemaphore = waitSemaphore->getRawSemaphore();
+    presentInfo.pWaitSemaphores = &rawWaitSemaphore;
+  }
+  presentInfo.swapchainCount = 1;
+  presentInfo.pSwapchains = &swapChain_;
+  presentInfo.pImageIndices = &imageIndex;
+  presentInfo.pResults = nullptr;
+
+  vkQueuePresentKHR(queue_, &presentInfo);
 }
 
 } // namespace tetris::render

@@ -28,11 +28,14 @@ class VulkanSwapChain {
   VkFormat getImageFormat() const { return imageFormat_; }
   VkExtent2D getSwapchainExtent() const { return extent_; }
 
+  void present(uint32_t imageIndex, VulkanSemaphore* waitSemaphore);
+
  private:
   VulkanGraphicsDevice* graphicsDevice_;
   VkSwapchainKHR swapChain_;
   VkFormat imageFormat_;
   VkExtent2D extent_;
+  VkQueue queue_;
   std::vector<VkImage> swapChainImages_;
 };
 

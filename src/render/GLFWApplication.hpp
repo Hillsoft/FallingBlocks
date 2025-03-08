@@ -30,6 +30,8 @@ class GLFWApplication {
   void run();
 
  private:
+  void drawFrame();
+
   struct GLFWLifetimeScope {
     GLFWLifetimeScope();
     ~GLFWLifetimeScope();

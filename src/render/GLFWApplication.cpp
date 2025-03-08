@@ -69,7 +69,29 @@ GLFWApplication::~GLFWApplication() {
 void GLFWApplication::run() {
   while (!surface_.window().shouldClose()) {
     glfwPollEvents();
+    drawFrame();
   }
+
+  vkDeviceWaitIdle(graphics_.getRawDevice());
+}
+
+void GLFWApplication::drawFrame() {
+  inFlightFence_.waitAndReset();
+
+  uint32_t imageIndex =
+      swapChain_.getNextImageIndex(&imageAvailableSemaphore_, nullptr);
+
+  commandBuffer_.runRenderPass(
+      pipeline_, frameBuffers_[imageIndex], [](VkCommandBuffer buffer) {
+        vkCmdDraw(buffer, 3, 1, 0, 0);
+      });
+
+  commandBuffer_.submit(
+      {&imageAvailableSemaphore_},
+      {&renderFinishedSemaphore_},
+      &inFlightFence_);
+
+  swapChain_.present(imageIndex, &renderFinishedSemaphore_);
 }
 
 GLFWApplication::GLFWLifetimeScope::GLFWLifetimeScope() {
