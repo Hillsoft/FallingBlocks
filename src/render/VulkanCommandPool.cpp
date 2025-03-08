@@ -1,5 +1,7 @@
 #include "render/VulkanCommandPool.hpp"
 
+#include <stdexcept>
+
 #include "util/debug.hpp"
 
 namespace tetris::render {
