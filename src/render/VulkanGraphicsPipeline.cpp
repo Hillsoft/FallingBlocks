@@ -7,7 +7,7 @@ namespace blocks::render {
 VulkanGraphicsPipeline::VulkanGraphicsPipeline(
     VulkanGraphicsDevice& device,
     VkFormat imageFormat,
-    VulkanShader& vertexShader,
+    VulkanVertexShader& vertexShader,
     VulkanShader& fragmentShader)
     : device_(&device),
       pipelineLayout_(device),
@@ -32,13 +32,18 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(
   dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
   dynamicState.pDynamicStates = dynamicStates.data();
 
+  const auto& bindingDescriptions = vertexShader.getInputBindingDescriptions();
+  const auto& attributeDescriptions =
+      vertexShader.getInputAttributeDescriptions();
   VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
   vertexInputInfo.sType =
       VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-  vertexInputInfo.vertexBindingDescriptionCount = 0;
-  vertexInputInfo.pVertexBindingDescriptions = nullptr;
-  vertexInputInfo.vertexAttributeDescriptionCount = 0;
-  vertexInputInfo.pVertexAttributeDescriptions = nullptr;
+  vertexInputInfo.vertexBindingDescriptionCount =
+      static_cast<uint32_t>(bindingDescriptions.size());
+  vertexInputInfo.pVertexBindingDescriptions = bindingDescriptions.data();
+  vertexInputInfo.vertexAttributeDescriptionCount =
+      static_cast<uint32_t>(attributeDescriptions.size());
+  vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
   VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
   inputAssembly.sType =

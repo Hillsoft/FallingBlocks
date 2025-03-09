@@ -40,4 +40,13 @@ VulkanShader& VulkanShader::operator=(VulkanShader&& other) noexcept {
   return *this;
 }
 
+VulkanVertexShader::VulkanVertexShader(
+    VulkanGraphicsDevice& device,
+    std::vector<VkVertexInputBindingDescription> bindingDescriptions,
+    std::vector<VkVertexInputAttributeDescription> inputAttributeDescription,
+    const std::filesystem::path& shaderPath)
+    : shader_(device, shaderPath),
+      bindingDescriptions_(std::move(bindingDescriptions)),
+      inputAttributeDescription_(std::move(inputAttributeDescription)) {}
+
 } // namespace blocks::render

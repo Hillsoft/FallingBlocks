@@ -26,4 +26,30 @@ class VulkanShader {
   VkShaderModule shaderModule_;
 };
 
+class VulkanVertexShader {
+ public:
+  VulkanVertexShader(
+      VulkanGraphicsDevice& device,
+      std::vector<VkVertexInputBindingDescription> bindingDescriptions,
+      std::vector<VkVertexInputAttributeDescription> inputAttributeDescription,
+      const std::filesystem::path& shaderPath);
+
+  const std::vector<VkVertexInputBindingDescription>&
+  getInputBindingDescriptions() const {
+    return bindingDescriptions_;
+  }
+
+  const std::vector<VkVertexInputAttributeDescription>&
+  getInputAttributeDescriptions() const {
+    return inputAttributeDescription_;
+  }
+
+  VkShaderModule getRawShader() { return shader_.getRawShader(); }
+
+ private:
+  VulkanShader shader_;
+  std::vector<VkVertexInputBindingDescription> bindingDescriptions_;
+  std::vector<VkVertexInputAttributeDescription> inputAttributeDescription_;
+};
+
 } // namespace blocks::render

@@ -52,7 +52,7 @@ class GLFWApplication {
 #endif
   VulkanSurface surface_;
   VulkanGraphicsDevice graphics_;
-  VulkanShader vertexShader_;
+  VulkanVertexShader vertexShader_;
   VulkanShader fragmentShader_;
   VulkanGraphicsPipeline pipeline_;
   VulkanPresentStack presentStack_;

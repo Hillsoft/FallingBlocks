@@ -57,7 +57,8 @@ GLFWApplication::GLFWApplication()
                  onWindowResize();
                })),
       graphics_(VulkanGraphicsDevice::make(vulkan_, surface_)),
-      vertexShader_(graphics_, std::filesystem::path{"shaders"} / "vertex.spv"),
+      vertexShader_(
+          graphics_, {}, {}, std::filesystem::path{"shaders"} / "vertex.spv"),
       fragmentShader_(graphics_, "shaders/fragment.spv"),
       pipeline_(
           graphics_,

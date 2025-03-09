@@ -14,7 +14,7 @@ class VulkanGraphicsPipeline {
   VulkanGraphicsPipeline(
       VulkanGraphicsDevice& device,
       VkFormat imageFormat,
-      VulkanShader& vertexShader,
+      VulkanVertexShader& vertexShader,
       VulkanShader& fragmentShader);
   ~VulkanGraphicsPipeline();
 
