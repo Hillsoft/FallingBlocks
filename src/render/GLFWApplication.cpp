@@ -97,21 +97,21 @@ void GLFWApplication::run() {
 void GLFWApplication::drawFrame() {
   synchronisationSets_[currentFrame].inFlightFence.waitAndReset();
 
-  uint32_t imageIndex = presentStack_.getNextImageIndex(
+  VulkanPresentStack::FrameData presentFrame = presentStack_.getNextImageIndex(
       &synchronisationSets_[currentFrame].imageAvailableSemaphore, nullptr);
 
   commandBuffers_[currentFrame].runRenderPass(
-      pipeline_,
-      presentStack_.getFrameBuffer(imageIndex),
-      [](VkCommandBuffer buffer) { vkCmdDraw(buffer, 3, 1, 0, 0); });
+      pipeline_, presentFrame.getFrameBuffer(), [](VkCommandBuffer buffer) {
+        vkCmdDraw(buffer, 3, 1, 0, 0);
+      });
 
   commandBuffers_[currentFrame].submit(
       {&synchronisationSets_[currentFrame].imageAvailableSemaphore},
       {&synchronisationSets_[currentFrame].renderFinishedSemaphore},
       &synchronisationSets_[currentFrame].inFlightFence);
 
-  presentStack_.present(
-      imageIndex, &synchronisationSets_[currentFrame].renderFinishedSemaphore);
+  presentFrame.present(
+      &synchronisationSets_[currentFrame].renderFinishedSemaphore);
 
   currentFrame = (currentFrame + 1) % kMaxFramesInFlight;
 }

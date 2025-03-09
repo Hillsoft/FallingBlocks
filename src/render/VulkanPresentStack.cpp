@@ -42,12 +42,12 @@ VulkanPresentStack::SwapChainData::SwapChainData(
       frameBuffer(makeFrameBuffers(
           device, renderPass, imageViews, swapChain.getSwapchainExtent())) {}
 
-uint32_t VulkanPresentStack::getNextImageIndex(
+VulkanPresentStack::FrameData VulkanPresentStack::getNextImageIndex(
     VulkanSemaphore* semaphore, VulkanFence* fence) {
   std::optional<uint32_t> nextImageIndex =
       swapChainData_->swapChain.getNextImageIndex(semaphore, fence);
   if (nextImageIndex.has_value()) {
-    return *nextImageIndex;
+    return FrameData{FrameDataCreationTag{}, *nextImageIndex, this};
   }
 
   std::cout << "Resetting swap chain\n";
@@ -57,11 +57,17 @@ uint32_t VulkanPresentStack::getNextImageIndex(
   nextImageIndex =
       swapChainData_->swapChain.getNextImageIndex(semaphore, fence);
   if (nextImageIndex.has_value()) {
-    return *nextImageIndex;
+    return FrameData{FrameDataCreationTag{}, *nextImageIndex, this};
   }
 
   throw std::runtime_error{
       "Recreating swapchain failed to resolve out of data issue"};
 }
+
+VulkanPresentStack::FrameData::FrameData(
+    FrameDataCreationTag /* tag */,
+    uint32_t imageIndex,
+    VulkanPresentStack* owner)
+    : imageIndex_(imageIndex), owner_(owner) {}
 
 } // namespace blocks::render

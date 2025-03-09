@@ -14,13 +14,36 @@
 namespace blocks::render {
 
 class VulkanPresentStack {
+ private:
+  struct FrameDataCreationTag {};
+
  public:
+  class FrameData {
+   public:
+    FrameData(
+        FrameDataCreationTag /* tag */,
+        uint32_t imageIndex,
+        VulkanPresentStack* owner);
+
+    VulkanFrameBuffer& getFrameBuffer() const {
+      return owner_->getFrameBuffer(imageIndex_);
+    }
+
+    void present(VulkanSemaphore* waitSemaphore) const {
+      return owner_->present(imageIndex_, waitSemaphore);
+    }
+
+   private:
+    uint32_t imageIndex_;
+    VulkanPresentStack* owner_;
+  };
+
   VulkanPresentStack(
       VulkanGraphicsDevice& device,
       VulkanSurface& surface,
       VulkanRenderPass& renderPass);
 
-  uint32_t getNextImageIndex(VulkanSemaphore* semaphore, VulkanFence* fence);
+  FrameData getNextImageIndex(VulkanSemaphore* semaphore, VulkanFence* fence);
 
   VulkanFrameBuffer& getFrameBuffer(uint32_t imageIndex) {
     return swapChainData_->frameBuffer[imageIndex];
