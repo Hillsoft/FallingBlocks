@@ -57,8 +57,10 @@ VulkanSwapChain::VulkanSwapChain(
     VulkanSurface& surface, VulkanGraphicsDevice& graphicsDevice)
     : graphicsDevice_(&graphicsDevice),
       queue_(graphicsDevice.getPresentQueue()) {
+  VulkanGraphicsDevice::PhysicalDeviceInfo physicalInfo{
+      graphicsDevice.physicalInfo().device, surface};
   const VulkanGraphicsDevice::SwapChainSupportDetails& swapChainSupport =
-      graphicsDevice.physicalInfo().swapChainSupport;
+      physicalInfo.swapChainSupport;
 
   VkSurfaceFormatKHR surfaceFormat = swapChainSupport.preferredFormat;
   VkPresentModeKHR presentMode =
@@ -165,16 +167,23 @@ std::vector<VulkanImageView> VulkanSwapChain::getImageViews() const {
   return result;
 }
 
-uint32_t VulkanSwapChain::getNextImageIndex(
+std::optional<uint32_t> VulkanSwapChain::getNextImageIndex(
     VulkanSemaphore* semaphore, VulkanFence* fence) {
   uint32_t imageIndex;
-  vkAcquireNextImageKHR(
+  VkResult result = vkAcquireNextImageKHR(
       graphicsDevice_->getRawDevice(),
       swapChain_,
       UINT64_MAX,
       semaphore != nullptr ? semaphore->getRawSemaphore() : nullptr,
       fence != nullptr ? fence->getRawFence() : nullptr,
       &imageIndex);
+
+  if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+    return std::nullopt;
+  } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+    throw std::runtime_error{"Failed to acquire swap chain image"};
+  }
+
   return imageIndex;
 }
 

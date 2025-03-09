@@ -6,4 +6,10 @@ add_library(util.debug INTERFACE "debug.hpp")
 
 add_library(util.file STATIC "file.cpp" "file.hpp")
 
+add_library(util.resettable INTERFACE "resettable.hpp")
+target_link_libraries(util.resettable INTERFACE
+	util.storage)
+
+add_library(util.storage INTERFACE "storage.hpp")
+
 add_library(util.string INTERFACE "string.hpp")

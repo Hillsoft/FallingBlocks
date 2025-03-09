@@ -9,6 +9,7 @@
 #include "render/VulkanRenderPass.hpp"
 #include "render/VulkanSurface.hpp"
 #include "render/VulkanSwapChain.hpp"
+#include "util/resettable.hpp"
 
 namespace blocks::render {
 
@@ -19,22 +20,32 @@ class VulkanPresentStack {
       VulkanSurface& surface,
       VulkanRenderPass& renderPass);
 
-  uint32_t getNextImageIndex(VulkanSemaphore* semaphore, VulkanFence* fence) {
-    return swapChain_.getNextImageIndex(semaphore, fence);
-  }
+  uint32_t getNextImageIndex(VulkanSemaphore* semaphore, VulkanFence* fence);
 
   VulkanFrameBuffer& getFrameBuffer(uint32_t imageIndex) {
-    return frameBuffer_[imageIndex];
+    return swapChainData_->frameBuffer[imageIndex];
   }
 
   void present(uint32_t imageIndex, VulkanSemaphore* waitSemaphore) {
-    swapChain_.present(imageIndex, waitSemaphore);
+    swapChainData_->swapChain.present(imageIndex, waitSemaphore);
   }
 
  private:
-  VulkanSwapChain swapChain_;
-  std::vector<VulkanImageView> imageViews_;
-  std::vector<VulkanFrameBuffer> frameBuffer_;
+  struct SwapChainData {
+    SwapChainData(
+        VulkanGraphicsDevice& device,
+        VulkanSurface& surface,
+        VulkanRenderPass& renderPass);
+
+    VulkanSwapChain swapChain;
+    std::vector<VulkanImageView> imageViews;
+    std::vector<VulkanFrameBuffer> frameBuffer;
+  };
+
+  util::Resettable<SwapChainData> swapChainData_;
+  VulkanGraphicsDevice* device_;
+  VulkanSurface* surface_;
+  VulkanRenderPass* renderPass_;
 };
 
 } // namespace blocks::render

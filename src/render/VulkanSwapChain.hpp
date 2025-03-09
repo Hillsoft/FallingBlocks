@@ -23,7 +23,9 @@ class VulkanSwapChain {
 
   std::vector<VulkanImageView> getImageViews() const;
 
-  uint32_t getNextImageIndex(VulkanSemaphore* semaphore, VulkanFence* fence);
+  // nullopt indicates out of date swapchain, recreation required
+  std::optional<uint32_t> getNextImageIndex(
+      VulkanSemaphore* semaphore, VulkanFence* fence);
 
   VkExtent2D getSwapchainExtent() const { return extent_; }
 

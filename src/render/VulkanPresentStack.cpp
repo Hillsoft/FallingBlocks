@@ -1,5 +1,8 @@
 #include "render/VulkanPresentStack.hpp"
 
+#include <iostream>
+#include <stdexcept>
+
 namespace blocks::render {
 
 namespace {
@@ -25,9 +28,40 @@ VulkanPresentStack::VulkanPresentStack(
     VulkanGraphicsDevice& device,
     VulkanSurface& surface,
     VulkanRenderPass& renderPass)
-    : swapChain_(surface, device),
-      imageViews_(swapChain_.getImageViews()),
-      frameBuffer_(makeFrameBuffers(
-          device, renderPass, imageViews_, swapChain_.getSwapchainExtent())) {}
+    : swapChainData_(device, surface, renderPass),
+      device_(&device),
+      surface_(&surface),
+      renderPass_(&renderPass) {}
+
+VulkanPresentStack::SwapChainData::SwapChainData(
+    VulkanGraphicsDevice& device,
+    VulkanSurface& surface,
+    VulkanRenderPass& renderPass)
+    : swapChain(surface, device),
+      imageViews(swapChain.getImageViews()),
+      frameBuffer(makeFrameBuffers(
+          device, renderPass, imageViews, swapChain.getSwapchainExtent())) {}
+
+uint32_t VulkanPresentStack::getNextImageIndex(
+    VulkanSemaphore* semaphore, VulkanFence* fence) {
+  std::optional<uint32_t> nextImageIndex =
+      swapChainData_->swapChain.getNextImageIndex(semaphore, fence);
+  if (nextImageIndex.has_value()) {
+    return *nextImageIndex;
+  }
+
+  std::cout << "Resetting swap chain\n";
+  vkDeviceWaitIdle(device_->getRawDevice());
+  swapChainData_.reset(*device_, *surface_, *renderPass_);
+
+  nextImageIndex =
+      swapChainData_->swapChain.getNextImageIndex(semaphore, fence);
+  if (nextImageIndex.has_value()) {
+    return *nextImageIndex;
+  }
+
+  throw std::runtime_error{
+      "Recreating swapchain failed to resolve out of data issue"};
+}
 
 } // namespace blocks::render

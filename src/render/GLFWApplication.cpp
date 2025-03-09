@@ -15,7 +15,6 @@ constexpr int kMaxFramesInFlight = 2;
 
 glfw::Window makeWindow() {
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
   return glfw::Window{800, 600, "Vulkan"};
 }
