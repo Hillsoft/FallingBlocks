@@ -125,7 +125,7 @@ void GLFWApplication::drawFrame() {
         VkBuffer vertexBuffer = vertexAttributes_.getRawBuffer();
         VkDeviceSize offsets = 0;
         vkCmdBindVertexBuffers(buffer, 0, 1, &vertexBuffer, &offsets);
-        vkCmdDraw(buffer, 3, 1, 0, 0);
+        vkCmdDraw(buffer, 6, 1, 0, 0);
       });
 
   commandBuffers_[currentFrame_].submit(

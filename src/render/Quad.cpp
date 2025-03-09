@@ -17,6 +17,9 @@ struct VertexData {
 std::vector<VertexData> vertices = {
     {{0.0f, -0.75f}, {1.0f, 1.0f, 1.0f}},
     {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+    {{0.0f, 0.75f}, {1.0f, 0.0f, 0.0f}},
     {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
 
 constexpr VkVertexInputBindingDescription kBindingDescription = []() {
