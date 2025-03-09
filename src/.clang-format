@@ -75,6 +75,7 @@ IndentExternBlock: AfterExternBlock
 IndentWidth: 2
 IndentWrappedFunctionNames: false
 InsertTrailingCommas: None
+InsertNewlineAtEOF: true
 JavaScriptQuotes: Leave
 JavaScriptWrapImports: true
 KeepEmptyLinesAtTheStartOfBlocks: false
