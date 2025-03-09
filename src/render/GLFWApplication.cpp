@@ -95,10 +95,17 @@ void GLFWApplication::run() {
 }
 
 void GLFWApplication::drawFrame() {
-  synchronisationSets_[currentFrame].inFlightFence.waitAndReset();
+  synchronisationSets_[currentFrame].inFlightFence.wait();
 
   VulkanPresentStack::FrameData presentFrame = presentStack_.getNextImageIndex(
       &synchronisationSets_[currentFrame].imageAvailableSemaphore, nullptr);
+
+  if (presentFrame.refreshRequired()) {
+    presentStack_.reset();
+    return;
+  }
+
+  synchronisationSets_[currentFrame].inFlightFence.reset();
 
   commandBuffers_[currentFrame].runRenderPass(
       pipeline_, presentFrame.getFrameBuffer(), [](VkCommandBuffer buffer) {

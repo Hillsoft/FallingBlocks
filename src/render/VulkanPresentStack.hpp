@@ -9,6 +9,7 @@
 #include "render/VulkanRenderPass.hpp"
 #include "render/VulkanSurface.hpp"
 #include "render/VulkanSwapChain.hpp"
+#include "util/debug.hpp"
 #include "util/resettable.hpp"
 
 namespace blocks::render {
@@ -24,16 +25,22 @@ class VulkanPresentStack {
         FrameDataCreationTag /* tag */,
         uint32_t imageIndex,
         VulkanPresentStack* owner);
+    FrameData(FrameDataCreationTag /* tag */);
+
+    bool refreshRequired() const { return refreshSwapChainRequired_; }
 
     VulkanFrameBuffer& getFrameBuffer() const {
+      DEBUG_ASSERT(!refreshSwapChainRequired_);
       return owner_->getFrameBuffer(imageIndex_);
     }
 
     void present(VulkanSemaphore* waitSemaphore) const {
+      DEBUG_ASSERT(!refreshSwapChainRequired_);
       return owner_->present(imageIndex_, waitSemaphore);
     }
 
    private:
+    bool refreshSwapChainRequired_;
     uint32_t imageIndex_;
     VulkanPresentStack* owner_;
   };
@@ -52,6 +59,8 @@ class VulkanPresentStack {
   void present(uint32_t imageIndex, VulkanSemaphore* waitSemaphore) {
     swapChainData_->swapChain.present(imageIndex, waitSemaphore);
   }
+
+  void reset();
 
  private:
   struct SwapChainData {
