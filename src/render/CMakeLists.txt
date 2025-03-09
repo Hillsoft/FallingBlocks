@@ -82,6 +82,7 @@ target_link_libraries(render.vulkanpresentstack
 	render.vulkanrenderpass
 	render.vulkansurface
 	render.vulkanswapchain
+	util.debug
 	util.resettable)
 
 add_library(render.vulkanrenderpass STATIC "VulkanRenderPass.cpp" "VulkanRenderPass.hpp")
