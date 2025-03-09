@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <GLFW/glfw3.h>
 
+#include "render/Quad.hpp"
 #include "render/glfw_wrapper/Window.hpp"
 
 namespace blocks::render {
@@ -57,8 +58,7 @@ GLFWApplication::GLFWApplication()
                  onWindowResize();
                })),
       graphics_(VulkanGraphicsDevice::make(vulkan_, surface_)),
-      vertexShader_(
-          graphics_, {}, {}, std::filesystem::path{"shaders"} / "vertex.spv"),
+      vertexShader_(getQuadVertexShader(graphics_)),
       fragmentShader_(graphics_, "shaders/fragment.spv"),
       pipeline_(
           graphics_,
@@ -68,7 +68,8 @@ GLFWApplication::GLFWApplication()
       presentStack_(graphics_, surface_, pipeline_.getRenderPass()),
       commandPool_(graphics_),
       commandBuffers_(makeCommandBuffers(graphics_, commandPool_)),
-      synchronisationSets_(makeSynchronisationSets(graphics_)) {
+      synchronisationSets_(makeSynchronisationSets(graphics_)),
+      vertexAttributes_(getQuadVertexAttributesBuffer(graphics_)) {
 }
 
 GLFWApplication::~GLFWApplication() {
@@ -120,7 +121,10 @@ void GLFWApplication::drawFrame() {
   synchronisationSets_[currentFrame_].inFlightFence.reset();
 
   commandBuffers_[currentFrame_].runRenderPass(
-      pipeline_, presentFrame.getFrameBuffer(), [](VkCommandBuffer buffer) {
+      pipeline_, presentFrame.getFrameBuffer(), [&](VkCommandBuffer buffer) {
+        VkBuffer vertexBuffer = vertexAttributes_.getRawBuffer();
+        VkDeviceSize offsets = 0;
+        vkCmdBindVertexBuffers(buffer, 0, 1, &vertexBuffer, &offsets);
         vkCmdDraw(buffer, 3, 1, 0, 0);
       });
 

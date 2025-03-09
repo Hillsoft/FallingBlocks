@@ -1,5 +1,6 @@
 #pragma once
 
+#include "render/VulkanBuffer.hpp"
 #include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanDebugMessenger.hpp"
@@ -59,6 +60,7 @@ class GLFWApplication {
   VulkanCommandPool commandPool_;
   std::vector<VulkanCommandBuffer> commandBuffers_;
   std::vector<PipelineSynchronisationSet> synchronisationSets_;
+  VulkanBuffer vertexAttributes_;
 
   bool shouldResetSwapChain_ = 0;
   uint32_t currentFrame_ = 0;

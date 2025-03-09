@@ -3,6 +3,8 @@ add_subdirectory(glfw_wrapper)
 add_library(render.glfwapplication STATIC "GLFWApplication.cpp" "GLFWApplication.hpp")
 target_link_libraries(render.glfwapplication
 	render.glfw_wrapper.window
+	render.quad
+	render.vulkanbuffer
 	render.vulkancommandbuffer
 	render.vulkancommandpool
 	render.vulkandebugmessenger
@@ -15,7 +17,20 @@ target_link_libraries(render.glfwapplication
 	render.vulkanshader
 	render.vulkansurface)
 
+add_library(render.quad STATIC "Quad.cpp" "Quad.hpp")
+target_link_libraries(render.quad
+	math.vec
+	render.vulkanbuffer
+	render.vulkangraphicsdevice
+	render.vulkanshader)
+
 add_library(render.validationlayers INTERFACE "validationLayers.hpp")
+
+add_library(render.vulkanbuffer STATIC "VulkanBuffer.cpp" "VulkanBuffer.hpp")
+target_link_libraries(render.vulkanbuffer
+	render.vulkandevicememory
+	render.vulkangraphicsdevice
+	render.vulkanrawbuffer)
 
 add_library(render.vulkancommandbuffer STATIC "VulkanCommandBuffer.cpp" "VulkanCommandBuffer.hpp")
 target_link_libraries(render.vulkancommandbuffer
@@ -37,6 +52,11 @@ add_library(render.vulkandebugmessenger STATIC "VulkanDebugMessenger.cpp" "Vulka
 target_link_libraries(render.vulkandebugmessenger
 	render.vulkaninstance
 	util.debug)
+
+add_library(render.vulkandevicememory STATIC "VulkanDeviceMemory.cpp" "VulkanDeviceMemory.hpp")
+target_link_libraries(render.vulkandevicememory
+	render.vulkangraphicsdevice
+	render.vulkanrawbuffer)
 
 add_library(render.vulkanfence STATIC "VulkanFence.cpp" "VulkanFence.hpp")
 target_link_libraries(render.vulkanfence
@@ -84,6 +104,10 @@ target_link_libraries(render.vulkanpresentstack
 	render.vulkanswapchain
 	util.debug
 	util.resettable)
+
+add_library(render.vulkanrawbuffer STATIC "VulkanRawBuffer.cpp" "VulkanRawBuffer.hpp")
+target_link_libraries(render.vulkanrawbuffer
+	render.vulkangraphicsdevice)
 
 add_library(render.vulkanrenderpass STATIC "VulkanRenderPass.cpp" "VulkanRenderPass.hpp")
 target_link_libraries(render.vulkanrenderpass
