@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-namespace tetris::render {
+namespace blocks::render {
 
 VulkanFence::VulkanFence(VulkanGraphicsDevice& device, bool preSignalled)
     : device_(&device), fence_(nullptr) {
@@ -52,4 +52,4 @@ void VulkanFence::waitAndReset() {
   reset();
 }
 
-} // namespace tetris::render
+} // namespace blocks::render

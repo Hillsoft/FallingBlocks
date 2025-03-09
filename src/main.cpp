@@ -3,7 +3,7 @@
 #include "render/GLFWApplication.hpp"
 
 int main() {
-  tetris::render::GLFWApplication vulkan{};
+  blocks::render::GLFWApplication vulkan{};
 
   vulkan.run();
 

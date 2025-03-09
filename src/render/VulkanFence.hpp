@@ -4,7 +4,7 @@
 
 #include "render/VulkanGraphicsDevice.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 class VulkanFence {
  public:
@@ -28,4 +28,4 @@ class VulkanFence {
   VkFence fence_;
 };
 
-} // namespace tetris::render
+} // namespace blocks::render

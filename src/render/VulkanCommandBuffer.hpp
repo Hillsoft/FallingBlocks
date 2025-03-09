@@ -11,7 +11,7 @@
 #include "render/VulkanRenderPass.hpp"
 #include "render/VulkanSemaphore.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 class VulkanCommandBuffer {
  public:
@@ -93,4 +93,4 @@ void VulkanCommandBuffer::runRenderPass(
   }
 }
 
-} // namespace tetris::render
+} // namespace blocks::render

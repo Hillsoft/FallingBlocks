@@ -4,7 +4,7 @@
 
 #include "render/VulkanGraphicsDevice.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 class VulkanCommandPool {
  public:
@@ -26,4 +26,4 @@ class VulkanCommandPool {
   VkCommandPool commandPool_;
 };
 
-} // namespace tetris::render
+} // namespace blocks::render

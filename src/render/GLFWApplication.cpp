@@ -7,7 +7,7 @@
 
 #include "render/glfw_wrapper/Window.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 namespace {
 
@@ -130,4 +130,4 @@ GLFWApplication::GLFWLifetimeScope::~GLFWLifetimeScope() {
   glfwTerminate();
 }
 
-} // namespace tetris::render
+} // namespace blocks::render

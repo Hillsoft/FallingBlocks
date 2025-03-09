@@ -2,7 +2,7 @@
 
 #include <GLFW/glfw3.h>
 
-namespace tetris::render {
+namespace blocks::render {
 
 class VulkanInstance {
  public:
@@ -21,4 +21,4 @@ class VulkanInstance {
   VkInstance instance_;
 };
 
-} // namespace tetris::render
+} // namespace blocks::render

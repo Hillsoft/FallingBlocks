@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-namespace tetris::render {
+namespace blocks::render {
 
 VulkanRenderPass::VulkanRenderPass(
     VulkanGraphicsDevice& device, VkFormat imageFormat)
@@ -70,4 +70,4 @@ VulkanRenderPass& VulkanRenderPass::operator=(
   return *this;
 }
 
-} // namespace tetris::render
+} // namespace blocks::render

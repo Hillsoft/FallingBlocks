@@ -7,7 +7,7 @@
 #include "render/VulkanRenderPass.hpp"
 #include "render/VulkanShader.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 class VulkanGraphicsPipeline {
  public:
@@ -35,4 +35,4 @@ class VulkanGraphicsPipeline {
   VkPipeline pipeline_;
 };
 
-} // namespace tetris::render
+} // namespace blocks::render

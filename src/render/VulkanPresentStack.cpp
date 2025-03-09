@@ -1,6 +1,6 @@
 #include "render/VulkanPresentStack.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 namespace {
 
@@ -30,4 +30,4 @@ VulkanPresentStack::VulkanPresentStack(
       frameBuffer_(makeFrameBuffers(
           device, renderPass, imageViews_, swapChain_.getSwapchainExtent())) {}
 
-} // namespace tetris::render
+} // namespace blocks::render

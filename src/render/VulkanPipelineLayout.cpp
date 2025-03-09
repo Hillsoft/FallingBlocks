@@ -1,6 +1,6 @@
 #include "render/VulkanPipelineLayout.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 VulkanPipelineLayout::VulkanPipelineLayout(VulkanGraphicsDevice& device)
     : device_(&device), layout_(nullptr) {
@@ -34,4 +34,4 @@ VulkanPipelineLayout& VulkanPipelineLayout::operator=(
   return *this;
 }
 
-} // namespace tetris::render
+} // namespace blocks::render

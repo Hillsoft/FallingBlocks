@@ -6,7 +6,7 @@
 #include "render/VulkanImageView.hpp"
 #include "render/VulkanRenderPass.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 class VulkanFrameBuffer {
  public:
@@ -32,4 +32,4 @@ class VulkanFrameBuffer {
   VkFramebuffer frameBuffer_;
 };
 
-} // namespace tetris::render
+} // namespace blocks::render

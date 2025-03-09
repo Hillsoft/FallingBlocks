@@ -2,7 +2,7 @@
 
 #include "util/file.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 VulkanShader::VulkanShader(
     VulkanGraphicsDevice& device, const std::filesystem::path& shaderPath)
@@ -40,4 +40,4 @@ VulkanShader& VulkanShader::operator=(VulkanShader&& other) noexcept {
   return *this;
 }
 
-} // namespace tetris::render
+} // namespace blocks::render

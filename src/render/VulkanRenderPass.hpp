@@ -4,7 +4,7 @@
 
 #include "render/VulkanGraphicsDevice.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 class VulkanRenderPass {
  public:
@@ -24,4 +24,4 @@ class VulkanRenderPass {
   VkRenderPass renderPass_;
 };
 
-} // namespace tetris::render
+} // namespace blocks::render

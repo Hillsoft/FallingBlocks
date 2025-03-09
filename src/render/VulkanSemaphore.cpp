@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-namespace tetris::render {
+namespace blocks::render {
 
 VulkanSemaphore::VulkanSemaphore(VulkanGraphicsDevice& device)
     : device_(&device), semaphore_(nullptr) {
@@ -35,4 +35,4 @@ VulkanSemaphore& VulkanSemaphore::operator=(VulkanSemaphore&& other) noexcept {
   return *this;
 }
 
-} // namespace tetris::render
+} // namespace blocks::render

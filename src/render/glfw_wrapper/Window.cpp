@@ -4,7 +4,7 @@
 
 #include "util/string.hpp"
 
-namespace tetris::render::glfw {
+namespace blocks::render::glfw {
 
 Window::Window(int width, int height, const char* title)
     : window_(glfwCreateWindow(width, height, title, nullptr, nullptr)) {
@@ -38,4 +38,4 @@ bool Window::shouldClose() const {
   return glfwWindowShouldClose(window_);
 }
 
-} // namespace tetris::render::glfw
+} // namespace blocks::render::glfw

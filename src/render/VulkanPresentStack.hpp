@@ -10,7 +10,7 @@
 #include "render/VulkanSurface.hpp"
 #include "render/VulkanSwapChain.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 class VulkanPresentStack {
  public:
@@ -37,4 +37,4 @@ class VulkanPresentStack {
   std::vector<VulkanFrameBuffer> frameBuffer_;
 };
 
-} // namespace tetris::render
+} // namespace blocks::render

@@ -8,7 +8,7 @@
 #include "render/VulkanInstance.hpp"
 #include "render/VulkanSurface.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 class VulkanGraphicsDevice {
  public:
@@ -67,4 +67,4 @@ class VulkanGraphicsDevice {
   std::unique_ptr<PhysicalDeviceInfo> physicalInfo_;
 };
 
-} // namespace tetris::render
+} // namespace blocks::render

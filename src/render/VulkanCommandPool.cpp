@@ -4,7 +4,7 @@
 
 #include "util/debug.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 VulkanCommandPool::VulkanCommandPool(VulkanGraphicsDevice& device)
     : device_(&device),
@@ -48,4 +48,4 @@ VulkanCommandPool& VulkanCommandPool::operator=(
   return *this;
 }
 
-} // namespace tetris::render
+} // namespace blocks::render

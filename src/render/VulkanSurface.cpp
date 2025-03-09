@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace tetris::render {
+namespace blocks::render {
 
 VulkanSurface::VulkanSurface(VulkanInstance& instance, glfw::Window window)
     : instance_(&instance), window_(std::move(window)), surface_(nullptr) {
@@ -35,4 +35,4 @@ VulkanSurface& VulkanSurface::operator=(VulkanSurface&& other) noexcept {
   return *this;
 }
 
-} // namespace tetris::render
+} // namespace blocks::render

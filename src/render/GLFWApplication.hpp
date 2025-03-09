@@ -12,7 +12,7 @@
 #include "render/VulkanShader.hpp"
 #include "render/VulkanSurface.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 class GLFWApplication {
  public:
@@ -59,4 +59,4 @@ class GLFWApplication {
   uint32_t currentFrame = 0;
 };
 
-} // namespace tetris::render
+} // namespace blocks::render

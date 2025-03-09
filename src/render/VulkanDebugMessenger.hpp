@@ -4,7 +4,7 @@
 
 #include "render/VulkanInstance.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 class VulkanDebugMessenger {
  public:
@@ -22,4 +22,4 @@ class VulkanDebugMessenger {
   VkDebugUtilsMessengerEXT debugMessenger_;
 };
 
-} // namespace tetris::render
+} // namespace blocks::render

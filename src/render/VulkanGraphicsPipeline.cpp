@@ -2,7 +2,7 @@
 
 #include <array>
 
-namespace tetris::render {
+namespace blocks::render {
 
 VulkanGraphicsPipeline::VulkanGraphicsPipeline(
     VulkanGraphicsDevice& device,
@@ -147,4 +147,4 @@ VulkanGraphicsPipeline& VulkanGraphicsPipeline::operator=(
   return *this;
 }
 
-} // namespace tetris::render
+} // namespace blocks::render

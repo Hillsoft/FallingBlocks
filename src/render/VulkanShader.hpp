@@ -5,7 +5,7 @@
 
 #include "render/VulkanGraphicsDevice.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 class VulkanShader {
  public:
@@ -26,4 +26,4 @@ class VulkanShader {
   VkShaderModule shaderModule_;
 };
 
-} // namespace tetris::render
+} // namespace blocks::render

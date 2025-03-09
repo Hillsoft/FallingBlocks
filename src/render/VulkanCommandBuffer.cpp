@@ -5,7 +5,7 @@
 
 #include "util/debug.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 VulkanCommandBuffer::VulkanCommandBuffer(
     VulkanGraphicsDevice& device, VulkanCommandPool& commandPool)
@@ -69,4 +69,4 @@ void VulkanCommandBuffer::submit(
   }
 }
 
-} // namespace tetris::render
+} // namespace blocks::render

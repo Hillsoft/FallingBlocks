@@ -4,7 +4,7 @@
 
 #include "util/debug.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 namespace {
 
@@ -91,4 +91,4 @@ VulkanDebugMessenger& VulkanDebugMessenger::operator=(
   return *this;
 }
 
-} // namespace tetris::render
+} // namespace blocks::render

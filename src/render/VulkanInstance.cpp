@@ -7,7 +7,7 @@
 
 #include "render/validationLayers.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 namespace {
 
@@ -133,4 +133,4 @@ VulkanInstance::~VulkanInstance() {
   vkDestroyInstance(instance_, nullptr);
 }
 
-} // namespace tetris::render
+} // namespace blocks::render

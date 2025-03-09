@@ -4,7 +4,7 @@
 
 #include "render/VulkanGraphicsDevice.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 class VulkanPipelineLayout {
  public:
@@ -24,4 +24,4 @@ class VulkanPipelineLayout {
   VkPipelineLayout layout_;
 };
 
-} // namespace tetris::render
+} // namespace blocks::render

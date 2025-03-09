@@ -9,7 +9,7 @@
 #include "render/glfw_wrapper/Window.hpp"
 #include "util/debug.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 namespace {
 
@@ -196,4 +196,4 @@ void VulkanSwapChain::present(
   vkQueuePresentKHR(queue_, &presentInfo);
 }
 
-} // namespace tetris::render
+} // namespace blocks::render

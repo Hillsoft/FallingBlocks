@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-namespace tetris::render {
+namespace blocks::render {
 
 VulkanFrameBuffer::VulkanFrameBuffer(
     VulkanGraphicsDevice& device,
@@ -48,4 +48,4 @@ VulkanFrameBuffer& VulkanFrameBuffer::operator=(
   return *this;
 }
 
-} // namespace tetris::render
+} // namespace blocks::render

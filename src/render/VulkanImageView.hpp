@@ -4,7 +4,7 @@
 
 #include "render/VulkanGraphicsDevice.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 class VulkanImageView {
  public:
@@ -25,4 +25,4 @@ class VulkanImageView {
   VkImageView imageView_;
 };
 
-} // namespace tetris::render
+} // namespace blocks::render

@@ -10,7 +10,7 @@
 #include "render/validationLayers.hpp"
 #include "util/debug.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 namespace {
 
@@ -351,4 +351,4 @@ VulkanGraphicsDevice VulkanGraphicsDevice::make(
   return {device, graphicsQueue, presentQueue, std::move(physicalDevice)};
 }
 
-} // namespace tetris::render
+} // namespace blocks::render

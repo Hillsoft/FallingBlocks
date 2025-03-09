@@ -1,4 +1,4 @@
-# CMakeList.txt : CMake project for Tetris, include source and define
+# CMakeList.txt : CMake project for FallingBlocks, include source and define
 # project specific logic here.
 #
 cmake_minimum_required (VERSION 3.9)
@@ -21,7 +21,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_definitions(-DGLFW_INCLUDE_VULKAN)
 
-project ("Tetris" CXX)
+project ("FallingBlocks" CXX)
 
 find_package(glfw3 CONFIG REQUIRED)
 find_package(Vulkan REQUIRED)

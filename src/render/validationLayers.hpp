@@ -2,7 +2,7 @@
 
 #include <array>
 
-namespace tetris::render {
+namespace blocks::render {
 
 constexpr std::array<const char*, 1> kValidationLayers{
     "VK_LAYER_KHRONOS_validation"};
@@ -13,4 +13,4 @@ constexpr bool kEnableValidationLayers = false;
 constexpr bool kEnableValidationLayers = true;
 #endif
 
-} // namespace tetris::render
+} // namespace blocks::render

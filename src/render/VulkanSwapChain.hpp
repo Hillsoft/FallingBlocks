@@ -8,7 +8,7 @@
 #include "render/VulkanSemaphore.hpp"
 #include "render/VulkanSurface.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 class VulkanSwapChain {
  public:
@@ -37,4 +37,4 @@ class VulkanSwapChain {
   std::vector<VkImage> swapChainImages_;
 };
 
-} // namespace tetris::render
+} // namespace blocks::render

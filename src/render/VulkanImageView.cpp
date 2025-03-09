@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-namespace tetris::render {
+namespace blocks::render {
 
 VulkanImageView::VulkanImageView(
     VulkanGraphicsDevice& device, VkImage image, VkFormat imageFormat)
@@ -48,4 +48,4 @@ VulkanImageView& VulkanImageView::operator=(VulkanImageView&& other) noexcept {
   return *this;
 }
 
-} // namespace tetris::render
+} // namespace blocks::render

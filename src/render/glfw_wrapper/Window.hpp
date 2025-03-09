@@ -2,7 +2,7 @@
 
 #include <GLFW/glfw3.h>
 
-namespace tetris::render::glfw {
+namespace blocks::render::glfw {
 
 class Window {
  public:
@@ -23,4 +23,4 @@ class Window {
   GLFWwindow* window_;
 };
 
-} // namespace tetris::render::glfw
+} // namespace blocks::render::glfw

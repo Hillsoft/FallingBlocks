@@ -3,7 +3,7 @@
 #include "render/VulkanInstance.hpp"
 #include "render/glfw_wrapper/Window.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 class VulkanSurface {
  public:
@@ -27,4 +27,4 @@ class VulkanSurface {
   VkSurfaceKHR surface_;
 };
 
-} // namespace tetris::render
+} // namespace blocks::render

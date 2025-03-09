@@ -4,7 +4,7 @@
 
 #include "render/VulkanGraphicsDevice.hpp"
 
-namespace tetris::render {
+namespace blocks::render {
 
 class VulkanSemaphore {
  public:
@@ -24,4 +24,4 @@ class VulkanSemaphore {
   VkSemaphore semaphore_;
 };
 
-} // namespace tetris::render
+} // namespace blocks::render
