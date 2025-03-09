@@ -36,6 +36,10 @@ class GLFWApplication {
  private:
   void drawFrame();
 
+  void onWindowResize();
+
+  void resetSwapChain();
+
   struct GLFWLifetimeScope {
     GLFWLifetimeScope();
     ~GLFWLifetimeScope();
@@ -56,7 +60,8 @@ class GLFWApplication {
   std::vector<VulkanCommandBuffer> commandBuffers_;
   std::vector<PipelineSynchronisationSet> synchronisationSets_;
 
-  uint32_t currentFrame = 0;
+  bool shouldResetSwapChain_ = 0;
+  uint32_t currentFrame_ = 0;
 };
 
 } // namespace blocks::render

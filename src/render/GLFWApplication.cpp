@@ -13,10 +13,13 @@ namespace {
 
 constexpr int kMaxFramesInFlight = 2;
 
-glfw::Window makeWindow() {
+glfw::Window makeWindow(std::function<void(int, int)> resizeHandler) {
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-  return glfw::Window{800, 600, "Vulkan"};
+  glfw::Window window{800, 600, "Vulkan"};
+  window.setResizeHandler(std::move(resizeHandler));
+
+  return window;
 }
 
 std::vector<VulkanCommandBuffer> makeCommandBuffers(
@@ -50,7 +53,9 @@ GLFWApplication::GLFWApplication()
 #ifndef NDEBUG
       debugMessenger_(vulkan_),
 #endif
-      surface_(vulkan_, makeWindow()),
+      surface_(vulkan_, makeWindow([&](int /* width */, int /* height */) {
+                 onWindowResize();
+               })),
       graphics_(VulkanGraphicsDevice::make(vulkan_, surface_)),
       vertexShader_(graphics_, std::filesystem::path{"shaders"} / "vertex.spv"),
       fragmentShader_(graphics_, "shaders/fragment.spv"),
@@ -95,32 +100,54 @@ void GLFWApplication::run() {
 }
 
 void GLFWApplication::drawFrame() {
-  synchronisationSets_[currentFrame].inFlightFence.wait();
+  synchronisationSets_[currentFrame_].inFlightFence.wait();
 
-  VulkanPresentStack::FrameData presentFrame = presentStack_.getNextImageIndex(
-      &synchronisationSets_[currentFrame].imageAvailableSemaphore, nullptr);
-
-  if (presentFrame.refreshRequired()) {
-    presentStack_.reset();
+  if (shouldResetSwapChain_) {
+    resetSwapChain();
+    shouldResetSwapChain_ = false;
     return;
   }
 
-  synchronisationSets_[currentFrame].inFlightFence.reset();
+  VulkanPresentStack::FrameData presentFrame = presentStack_.getNextImageIndex(
+      &synchronisationSets_[currentFrame_].imageAvailableSemaphore, nullptr);
 
-  commandBuffers_[currentFrame].runRenderPass(
+  if (presentFrame.refreshRequired()) {
+    resetSwapChain();
+    return;
+  }
+
+  synchronisationSets_[currentFrame_].inFlightFence.reset();
+
+  commandBuffers_[currentFrame_].runRenderPass(
       pipeline_, presentFrame.getFrameBuffer(), [](VkCommandBuffer buffer) {
         vkCmdDraw(buffer, 3, 1, 0, 0);
       });
 
-  commandBuffers_[currentFrame].submit(
-      {&synchronisationSets_[currentFrame].imageAvailableSemaphore},
-      {&synchronisationSets_[currentFrame].renderFinishedSemaphore},
-      &synchronisationSets_[currentFrame].inFlightFence);
+  commandBuffers_[currentFrame_].submit(
+      {&synchronisationSets_[currentFrame_].imageAvailableSemaphore},
+      {&synchronisationSets_[currentFrame_].renderFinishedSemaphore},
+      &synchronisationSets_[currentFrame_].inFlightFence);
 
   presentFrame.present(
-      &synchronisationSets_[currentFrame].renderFinishedSemaphore);
+      &synchronisationSets_[currentFrame_].renderFinishedSemaphore);
 
-  currentFrame = (currentFrame + 1) % kMaxFramesInFlight;
+  currentFrame_ = (currentFrame_ + 1) % kMaxFramesInFlight;
+}
+
+void GLFWApplication::onWindowResize() {
+  shouldResetSwapChain_ = true;
+}
+
+void GLFWApplication::resetSwapChain() {
+  std::pair<int, int> windowSize = surface_.window().getCurrentWindowSize();
+  while ((windowSize.first == 0 || windowSize.second == 0) &&
+         !surface_.window().shouldClose()) {
+    glfwWaitEvents();
+    windowSize = surface_.window().getCurrentWindowSize();
+  }
+  if (!(windowSize.first == 0 || windowSize.second == 0)) {
+    presentStack_.reset();
+  }
 }
 
 GLFWApplication::GLFWLifetimeScope::GLFWLifetimeScope() {
