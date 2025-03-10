@@ -3,23 +3,16 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanInstance.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 
 namespace blocks::render {
 
 class VulkanDebugMessenger {
  public:
   VulkanDebugMessenger(VulkanInstance& instance);
-  ~VulkanDebugMessenger();
-
-  VulkanDebugMessenger(const VulkanDebugMessenger& other) = delete;
-  VulkanDebugMessenger& operator=(const VulkanDebugMessenger& other) = delete;
-
-  VulkanDebugMessenger(VulkanDebugMessenger&& other) noexcept;
-  VulkanDebugMessenger& operator=(VulkanDebugMessenger&& other) noexcept;
 
  private:
-  VulkanInstance* instance_;
-  VkDebugUtilsMessengerEXT debugMessenger_;
+  VulkanUniqueHandle<VkDebugUtilsMessengerEXT> debugMessenger_;
 };
 
 } // namespace blocks::render

@@ -27,7 +27,7 @@ uint32_t findMemoryType(
 
 VulkanDeviceMemory::VulkanDeviceMemory(
     VulkanGraphicsDevice& device, VulkanRawBuffer& rawBuffer)
-    : device_(&device), memory_(nullptr) {
+    : memory_(nullptr, nullptr) {
   VkMemoryRequirements memRequirements{};
   vkGetBufferMemoryRequirements(
       device.getRawDevice(), rawBuffer.getRawBuffer(), &memRequirements);
@@ -45,31 +45,14 @@ VulkanDeviceMemory::VulkanDeviceMemory(
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
+  VkDeviceMemory memory;
   VkResult result =
-      vkAllocateMemory(device.getRawDevice(), &allocInfo, nullptr, &memory_);
+      vkAllocateMemory(device.getRawDevice(), &allocInfo, nullptr, &memory);
   if (result != VK_SUCCESS) {
     throw std::runtime_error{"Failed to allocate memory"};
   }
-}
 
-VulkanDeviceMemory::~VulkanDeviceMemory() {
-  if (memory_ != nullptr) {
-    vkFreeMemory(device_->getRawDevice(), memory_, nullptr);
-  }
-}
-
-VulkanDeviceMemory::VulkanDeviceMemory(VulkanDeviceMemory&& other) noexcept
-    : device_(other.device_), memory_(other.memory_) {
-  other.device_ = nullptr;
-  other.memory_ = nullptr;
-}
-
-VulkanDeviceMemory& VulkanDeviceMemory::operator=(
-    VulkanDeviceMemory&& other) noexcept {
-  std::swap(device_, other.device_);
-  std::swap(memory_, other.memory_);
-
-  return *this;
+  memory_ = VulkanUniqueHandle<VkDeviceMemory>{memory, device.getRawDevice()};
 }
 
 } // namespace blocks::render

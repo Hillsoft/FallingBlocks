@@ -6,6 +6,7 @@
 #include "render/VulkanPipelineLayout.hpp"
 #include "render/VulkanRenderPass.hpp"
 #include "render/VulkanShader.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -16,23 +17,14 @@ class VulkanGraphicsPipeline {
       VkFormat imageFormat,
       VulkanVertexShader& vertexShader,
       VulkanShader& fragmentShader);
-  ~VulkanGraphicsPipeline();
 
-  VulkanGraphicsPipeline(const VulkanGraphicsPipeline& other) = delete;
-  VulkanGraphicsPipeline& operator=(const VulkanGraphicsPipeline& other) =
-      delete;
-
-  VulkanGraphicsPipeline(VulkanGraphicsPipeline&& other) noexcept;
-  VulkanGraphicsPipeline& operator=(VulkanGraphicsPipeline&& other) noexcept;
-
-  VkPipeline getRawPipeline() { return pipeline_; }
+  VkPipeline getRawPipeline() { return pipeline_.get(); }
   VulkanRenderPass& getRenderPass() { return renderPass_; }
 
  private:
-  VulkanGraphicsDevice* device_;
   VulkanPipelineLayout pipelineLayout_;
   VulkanRenderPass renderPass_;
-  VkPipeline pipeline_;
+  VulkanUniqueHandle<VkPipeline> pipeline_;
 };
 
 } // namespace blocks::render

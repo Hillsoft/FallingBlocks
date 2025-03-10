@@ -46,33 +46,39 @@ target_link_libraries(render.vulkancommandbuffer
 add_library(render.vulkancommandpool STATIC "VulkanCommandPool.cpp" "VulkanCommandPool.hpp")
 target_link_libraries(render.vulkancommandpool
 	render.vulkangraphicsdevice
+	render.vulkanuniquehandle
 	util.debug)
 
 add_library(render.vulkandebugmessenger STATIC "VulkanDebugMessenger.cpp" "VulkanDebugMessenger.hpp")
 target_link_libraries(render.vulkandebugmessenger
 	render.vulkaninstance
+	render.vulkanuniquehandle
 	util.debug)
 
 add_library(render.vulkandevicememory STATIC "VulkanDeviceMemory.cpp" "VulkanDeviceMemory.hpp")
 target_link_libraries(render.vulkandevicememory
 	render.vulkangraphicsdevice
-	render.vulkanrawbuffer)
+	render.vulkanrawbuffer
+	render.vulkanuniquehandle)
 
 add_library(render.vulkanfence STATIC "VulkanFence.cpp" "VulkanFence.hpp")
 target_link_libraries(render.vulkanfence
-	render.vulkangraphicsdevice)
+	render.vulkangraphicsdevice
+	render.vulkanuniquehandle)
 
 add_library(render.vulkanframebuffer STATIC "VulkanFrameBuffer.cpp" "VulkanFrameBuffer.hpp")
 target_link_libraries(render.vulkanframebuffer
 	render.vulkangraphicsdevice
 	render.vulkanimageview
-	render.vulkanrenderpass)
+	render.vulkanrenderpass
+	render.vulkanuniquehandle)
 
 add_library(render.vulkangraphicsdevice STATIC "VulkanGraphicsDevice.cpp" "VulkanGraphicsDevice.hpp")
 target_link_libraries(render.vulkangraphicsdevice
+	render.validationlayers
 	render.vulkaninstance
 	render.vulkansurface
-	render.validationlayers
+	render.vulkanuniquehandle
 	util.debug)
 
 add_library(render.vulkangraphicspipeline STATIC "VulkanGraphicsPipeline.cpp" "VulkanGraphicsPipeline.hpp")
@@ -80,19 +86,23 @@ target_link_libraries(render.vulkangraphicspipeline
 	render.vulkangraphicsdevice
 	render.vulkanpipelinelayout
 	render.vulkanrenderpass
-	render.vulkanshader)
+	render.vulkanshader
+	render.vulkanuniquehandle)
 
 add_library(render.vulkanimageview STATIC "VulkanImageView.cpp" "VulkanImageView.hpp")
 target_link_libraries(render.vulkanimageview
-	render.vulkangraphicsdevice)
+	render.vulkangraphicsdevice
+	render.vulkanuniquehandle)
 
 add_library(render.vulkaninstance STATIC "VulkanInstance.cpp" "VulkanInstance.hpp")
 target_link_libraries(render.vulkaninstance INTERFACE
-	render.validationlayers)
+	render.validationlayers
+	render.vulkanuniquehandle)
 
 add_library(render.vulkanpipelinelayout STATIC "VulkanPipelineLayout.cpp" "VulkanPipelineLayout.hpp")
 target_link_libraries(render.vulkanpipelinelayout
-	render.vulkangraphicsdevice)
+	render.vulkangraphicsdevice
+	render.vulkanuniquehandle)
 
 add_library(render.vulkanpresentstack STATIC "VulkanPresentStack.cpp" "VulkanPresentStack.hpp")
 target_link_libraries(render.vulkanpresentstack
@@ -107,25 +117,30 @@ target_link_libraries(render.vulkanpresentstack
 
 add_library(render.vulkanrawbuffer STATIC "VulkanRawBuffer.cpp" "VulkanRawBuffer.hpp")
 target_link_libraries(render.vulkanrawbuffer
-	render.vulkangraphicsdevice)
+	render.vulkangraphicsdevice
+	render.vulkanuniquehandle)
 
 add_library(render.vulkanrenderpass STATIC "VulkanRenderPass.cpp" "VulkanRenderPass.hpp")
 target_link_libraries(render.vulkanrenderpass
-	render.vulkangraphicsdevice)
+	render.vulkangraphicsdevice
+	render.vulkanuniquehandle)
 
 add_library(render.vulkansemaphore STATIC "VulkanSemaphore.cpp" "VulkanSemaphore.hpp")
 target_link_libraries(render.vulkansemaphore
-	render.vulkangraphicsdevice)
+	render.vulkangraphicsdevice
+	render.vulkanuniquehandle)
 
 add_library(render.vulkanshader STATIC "VulkanShader.cpp" "VulkanShader.hpp")
 target_link_libraries(render.vulkanshader
 	render.vulkangraphicsdevice
+	render.vulkanuniquehandle
 	util.file)
 
 add_library(render.vulkansurface STATIC "VulkanSurface.cpp" "VulkanSurface.hpp")
 target_link_libraries(render.vulkansurface
 	render.glfw_wrapper.window
-	render.vulkaninstance)
+	render.vulkaninstance
+	render.vulkanuniquehandle)
 
 add_library(render.vulkanswapchain STATIC "VulkanSwapChain.cpp" "VulkanSwapChain.hpp")
 target_link_libraries(render.vulkanswapchain
@@ -135,4 +150,9 @@ target_link_libraries(render.vulkanswapchain
 	render.vulkanimageview
 	render.vulkansemaphore
 	render.vulkansurface
+	render.vulkanuniquehandle
+	util.debug)
+
+add_library(render.vulkanuniquehandle "VulkanUniqueHandle.hpp" "VulkanUniqueHandleDeleters.hpp" "VulkanUniqueHandleDeleters.cpp")
+target_link_libraries(render.vulkanuniquehandle
 	util.debug)

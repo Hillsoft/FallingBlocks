@@ -6,7 +6,7 @@ namespace blocks::render {
 
 VulkanRenderPass::VulkanRenderPass(
     VulkanGraphicsDevice& device, VkFormat imageFormat)
-    : device_(&device), renderPass_(nullptr) {
+    : renderPass_(nullptr, nullptr) {
   VkAttachmentDescription colorAttachment{};
   colorAttachment.format = imageFormat;
   colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -43,31 +43,15 @@ VulkanRenderPass::VulkanRenderPass(
   renderPassInfo.dependencyCount = 1;
   renderPassInfo.pDependencies = &dependency;
 
+  VkRenderPass renderPass;
   VkResult result = vkCreateRenderPass(
-      device.getRawDevice(), &renderPassInfo, nullptr, &renderPass_);
+      device.getRawDevice(), &renderPassInfo, nullptr, &renderPass);
   if (result != VK_SUCCESS) {
     throw std::runtime_error{"Failed to create render pass"};
   }
-}
 
-VulkanRenderPass::~VulkanRenderPass() {
-  if (renderPass_ != nullptr) {
-    vkDestroyRenderPass(device_->getRawDevice(), renderPass_, nullptr);
-  }
-}
-
-VulkanRenderPass::VulkanRenderPass(VulkanRenderPass&& other) noexcept
-    : device_(other.device_), renderPass_(other.renderPass_) {
-  other.device_ = nullptr;
-  other.renderPass_ = nullptr;
-}
-
-VulkanRenderPass& VulkanRenderPass::operator=(
-    VulkanRenderPass&& other) noexcept {
-  std::swap(device_, other.device_);
-  std::swap(renderPass_, other.renderPass_);
-
-  return *this;
+  renderPass_ =
+      VulkanUniqueHandle<VkRenderPass>{renderPass, device.getRawDevice()};
 }
 
 } // namespace blocks::render

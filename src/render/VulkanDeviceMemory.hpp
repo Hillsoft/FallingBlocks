@@ -4,25 +4,18 @@
 
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanRawBuffer.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 
 namespace blocks::render {
 
 class VulkanDeviceMemory {
  public:
   VulkanDeviceMemory(VulkanGraphicsDevice& device, VulkanRawBuffer& rawBuffer);
-  ~VulkanDeviceMemory();
 
-  VulkanDeviceMemory(const VulkanDeviceMemory& other) = delete;
-  VulkanDeviceMemory& operator=(const VulkanDeviceMemory& other) = delete;
-
-  VulkanDeviceMemory(VulkanDeviceMemory&& other) noexcept;
-  VulkanDeviceMemory& operator=(VulkanDeviceMemory&& other) noexcept;
-
-  VkDeviceMemory getRawMemory() { return memory_; }
+  VkDeviceMemory getRawMemory() { return memory_.get(); }
 
  private:
-  VulkanGraphicsDevice* device_;
-  VkDeviceMemory memory_;
+  VulkanUniqueHandle<VkDeviceMemory> memory_;
 };
 
 } // namespace blocks::render

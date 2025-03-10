@@ -4,25 +4,18 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 
 namespace blocks::render {
 
 class VulkanRawBuffer {
  public:
   VulkanRawBuffer(VulkanGraphicsDevice& device, std::span<char> data);
-  ~VulkanRawBuffer();
 
-  VulkanRawBuffer(const VulkanRawBuffer& other) = delete;
-  VulkanRawBuffer& operator=(const VulkanRawBuffer& other) = delete;
-
-  VulkanRawBuffer(VulkanRawBuffer&& other) noexcept;
-  VulkanRawBuffer& operator=(VulkanRawBuffer&& other) noexcept;
-
-  VkBuffer getRawBuffer() { return buffer_; }
+  VkBuffer getRawBuffer() { return buffer_.get(); }
 
  private:
-  VulkanGraphicsDevice* device_;
-  VkBuffer buffer_;
+  VulkanUniqueHandle<VkBuffer> buffer_;
 };
 
 } // namespace blocks::render

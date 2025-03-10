@@ -7,19 +7,13 @@
 #include "render/VulkanImageView.hpp"
 #include "render/VulkanSemaphore.hpp"
 #include "render/VulkanSurface.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 
 namespace blocks::render {
 
 class VulkanSwapChain {
  public:
   VulkanSwapChain(VulkanSurface& surface, VulkanGraphicsDevice& graphicsDevice);
-  ~VulkanSwapChain();
-
-  VulkanSwapChain(const VulkanSwapChain& other) = delete;
-  VulkanSwapChain& operator=(const VulkanSwapChain& other) = delete;
-
-  VulkanSwapChain(VulkanSwapChain&& other) noexcept;
-  VulkanSwapChain& operator=(VulkanSwapChain&& other) noexcept;
 
   std::vector<VulkanImageView> getImageViews() const;
 
@@ -33,7 +27,7 @@ class VulkanSwapChain {
 
  private:
   VulkanGraphicsDevice* graphicsDevice_;
-  VkSwapchainKHR swapChain_;
+  VulkanUniqueHandle<VkSwapchainKHR> swapChain_;
   VkExtent2D extent_;
   VkQueue queue_;
   std::vector<VkImage> swapChainImages_;

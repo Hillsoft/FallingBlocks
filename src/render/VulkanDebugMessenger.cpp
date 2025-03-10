@@ -34,23 +34,10 @@ VkResult createDebugUtilsMessengerEXT(
   }
 }
 
-void destroyDebugUtilsMessengerEXT(
-    VkInstance instance,
-    VkDebugUtilsMessengerEXT debugMessenger,
-    const VkAllocationCallbacks* pAllocator) {
-  static auto func = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(
-      vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT"));
-  if (func != nullptr) {
-    func(instance, debugMessenger, pAllocator);
-  } else {
-    DEBUG_ASSERT(false);
-  }
-}
-
 } // namespace
 
 VulkanDebugMessenger::VulkanDebugMessenger(VulkanInstance& instance)
-    : instance_(&instance), debugMessenger_(nullptr) {
+    : debugMessenger_(nullptr, nullptr) {
   VkDebugUtilsMessengerCreateInfoEXT createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
   createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
@@ -62,33 +49,15 @@ VulkanDebugMessenger::VulkanDebugMessenger(VulkanInstance& instance)
   createInfo.pfnUserCallback = debugCallback;
   createInfo.pUserData = nullptr;
 
+  VkDebugUtilsMessengerEXT debugMessenger;
   VkResult result = createDebugUtilsMessengerEXT(
-      instance.getRawInstance(), &createInfo, nullptr, &debugMessenger_);
+      instance.getRawInstance(), &createInfo, nullptr, &debugMessenger);
   if (result != VK_SUCCESS) {
     throw std::runtime_error{"Failed to set up debug messenger"};
   }
-}
 
-VulkanDebugMessenger::~VulkanDebugMessenger() {
-  if (debugMessenger_ != nullptr) {
-    destroyDebugUtilsMessengerEXT(
-        instance_->getRawInstance(), debugMessenger_, nullptr);
-  }
-}
-
-VulkanDebugMessenger::VulkanDebugMessenger(
-    VulkanDebugMessenger&& other) noexcept
-    : instance_(other.instance_), debugMessenger_(other.debugMessenger_) {
-  other.instance_ = nullptr;
-  other.debugMessenger_ = nullptr;
-}
-
-VulkanDebugMessenger& VulkanDebugMessenger::operator=(
-    VulkanDebugMessenger&& other) noexcept {
-  std::swap(instance_, other.instance_);
-  std::swap(debugMessenger_, other.debugMessenger_);
-
-  return *this;
+  debugMessenger_ = VulkanUniqueHandle<VkDebugUtilsMessengerEXT>{
+      debugMessenger, instance.getRawInstance()};
 }
 
 } // namespace blocks::render

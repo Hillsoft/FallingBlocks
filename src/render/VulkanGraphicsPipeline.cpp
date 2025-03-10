@@ -9,10 +9,9 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(
     VkFormat imageFormat,
     VulkanVertexShader& vertexShader,
     VulkanShader& fragmentShader)
-    : device_(&device),
-      pipelineLayout_(device),
+    : pipelineLayout_(device),
       renderPass_(device, imageFormat),
-      pipeline_(nullptr) {
+      pipeline_(nullptr, nullptr) {
   std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{
       VkPipelineShaderStageCreateInfo{}, VkPipelineShaderStageCreateInfo{}};
   shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -114,42 +113,19 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(
   pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
   pipelineInfo.basePipelineIndex = 1;
 
+  VkPipeline pipeline;
   VkResult result = vkCreateGraphicsPipelines(
       device.getRawDevice(),
       VK_NULL_HANDLE,
       1,
       &pipelineInfo,
       nullptr,
-      &pipeline_);
+      &pipeline);
   if (result != VK_SUCCESS) {
     throw std::runtime_error{"Failed to create graphics pipeline"};
   }
-}
 
-VulkanGraphicsPipeline::~VulkanGraphicsPipeline() {
-  if (pipeline_ != nullptr) {
-    vkDestroyPipeline(device_->getRawDevice(), pipeline_, nullptr);
-  }
-}
-
-VulkanGraphicsPipeline::VulkanGraphicsPipeline(
-    VulkanGraphicsPipeline&& other) noexcept
-    : device_(other.device_),
-      pipelineLayout_(std::move(other.pipelineLayout_)),
-      renderPass_(std::move(other.renderPass_)),
-      pipeline_(other.pipeline_) {
-  other.device_ = nullptr;
-  other.pipeline_ = nullptr;
-}
-
-VulkanGraphicsPipeline& VulkanGraphicsPipeline::operator=(
-    VulkanGraphicsPipeline&& other) noexcept {
-  std::swap(device_, other.device_);
-  std::swap(pipelineLayout_, other.pipelineLayout_);
-  std::swap(renderPass_, other.renderPass_);
-  std::swap(pipeline_, other.pipeline_);
-
-  return *this;
+  pipeline_ = VulkanUniqueHandle<VkPipeline>{pipeline, device.getRawDevice()};
 }
 
 } // namespace blocks::render

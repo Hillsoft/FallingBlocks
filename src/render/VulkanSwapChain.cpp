@@ -56,6 +56,7 @@ VkExtent2D chooseSwapExtent(
 VulkanSwapChain::VulkanSwapChain(
     VulkanSurface& surface, VulkanGraphicsDevice& graphicsDevice)
     : graphicsDevice_(&graphicsDevice),
+      swapChain_(nullptr, nullptr),
       queue_(graphicsDevice.getPresentQueue()) {
   VulkanGraphicsDevice::PhysicalDeviceInfo physicalInfo{
       graphicsDevice.physicalInfo().device, surface};
@@ -114,7 +115,8 @@ VulkanSwapChain::VulkanSwapChain(
     throw std::runtime_error{"Failed to create swap chain!"};
   }
 
-  swapChain_ = swapChain;
+  swapChain_ = VulkanUniqueHandle<VkSwapchainKHR>{
+      swapChain, graphicsDevice.getRawDevice()};
   extent_ = extent;
 
   vkGetSwapchainImagesKHR(
@@ -125,31 +127,6 @@ VulkanSwapChain::VulkanSwapChain(
       swapChain,
       &imageCount,
       swapChainImages_.data());
-}
-
-VulkanSwapChain::VulkanSwapChain(VulkanSwapChain&& other) noexcept
-    : graphicsDevice_(other.graphicsDevice_),
-      swapChain_(other.swapChain_),
-      extent_(other.extent_),
-      queue_(other.queue_),
-      swapChainImages_(std::move(other.swapChainImages_)) {
-  other.swapChain_ = nullptr;
-}
-
-VulkanSwapChain& VulkanSwapChain::operator=(VulkanSwapChain&& other) noexcept {
-  std::swap(graphicsDevice_, other.graphicsDevice_);
-  std::swap(swapChain_, other.swapChain_);
-  std::swap(extent_, other.extent_);
-  std::swap(queue_, other.queue_);
-  std::swap(swapChainImages_, other.swapChainImages_);
-
-  return *this;
-}
-
-VulkanSwapChain::~VulkanSwapChain() {
-  if (swapChain_ != nullptr) {
-    vkDestroySwapchainKHR(graphicsDevice_->getRawDevice(), swapChain_, nullptr);
-  }
 }
 
 std::vector<VulkanImageView> VulkanSwapChain::getImageViews() const {
@@ -172,7 +149,7 @@ std::optional<uint32_t> VulkanSwapChain::getNextImageIndex(
   uint32_t imageIndex;
   VkResult result = vkAcquireNextImageKHR(
       graphicsDevice_->getRawDevice(),
-      swapChain_,
+      swapChain_.get(),
       UINT64_MAX,
       semaphore != nullptr ? semaphore->getRawSemaphore() : nullptr,
       fence != nullptr ? fence->getRawFence() : nullptr,
@@ -189,6 +166,7 @@ std::optional<uint32_t> VulkanSwapChain::getNextImageIndex(
 
 void VulkanSwapChain::present(
     uint32_t imageIndex, VulkanSemaphore* waitSemaphore) {
+  VkSwapchainKHR swapChain = swapChain_.get();
   VkPresentInfoKHR presentInfo{};
   presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
   VkSemaphore rawWaitSemaphore;
@@ -198,7 +176,7 @@ void VulkanSwapChain::present(
     presentInfo.pWaitSemaphores = &rawWaitSemaphore;
   }
   presentInfo.swapchainCount = 1;
-  presentInfo.pSwapchains = &swapChain_;
+  presentInfo.pSwapchains = &swapChain;
   presentInfo.pImageIndices = &imageIndex;
   presentInfo.pResults = nullptr;
 

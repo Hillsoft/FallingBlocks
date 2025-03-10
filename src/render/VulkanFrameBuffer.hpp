@@ -5,6 +5,7 @@
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
 #include "render/VulkanRenderPass.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -15,21 +16,13 @@ class VulkanFrameBuffer {
       VulkanRenderPass& renderPass,
       VulkanImageView& imageView,
       VkExtent2D extent);
-  ~VulkanFrameBuffer();
 
-  VulkanFrameBuffer(const VulkanFrameBuffer& other) = delete;
-  VulkanFrameBuffer& operator=(const VulkanFrameBuffer& other) = delete;
-
-  VulkanFrameBuffer(VulkanFrameBuffer&& other) noexcept;
-  VulkanFrameBuffer& operator=(VulkanFrameBuffer&& other) noexcept;
-
-  VkFramebuffer getRawFrameBuffer() { return frameBuffer_; }
+  VkFramebuffer getRawFrameBuffer() { return frameBuffer_.get(); }
   VkExtent2D getExtent() const { return extent_; }
 
  private:
-  VulkanGraphicsDevice* device_;
   VkExtent2D extent_;
-  VkFramebuffer frameBuffer_;
+  VulkanUniqueHandle<VkFramebuffer> frameBuffer_;
 };
 
 } // namespace blocks::render

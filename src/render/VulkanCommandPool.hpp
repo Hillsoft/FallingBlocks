@@ -3,27 +3,20 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 
 namespace blocks::render {
 
 class VulkanCommandPool {
  public:
   VulkanCommandPool(VulkanGraphicsDevice& device);
-  ~VulkanCommandPool();
 
-  VulkanCommandPool(const VulkanCommandPool& other) = delete;
-  VulkanCommandPool& operator=(const VulkanCommandPool& other) = delete;
-
-  VulkanCommandPool(VulkanCommandPool&& other) noexcept;
-  VulkanCommandPool& operator=(VulkanCommandPool&& other) noexcept;
-
-  VkCommandPool getRawCommandPool() { return commandPool_; }
+  VkCommandPool getRawCommandPool() { return commandPool_.get(); }
   VkQueue getQueue() { return queue_; }
 
  private:
-  VulkanGraphicsDevice* device_;
   VkQueue queue_;
-  VkCommandPool commandPool_;
+  VulkanUniqueHandle<VkCommandPool> commandPool_;
 };
 
 } // namespace blocks::render

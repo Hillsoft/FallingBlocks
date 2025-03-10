@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -11,19 +12,11 @@ class VulkanShader {
  public:
   VulkanShader(
       VulkanGraphicsDevice& device, const std::filesystem::path& shaderPath);
-  ~VulkanShader();
 
-  VulkanShader(const VulkanShader& other) = delete;
-  VulkanShader& operator=(const VulkanShader& other) = delete;
-
-  VulkanShader(VulkanShader&& other) noexcept;
-  VulkanShader& operator=(VulkanShader&& other) noexcept;
-
-  VkShaderModule getRawShader() { return shaderModule_; }
+  VkShaderModule getRawShader() { return shaderModule_.get(); }
 
  private:
-  VulkanGraphicsDevice* device_;
-  VkShaderModule shaderModule_;
+  VulkanUniqueHandle<VkShaderModule> shaderModule_;
 };
 
 class VulkanVertexShader {

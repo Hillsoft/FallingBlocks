@@ -6,7 +6,7 @@ namespace blocks::render {
 
 VulkanImageView::VulkanImageView(
     VulkanGraphicsDevice& device, VkImage image, VkFormat imageFormat)
-    : device_(&device), imageView_(nullptr) {
+    : imageView_(nullptr, nullptr) {
   VkImageViewCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
   createInfo.image = image;
@@ -22,30 +22,15 @@ VulkanImageView::VulkanImageView(
   createInfo.subresourceRange.baseArrayLayer = 0;
   createInfo.subresourceRange.layerCount = 1;
 
+  VkImageView imageView;
   VkResult result = vkCreateImageView(
-      device.getRawDevice(), &createInfo, nullptr, &imageView_);
+      device.getRawDevice(), &createInfo, nullptr, &imageView);
   if (result != VK_SUCCESS) {
     throw std::runtime_error{"Failed to create image view"};
   }
-}
 
-VulkanImageView::~VulkanImageView() {
-  if (imageView_ != nullptr) {
-    vkDestroyImageView(device_->getRawDevice(), imageView_, nullptr);
-  }
-}
-
-VulkanImageView::VulkanImageView(VulkanImageView&& other) noexcept
-    : device_(other.device_), imageView_(other.imageView_) {
-  other.device_ = nullptr;
-  other.imageView_ = nullptr;
-}
-
-VulkanImageView& VulkanImageView::operator=(VulkanImageView&& other) noexcept {
-  std::swap(device_, other.device_);
-  std::swap(imageView_, other.imageView_);
-
-  return *this;
+  imageView_ =
+      VulkanUniqueHandle<VkImageView>{imageView, device.getRawDevice()};
 }
 
 } // namespace blocks::render

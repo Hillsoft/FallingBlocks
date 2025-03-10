@@ -7,9 +7,7 @@
 namespace blocks::render {
 
 VulkanCommandPool::VulkanCommandPool(VulkanGraphicsDevice& device)
-    : device_(&device),
-      queue_(device.getGraphicsQueue()),
-      commandPool_(nullptr) {
+    : queue_(device.getGraphicsQueue()), commandPool_(nullptr, nullptr) {
   VkCommandPoolCreateInfo poolInfo{};
   poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
   poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
@@ -17,35 +15,14 @@ VulkanCommandPool::VulkanCommandPool(VulkanGraphicsDevice& device)
   poolInfo.queueFamilyIndex =
       *device.physicalInfo().queueFamilies.graphicsFamily;
 
+  VkCommandPool commandPool;
   VkResult result = vkCreateCommandPool(
-      device.getRawDevice(), &poolInfo, nullptr, &commandPool_);
+      device.getRawDevice(), &poolInfo, nullptr, &commandPool);
   if (result != VK_SUCCESS) {
     throw std::runtime_error{"Failed to create command pool"};
   }
-}
-
-VulkanCommandPool::~VulkanCommandPool() {
-  if (commandPool_ != nullptr) {
-    vkDestroyCommandPool(device_->getRawDevice(), commandPool_, nullptr);
-  }
-}
-
-VulkanCommandPool::VulkanCommandPool(VulkanCommandPool&& other) noexcept
-    : device_(other.device_),
-      queue_(other.queue_),
-      commandPool_(other.commandPool_) {
-  other.device_ = nullptr;
-  other.queue_ = nullptr;
-  other.commandPool_ = nullptr;
-}
-
-VulkanCommandPool& VulkanCommandPool::operator=(
-    VulkanCommandPool&& other) noexcept {
-  std::swap(device_, other.device_);
-  std::swap(queue_, other.queue_);
-  std::swap(commandPool_, other.commandPool_);
-
-  return *this;
+  commandPool_ =
+      VulkanUniqueHandle<VkCommandPool>{commandPool, device.getRawDevice()};
 }
 
 } // namespace blocks::render

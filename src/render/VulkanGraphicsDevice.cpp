@@ -255,46 +255,14 @@ VulkanGraphicsDevice::PhysicalDeviceInfo::PhysicalDeviceInfo(
 }
 
 VulkanGraphicsDevice::VulkanGraphicsDevice(
-    VkDevice device,
+    VulkanUniqueHandle<VkDevice> device,
     VkQueue graphicsQueue,
     VkQueue presentQueue,
     std::unique_ptr<PhysicalDeviceInfo> physicalInfo)
-    : device_(device),
+    : device_(std::move(device)),
       graphicsQueue_(graphicsQueue),
       presentQueue_(presentQueue),
       physicalInfo_(std::move(physicalInfo)) {}
-
-VulkanGraphicsDevice::~VulkanGraphicsDevice() {
-  cleanup();
-}
-
-VulkanGraphicsDevice::VulkanGraphicsDevice(
-    VulkanGraphicsDevice&& other) noexcept
-    : device_(other.device_),
-      graphicsQueue_(other.graphicsQueue_),
-      presentQueue_(other.presentQueue_),
-      physicalInfo_(std::move(other.physicalInfo_)) {
-  other.device_ = nullptr;
-  other.graphicsQueue_ = nullptr;
-  other.presentQueue_ = nullptr;
-}
-
-VulkanGraphicsDevice& VulkanGraphicsDevice::operator=(
-    VulkanGraphicsDevice&& other) noexcept {
-  std::swap(device_, other.device_);
-  std::swap(graphicsQueue_, other.graphicsQueue_);
-  std::swap(presentQueue_, other.presentQueue_);
-  std::swap(physicalInfo_, other.physicalInfo_);
-
-  return *this;
-}
-
-void VulkanGraphicsDevice::cleanup() {
-  if (device_ != nullptr) {
-    vkDestroyDevice(device_, nullptr);
-    device_ = nullptr;
-  }
-}
 
 VulkanGraphicsDevice VulkanGraphicsDevice::make(
     VulkanInstance& instance, VulkanSurface& surface) {
@@ -348,7 +316,11 @@ VulkanGraphicsDevice VulkanGraphicsDevice::make(
       0,
       &presentQueue);
 
-  return {device, graphicsQueue, presentQueue, std::move(physicalDevice)};
+  return {
+      VulkanUniqueHandle<VkDevice>{device},
+      graphicsQueue,
+      presentQueue,
+      std::move(physicalDevice)};
 }
 
 } // namespace blocks::render

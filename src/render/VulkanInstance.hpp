@@ -2,23 +2,18 @@
 
 #include <GLFW/glfw3.h>
 
+#include "render/VulkanUniqueHandle.hpp"
+
 namespace blocks::render {
 
 class VulkanInstance {
  public:
   VulkanInstance();
-  ~VulkanInstance();
 
-  VulkanInstance(const VulkanInstance& other) = delete;
-  VulkanInstance(VulkanInstance&& other) = delete;
-
-  VulkanInstance& operator=(const VulkanInstance& other) = delete;
-  VulkanInstance& operator=(VulkanInstance&& other) = delete;
-
-  VkInstance getRawInstance() { return instance_; }
+  VkInstance getRawInstance() { return instance_.get(); }
 
  private:
-  VkInstance instance_;
+  VulkanUniqueHandle<VkInstance> instance_;
 };
 
 } // namespace blocks::render

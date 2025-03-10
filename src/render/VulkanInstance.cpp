@@ -72,7 +72,7 @@ bool validateRequiredExtensions(
 
 } // namespace
 
-VulkanInstance::VulkanInstance() {
+VulkanInstance::VulkanInstance() : instance_(nullptr) {
   std::cout << "Initialising Vulkan\n";
   std::cout << "Available Vulkan extensions:\n";
   const auto supportedExtensions = getSupportedExtensions();
@@ -121,16 +121,14 @@ VulkanInstance::VulkanInstance() {
   createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
   createInfo.ppEnabledExtensionNames = extensions.data();
 
-  VkResult result = vkCreateInstance(&createInfo, nullptr, &instance_);
+  VkInstance instance;
+  VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
   if (result != VK_SUCCESS) {
     throw std::runtime_error{"Failed to initialise Vulkan instance"};
   }
+  instance_ = VulkanUniqueHandle<VkInstance>{instance};
 
   std::cout << "Vulkan initialised\n";
-}
-
-VulkanInstance::~VulkanInstance() {
-  vkDestroyInstance(instance_, nullptr);
 }
 
 } // namespace blocks::render

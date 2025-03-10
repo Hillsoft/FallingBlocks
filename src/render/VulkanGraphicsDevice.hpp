@@ -7,6 +7,7 @@
 
 #include "render/VulkanInstance.hpp"
 #include "render/VulkanSurface.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -35,33 +36,23 @@ class VulkanGraphicsDevice {
     SwapChainSupportDetails swapChainSupport;
   };
 
-  ~VulkanGraphicsDevice();
-
-  VulkanGraphicsDevice(const VulkanGraphicsDevice& other) = delete;
-  VulkanGraphicsDevice& operator=(const VulkanGraphicsDevice& other) = delete;
-
-  VulkanGraphicsDevice(VulkanGraphicsDevice&& other) noexcept;
-  VulkanGraphicsDevice& operator=(VulkanGraphicsDevice&& other) noexcept;
-
   static VulkanGraphicsDevice make(
       VulkanInstance& instance, VulkanSurface& surface);
 
   const PhysicalDeviceInfo& physicalInfo() const { return *physicalInfo_; }
 
-  VkDevice getRawDevice() { return device_; }
+  VkDevice getRawDevice() { return device_.get(); }
   VkQueue getGraphicsQueue() { return graphicsQueue_; }
   VkQueue getPresentQueue() { return presentQueue_; }
 
  private:
   VulkanGraphicsDevice(
-      VkDevice device,
+      VulkanUniqueHandle<VkDevice> device,
       VkQueue graphicsQueue,
       VkQueue presentQueue,
       std::unique_ptr<PhysicalDeviceInfo> physicalInfo);
 
-  void cleanup();
-
-  VkDevice device_;
+  VulkanUniqueHandle<VkDevice> device_;
   VkQueue graphicsQueue_;
   VkQueue presentQueue_;
   std::unique_ptr<PhysicalDeviceInfo> physicalInfo_;

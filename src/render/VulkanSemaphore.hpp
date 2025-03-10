@@ -3,25 +3,18 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 
 namespace blocks::render {
 
 class VulkanSemaphore {
  public:
   VulkanSemaphore(VulkanGraphicsDevice& device);
-  ~VulkanSemaphore();
 
-  VulkanSemaphore(const VulkanSemaphore& other) = delete;
-  VulkanSemaphore& operator=(const VulkanSemaphore& other) = delete;
-
-  VulkanSemaphore(VulkanSemaphore&& other) noexcept;
-  VulkanSemaphore& operator=(VulkanSemaphore&& other) noexcept;
-
-  VkSemaphore getRawSemaphore() { return semaphore_; }
+  VkSemaphore getRawSemaphore() { return semaphore_.get(); }
 
  private:
-  VulkanGraphicsDevice* device_;
-  VkSemaphore semaphore_;
+  VulkanUniqueHandle<VkSemaphore> semaphore_;
 };
 
 } // namespace blocks::render
