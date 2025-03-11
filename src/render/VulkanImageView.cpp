@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -34,7 +34,7 @@ VulkanImageView::VulkanImageView(
   }
 
   imageView_ =
-      VulkanUniqueHandle<VkImageView>{imageView, device.getRawDevice()};
+      vulkan::UniqueHandle<VkImageView>{imageView, device.getRawDevice()};
 }
 
 } // namespace blocks::render

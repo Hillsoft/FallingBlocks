@@ -10,10 +10,9 @@
 #include "render/VulkanImageView.hpp"
 #include "render/VulkanSemaphore.hpp"
 #include "render/VulkanSurface.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
-
 class VulkanSwapChain {
  public:
   VulkanSwapChain(VulkanSurface& surface, VulkanGraphicsDevice& graphicsDevice);
@@ -30,7 +29,7 @@ class VulkanSwapChain {
 
  private:
   VulkanGraphicsDevice* graphicsDevice_;
-  VulkanUniqueHandle<VkSwapchainKHR> swapChain_;
+  vulkan::UniqueHandle<VkSwapchainKHR> swapChain_;
   VkExtent2D extent_;
   VkQueue queue_;
   std::vector<VkImage> swapChainImages_;

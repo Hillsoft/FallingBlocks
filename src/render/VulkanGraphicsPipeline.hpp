@@ -6,7 +6,7 @@
 #include "render/VulkanPipelineLayout.hpp"
 #include "render/VulkanRenderPass.hpp"
 #include "render/VulkanShader.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -24,7 +24,7 @@ class VulkanGraphicsPipeline {
  private:
   VulkanPipelineLayout pipelineLayout_;
   VulkanRenderPass renderPass_;
-  VulkanUniqueHandle<VkPipeline> pipeline_;
+  vulkan::UniqueHandle<VkPipeline> pipeline_;
 };
 
 } // namespace blocks::render

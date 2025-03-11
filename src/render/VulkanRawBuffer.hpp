@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -15,7 +15,7 @@ class VulkanRawBuffer {
   VkBuffer getRawBuffer() { return buffer_.get(); }
 
  private:
-  VulkanUniqueHandle<VkBuffer> buffer_;
+  vulkan::UniqueHandle<VkBuffer> buffer_;
 };
 
 } // namespace blocks::render

@@ -8,7 +8,7 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 #include "util/file.hpp"
 
 namespace blocks::render {
@@ -31,7 +31,7 @@ VulkanShader::VulkanShader(
   }
 
   shaderModule_ =
-      VulkanUniqueHandle<VkShaderModule>{shaderModule, device.getRawDevice()};
+      vulkan::UniqueHandle<VkShaderModule>{shaderModule, device.getRawDevice()};
 }
 
 VulkanVertexShader::VulkanVertexShader(

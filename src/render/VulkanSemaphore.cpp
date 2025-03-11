@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -21,7 +21,7 @@ VulkanSemaphore::VulkanSemaphore(VulkanGraphicsDevice& device)
   }
 
   semaphore_ =
-      VulkanUniqueHandle<VkSemaphore>{semaphore, device.getRawDevice()};
+      vulkan::UniqueHandle<VkSemaphore>{semaphore, device.getRawDevice()};
 }
 
 } // namespace blocks::render

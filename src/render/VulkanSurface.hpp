@@ -3,8 +3,8 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanInstance.hpp"
-#include "render/VulkanUniqueHandle.hpp"
 #include "render/glfw_wrapper/Window.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -19,7 +19,7 @@ class VulkanSurface {
 
  private:
   glfw::Window window_;
-  VulkanUniqueHandle<VkSurfaceKHR> surface_;
+  vulkan::UniqueHandle<VkSurfaceKHR> surface_;
 };
 
 } // namespace blocks::render

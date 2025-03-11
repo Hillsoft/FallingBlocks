@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -19,7 +19,7 @@ class VulkanFence {
 
  private:
   VulkanGraphicsDevice* device_;
-  VulkanUniqueHandle<VkFence> fence_;
+  vulkan::UniqueHandle<VkFence> fence_;
 };
 
 } // namespace blocks::render

@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -25,7 +25,7 @@ VulkanRawBuffer::VulkanRawBuffer(
     throw std::runtime_error{"Failed to create buffer"};
   }
 
-  buffer_ = VulkanUniqueHandle<VkBuffer>{buffer, device.getRawDevice()};
+  buffer_ = vulkan::UniqueHandle<VkBuffer>{buffer, device.getRawDevice()};
 }
 
 } // namespace blocks::render

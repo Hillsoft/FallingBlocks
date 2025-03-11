@@ -2,7 +2,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -13,7 +13,7 @@ class VulkanInstance {
   VkInstance getRawInstance() { return instance_.get(); }
 
  private:
-  VulkanUniqueHandle<VkInstance> instance_;
+  vulkan::UniqueHandle<VkInstance> instance_;
 };
 
 } // namespace blocks::render

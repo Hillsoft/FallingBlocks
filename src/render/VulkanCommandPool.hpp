@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -16,7 +16,7 @@ class VulkanCommandPool {
 
  private:
   VkQueue queue_;
-  VulkanUniqueHandle<VkCommandPool> commandPool_;
+  vulkan::UniqueHandle<VkCommandPool> commandPool_;
 };
 
 } // namespace blocks::render

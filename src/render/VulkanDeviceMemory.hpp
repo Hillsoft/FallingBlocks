@@ -4,7 +4,7 @@
 
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanRawBuffer.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -15,7 +15,7 @@ class VulkanDeviceMemory {
   VkDeviceMemory getRawMemory() { return memory_.get(); }
 
  private:
-  VulkanUniqueHandle<VkDeviceMemory> memory_;
+  vulkan::UniqueHandle<VkDeviceMemory> memory_;
 };
 
 } // namespace blocks::render

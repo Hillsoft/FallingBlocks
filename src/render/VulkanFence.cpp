@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -24,7 +24,7 @@ VulkanFence::VulkanFence(VulkanGraphicsDevice& device, bool preSignalled)
   if (result != VK_SUCCESS) {
     throw std::runtime_error{"Failed to create fence"};
   }
-  fence_ = VulkanUniqueHandle<VkFence>{fence, device.getRawDevice()};
+  fence_ = vulkan::UniqueHandle<VkFence>{fence, device.getRawDevice()};
 }
 
 void VulkanFence::wait() const {

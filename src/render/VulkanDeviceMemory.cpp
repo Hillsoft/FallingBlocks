@@ -6,7 +6,7 @@
 
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanRawBuffer.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -58,7 +58,7 @@ VulkanDeviceMemory::VulkanDeviceMemory(
     throw std::runtime_error{"Failed to allocate memory"};
   }
 
-  memory_ = VulkanUniqueHandle<VkDeviceMemory>{memory, device.getRawDevice()};
+  memory_ = vulkan::UniqueHandle<VkDeviceMemory>{memory, device.getRawDevice()};
 }
 
 } // namespace blocks::render

@@ -3,36 +3,36 @@
 #include <memory>
 #include <type_traits>
 
-#include "render/VulkanUniqueHandleDeleters.hpp"
+#include "render/vulkan/UniqueHandleDeleters.hpp"
 
-namespace blocks::render {
+namespace blocks::render::vulkan {
 
 template <typename T>
-class VulkanUniqueHandle {
+class UniqueHandle {
  public:
   using Deleter = detail::HandleDeleter<T>;
 
-  explicit VulkanUniqueHandle(T handle)
+  explicit UniqueHandle(T handle)
     requires(std::is_default_constructible_v<Deleter>)
       : handle_(handle), deleter_() {}
-  explicit VulkanUniqueHandle(T handle, Deleter deleter)
+  explicit UniqueHandle(T handle, Deleter deleter)
       : handle_(handle), deleter_(std::move(deleter)) {}
 
-  ~VulkanUniqueHandle() {
+  ~UniqueHandle() {
     if (handle_ != nullptr) {
       deleter_.destroy(handle_);
     }
   }
 
-  VulkanUniqueHandle(const VulkanUniqueHandle& other) = delete;
-  VulkanUniqueHandle& operator=(const VulkanUniqueHandle& other) = delete;
+  UniqueHandle(const UniqueHandle& other) = delete;
+  UniqueHandle& operator=(const UniqueHandle& other) = delete;
 
-  VulkanUniqueHandle(VulkanUniqueHandle&& other) noexcept
+  UniqueHandle(UniqueHandle&& other) noexcept
       : handle_(other.handle_), deleter_(std::move(other.deleter_)) {
     other.handle_ = nullptr;
   }
 
-  VulkanUniqueHandle& operator=(VulkanUniqueHandle&& other) noexcept {
+  UniqueHandle& operator=(UniqueHandle&& other) noexcept {
     std::swap(handle_, other.handle_);
     std::swap(deleter_, other.deleter_);
 
@@ -46,4 +46,4 @@ class VulkanUniqueHandle {
   [[no_unique_address]] Deleter deleter_;
 };
 
-} // namespace blocks::render
+} // namespace blocks::render::vulkan

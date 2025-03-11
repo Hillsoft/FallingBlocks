@@ -1,10 +1,10 @@
-#include "render/VulkanUniqueHandleDeleters.hpp"
+#include "render/vulkan/UniqueHandleDeleters.hpp"
 
 #include <GLFW/glfw3.h>
 
 #include "util/debug.hpp"
 
-namespace blocks::render::detail {
+namespace blocks::render::vulkan::detail {
 
 void destroyDebugUtilsMessengerEXT(
     VkInstance instance,
@@ -19,4 +19,4 @@ void destroyDebugUtilsMessengerEXT(
   }
 }
 
-} // namespace blocks::render::detail
+} // namespace blocks::render::vulkan::detail

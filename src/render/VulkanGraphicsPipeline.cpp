@@ -7,7 +7,7 @@
 
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanShader.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -132,7 +132,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(
     throw std::runtime_error{"Failed to create graphics pipeline"};
   }
 
-  pipeline_ = VulkanUniqueHandle<VkPipeline>{pipeline, device.getRawDevice()};
+  pipeline_ = vulkan::UniqueHandle<VkPipeline>{pipeline, device.getRawDevice()};
 }
 
 } // namespace blocks::render

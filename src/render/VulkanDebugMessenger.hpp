@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanInstance.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -12,7 +12,7 @@ class VulkanDebugMessenger {
   VulkanDebugMessenger(VulkanInstance& instance);
 
  private:
-  VulkanUniqueHandle<VkDebugUtilsMessengerEXT> debugMessenger_;
+  vulkan::UniqueHandle<VkDebugUtilsMessengerEXT> debugMessenger_;
 };
 
 } // namespace blocks::render

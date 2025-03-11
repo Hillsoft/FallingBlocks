@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 #include "util/debug.hpp"
 
 namespace blocks::render {
@@ -25,7 +25,7 @@ VulkanCommandPool::VulkanCommandPool(VulkanGraphicsDevice& device)
     throw std::runtime_error{"Failed to create command pool"};
   }
   commandPool_ =
-      VulkanUniqueHandle<VkCommandPool>{commandPool, device.getRawDevice()};
+      vulkan::UniqueHandle<VkCommandPool>{commandPool, device.getRawDevice()};
 }
 
 } // namespace blocks::render

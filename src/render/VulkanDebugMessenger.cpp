@@ -6,7 +6,7 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanInstance.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -60,7 +60,7 @@ VulkanDebugMessenger::VulkanDebugMessenger(VulkanInstance& instance)
     throw std::runtime_error{"Failed to set up debug messenger"};
   }
 
-  debugMessenger_ = VulkanUniqueHandle<VkDebugUtilsMessengerEXT>{
+  debugMessenger_ = vulkan::UniqueHandle<VkDebugUtilsMessengerEXT>{
       debugMessenger, instance.getRawInstance()};
 }
 

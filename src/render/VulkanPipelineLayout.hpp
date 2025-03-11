@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -14,7 +14,7 @@ class VulkanPipelineLayout {
   VkPipelineLayout getRawLayout() { return layout_.get(); }
 
  private:
-  VulkanUniqueHandle<VkPipelineLayout> layout_;
+  vulkan::UniqueHandle<VkPipelineLayout> layout_;
 };
 
 } // namespace blocks::render

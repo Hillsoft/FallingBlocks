@@ -14,8 +14,8 @@
 #include "render/VulkanImageView.hpp"
 #include "render/VulkanSemaphore.hpp"
 #include "render/VulkanSurface.hpp"
-#include "render/VulkanUniqueHandle.hpp"
 #include "render/glfw_wrapper/Window.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -123,7 +123,7 @@ VulkanSwapChain::VulkanSwapChain(
     throw std::runtime_error{"Failed to create swap chain!"};
   }
 
-  swapChain_ = VulkanUniqueHandle<VkSwapchainKHR>{
+  swapChain_ = vulkan::UniqueHandle<VkSwapchainKHR>{
       swapChain, graphicsDevice.getRawDevice()};
   extent_ = extent;
 

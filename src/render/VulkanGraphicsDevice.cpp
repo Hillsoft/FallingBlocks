@@ -16,8 +16,8 @@
 
 #include "render/VulkanInstance.hpp"
 #include "render/VulkanSurface.hpp"
-#include "render/VulkanUniqueHandle.hpp"
 #include "render/validationLayers.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 #include "util/debug.hpp"
 
 namespace blocks::render {
@@ -265,7 +265,7 @@ VulkanGraphicsDevice::PhysicalDeviceInfo::PhysicalDeviceInfo(
 }
 
 VulkanGraphicsDevice::VulkanGraphicsDevice(
-    VulkanUniqueHandle<VkDevice> device,
+    vulkan::UniqueHandle<VkDevice> device,
     VkQueue graphicsQueue,
     VkQueue presentQueue,
     std::unique_ptr<PhysicalDeviceInfo> physicalInfo)
@@ -327,7 +327,7 @@ VulkanGraphicsDevice VulkanGraphicsDevice::make(
       &presentQueue);
 
   return {
-      VulkanUniqueHandle<VkDevice>{device},
+      vulkan::UniqueHandle<VkDevice>{device},
       graphicsQueue,
       presentQueue,
       std::move(physicalDevice)};

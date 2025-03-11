@@ -8,8 +8,8 @@
 #include <vector>
 #include <GLFW/glfw3.h>
 
-#include "render/VulkanUniqueHandle.hpp"
 #include "render/validationLayers.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -130,7 +130,7 @@ VulkanInstance::VulkanInstance() : instance_(nullptr) {
   if (result != VK_SUCCESS) {
     throw std::runtime_error{"Failed to initialise Vulkan instance"};
   }
-  instance_ = VulkanUniqueHandle<VkInstance>{instance};
+  instance_ = vulkan::UniqueHandle<VkInstance>{instance};
 
   std::cout << "Vulkan initialised\n";
 }

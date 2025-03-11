@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -15,7 +15,7 @@ class VulkanImageView {
   VkImageView getRawImageView() { return imageView_.get(); }
 
  private:
-  VulkanUniqueHandle<VkImageView> imageView_;
+  vulkan::UniqueHandle<VkImageView> imageView_;
 };
 
 } // namespace blocks::render

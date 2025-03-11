@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -55,7 +55,7 @@ VulkanRenderPass::VulkanRenderPass(
   }
 
   renderPass_ =
-      VulkanUniqueHandle<VkRenderPass>{renderPass, device.getRawDevice()};
+      vulkan::UniqueHandle<VkRenderPass>{renderPass, device.getRawDevice()};
 }
 
 } // namespace blocks::render

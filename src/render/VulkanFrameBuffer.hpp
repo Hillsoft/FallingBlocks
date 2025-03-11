@@ -5,7 +5,7 @@
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
 #include "render/VulkanRenderPass.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -22,7 +22,7 @@ class VulkanFrameBuffer {
 
  private:
   VkExtent2D extent_;
-  VulkanUniqueHandle<VkFramebuffer> frameBuffer_;
+  vulkan::UniqueHandle<VkFramebuffer> frameBuffer_;
 };
 
 } // namespace blocks::render

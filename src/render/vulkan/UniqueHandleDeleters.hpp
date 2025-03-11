@@ -2,7 +2,7 @@
 
 #include <GLFW/glfw3.h>
 
-namespace blocks::render::detail {
+namespace blocks::render::vulkan::detail {
 
 void destroyDebugUtilsMessengerEXT(
     VkInstance instance,
@@ -190,4 +190,4 @@ class HandleDeleter<VkSwapchainKHR> {
   VkDevice device_;
 };
 
-} // namespace blocks::render::detail
+} // namespace blocks::render::vulkan::detail

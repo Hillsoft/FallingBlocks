@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -18,7 +18,8 @@ VulkanPipelineLayout::VulkanPipelineLayout(VulkanGraphicsDevice& device)
   VkResult result = vkCreatePipelineLayout(
       device.getRawDevice(), &pipelineLayoutInfo, nullptr, &layout);
 
-  layout_ = VulkanUniqueHandle<VkPipelineLayout>{layout, device.getRawDevice()};
+  layout_ =
+      vulkan::UniqueHandle<VkPipelineLayout>{layout, device.getRawDevice()};
 }
 
 } // namespace blocks::render

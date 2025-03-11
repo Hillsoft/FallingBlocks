@@ -8,7 +8,7 @@
 
 #include "render/VulkanInstance.hpp"
 #include "render/VulkanSurface.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -48,12 +48,12 @@ class VulkanGraphicsDevice {
 
  private:
   VulkanGraphicsDevice(
-      VulkanUniqueHandle<VkDevice> device,
+      vulkan::UniqueHandle<VkDevice> device,
       VkQueue graphicsQueue,
       VkQueue presentQueue,
       std::unique_ptr<PhysicalDeviceInfo> physicalInfo);
 
-  VulkanUniqueHandle<VkDevice> device_;
+  vulkan::UniqueHandle<VkDevice> device_;
   VkQueue graphicsQueue_;
   VkQueue presentQueue_;
   std::unique_ptr<PhysicalDeviceInfo> physicalInfo_;

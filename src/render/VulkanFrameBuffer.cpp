@@ -6,7 +6,7 @@
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
 #include "render/VulkanRenderPass.hpp"
-#include "render/VulkanUniqueHandle.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -35,7 +35,7 @@ VulkanFrameBuffer::VulkanFrameBuffer(
   }
 
   frameBuffer_ =
-      VulkanUniqueHandle<VkFramebuffer>{frameBuffer, device.getRawDevice()};
+      vulkan::UniqueHandle<VkFramebuffer>{frameBuffer, device.getRawDevice()};
 }
 
 } // namespace blocks::render
