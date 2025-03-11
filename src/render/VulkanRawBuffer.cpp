@@ -1,6 +1,11 @@
 #include "render/VulkanRawBuffer.hpp"
 
+#include <span>
 #include <stdexcept>
+#include <GLFW/glfw3.h>
+
+#include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 
 namespace blocks::render {
 

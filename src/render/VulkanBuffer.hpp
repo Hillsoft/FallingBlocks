@@ -1,5 +1,8 @@
 #pragma once
 
+#include <span>
+#include <GLFW/glfw3.h>
+
 #include "render/VulkanDeviceMemory.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanRawBuffer.hpp"

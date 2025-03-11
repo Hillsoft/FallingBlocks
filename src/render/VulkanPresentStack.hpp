@@ -1,12 +1,14 @@
 #pragma once
 
+#include <cstdint>
 #include <vector>
-#include <GLFW/glfw3.h>
 
+#include "render/VulkanFence.hpp"
 #include "render/VulkanFrameBuffer.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
 #include "render/VulkanRenderPass.hpp"
+#include "render/VulkanSemaphore.hpp"
 #include "render/VulkanSurface.hpp"
 #include "render/VulkanSwapChain.hpp"
 #include "util/debug.hpp"

@@ -1,6 +1,10 @@
 #include "render/glfw_wrapper/Window.hpp"
 
+#include <functional>
 #include <stdexcept>
+#include <type_traits>
+#include <utility>
+#include <GLFW/glfw3.h>
 
 #include "util/string.hpp"
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <GLFW/glfw3.h>
+
 #include "render/VulkanInstance.hpp"
 #include "render/VulkanUniqueHandle.hpp"
 #include "render/glfw_wrapper/Window.hpp"

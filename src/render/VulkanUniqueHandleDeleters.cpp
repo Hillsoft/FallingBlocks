@@ -1,5 +1,7 @@
 #include "render/VulkanUniqueHandleDeleters.hpp"
 
+#include <GLFW/glfw3.h>
+
 #include "util/debug.hpp"
 
 namespace blocks::render::detail {

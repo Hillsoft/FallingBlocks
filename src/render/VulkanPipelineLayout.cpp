@@ -1,5 +1,10 @@
 #include "render/VulkanPipelineLayout.hpp"
 
+#include <GLFW/glfw3.h>
+
+#include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanUniqueHandle.hpp"
+
 namespace blocks::render {
 
 VulkanPipelineLayout::VulkanPipelineLayout(VulkanGraphicsDevice& device)

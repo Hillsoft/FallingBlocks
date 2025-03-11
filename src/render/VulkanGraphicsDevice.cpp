@@ -1,12 +1,22 @@
 #include "render/VulkanGraphicsDevice.hpp"
 
+#include <string.h>
 #include <algorithm>
+#include <array>
+#include <cstdint>
 #include <iostream>
+#include <memory>
 #include <optional>
+#include <stdexcept>
+#include <type_traits>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
 
+#include "render/VulkanInstance.hpp"
+#include "render/VulkanSurface.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 #include "render/validationLayers.hpp"
 #include "util/debug.hpp"
 

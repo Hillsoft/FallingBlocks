@@ -1,9 +1,15 @@
 #include "render/Quad.hpp"
 
+#include <array>
+#include <cstddef>
+#include <span>
 #include <vector>
 #include <GLFW/glfw3.h>
 
 #include "math/vec.hpp"
+#include "render/VulkanBuffer.hpp"
+#include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanShader.hpp"
 
 namespace blocks::render {
 

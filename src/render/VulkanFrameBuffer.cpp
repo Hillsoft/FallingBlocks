@@ -1,6 +1,12 @@
 #include "render/VulkanFrameBuffer.hpp"
 
 #include <stdexcept>
+#include <GLFW/glfw3.h>
+
+#include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanImageView.hpp"
+#include "render/VulkanRenderPass.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 
 namespace blocks::render {
 

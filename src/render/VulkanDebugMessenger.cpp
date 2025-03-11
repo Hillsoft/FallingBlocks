@@ -1,8 +1,12 @@
 #include "render/VulkanDebugMessenger.hpp"
 
+#include <cstdlib>
 #include <iostream>
+#include <stdexcept>
+#include <GLFW/glfw3.h>
 
-#include "util/debug.hpp"
+#include "render/VulkanInstance.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 
 namespace blocks::render {
 

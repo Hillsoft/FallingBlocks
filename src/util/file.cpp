@@ -1,6 +1,10 @@
 #include "util/file.hpp"
 
+#include <filesystem>
 #include <fstream>
+#include <iosfwd>
+#include <stdexcept>
+#include <vector>
 
 namespace util {
 

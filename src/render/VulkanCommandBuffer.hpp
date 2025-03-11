@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdexcept>
+#include <vector>
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanCommandPool.hpp"

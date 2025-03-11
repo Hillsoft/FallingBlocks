@@ -1,6 +1,6 @@
 #pragma once
 
-#include <utility>
+#include <type_traits>
 
 namespace util {
 
@@ -19,7 +19,7 @@ TVal sumImpl(TVal&& val, TVals&&... vals) {
 } // namespace detail
 
 template <typename... TArgs, typename TVal = std::common_type_t<TArgs...>>
-  requires std::is_arithmetic_v<TVal>
+  requires(std::is_arithmetic_v<TVal>)
 TVal sum(TArgs&&... args) {
   return detail::sumImpl<TVal>(std::forward<TArgs>(args)...);
 }

@@ -1,7 +1,12 @@
 #include "render/VulkanSurface.hpp"
 
 #include <stdexcept>
-#include <utility>
+#include <type_traits>
+#include <GLFW/glfw3.h>
+
+#include "render/VulkanInstance.hpp"
+#include "render/VulkanUniqueHandle.hpp"
+#include "render/glfw_wrapper/Window.hpp"
 
 namespace blocks::render {
 

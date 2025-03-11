@@ -2,12 +2,20 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
+#include <limits>
+#include <optional>
 #include <stdexcept>
 #include <vector>
 #include <GLFW/glfw3.h>
 
+#include "render/VulkanFence.hpp"
+#include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanImageView.hpp"
+#include "render/VulkanSemaphore.hpp"
+#include "render/VulkanSurface.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 #include "render/glfw_wrapper/Window.hpp"
-#include "util/debug.hpp"
 
 namespace blocks::render {
 

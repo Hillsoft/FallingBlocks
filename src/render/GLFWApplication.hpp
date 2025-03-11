@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdint>
+#include <vector>
+
 #include "render/VulkanBuffer.hpp"
 #include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"

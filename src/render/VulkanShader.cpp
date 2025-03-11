@@ -1,5 +1,14 @@
 #include "render/VulkanShader.hpp"
 
+#include <cstdint>
+#include <filesystem>
+#include <stdexcept>
+#include <type_traits>
+#include <vector>
+#include <GLFW/glfw3.h>
+
+#include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 #include "util/file.hpp"
 
 namespace blocks::render {

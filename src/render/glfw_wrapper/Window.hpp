@@ -1,6 +1,8 @@
 #pragma once
 
 #include <functional>
+#include <type_traits>
+#include <utility>
 #include <GLFW/glfw3.h>
 
 namespace blocks::render::glfw {

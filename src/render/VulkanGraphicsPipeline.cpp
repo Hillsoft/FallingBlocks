@@ -1,6 +1,13 @@
 #include "render/VulkanGraphicsPipeline.hpp"
 
 #include <array>
+#include <cstdint>
+#include <stdexcept>
+#include <GLFW/glfw3.h>
+
+#include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanShader.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 
 namespace blocks::render {
 

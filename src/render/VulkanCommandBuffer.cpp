@@ -1,8 +1,14 @@
 #include "render/VulkanCommandBuffer.hpp"
 
-#include <array>
+#include <cstdint>
 #include <stdexcept>
+#include <vector>
+#include <GLFW/glfw3.h>
 
+#include "render/VulkanCommandPool.hpp"
+#include "render/VulkanFence.hpp"
+#include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanSemaphore.hpp"
 #include "util/debug.hpp"
 
 namespace blocks::render {

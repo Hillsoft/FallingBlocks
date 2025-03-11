@@ -1,5 +1,11 @@
 #include "render/VulkanBuffer.hpp"
 
+#include <cstring>
+#include <span>
+#include <GLFW/glfw3.h>
+
+#include "render/VulkanGraphicsDevice.hpp"
+
 namespace blocks::render {
 
 VulkanBuffer::VulkanBuffer(VulkanGraphicsDevice& device, std::span<char> data)

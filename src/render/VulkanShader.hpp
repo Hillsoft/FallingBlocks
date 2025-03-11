@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <vector>
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"

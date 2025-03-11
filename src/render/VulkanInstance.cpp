@@ -1,10 +1,14 @@
 #include "render/VulkanInstance.hpp"
 
+#include <string.h>
 #include <array>
+#include <cstdint>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
+#include <GLFW/glfw3.h>
 
+#include "render/VulkanUniqueHandle.hpp"
 #include "render/validationLayers.hpp"
 
 namespace blocks::render {
@@ -23,7 +27,7 @@ bool checkValidationLayers() {
     bool layerFound = false;
 
     for (const auto& layerProperty : availableLayers) {
-      if (strcmp(layerProperty.layerName, requestedLayer) == 0) {
+      if (std::strcmp(layerProperty.layerName, requestedLayer) == 0) {
         layerFound = true;
         break;
       }
@@ -56,7 +60,7 @@ bool validateRequiredExtensions(
     bool extensionFound = false;
 
     for (const auto& available : availableExtensions) {
-      if (strcmp(available.extensionName, requested) == 0) {
+      if (std::strcmp(available.extensionName, requested) == 0) {
         extensionFound = true;
         break;
       }

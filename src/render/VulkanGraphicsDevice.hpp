@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -19,10 +20,10 @@ class VulkanGraphicsDevice {
   };
 
   struct SwapChainSupportDetails {
-    VkSurfaceCapabilitiesKHR capabilities;
+    VkSurfaceCapabilitiesKHR capabilities{};
     std::vector<VkSurfaceFormatKHR> formats;
     std::vector<VkPresentModeKHR> presentModes;
-    VkSurfaceFormatKHR preferredFormat;
+    VkSurfaceFormatKHR preferredFormat{};
   };
 
   struct PhysicalDeviceInfo {

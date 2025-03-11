@@ -1,8 +1,7 @@
 #pragma once
 
+#include <memory>
 #include <type_traits>
-#include <utility>
-#include <GLFW/glfw3.h>
 
 #include "render/VulkanUniqueHandleDeleters.hpp"
 

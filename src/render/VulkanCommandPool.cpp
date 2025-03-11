@@ -1,7 +1,10 @@
 #include "render/VulkanCommandPool.hpp"
 
 #include <stdexcept>
+#include <GLFW/glfw3.h>
 
+#include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanUniqueHandle.hpp"
 #include "util/debug.hpp"
 
 namespace blocks::render {

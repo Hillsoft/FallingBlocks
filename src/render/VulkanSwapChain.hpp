@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstdint>
+#include <optional>
+#include <vector>
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanFence.hpp"
