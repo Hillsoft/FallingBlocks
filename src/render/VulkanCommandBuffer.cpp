@@ -8,8 +8,6 @@
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanFence.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanSemaphore.hpp"
-#include "util/debug.hpp"
 
 namespace blocks::render {
 
@@ -30,40 +28,28 @@ VulkanCommandBuffer::VulkanCommandBuffer(
 }
 
 void VulkanCommandBuffer::submit(
-    const std::vector<VulkanSemaphore*>& waitSemaphores,
-    const std::vector<VulkanSemaphore*>& signalSemaphores,
+    const std::vector<VkSemaphore>& waitSemaphores,
+    const std::vector<VkSemaphore>& signalSemaphores,
     VulkanFence* signalFence) {
-  std::vector<VkSemaphore> waitSemaphoresRaw;
-  waitSemaphoresRaw.reserve(waitSemaphores.size());
   std::vector<VkPipelineStageFlags> waitStages;
   waitStages.reserve(waitSemaphores.size());
   for (const auto& semaphore : waitSemaphores) {
-    DEBUG_ASSERT(semaphore != nullptr);
-    waitSemaphoresRaw.emplace_back(semaphore->getRawSemaphore());
     waitStages.emplace_back(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
-  }
-
-  std::vector<VkSemaphore> signalSemaphoresRaw;
-  signalSemaphoresRaw.reserve(signalSemaphores.size());
-  for (const auto& semaphore : signalSemaphores) {
-    DEBUG_ASSERT(semaphore != nullptr);
-    signalSemaphoresRaw.emplace_back(semaphore->getRawSemaphore());
   }
 
   VkSubmitInfo submitInfo{};
   submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-  submitInfo.waitSemaphoreCount =
-      static_cast<uint32_t>(waitSemaphoresRaw.size());
-  submitInfo.pWaitSemaphores = waitSemaphoresRaw.data();
+  submitInfo.waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.size());
+  submitInfo.pWaitSemaphores = waitSemaphores.data();
   submitInfo.pWaitDstStageMask = waitStages.data();
 
   submitInfo.commandBufferCount = 1;
   submitInfo.pCommandBuffers = &commandBuffer_;
 
   submitInfo.signalSemaphoreCount =
-      static_cast<uint32_t>(signalSemaphoresRaw.size());
-  submitInfo.pSignalSemaphores = signalSemaphoresRaw.data();
+      static_cast<uint32_t>(signalSemaphores.size());
+  submitInfo.pSignalSemaphores = signalSemaphores.data();
 
   if (vkQueueSubmit(
           queue_,

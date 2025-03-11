@@ -10,7 +10,6 @@
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanGraphicsPipeline.hpp"
 #include "render/VulkanRenderPass.hpp"
-#include "render/VulkanSemaphore.hpp"
 
 namespace blocks::render {
 
@@ -26,8 +25,8 @@ class VulkanCommandBuffer {
       Fn&& fn);
 
   void submit(
-      const std::vector<VulkanSemaphore*>& waitSemaphores,
-      const std::vector<VulkanSemaphore*>& signalSemaphores,
+      const std::vector<VkSemaphore>& waitSemaphores,
+      const std::vector<VkSemaphore>& signalSemaphores,
       VulkanFence* signalFence);
 
  private:

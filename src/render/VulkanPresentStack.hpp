@@ -2,13 +2,12 @@
 
 #include <cstdint>
 #include <vector>
-
+#include <GLFW/glfw3.h>
 #include "render/VulkanFence.hpp"
 #include "render/VulkanFrameBuffer.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
 #include "render/VulkanRenderPass.hpp"
-#include "render/VulkanSemaphore.hpp"
 #include "render/VulkanSurface.hpp"
 #include "render/VulkanSwapChain.hpp"
 #include "util/debug.hpp"
@@ -36,7 +35,7 @@ class VulkanPresentStack {
       return owner_->getFrameBuffer(imageIndex_);
     }
 
-    void present(VulkanSemaphore* waitSemaphore) const {
+    void present(VkSemaphore waitSemaphore) const {
       DEBUG_ASSERT(!refreshSwapChainRequired_);
       return owner_->present(imageIndex_, waitSemaphore);
     }
@@ -52,13 +51,13 @@ class VulkanPresentStack {
       VulkanSurface& surface,
       VulkanRenderPass& renderPass);
 
-  FrameData getNextImageIndex(VulkanSemaphore* semaphore, VulkanFence* fence);
+  FrameData getNextImageIndex(VkSemaphore semaphore, VulkanFence* fence);
 
   VulkanFrameBuffer& getFrameBuffer(uint32_t imageIndex) {
     return swapChainData_->frameBuffer[imageIndex];
   }
 
-  void present(uint32_t imageIndex, VulkanSemaphore* waitSemaphore) {
+  void present(uint32_t imageIndex, VkSemaphore waitSemaphore) {
     swapChainData_->swapChain.present(imageIndex, waitSemaphore);
   }
 

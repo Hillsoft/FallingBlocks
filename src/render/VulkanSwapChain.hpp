@@ -8,7 +8,6 @@
 #include "render/VulkanFence.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
-#include "render/VulkanSemaphore.hpp"
 #include "render/VulkanSurface.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 
@@ -21,11 +20,11 @@ class VulkanSwapChain {
 
   // nullopt indicates out of date swapchain, recreation required
   std::optional<uint32_t> getNextImageIndex(
-      VulkanSemaphore* semaphore, VulkanFence* fence);
+      VkSemaphore semaphore, VulkanFence* fence);
 
   VkExtent2D getSwapchainExtent() const { return extent_; }
 
-  void present(uint32_t imageIndex, VulkanSemaphore* waitSemaphore);
+  void present(uint32_t imageIndex, VkSemaphore waitSemaphore);
 
  private:
   VulkanGraphicsDevice* graphicsDevice_;

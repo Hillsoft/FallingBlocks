@@ -12,7 +12,6 @@
 #include "render/VulkanFence.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
-#include "render/VulkanSemaphore.hpp"
 #include "render/VulkanSurface.hpp"
 #include "render/glfw_wrapper/Window.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
@@ -153,13 +152,13 @@ std::vector<VulkanImageView> VulkanSwapChain::getImageViews() const {
 }
 
 std::optional<uint32_t> VulkanSwapChain::getNextImageIndex(
-    VulkanSemaphore* semaphore, VulkanFence* fence) {
+    VkSemaphore semaphore, VulkanFence* fence) {
   uint32_t imageIndex;
   VkResult result = vkAcquireNextImageKHR(
       graphicsDevice_->getRawDevice(),
       swapChain_.get(),
       UINT64_MAX,
-      semaphore != nullptr ? semaphore->getRawSemaphore() : nullptr,
+      semaphore,
       fence != nullptr ? fence->getRawFence() : nullptr,
       &imageIndex);
 
@@ -172,16 +171,13 @@ std::optional<uint32_t> VulkanSwapChain::getNextImageIndex(
   return imageIndex;
 }
 
-void VulkanSwapChain::present(
-    uint32_t imageIndex, VulkanSemaphore* waitSemaphore) {
+void VulkanSwapChain::present(uint32_t imageIndex, VkSemaphore waitSemaphore) {
   VkSwapchainKHR swapChain = swapChain_.get();
   VkPresentInfoKHR presentInfo{};
   presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-  VkSemaphore rawWaitSemaphore;
   if (waitSemaphore != nullptr) {
     presentInfo.waitSemaphoreCount = 1;
-    rawWaitSemaphore = waitSemaphore->getRawSemaphore();
-    presentInfo.pWaitSemaphores = &rawWaitSemaphore;
+    presentInfo.pWaitSemaphores = &waitSemaphore;
   }
   presentInfo.swapchainCount = 1;
   presentInfo.pSwapchains = &swapChain;

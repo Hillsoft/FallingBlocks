@@ -16,6 +16,7 @@
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanPresentStack.hpp"
 #include "render/glfw_wrapper/Window.hpp"
+#include "render/vulkan/SemaphoreBuilder.hpp"
 
 namespace blocks::render {
 
@@ -50,7 +51,10 @@ makeSynchronisationSets(VulkanGraphicsDevice& device) {
   result.reserve(kMaxFramesInFlight);
 
   for (int i = 0; i < kMaxFramesInFlight; i++) {
-    result.emplace_back(device, device, VulkanFence{device, true});
+    result.emplace_back(
+        vulkan::SemaphoreBuilder{}.build(device.getRawDevice()),
+        vulkan::SemaphoreBuilder{}.build(device.getRawDevice()),
+        VulkanFence{device, true});
   }
 
   return result;
@@ -120,7 +124,8 @@ void GLFWApplication::drawFrame() {
   }
 
   VulkanPresentStack::FrameData presentFrame = presentStack_.getNextImageIndex(
-      &synchronisationSets_[currentFrame_].imageAvailableSemaphore, nullptr);
+      synchronisationSets_[currentFrame_].imageAvailableSemaphore.get(),
+      nullptr);
 
   if (presentFrame.refreshRequired()) {
     resetSwapChain();
@@ -138,12 +143,12 @@ void GLFWApplication::drawFrame() {
       });
 
   commandBuffers_[currentFrame_].submit(
-      {&synchronisationSets_[currentFrame_].imageAvailableSemaphore},
-      {&synchronisationSets_[currentFrame_].renderFinishedSemaphore},
+      {synchronisationSets_[currentFrame_].imageAvailableSemaphore.get()},
+      {synchronisationSets_[currentFrame_].renderFinishedSemaphore.get()},
       &synchronisationSets_[currentFrame_].inFlightFence);
 
   presentFrame.present(
-      &synchronisationSets_[currentFrame_].renderFinishedSemaphore);
+      synchronisationSets_[currentFrame_].renderFinishedSemaphore.get());
 
   currentFrame_ = (currentFrame_ + 1) % kMaxFramesInFlight;
 }

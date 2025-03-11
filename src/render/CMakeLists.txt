@@ -4,6 +4,8 @@ add_subdirectory(vulkan)
 add_library(render.glfwapplication STATIC "GLFWApplication.cpp" "GLFWApplication.hpp")
 target_link_libraries(render.glfwapplication
 	render.glfw_wrapper.window
+	render.vulkan.semaphorebuilder
+	render.vulkan.uniquehandle
 	render.quad
 	render.vulkanbuffer
 	render.vulkancommandbuffer
@@ -14,7 +16,6 @@ target_link_libraries(render.glfwapplication
 	render.vulkangraphicspipeline
 	render.vulkaninstance
 	render.vulkanpresentstack
-	render.vulkansemaphore
 	render.vulkanshader
 	render.vulkansurface)
 
@@ -40,9 +41,7 @@ target_link_libraries(render.vulkancommandbuffer
 	render.vulkanframebuffer
 	render.vulkangraphicsdevice
 	render.vulkangraphicspipeline
-	render.vulkanrenderpass
-	render.vulkansemaphore
-	util.debug)
+	render.vulkanrenderpass)
 
 add_library(render.vulkancommandpool STATIC "VulkanCommandPool.cpp" "VulkanCommandPool.hpp")
 target_link_libraries(render.vulkancommandpool
@@ -53,8 +52,7 @@ target_link_libraries(render.vulkancommandpool
 add_library(render.vulkandebugmessenger STATIC "VulkanDebugMessenger.cpp" "VulkanDebugMessenger.hpp")
 target_link_libraries(render.vulkandebugmessenger
 	render.vulkaninstance
-	render.vulkan.uniquehandle
-	util.debug)
+	render.vulkan.uniquehandle)
 
 add_library(render.vulkandevicememory STATIC "VulkanDeviceMemory.cpp" "VulkanDeviceMemory.hpp")
 target_link_libraries(render.vulkandevicememory
@@ -107,6 +105,7 @@ target_link_libraries(render.vulkanpipelinelayout
 
 add_library(render.vulkanpresentstack STATIC "VulkanPresentStack.cpp" "VulkanPresentStack.hpp")
 target_link_libraries(render.vulkanpresentstack
+	render.vulkanfence
 	render.vulkanframebuffer
 	render.vulkangraphicsdevice
 	render.vulkanimageview
@@ -123,11 +122,6 @@ target_link_libraries(render.vulkanrawbuffer
 
 add_library(render.vulkanrenderpass STATIC "VulkanRenderPass.cpp" "VulkanRenderPass.hpp")
 target_link_libraries(render.vulkanrenderpass
-	render.vulkangraphicsdevice
-	render.vulkan.uniquehandle)
-
-add_library(render.vulkansemaphore STATIC "VulkanSemaphore.cpp" "VulkanSemaphore.hpp")
-target_link_libraries(render.vulkansemaphore
 	render.vulkangraphicsdevice
 	render.vulkan.uniquehandle)
 
@@ -149,7 +143,5 @@ target_link_libraries(render.vulkanswapchain
 	render.vulkanfence
 	render.vulkangraphicsdevice
 	render.vulkanimageview
-	render.vulkansemaphore
 	render.vulkansurface
-	render.vulkan.uniquehandle
-	util.debug)
+	render.vulkan.uniquehandle)

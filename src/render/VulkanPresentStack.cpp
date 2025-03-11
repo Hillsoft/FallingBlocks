@@ -11,7 +11,6 @@
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
 #include "render/VulkanRenderPass.hpp"
-#include "render/VulkanSemaphore.hpp"
 #include "render/VulkanSurface.hpp"
 #include "util/resettable.hpp"
 
@@ -55,7 +54,7 @@ VulkanPresentStack::SwapChainData::SwapChainData(
           device, renderPass, imageViews, swapChain.getSwapchainExtent())) {}
 
 VulkanPresentStack::FrameData VulkanPresentStack::getNextImageIndex(
-    VulkanSemaphore* semaphore, VulkanFence* fence) {
+    VkSemaphore semaphore, VulkanFence* fence) {
   std::optional<uint32_t> nextImageIndex =
       swapChainData_->swapChain.getNextImageIndex(semaphore, fence);
   if (nextImageIndex.has_value()) {

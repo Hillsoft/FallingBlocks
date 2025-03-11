@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <vector>
-
+#include <GLFW/glfw3.h>
 #include "render/VulkanBuffer.hpp"
 #include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
@@ -12,9 +12,9 @@
 #include "render/VulkanGraphicsPipeline.hpp"
 #include "render/VulkanInstance.hpp"
 #include "render/VulkanPresentStack.hpp"
-#include "render/VulkanSemaphore.hpp"
 #include "render/VulkanShader.hpp"
 #include "render/VulkanSurface.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
@@ -32,8 +32,8 @@ class GLFWApplication {
   void run();
 
   struct PipelineSynchronisationSet {
-    VulkanSemaphore imageAvailableSemaphore;
-    VulkanSemaphore renderFinishedSemaphore;
+    vulkan::UniqueHandle<VkSemaphore> imageAvailableSemaphore;
+    vulkan::UniqueHandle<VkSemaphore> renderFinishedSemaphore;
     VulkanFence inFlightFence;
   };
 
