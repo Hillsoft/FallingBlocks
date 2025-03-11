@@ -6,7 +6,6 @@
 #include <vector>
 #include <GLFW/glfw3.h>
 
-#include "render/VulkanFence.hpp"
 #include "render/VulkanFrameBuffer.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
@@ -54,7 +53,7 @@ VulkanPresentStack::SwapChainData::SwapChainData(
           device, renderPass, imageViews, swapChain.getSwapchainExtent())) {}
 
 VulkanPresentStack::FrameData VulkanPresentStack::getNextImageIndex(
-    VkSemaphore semaphore, VulkanFence* fence) {
+    VkSemaphore semaphore, VkFence fence) {
   std::optional<uint32_t> nextImageIndex =
       swapChainData_->swapChain.getNextImageIndex(semaphore, fence);
   if (nextImageIndex.has_value()) {

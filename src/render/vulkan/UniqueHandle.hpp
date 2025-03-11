@@ -39,7 +39,7 @@ class UniqueHandle {
     return *this;
   }
 
-  T get() const { return handle_; }
+  const T& get() const { return handle_; }
 
  private:
   T handle_;

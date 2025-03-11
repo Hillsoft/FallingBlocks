@@ -1,6 +1,7 @@
 #include "render/GLFWApplication.hpp"
 
 #include <chrono>
+#include <cstdint>
 #include <functional>
 #include <iostream>
 #include <stdexcept>
@@ -8,14 +9,13 @@
 #include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
-
 #include "render/Quad.hpp"
 #include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
-#include "render/VulkanFence.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanPresentStack.hpp"
 #include "render/glfw_wrapper/Window.hpp"
+#include "render/vulkan/FenceBuilder.hpp"
 #include "render/vulkan/SemaphoreBuilder.hpp"
 
 namespace blocks::render {
@@ -54,7 +54,8 @@ makeSynchronisationSets(VulkanGraphicsDevice& device) {
     result.emplace_back(
         vulkan::SemaphoreBuilder{}.build(device.getRawDevice()),
         vulkan::SemaphoreBuilder{}.build(device.getRawDevice()),
-        VulkanFence{device, true});
+        vulkan::FenceBuilder{}.setInitiallySignalled(true).build(
+            device.getRawDevice()));
   }
 
   return result;
@@ -115,7 +116,12 @@ void GLFWApplication::run() {
 }
 
 void GLFWApplication::drawFrame() {
-  synchronisationSets_[currentFrame_].inFlightFence.wait();
+  vkWaitForFences(
+      graphics_.getRawDevice(),
+      1,
+      &synchronisationSets_[currentFrame_].inFlightFence.get(),
+      true,
+      UINT64_MAX);
 
   if (shouldResetSwapChain_) {
     resetSwapChain();
@@ -132,7 +138,10 @@ void GLFWApplication::drawFrame() {
     return;
   }
 
-  synchronisationSets_[currentFrame_].inFlightFence.reset();
+  vkResetFences(
+      graphics_.getRawDevice(),
+      1,
+      &synchronisationSets_[currentFrame_].inFlightFence.get());
 
   commandBuffers_[currentFrame_].runRenderPass(
       pipeline_, presentFrame.getFrameBuffer(), [&](VkCommandBuffer buffer) {
@@ -145,7 +154,7 @@ void GLFWApplication::drawFrame() {
   commandBuffers_[currentFrame_].submit(
       {synchronisationSets_[currentFrame_].imageAvailableSemaphore.get()},
       {synchronisationSets_[currentFrame_].renderFinishedSemaphore.get()},
-      &synchronisationSets_[currentFrame_].inFlightFence);
+      synchronisationSets_[currentFrame_].inFlightFence.get());
 
   presentFrame.present(
       synchronisationSets_[currentFrame_].renderFinishedSemaphore.get());

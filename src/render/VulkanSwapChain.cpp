@@ -9,7 +9,6 @@
 #include <vector>
 #include <GLFW/glfw3.h>
 
-#include "render/VulkanFence.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
 #include "render/VulkanSurface.hpp"
@@ -152,14 +151,14 @@ std::vector<VulkanImageView> VulkanSwapChain::getImageViews() const {
 }
 
 std::optional<uint32_t> VulkanSwapChain::getNextImageIndex(
-    VkSemaphore semaphore, VulkanFence* fence) {
+    VkSemaphore semaphore, VkFence fence) {
   uint32_t imageIndex;
   VkResult result = vkAcquireNextImageKHR(
       graphicsDevice_->getRawDevice(),
       swapChain_.get(),
       UINT64_MAX,
       semaphore,
-      fence != nullptr ? fence->getRawFence() : nullptr,
+      fence,
       &imageIndex);
 
   if (result == VK_ERROR_OUT_OF_DATE_KHR) {

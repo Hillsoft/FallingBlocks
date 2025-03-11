@@ -5,7 +5,6 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanCommandPool.hpp"
-#include "render/VulkanFence.hpp"
 #include "render/VulkanFrameBuffer.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanGraphicsPipeline.hpp"
@@ -27,7 +26,7 @@ class VulkanCommandBuffer {
   void submit(
       const std::vector<VkSemaphore>& waitSemaphores,
       const std::vector<VkSemaphore>& signalSemaphores,
-      VulkanFence* signalFence);
+      VkFence signalFence);
 
  private:
   VkCommandBuffer commandBuffer_;

@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <vector>
 #include <GLFW/glfw3.h>
-#include "render/VulkanFence.hpp"
 #include "render/VulkanFrameBuffer.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
@@ -51,7 +50,7 @@ class VulkanPresentStack {
       VulkanSurface& surface,
       VulkanRenderPass& renderPass);
 
-  FrameData getNextImageIndex(VkSemaphore semaphore, VulkanFence* fence);
+  FrameData getNextImageIndex(VkSemaphore semaphore, VkFence fence);
 
   VulkanFrameBuffer& getFrameBuffer(uint32_t imageIndex) {
     return swapChainData_->frameBuffer[imageIndex];

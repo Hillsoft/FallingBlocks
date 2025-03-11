@@ -4,6 +4,7 @@ add_subdirectory(vulkan)
 add_library(render.glfwapplication STATIC "GLFWApplication.cpp" "GLFWApplication.hpp")
 target_link_libraries(render.glfwapplication
 	render.glfw_wrapper.window
+	render.vulkan.fencebuilder
 	render.vulkan.semaphorebuilder
 	render.vulkan.uniquehandle
 	render.quad
@@ -11,7 +12,6 @@ target_link_libraries(render.glfwapplication
 	render.vulkancommandbuffer
 	render.vulkancommandpool
 	render.vulkandebugmessenger
-	render.vulkanfence
 	render.vulkangraphicsdevice
 	render.vulkangraphicspipeline
 	render.vulkaninstance
@@ -37,7 +37,6 @@ target_link_libraries(render.vulkanbuffer
 add_library(render.vulkancommandbuffer STATIC "VulkanCommandBuffer.cpp" "VulkanCommandBuffer.hpp")
 target_link_libraries(render.vulkancommandbuffer
 	render.vulkancommandpool
-	render.vulkanfence
 	render.vulkanframebuffer
 	render.vulkangraphicsdevice
 	render.vulkangraphicspipeline
@@ -58,11 +57,6 @@ add_library(render.vulkandevicememory STATIC "VulkanDeviceMemory.cpp" "VulkanDev
 target_link_libraries(render.vulkandevicememory
 	render.vulkangraphicsdevice
 	render.vulkanrawbuffer
-	render.vulkan.uniquehandle)
-
-add_library(render.vulkanfence STATIC "VulkanFence.cpp" "VulkanFence.hpp")
-target_link_libraries(render.vulkanfence
-	render.vulkangraphicsdevice
 	render.vulkan.uniquehandle)
 
 add_library(render.vulkanframebuffer STATIC "VulkanFrameBuffer.cpp" "VulkanFrameBuffer.hpp")
@@ -105,7 +99,6 @@ target_link_libraries(render.vulkanpipelinelayout
 
 add_library(render.vulkanpresentstack STATIC "VulkanPresentStack.cpp" "VulkanPresentStack.hpp")
 target_link_libraries(render.vulkanpresentstack
-	render.vulkanfence
 	render.vulkanframebuffer
 	render.vulkangraphicsdevice
 	render.vulkanimageview
@@ -140,7 +133,6 @@ target_link_libraries(render.vulkansurface
 add_library(render.vulkanswapchain STATIC "VulkanSwapChain.cpp" "VulkanSwapChain.hpp")
 target_link_libraries(render.vulkanswapchain
 	render.glfw_wrapper.window
-	render.vulkanfence
 	render.vulkangraphicsdevice
 	render.vulkanimageview
 	render.vulkansurface

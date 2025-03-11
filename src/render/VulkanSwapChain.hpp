@@ -5,7 +5,6 @@
 #include <vector>
 #include <GLFW/glfw3.h>
 
-#include "render/VulkanFence.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
 #include "render/VulkanSurface.hpp"
@@ -20,7 +19,7 @@ class VulkanSwapChain {
 
   // nullopt indicates out of date swapchain, recreation required
   std::optional<uint32_t> getNextImageIndex(
-      VkSemaphore semaphore, VulkanFence* fence);
+      VkSemaphore semaphore, VkFence fence);
 
   VkExtent2D getSwapchainExtent() const { return extent_; }
 

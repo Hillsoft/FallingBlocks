@@ -7,7 +7,6 @@
 #include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanDebugMessenger.hpp"
-#include "render/VulkanFence.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanGraphicsPipeline.hpp"
 #include "render/VulkanInstance.hpp"
@@ -34,7 +33,7 @@ class GLFWApplication {
   struct PipelineSynchronisationSet {
     vulkan::UniqueHandle<VkSemaphore> imageAvailableSemaphore;
     vulkan::UniqueHandle<VkSemaphore> renderFinishedSemaphore;
-    VulkanFence inFlightFence;
+    vulkan::UniqueHandle<VkFence> inFlightFence;
   };
 
  private:

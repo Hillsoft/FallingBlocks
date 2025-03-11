@@ -6,7 +6,6 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanCommandPool.hpp"
-#include "render/VulkanFence.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 
 namespace blocks::render {
@@ -30,7 +29,7 @@ VulkanCommandBuffer::VulkanCommandBuffer(
 void VulkanCommandBuffer::submit(
     const std::vector<VkSemaphore>& waitSemaphores,
     const std::vector<VkSemaphore>& signalSemaphores,
-    VulkanFence* signalFence) {
+    VkFence signalFence) {
   std::vector<VkPipelineStageFlags> waitStages;
   waitStages.reserve(waitSemaphores.size());
   for (const auto& semaphore : waitSemaphores) {
@@ -51,12 +50,7 @@ void VulkanCommandBuffer::submit(
       static_cast<uint32_t>(signalSemaphores.size());
   submitInfo.pSignalSemaphores = signalSemaphores.data();
 
-  if (vkQueueSubmit(
-          queue_,
-          1,
-          &submitInfo,
-          signalFence != nullptr ? signalFence->getRawFence() : nullptr) !=
-      VK_SUCCESS) {
+  if (vkQueueSubmit(queue_, 1, &submitInfo, signalFence) != VK_SUCCESS) {
     throw std::runtime_error{"Failed to submit draw command buffer"};
   }
 }
