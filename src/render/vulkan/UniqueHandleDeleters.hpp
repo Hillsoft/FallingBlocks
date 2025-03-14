@@ -47,6 +47,30 @@ class HandleDeleter<VkDebugUtilsMessengerEXT> {
 };
 
 template <>
+class HandleDeleter<VkDescriptorPool> {
+ public:
+  HandleDeleter(VkDevice device) : device_(device) {}
+  void destroy(VkDescriptorPool handle) {
+    vkDestroyDescriptorPool(device_, handle, nullptr);
+  }
+
+ private:
+  VkDevice device_;
+};
+
+template <>
+class HandleDeleter<VkDescriptorSetLayout> {
+ public:
+  HandleDeleter(VkDevice device) : device_(device) {}
+  void destroy(VkDescriptorSetLayout handle) {
+    vkDestroyDescriptorSetLayout(device_, handle, nullptr);
+  }
+
+ private:
+  VkDevice device_;
+};
+
+template <>
 class HandleDeleter<VkDeviceMemory> {
  public:
   HandleDeleter(VkDevice device) : device_(device) {}
@@ -85,6 +109,16 @@ class HandleDeleter<VkDevice> {
  public:
   HandleDeleter() {}
   void destroy(VkDevice handle) { vkDestroyDevice(handle, nullptr); }
+};
+
+template <>
+class HandleDeleter<VkImage> {
+ public:
+  HandleDeleter(VkDevice device) : device_(device) {}
+  void destroy(VkImage handle) { vkDestroyImage(device_, handle, nullptr); }
+
+ private:
+  VkDevice device_;
 };
 
 template <>
@@ -137,6 +171,16 @@ class HandleDeleter<VkRenderPass> {
   void destroy(VkRenderPass handle) {
     vkDestroyRenderPass(device_, handle, nullptr);
   }
+
+ private:
+  VkDevice device_;
+};
+
+template <>
+class HandleDeleter<VkSampler> {
+ public:
+  HandleDeleter(VkDevice device) : device_(device) {}
+  void destroy(VkSampler handle) { vkDestroySampler(device_, handle, nullptr); }
 
  private:
   VkDevice device_;

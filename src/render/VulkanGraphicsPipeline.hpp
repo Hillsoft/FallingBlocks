@@ -2,6 +2,7 @@
 
 #include <GLFW/glfw3.h>
 
+#include "render/VulkanDescriptorSetLayout.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanPipelineLayout.hpp"
 #include "render/VulkanRenderPass.hpp"
@@ -16,9 +17,11 @@ class VulkanGraphicsPipeline {
       VulkanGraphicsDevice& device,
       VkFormat imageFormat,
       VulkanVertexShader& vertexShader,
-      VulkanShader& fragmentShader);
+      VulkanShader& fragmentShader,
+      VulkanDescriptorSetLayout& descriptorLayout);
 
   VkPipeline getRawPipeline() { return pipeline_.get(); }
+  VulkanPipelineLayout& getPipelineLayout() { return pipelineLayout_; }
   VulkanRenderPass& getRenderPass() { return renderPass_; }
 
  private:

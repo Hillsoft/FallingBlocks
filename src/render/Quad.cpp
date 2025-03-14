@@ -17,16 +17,16 @@ namespace {
 
 struct VertexData {
   math::Vec2 position;
-  math::Vec3 color;
+  math::Vec2 uv;
 };
 
 std::vector<VertexData> vertices = {
-    {{0.0f, -0.75f}, {1.0f, 1.0f, 1.0f}},
-    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-    {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{0.0f, 0.75f}, {1.0f, 0.0f, 0.0f}},
-    {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}};
+    {{-0.5f, 0.5f}, {0.0f, 0.0f}},
+    {{-0.5f, -0.5f}, {0.0f, 1.0f}},
+    {{0.5f, -0.5f}, {1.0f, 1.0f}},
+    {{0.5f, 0.5f}, {1.0f, 0.0f}},
+    {{-0.5f, 0.5f}, {0.0f, 0.0f}},
+    {{0.5f, -0.5f}, {1.0f, 1.0f}}};
 
 constexpr VkVertexInputBindingDescription kBindingDescription = []() {
   VkVertexInputBindingDescription bindingDescription{};
@@ -48,8 +48,8 @@ constexpr std::array<VkVertexInputAttributeDescription, 2>
 
       attributeDescriptions[1].binding = 0;
       attributeDescriptions[1].location = 1;
-      attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-      attributeDescriptions[1].offset = offsetof(VertexData, color);
+      attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
+      attributeDescriptions[1].offset = offsetof(VertexData, uv);
 
       return attributeDescriptions;
     }();
@@ -69,7 +69,8 @@ VulkanBuffer getQuadVertexAttributesBuffer(VulkanGraphicsDevice& device) {
       device,
       std::span{
           reinterpret_cast<char*>(vertices.data()),
-          sizeof(VertexData) * vertices.size()}};
+          sizeof(VertexData) * vertices.size()},
+      VK_BUFFER_USAGE_VERTEX_BUFFER_BIT};
 }
 
 } // namespace blocks::render

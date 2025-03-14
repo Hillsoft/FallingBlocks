@@ -8,8 +8,11 @@
 
 namespace blocks::render {
 
-VulkanBuffer::VulkanBuffer(VulkanGraphicsDevice& device, std::span<char> data)
-    : rawBuffer_(device, data), memory_(device, rawBuffer_) {
+VulkanBuffer::VulkanBuffer(
+    VulkanGraphicsDevice& device,
+    std::span<char> data,
+    VkBufferUsageFlags usageFlags)
+    : rawBuffer_(device, data, usageFlags), memory_(device, rawBuffer_) {
   vkBindBufferMemory(
       device.getRawDevice(),
       rawBuffer_.getRawBuffer(),

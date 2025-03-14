@@ -1,17 +1,20 @@
 #include "render/VulkanPipelineLayout.hpp"
 
 #include <GLFW/glfw3.h>
-
+#include "render/VulkanDescriptorSetLayout.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 
-VulkanPipelineLayout::VulkanPipelineLayout(VulkanGraphicsDevice& device)
+VulkanPipelineLayout::VulkanPipelineLayout(
+    VulkanGraphicsDevice& device, VulkanDescriptorSetLayout& descriptorLayout)
     : layout_(nullptr, nullptr) {
+  VkDescriptorSetLayout rawDescriptorLayout = descriptorLayout.getRawLayout();
   VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
   pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-  pipelineLayoutInfo.setLayoutCount = 0;
+  pipelineLayoutInfo.setLayoutCount = 1;
+  pipelineLayoutInfo.pSetLayouts = &rawDescriptorLayout;
   pipelineLayoutInfo.pushConstantRangeCount = 0;
 
   VkPipelineLayout layout;

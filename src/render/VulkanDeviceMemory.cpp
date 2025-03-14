@@ -10,8 +10,6 @@
 
 namespace blocks::render {
 
-namespace {
-
 uint32_t findMemoryType(
     const VkMemoryRequirements& requirements,
     const VkPhysicalDeviceMemoryProperties& memProperties,
@@ -28,8 +26,6 @@ uint32_t findMemoryType(
 
   throw std::runtime_error{"No suitable memory found"};
 }
-
-} // namespace
 
 VulkanDeviceMemory::VulkanDeviceMemory(
     VulkanGraphicsDevice& device, VulkanRawBuffer& rawBuffer)

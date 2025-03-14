@@ -12,12 +12,15 @@ target_link_libraries(render.glfwapplication
 	render.vulkancommandbuffer
 	render.vulkancommandpool
 	render.vulkandebugmessenger
+	render.vulkandescriptorpool
+	render.vulkandescriptorsetlayout
 	render.vulkangraphicsdevice
 	render.vulkangraphicspipeline
 	render.vulkaninstance
 	render.vulkanpresentstack
 	render.vulkanshader
-	render.vulkansurface)
+	render.vulkansurface
+	render.vulkantexture)
 
 add_library(render.quad STATIC "Quad.cpp" "Quad.hpp")
 target_link_libraries(render.quad
@@ -53,6 +56,17 @@ target_link_libraries(render.vulkandebugmessenger
 	render.vulkaninstance
 	render.vulkan.uniquehandle)
 
+add_library(render.vulkandescriptorpool STATIC "VulkanDescriptorPool.cpp" "VulkanDescriptorPool.hpp")
+target_link_libraries(render.vulkandescriptorpool
+	render.vulkandescriptorsetlayout
+	render.vulkangraphicsdevice
+	render.vulkan.uniquehandle)
+
+add_library(render.vulkandescriptorsetlayout STATIC "VulkanDescriptorSetLayout.cpp" "VulkanDescriptorSetLayout.hpp")
+target_link_libraries(render.vulkandescriptorsetlayout
+	render.vulkangraphicsdevice
+	render.vulkan.uniquehandle)
+
 add_library(render.vulkandevicememory STATIC "VulkanDeviceMemory.cpp" "VulkanDeviceMemory.hpp")
 target_link_libraries(render.vulkandevicememory
 	render.vulkangraphicsdevice
@@ -76,6 +90,7 @@ target_link_libraries(render.vulkangraphicsdevice
 
 add_library(render.vulkangraphicspipeline STATIC "VulkanGraphicsPipeline.cpp" "VulkanGraphicsPipeline.hpp")
 target_link_libraries(render.vulkangraphicspipeline
+	render.vulkandescriptorsetlayout
 	render.vulkangraphicsdevice
 	render.vulkanpipelinelayout
 	render.vulkanrenderpass
@@ -94,6 +109,7 @@ target_link_libraries(render.vulkaninstance INTERFACE
 
 add_library(render.vulkanpipelinelayout STATIC "VulkanPipelineLayout.cpp" "VulkanPipelineLayout.hpp")
 target_link_libraries(render.vulkanpipelinelayout
+	render.vulkandescriptorsetlayout
 	render.vulkangraphicsdevice
 	render.vulkan.uniquehandle)
 
@@ -136,4 +152,17 @@ target_link_libraries(render.vulkanswapchain
 	render.vulkangraphicsdevice
 	render.vulkanimageview
 	render.vulkansurface
+	render.vulkan.uniquehandle)
+
+add_library(render.vulkantexture STATIC "VulkanTexture.cpp" "VulkanTexture.hpp")
+target_link_libraries(render.vulkantexture
+	loader.image
+	loader.image.bitmap
+	render.vulkanbuffer
+	render.vulkancommandbuffer
+	render.vulkancommandpool
+	render.vulkandevicememory
+	render.vulkangraphicsdevice
+	render.vulkanimageview
+	render.vulkan.fencebuilder
 	render.vulkan.uniquehandle)

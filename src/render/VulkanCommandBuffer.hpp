@@ -28,6 +28,8 @@ class VulkanCommandBuffer {
       const std::vector<VkSemaphore>& signalSemaphores,
       VkFence signalFence);
 
+  VkCommandBuffer getRawBuffer() { return commandBuffer_; }
+
  private:
   VkCommandBuffer commandBuffer_;
   VkQueue queue_;

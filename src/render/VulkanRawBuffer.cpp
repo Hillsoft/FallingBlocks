@@ -10,12 +10,14 @@
 namespace blocks::render {
 
 VulkanRawBuffer::VulkanRawBuffer(
-    VulkanGraphicsDevice& device, std::span<char> data)
+    VulkanGraphicsDevice& device,
+    std::span<char> data,
+    VkBufferUsageFlags usageFlags)
     : buffer_(nullptr, nullptr) {
   VkBufferCreateInfo bufferInfo{};
   bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
   bufferInfo.size = data.size();
-  bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+  bufferInfo.usage = usageFlags;
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
   VkBuffer buffer;

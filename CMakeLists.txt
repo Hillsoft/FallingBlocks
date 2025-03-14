@@ -20,6 +20,7 @@ set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
 set(CMAKE_CXX_STANDARD 20)
 
 add_definitions(-DGLFW_INCLUDE_VULKAN)
+add_definitions("-DRESOURCE_DIR=\"${CMAKE_SOURCE_DIR}/res\"")
 
 project ("FallingBlocks" CXX)
 

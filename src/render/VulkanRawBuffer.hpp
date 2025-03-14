@@ -10,7 +10,10 @@ namespace blocks::render {
 
 class VulkanRawBuffer {
  public:
-  VulkanRawBuffer(VulkanGraphicsDevice& device, std::span<char> data);
+  VulkanRawBuffer(
+      VulkanGraphicsDevice& device,
+      std::span<char> data,
+      VkBufferUsageFlags usageFlags);
 
   VkBuffer getRawBuffer() { return buffer_.get(); }
 

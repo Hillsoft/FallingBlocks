@@ -7,12 +7,15 @@
 #include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanDebugMessenger.hpp"
+#include "render/VulkanDescriptorPool.hpp"
+#include "render/VulkanDescriptorSetLayout.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanGraphicsPipeline.hpp"
 #include "render/VulkanInstance.hpp"
 #include "render/VulkanPresentStack.hpp"
 #include "render/VulkanShader.hpp"
 #include "render/VulkanSurface.hpp"
+#include "render/VulkanTexture.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
@@ -57,12 +60,15 @@ class GLFWApplication {
   VulkanGraphicsDevice graphics_;
   VulkanVertexShader vertexShader_;
   VulkanShader fragmentShader_;
+  VulkanDescriptorSetLayout descriptorSetLayout_;
+  VulkanDescriptorPool descriptorPool_;
   VulkanGraphicsPipeline pipeline_;
   VulkanPresentStack presentStack_;
   VulkanCommandPool commandPool_;
   std::vector<VulkanCommandBuffer> commandBuffers_;
   std::vector<PipelineSynchronisationSet> synchronisationSets_;
   VulkanBuffer vertexAttributes_;
+  VulkanTexture texture_;
 
   bool shouldResetSwapChain_ = 0;
   uint32_t currentFrame_ = 0;

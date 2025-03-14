@@ -74,16 +74,46 @@ GLFWApplication::GLFWApplication()
       graphics_(VulkanGraphicsDevice::make(vulkan_, surface_)),
       vertexShader_(getQuadVertexShader(graphics_)),
       fragmentShader_(graphics_, "shaders/fragment.spv"),
+      descriptorSetLayout_(graphics_),
+      descriptorPool_(graphics_, descriptorSetLayout_, kMaxFramesInFlight),
       pipeline_(
           graphics_,
           graphics_.physicalInfo().swapChainSupport.preferredFormat.format,
           vertexShader_,
-          fragmentShader_),
+          fragmentShader_,
+          descriptorSetLayout_),
       presentStack_(graphics_, surface_, pipeline_.getRenderPass()),
       commandPool_(graphics_),
       commandBuffers_(makeCommandBuffers(graphics_, commandPool_)),
       synchronisationSets_(makeSynchronisationSets(graphics_)),
-      vertexAttributes_(getQuadVertexAttributesBuffer(graphics_)) {
+      vertexAttributes_(getQuadVertexAttributesBuffer(graphics_)),
+      texture_(graphics_, commandPool_, RESOURCE_DIR "/test_image.bmp") {
+  const auto& descriptorSets = descriptorPool_.getDescriptorSets();
+  std::vector<VkWriteDescriptorSet> descriptorWrites;
+  descriptorWrites.reserve(descriptorSets.size());
+
+  VkDescriptorImageInfo imageInfo{};
+  imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+  imageInfo.imageView = texture_.getImageView().getRawImageView();
+  imageInfo.sampler = texture_.getSampler();
+
+  for (const auto& set : descriptorSets) {
+    auto& curWrite = descriptorWrites.emplace_back();
+    curWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    curWrite.dstSet = set;
+    curWrite.dstBinding = 0;
+    curWrite.dstArrayElement = 0;
+    curWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    curWrite.descriptorCount = 1;
+    curWrite.pImageInfo = &imageInfo;
+  }
+
+  vkUpdateDescriptorSets(
+      graphics_.getRawDevice(),
+      static_cast<uint32_t>(descriptorWrites.size()),
+      descriptorWrites.data(),
+      0,
+      nullptr);
 }
 
 GLFWApplication::~GLFWApplication() {
@@ -145,6 +175,16 @@ void GLFWApplication::drawFrame() {
 
   commandBuffers_[currentFrame_].runRenderPass(
       pipeline_, presentFrame.getFrameBuffer(), [&](VkCommandBuffer buffer) {
+        vkCmdBindDescriptorSets(
+            buffer,
+            VK_PIPELINE_BIND_POINT_GRAPHICS,
+            pipeline_.getPipelineLayout().getRawLayout(),
+            0,
+            1,
+            &descriptorPool_.getDescriptorSets()[currentFrame_],
+            0,
+            nullptr);
+
         VkBuffer vertexBuffer = vertexAttributes_.getRawBuffer();
         VkDeviceSize offsets = 0;
         vkCmdBindVertexBuffers(buffer, 0, 1, &vertexBuffer, &offsets);
