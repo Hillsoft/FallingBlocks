@@ -1,7 +1,7 @@
 #pragma once
 
 #include <array>
-
+#include <type_traits>
 #include "util/debug.hpp"
 
 namespace math {
@@ -24,8 +24,22 @@ constexpr size_t alignmentForVec(size_t size) {
 template <typename TNum, size_t size>
 class Vec {
  public:
+  Vec(const Vec& other) = default;
+  Vec(Vec&& other) = default;
+
   template <typename... TArgs>
-  Vec(TArgs&&... args) : data_(std::forward<TArgs>(args)...) {}
+  Vec(TArgs&&... args)
+    requires(std::conjunction_v<std::is_convertible<TArgs, TNum>...>)
+      : data_(std::forward<TArgs>(args)...) {}
+
+  template <typename TNum2>
+  Vec(const Vec<TNum2, size>& other)
+    requires(std::is_convertible_v<TNum2, TNum>)
+      : data_() {
+    for (int i = 0; i < size; i++) {
+      data_ = other.at(i);
+    }
+  }
 
   TNum& at(size_t index) {
     DEBUG_ASSERT(index < size);
@@ -80,5 +94,49 @@ class Vec {
 static_assert(sizeof(float) == 4);
 using Vec2 = Vec<float, 2>;
 using Vec3 = Vec<float, 3>;
+
+template <typename TNum, size_t size>
+Vec<TNum, size> operator+(const Vec<TNum, size>& a, const Vec<TNum, size>& b)
+  requires(std::is_arithmetic_v<TNum>)
+{
+  Vec<TNum, size> result;
+  for (size_t i = 0; i < size; i++) {
+    result.at(i) = a.at(i) + b.at(i);
+  }
+  return result;
+}
+
+template <typename TNum, size_t size>
+Vec<TNum, size> operator-(const Vec<TNum, size>& a, const Vec<TNum, size>& b)
+  requires(std::is_arithmetic_v<TNum>)
+{
+  Vec<TNum, size> result;
+  for (size_t i = 0; i < size; i++) {
+    result.at(i) = a.at(i) - b.at(i);
+  }
+  return result;
+}
+
+template <typename TNum, size_t size>
+Vec<TNum, size> operator/(const Vec<TNum, size>& a, TNum d)
+  requires(std::is_arithmetic_v<TNum>)
+{
+  Vec<TNum, size> result;
+  for (size_t i = 0; i < size; i++) {
+    result.at(i) = a.at(i) / d;
+  }
+  return result;
+}
+
+template <typename TNum, size_t size>
+Vec<TNum, size> abs(const Vec<TNum, size>& a)
+  requires(std::is_arithmetic_v<TNum>)
+{
+  Vec<TNum, size> result;
+  for (size_t i = 0; i < size; i++) {
+    result.at(i) = std::abs(a.at(i));
+  }
+  return result;
+}
 
 } // namespace math
