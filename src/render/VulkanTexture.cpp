@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <GLFW/glfw3.h>
 #include "loader/Image.hpp"
-#include "loader/image/Bitmap.hpp"
+#include "loader/LoadImage.hpp"
 #include "render/VulkanBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanDeviceMemory.hpp"
@@ -82,7 +82,7 @@ VulkanTexture::VulkanTexture(
       buffer_(nullptr, nullptr),
       image_(nullptr, nullptr),
       sampler_(nullptr, nullptr) {
-  loader::Image tex = loader::loadBitmap(source);
+  loader::Image tex = loader::loadImage(source);
 
   VulkanBuffer stagingBuffer(
       device, tex.pixelData, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);

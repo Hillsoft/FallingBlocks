@@ -157,7 +157,7 @@ target_link_libraries(render.vulkanswapchain
 add_library(render.vulkantexture STATIC "VulkanTexture.cpp" "VulkanTexture.hpp")
 target_link_libraries(render.vulkantexture
 	loader.image
-	loader.image.bitmap
+	loader.loadimage
 	render.vulkanbuffer
 	render.vulkancommandpool
 	render.vulkandevicememory

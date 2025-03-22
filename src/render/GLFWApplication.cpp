@@ -87,7 +87,7 @@ GLFWApplication::GLFWApplication()
       commandBuffers_(makeCommandBuffers(graphics_, commandPool_)),
       synchronisationSets_(makeSynchronisationSets(graphics_)),
       vertexAttributes_(getQuadVertexAttributesBuffer(graphics_)),
-      texture_(graphics_, commandPool_, RESOURCE_DIR "/test_image.bmp") {
+      texture_(graphics_, commandPool_, RESOURCE_DIR "/mandelbrot set.png") {
   const auto& descriptorSets = descriptorPool_.getDescriptorSets();
   std::vector<VkWriteDescriptorSet> descriptorWrites;
   descriptorWrites.reserve(descriptorSets.size());
