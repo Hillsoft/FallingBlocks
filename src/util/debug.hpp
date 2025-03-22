@@ -22,6 +22,7 @@ inline void debugAssert(
               << conditionText << "\nAt: " << location.file_name() << "("
               << location.line() << ":" << location.column() << ")\n`"
               << location.function_name() << "`" << std::endl;
+    __debugbreak();
     std::abort();
   }
 }
