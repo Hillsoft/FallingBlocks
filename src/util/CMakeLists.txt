@@ -13,3 +13,7 @@ target_link_libraries(util.resettable INTERFACE
 add_library(util.storage INTERFACE "storage.hpp")
 
 add_library(util.string INTERFACE "string.hpp")
+
+add_library(util.zlib STATIC "zlib.hpp" "zlib.cpp")
+target_link_libraries(util.zlib
+	util.debug)
