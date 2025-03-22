@@ -159,10 +159,10 @@ target_link_libraries(render.vulkantexture
 	loader.image
 	loader.image.bitmap
 	render.vulkanbuffer
-	render.vulkancommandbuffer
 	render.vulkancommandpool
 	render.vulkandevicememory
 	render.vulkangraphicsdevice
 	render.vulkanimageview
+	render.vulkan.commandbufferbuilder
 	render.vulkan.fencebuilder
 	render.vulkan.uniquehandle)

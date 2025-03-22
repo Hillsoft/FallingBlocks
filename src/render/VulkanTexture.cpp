@@ -7,10 +7,10 @@
 #include "loader/Image.hpp"
 #include "loader/image/Bitmap.hpp"
 #include "render/VulkanBuffer.hpp"
-#include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanDeviceMemory.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
+#include "render/vulkan/CommandBufferBuilder.hpp"
 #include "render/vulkan/FenceBuilder.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 
@@ -154,15 +154,15 @@ VulkanTexture::VulkanTexture(
   vkBindImageMemory(
       device.getRawDevice(), textureImage, deviceMemory_.get(), 0);
 
-  VulkanCommandBuffer commandBuffer{device, commandPool};
+  vulkan::UniqueHandle<VkCommandBuffer> commandBuffer =
+      vulkan::CommandBufferBuilder(
+          commandPool.getRawCommandPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY)
+          .build(device.getRawDevice());
 
-  VkCommandBufferBeginInfo beginInfo{};
-  beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-  beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-  vkBeginCommandBuffer(commandBuffer.getRawBuffer(), &beginInfo);
+  vulkan::beginSingleTimeCommandBuffer(commandBuffer.get());
 
   transitionImageLayout(
-      commandBuffer.getRawBuffer(),
+      commandBuffer.get(),
       textureImage,
       VK_FORMAT_B8G8R8A8_SRGB,
       VK_IMAGE_LAYOUT_UNDEFINED,
@@ -180,7 +180,7 @@ VulkanTexture::VulkanTexture(
   region.imageExtent = {
       static_cast<uint32_t>(tex.width), static_cast<uint32_t>(tex.height), 1};
   vkCmdCopyBufferToImage(
-      commandBuffer.getRawBuffer(),
+      commandBuffer.get(),
       stagingBuffer.getRawBuffer(),
       textureImage,
       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -188,16 +188,16 @@ VulkanTexture::VulkanTexture(
       &region);
 
   transitionImageLayout(
-      commandBuffer.getRawBuffer(),
+      commandBuffer.get(),
       textureImage,
       VK_FORMAT_B8G8R8A8_SRGB,
       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
       VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-  vkEndCommandBuffer(commandBuffer.getRawBuffer());
   vulkan::UniqueHandle<VkFence> fence =
       vulkan::FenceBuilder().build(device.getRawDevice());
-  commandBuffer.submit({}, {}, fence.get());
+  vulkan::endSingleTimeCommandBuffer(
+      commandBuffer.get(), commandPool.getQueue(), {}, {}, fence.get());
   vkWaitForFences(device.getRawDevice(), 1, &fence.get(), true, UINT32_MAX);
   imageView_.emplace(device, textureImage, VK_FORMAT_B8G8R8A8_SRGB);
 
@@ -205,9 +205,9 @@ VulkanTexture::VulkanTexture(
   samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
   samplerInfo.magFilter = VK_FILTER_LINEAR;
   samplerInfo.minFilter = VK_FILTER_LINEAR;
-  samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-  samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-  samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+  samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+  samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+  samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
   samplerInfo.anisotropyEnable = VK_FALSE;
   samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
   samplerInfo.unnormalizedCoordinates = VK_FALSE;

@@ -35,6 +35,20 @@ class HandleDeleter<VkCommandPool> {
 };
 
 template <>
+class HandleDeleter<VkCommandBuffer> {
+ public:
+  HandleDeleter(VkDevice device, VkCommandPool commandPool)
+      : device_(device), commandPool_(commandPool) {}
+  void destroy(VkCommandBuffer handle) {
+    vkFreeCommandBuffers(device_, commandPool_, 1, &handle);
+  }
+
+ private:
+  VkDevice device_;
+  VkCommandPool commandPool_;
+};
+
+template <>
 class HandleDeleter<VkDebugUtilsMessengerEXT> {
  public:
   HandleDeleter(VkInstance instance) : instance_(instance) {}
