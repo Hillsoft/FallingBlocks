@@ -61,6 +61,17 @@ class BitStream {
     return result;
   }
 
+  bool consumeBit() {
+    if (data_.size() == 0) {
+      throw std::runtime_error{"Out-of-bounds bitstream read"};
+    }
+    bool result = ((data_[0] >> byteOffset_) & 0b1) > 0;
+    byteOffset_ += 1;
+    data_ = data_.subspan(byteOffset_ / 8);
+    byteOffset_ %= 8;
+    return result;
+  }
+
   void byteAlign() {
     if (byteOffset_ != 0) {
       data_ = data_.subspan(1);
@@ -162,7 +173,7 @@ class HuffmanTree {
     unsigned short code = 0;
 
     while (!curNode->isLeaf) {
-      bool rightNext = stream.consumeBits(1) > 0;
+      bool rightNext = stream.consumeBit();
       code <<= 1;
       code += rightNext ? 1 : 0;
       short nextNodeIndex = rightNext ? curNode->r : curNode->l;
