@@ -1,5 +1,7 @@
 add_subdirectory(test)
 
+add_library(util.arena STATIC "Arena.hpp" "Arena.cpp")
+
 add_library(util.basic_match INTERFACE "basic_math.hpp")
 
 add_library(util.debug INTERFACE "debug.hpp")
