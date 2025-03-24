@@ -7,24 +7,16 @@
 
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
+#include "render/vulkan/CommandBufferBuilder.hpp"
 
 namespace blocks::render {
 
 VulkanCommandBuffer::VulkanCommandBuffer(
     VulkanGraphicsDevice& device, VulkanCommandPool& commandPool)
-    : commandBuffer_(nullptr), queue_(commandPool.getQueue()) {
-  VkCommandBufferAllocateInfo allocInfo{};
-  allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-  allocInfo.commandPool = commandPool.getRawCommandPool();
-  allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-  allocInfo.commandBufferCount = 1;
-
-  VkResult result = vkAllocateCommandBuffers(
-      device.getRawDevice(), &allocInfo, &commandBuffer_);
-  if (result != VK_SUCCESS) {
-    throw std::runtime_error{"Failed to create command buffer"};
-  }
-}
+    : commandBuffer_(vulkan::CommandBufferBuilder{
+          commandPool.getRawCommandPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY}
+                         .build(device.getRawDevice())),
+      queue_(commandPool.getQueue()) {}
 
 void VulkanCommandBuffer::submit(
     const std::vector<VkSemaphore>& waitSemaphores,
@@ -44,7 +36,7 @@ void VulkanCommandBuffer::submit(
   submitInfo.pWaitDstStageMask = waitStages.data();
 
   submitInfo.commandBufferCount = 1;
-  submitInfo.pCommandBuffers = &commandBuffer_;
+  submitInfo.pCommandBuffers = &commandBuffer_.get();
 
   submitInfo.signalSemaphoreCount =
       static_cast<uint32_t>(signalSemaphores.size());

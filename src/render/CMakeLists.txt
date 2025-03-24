@@ -43,7 +43,9 @@ target_link_libraries(render.vulkancommandbuffer
 	render.vulkanframebuffer
 	render.vulkangraphicsdevice
 	render.vulkangraphicspipeline
-	render.vulkanrenderpass)
+	render.vulkanrenderpass
+	render.vulkan.commandbufferbuilder
+	render.vulkan.uniquehandle)
 
 add_library(render.vulkancommandpool STATIC "VulkanCommandPool.cpp" "VulkanCommandPool.hpp")
 target_link_libraries(render.vulkancommandpool
