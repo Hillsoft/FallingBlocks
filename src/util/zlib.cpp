@@ -84,6 +84,8 @@ class BitStream {
   int byteOffset_;
 };
 
+constexpr size_t kMaxHuffmanCodeLength = 15;
+
 class HuffmanTree {
  private:
   struct Node {
@@ -100,48 +102,32 @@ class HuffmanTree {
       : nodes_() {
     nodes_.reserve(2 * codeLengths.size() - 1);
 
-    TIntegral maxLength = 0;
     for (const auto& l : codeLengths) {
-      if (l > maxLength) {
-        maxLength = l;
-      }
-    }
-    if (maxLength > 64) {
-      throw std::runtime_error{"Over 64 bit huffman codes unsupported"};
+      DEBUG_ASSERT(l <= kMaxHuffmanCodeLength);
     }
 
-    std::vector<unsigned int> blCount;
-    blCount.resize(maxLength + 1);
+    std::array<unsigned int, kMaxHuffmanCodeLength + 1> blCount{};
     for (const auto& l : codeLengths) {
       if (l > 0) {
         blCount[l]++;
       }
     }
 
-    std::vector<size_t> nextCode;
-    nextCode.resize(maxLength + 1);
+    std::array<size_t, kMaxHuffmanCodeLength + 1> nextCode{};
     size_t code = 0;
-    for (int bits = 1; bits <= maxLength; bits++) {
+    for (int bits = 1; bits <= kMaxHuffmanCodeLength; bits++) {
       code = (code + blCount[bits - 1]) << 1;
       nextCode[bits] = code;
-      if (nextCode[bits] >= (1ULL << bits)) {
+      if (blCount[bits] > 0 && nextCode[bits] >= (1ULL << bits)) {
         throw std::runtime_error{"Corrupt zlib data"};
-      }
-    }
-
-    std::vector<size_t> codes;
-    codes.resize(codeLengths.size());
-    for (size_t i = 0; i < codeLengths.size(); i++) {
-      if (codeLengths[i] != 0) {
-        codes[i] = nextCode[codeLengths[i]];
-        nextCode[codeLengths[i]]++;
       }
     }
 
     nodes_.emplace_back();
     for (size_t i = 0; i < codeLengths.size(); i++) {
-      size_t c = codes[i];
       size_t len = codeLengths[i];
+      size_t c = nextCode[len];
+      nextCode[len]++;
 
       if (len != 0) {
         Node* curNode = &nodes_[0];
