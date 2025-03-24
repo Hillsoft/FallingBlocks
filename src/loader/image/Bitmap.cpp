@@ -110,7 +110,7 @@ Image loadBitmap(const std::vector<char>& data) {
       data.data() + sizeof(BitmapHeader) + sizeof(BitmapInfoHeader);
 
   std::vector<char> outData;
-  outData.reserve(imageWidth * imageHeight * 4);
+  outData.resize(imageWidth * imageHeight * 4);
 
   for (uint32_t y = 0; y < imageHeight; y++) {
     for (uint32_t x = 0; x < imageWidth; x++) {
@@ -119,10 +119,11 @@ Image loadBitmap(const std::vector<char>& data) {
       char g = pixel[1];
       char b = pixel[2];
 
-      outData.emplace_back(r);
-      outData.emplace_back(g);
-      outData.emplace_back(b);
-      outData.emplace_back(std::numeric_limits<char>::max());
+      char* outPixel = &outData[0] + 4 * (y * imageWidth + x);
+      outPixel[0] = r;
+      outPixel[1] = g;
+      outPixel[2] = b;
+      outPixel[3] = std::numeric_limits<char>::max();
     }
   }
 
