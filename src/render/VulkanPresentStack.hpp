@@ -3,12 +3,12 @@
 #include <cstdint>
 #include <vector>
 #include <GLFW/glfw3.h>
-#include "render/VulkanFrameBuffer.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
 #include "render/VulkanRenderPass.hpp"
 #include "render/VulkanSurface.hpp"
 #include "render/VulkanSwapChain.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 #include "util/debug.hpp"
 #include "util/resettable.hpp"
 
@@ -29,7 +29,7 @@ class VulkanPresentStack {
 
     bool refreshRequired() const { return refreshSwapChainRequired_; }
 
-    VulkanFrameBuffer& getFrameBuffer() const {
+    VkFramebuffer getFrameBuffer() const {
       DEBUG_ASSERT(!refreshSwapChainRequired_);
       return owner_->getFrameBuffer(imageIndex_);
     }
@@ -52,12 +52,16 @@ class VulkanPresentStack {
 
   FrameData getNextImageIndex(VkSemaphore semaphore, VkFence fence);
 
-  VulkanFrameBuffer& getFrameBuffer(uint32_t imageIndex) {
-    return swapChainData_->frameBuffer[imageIndex];
+  VkFramebuffer getFrameBuffer(uint32_t imageIndex) {
+    return swapChainData_->frameBuffer[imageIndex].get();
   }
 
   void present(uint32_t imageIndex, VkSemaphore waitSemaphore) {
     swapChainData_->swapChain.present(imageIndex, waitSemaphore);
+  }
+
+  VkExtent2D extent() const {
+    return swapChainData_->swapChain.getSwapchainExtent();
   }
 
   void reset();
@@ -71,7 +75,7 @@ class VulkanPresentStack {
 
     VulkanSwapChain swapChain;
     std::vector<VulkanImageView> imageViews;
-    std::vector<VulkanFrameBuffer> frameBuffer;
+    std::vector<vulkan::UniqueHandle<VkFramebuffer>> frameBuffer;
   };
 
   util::Resettable<SwapChainData> swapChainData_;

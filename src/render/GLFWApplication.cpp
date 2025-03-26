@@ -174,7 +174,10 @@ void GLFWApplication::drawFrame() {
       &synchronisationSets_[currentFrame_].inFlightFence.get());
 
   commandBuffers_[currentFrame_].runRenderPass(
-      pipeline_, presentFrame.getFrameBuffer(), [&](VkCommandBuffer buffer) {
+      pipeline_,
+      presentFrame.getFrameBuffer(),
+      presentStack_.extent(),
+      [&](VkCommandBuffer buffer) {
         vkCmdBindDescriptorSets(
             buffer,
             VK_PIPELINE_BIND_POINT_GRAPHICS,

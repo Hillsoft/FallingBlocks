@@ -6,27 +6,33 @@
 #include <vector>
 #include <GLFW/glfw3.h>
 
-#include "render/VulkanFrameBuffer.hpp"
+#include <span>
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
 #include "render/VulkanRenderPass.hpp"
 #include "render/VulkanSurface.hpp"
+#include "render/vulkan/FrameBufferBuilder.hpp"
+#include "render/vulkan/UniqueHandle.hpp"
 #include "util/resettable.hpp"
 
 namespace blocks::render {
 
 namespace {
 
-std::vector<VulkanFrameBuffer> makeFrameBuffers(
+std::vector<vulkan::UniqueHandle<VkFramebuffer>> makeFrameBuffers(
     VulkanGraphicsDevice& device,
     VulkanRenderPass& renderPass,
     std::vector<VulkanImageView>& imageViews,
     VkExtent2D extent) {
-  std::vector<VulkanFrameBuffer> result;
+  std::vector<vulkan::UniqueHandle<VkFramebuffer>> result;
   result.reserve(imageViews.size());
 
   for (auto& v : imageViews) {
-    result.emplace_back(device, renderPass, v, extent);
+    VkImageView rawView = v.getRawImageView();
+    result.emplace_back(
+        vulkan::FrameBufferBuilder(
+            renderPass.getRawRenderPass(), std::span{&rawView, 1}, extent, 1)
+            .build(device.getRawDevice()));
   }
 
   return result;

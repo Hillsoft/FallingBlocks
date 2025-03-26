@@ -40,7 +40,6 @@ target_link_libraries(render.vulkanbuffer
 add_library(render.vulkancommandbuffer STATIC "VulkanCommandBuffer.cpp" "VulkanCommandBuffer.hpp")
 target_link_libraries(render.vulkancommandbuffer
 	render.vulkancommandpool
-	render.vulkanframebuffer
 	render.vulkangraphicsdevice
 	render.vulkangraphicspipeline
 	render.vulkanrenderpass
@@ -73,13 +72,6 @@ add_library(render.vulkandevicememory STATIC "VulkanDeviceMemory.cpp" "VulkanDev
 target_link_libraries(render.vulkandevicememory
 	render.vulkangraphicsdevice
 	render.vulkanrawbuffer
-	render.vulkan.uniquehandle)
-
-add_library(render.vulkanframebuffer STATIC "VulkanFrameBuffer.cpp" "VulkanFrameBuffer.hpp")
-target_link_libraries(render.vulkanframebuffer
-	render.vulkangraphicsdevice
-	render.vulkanimageview
-	render.vulkanrenderpass
 	render.vulkan.uniquehandle)
 
 add_library(render.vulkangraphicsdevice STATIC "VulkanGraphicsDevice.cpp" "VulkanGraphicsDevice.hpp")
@@ -117,12 +109,13 @@ target_link_libraries(render.vulkanpipelinelayout
 
 add_library(render.vulkanpresentstack STATIC "VulkanPresentStack.cpp" "VulkanPresentStack.hpp")
 target_link_libraries(render.vulkanpresentstack
-	render.vulkanframebuffer
 	render.vulkangraphicsdevice
 	render.vulkanimageview
 	render.vulkanrenderpass
 	render.vulkansurface
 	render.vulkanswapchain
+	render.vulkan.framebufferbuilder
+	render.vulkan.uniquehandle
 	util.debug
 	util.resettable)
 
