@@ -15,7 +15,6 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanInstance.hpp"
-#include "render/VulkanSurface.hpp"
 #include "render/validationLayers.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 #include "util/debug.hpp"
@@ -28,7 +27,7 @@ constexpr std::array<const char*, 1> requiredDeviceExtensions{
     VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
 VulkanGraphicsDevice::QueueFamilyIndices findQueueFamilies(
-    VkPhysicalDevice device, VulkanSurface& surface) {
+    VkInstance instance, VkPhysicalDevice device) {
   VulkanGraphicsDevice::QueueFamilyIndices indices;
 
   uint32_t queueFamilyCount;
@@ -43,68 +42,16 @@ VulkanGraphicsDevice::QueueFamilyIndices findQueueFamilies(
       indices.graphicsFamily = i;
     }
     VkBool32 presentSupport = false;
-    vkGetPhysicalDeviceSurfaceSupportKHR(
-        device, i, surface.getRawSurface(), &presentSupport);
+    presentSupport =
+        glfwGetPhysicalDevicePresentationSupport(instance, device, i);
+    // vkGetPhysicalDeviceSurfaceSupportKHR(device, i, nullptr,
+    // &presentSupport);
     if (presentSupport) {
       indices.presentFamily = i;
     }
   }
 
   return indices;
-}
-
-VkSurfaceFormatKHR chooseSwapSurfaceFormat(
-    const std::vector<VkSurfaceFormatKHR>& availableFormats) {
-  for (const auto& availableFormat : availableFormats) {
-    if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB &&
-        availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
-      return availableFormat;
-    }
-  }
-
-  DEBUG_ASSERT(availableFormats.size() > 0);
-  return availableFormats[0];
-}
-
-VulkanGraphicsDevice::SwapChainSupportDetails getSwapChainSupportDetails(
-    VkPhysicalDevice device, VulkanSurface& surface) {
-  VulkanGraphicsDevice::SwapChainSupportDetails details;
-
-  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-      device, surface.getRawSurface(), &details.capabilities);
-
-  uint32_t formatCount;
-  vkGetPhysicalDeviceSurfaceFormatsKHR(
-      device, surface.getRawSurface(), &formatCount, nullptr);
-
-  if (formatCount != 0) {
-    details.formats.resize(formatCount);
-    vkGetPhysicalDeviceSurfaceFormatsKHR(
-        device, surface.getRawSurface(), &formatCount, details.formats.data());
-  }
-
-  uint32_t presentModeCount;
-  vkGetPhysicalDeviceSurfacePresentModesKHR(
-      device, surface.getRawSurface(), &presentModeCount, nullptr);
-
-  if (presentModeCount != 0) {
-    details.presentModes.resize(presentModeCount);
-    vkGetPhysicalDeviceSurfacePresentModesKHR(
-        device,
-        surface.getRawSurface(),
-        &presentModeCount,
-        details.presentModes.data());
-  }
-
-  details.preferredFormat = chooseSwapSurfaceFormat(details.formats);
-
-  return details;
-}
-
-bool isSwapChainAdequate(
-    const VulkanGraphicsDevice::SwapChainSupportDetails& swapChainSupport) {
-  return !swapChainSupport.formats.empty() &&
-      !swapChainSupport.presentModes.empty();
 }
 
 std::vector<VkPhysicalDevice> enumerateDevices(VulkanInstance& instance) {
@@ -158,9 +105,6 @@ bool isDeviceSuitable(const VulkanGraphicsDevice::PhysicalDeviceInfo& device) {
   if (!deviceHasRequiredExtensionSupport(device.device)) {
     return false;
   }
-  if (!isSwapChainAdequate(device.swapChainSupport)) {
-    return false;
-  }
 
   return true;
 }
@@ -185,7 +129,7 @@ int deviceSuitabilityHeuristic(
 }
 
 std::unique_ptr<VulkanGraphicsDevice::PhysicalDeviceInfo> choosePhysicalDevice(
-    VulkanInstance& instance, VulkanSurface& surface) {
+    VulkanInstance& instance) {
   std::vector<VkPhysicalDevice> devices = enumerateDevices(instance);
 
   std::vector<
@@ -195,7 +139,7 @@ std::unique_ptr<VulkanGraphicsDevice::PhysicalDeviceInfo> choosePhysicalDevice(
   for (const auto& device : devices) {
     auto deviceInfo =
         std::make_unique<VulkanGraphicsDevice::PhysicalDeviceInfo>(
-            device, surface);
+            instance.getRawInstance(), device);
     int suitabilityHeuristic = deviceSuitabilityHeuristic(*deviceInfo);
     if (suitabilityHeuristic > 0) {
       rankedDevices.emplace_back(std::move(deviceInfo), suitabilityHeuristic);
@@ -256,12 +200,11 @@ void makeQueueCreateInfo(
 } // namespace
 
 VulkanGraphicsDevice::PhysicalDeviceInfo::PhysicalDeviceInfo(
-    VkPhysicalDevice device, VulkanSurface& surface)
+    VkInstance instance, VkPhysicalDevice device)
     : device(device) {
   vkGetPhysicalDeviceProperties(device, &properties);
   vkGetPhysicalDeviceFeatures(device, &features);
-  queueFamilies = findQueueFamilies(device, surface);
-  swapChainSupport = getSwapChainSupportDetails(device, surface);
+  queueFamilies = findQueueFamilies(instance, device);
 }
 
 VulkanGraphicsDevice::VulkanGraphicsDevice(
@@ -274,10 +217,9 @@ VulkanGraphicsDevice::VulkanGraphicsDevice(
       presentQueue_(presentQueue),
       physicalInfo_(std::move(physicalInfo)) {}
 
-VulkanGraphicsDevice VulkanGraphicsDevice::make(
-    VulkanInstance& instance, VulkanSurface& surface) {
+VulkanGraphicsDevice VulkanGraphicsDevice::make(VulkanInstance& instance) {
   std::unique_ptr<PhysicalDeviceInfo> physicalDevice =
-      choosePhysicalDevice(instance, surface);
+      choosePhysicalDevice(instance);
   DEBUG_ASSERT(physicalDevice != nullptr);
   std::cout << "Using graphics device " << physicalDevice->properties.deviceName
             << "\n";

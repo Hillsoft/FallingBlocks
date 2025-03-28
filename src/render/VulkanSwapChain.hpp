@@ -28,6 +28,7 @@ class VulkanSwapChain {
  private:
   VulkanGraphicsDevice* graphicsDevice_;
   vulkan::UniqueHandle<VkSwapchainKHR> swapChain_;
+  VkFormat format_;
   VkExtent2D extent_;
   VkQueue queue_;
   std::vector<VkImage> swapChainImages_;

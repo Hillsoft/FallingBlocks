@@ -78,7 +78,6 @@ add_library(render.vulkangraphicsdevice STATIC "VulkanGraphicsDevice.cpp" "Vulka
 target_link_libraries(render.vulkangraphicsdevice
 	render.validationlayers
 	render.vulkaninstance
-	render.vulkansurface
 	render.vulkan.uniquehandle
 	util.debug)
 
@@ -147,7 +146,8 @@ target_link_libraries(render.vulkanswapchain
 	render.vulkangraphicsdevice
 	render.vulkanimageview
 	render.vulkansurface
-	render.vulkan.uniquehandle)
+	render.vulkan.uniquehandle
+	util.debug)
 
 add_library(render.vulkantexture STATIC "VulkanTexture.cpp" "VulkanTexture.hpp")
 target_link_libraries(render.vulkantexture

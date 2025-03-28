@@ -3,11 +3,9 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
-#include <vector>
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanInstance.hpp"
-#include "render/VulkanSurface.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
@@ -19,26 +17,16 @@ class VulkanGraphicsDevice {
     std::optional<uint32_t> presentFamily;
   };
 
-  struct SwapChainSupportDetails {
-    VkSurfaceCapabilitiesKHR capabilities{};
-    std::vector<VkSurfaceFormatKHR> formats;
-    std::vector<VkPresentModeKHR> presentModes;
-    VkSurfaceFormatKHR preferredFormat{};
-  };
-
   struct PhysicalDeviceInfo {
-    explicit PhysicalDeviceInfo(
-        VkPhysicalDevice device, VulkanSurface& surface);
+    explicit PhysicalDeviceInfo(VkInstance instance, VkPhysicalDevice device);
 
     VkPhysicalDevice device;
     VkPhysicalDeviceProperties properties;
     VkPhysicalDeviceFeatures features;
     QueueFamilyIndices queueFamilies;
-    SwapChainSupportDetails swapChainSupport;
   };
 
-  static VulkanGraphicsDevice make(
-      VulkanInstance& instance, VulkanSurface& surface);
+  static VulkanGraphicsDevice make(VulkanInstance& instance);
 
   const PhysicalDeviceInfo& physicalInfo() const { return *physicalInfo_; }
 

@@ -71,14 +71,14 @@ GLFWApplication::GLFWApplication()
       surface_(vulkan_, makeWindow([&](int /* width */, int /* height */) {
                  onWindowResize();
                })),
-      graphics_(VulkanGraphicsDevice::make(vulkan_, surface_)),
+      graphics_(VulkanGraphicsDevice::make(vulkan_)),
       vertexShader_(getQuadVertexShader(graphics_)),
       fragmentShader_(graphics_, "shaders/fragment.spv"),
       descriptorSetLayout_(graphics_),
       descriptorPool_(graphics_, descriptorSetLayout_, kMaxFramesInFlight),
       pipeline_(
           graphics_,
-          graphics_.physicalInfo().swapChainSupport.preferredFormat.format,
+          VK_FORMAT_B8G8R8A8_SRGB,
           vertexShader_,
           fragmentShader_,
           descriptorSetLayout_),

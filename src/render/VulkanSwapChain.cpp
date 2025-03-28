@@ -14,10 +14,18 @@
 #include "render/VulkanSurface.hpp"
 #include "render/glfw_wrapper/Window.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
+#include "util/debug.hpp"
 
 namespace blocks::render {
 
 namespace {
+
+struct SwapChainSupportDetails {
+  VkSurfaceCapabilitiesKHR capabilities{};
+  std::vector<VkSurfaceFormatKHR> formats;
+  std::vector<VkPresentModeKHR> presentModes;
+  VkSurfaceFormatKHR preferredFormat{};
+};
 
 VkPresentModeKHR chooseSwapPresentMode(
     const std::vector<VkPresentModeKHR>& availablePresentModes) {
@@ -57,6 +65,58 @@ VkExtent2D chooseSwapExtent(
   }
 }
 
+VkSurfaceFormatKHR chooseSwapSurfaceFormat(
+    const std::vector<VkSurfaceFormatKHR>& availableFormats) {
+  for (const auto& availableFormat : availableFormats) {
+    if (availableFormat.format == VK_FORMAT_B8G8R8A8_SRGB &&
+        availableFormat.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
+      return availableFormat;
+    }
+  }
+
+  DEBUG_ASSERT(availableFormats.size() > 0);
+  return availableFormats[0];
+}
+
+SwapChainSupportDetails getSwapChainSupportDetails(
+    VkPhysicalDevice device, VulkanSurface& surface) {
+  SwapChainSupportDetails details;
+
+  vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
+      device, surface.getRawSurface(), &details.capabilities);
+
+  uint32_t formatCount;
+  vkGetPhysicalDeviceSurfaceFormatsKHR(
+      device, surface.getRawSurface(), &formatCount, nullptr);
+
+  if (formatCount != 0) {
+    details.formats.resize(formatCount);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(
+        device, surface.getRawSurface(), &formatCount, details.formats.data());
+  }
+
+  uint32_t presentModeCount;
+  vkGetPhysicalDeviceSurfacePresentModesKHR(
+      device, surface.getRawSurface(), &presentModeCount, nullptr);
+
+  if (presentModeCount != 0) {
+    details.presentModes.resize(presentModeCount);
+    vkGetPhysicalDeviceSurfacePresentModesKHR(
+        device,
+        surface.getRawSurface(),
+        &presentModeCount,
+        details.presentModes.data());
+  }
+
+  details.preferredFormat = chooseSwapSurfaceFormat(details.formats);
+
+  if (details.preferredFormat.format != VK_FORMAT_B8G8R8A8_SRGB) {
+    throw std::runtime_error{"Required surface format unsupported"};
+  }
+
+  return details;
+}
+
 } // namespace
 
 VulkanSwapChain::VulkanSwapChain(
@@ -64,10 +124,8 @@ VulkanSwapChain::VulkanSwapChain(
     : graphicsDevice_(&graphicsDevice),
       swapChain_(nullptr, nullptr),
       queue_(graphicsDevice.getPresentQueue()) {
-  VulkanGraphicsDevice::PhysicalDeviceInfo physicalInfo{
-      graphicsDevice.physicalInfo().device, surface};
-  const VulkanGraphicsDevice::SwapChainSupportDetails& swapChainSupport =
-      physicalInfo.swapChainSupport;
+  const SwapChainSupportDetails swapChainSupport =
+      getSwapChainSupportDetails(graphicsDevice.physicalInfo().device, surface);
 
   VkSurfaceFormatKHR surfaceFormat = swapChainSupport.preferredFormat;
   VkPresentModeKHR presentMode =
@@ -124,6 +182,7 @@ VulkanSwapChain::VulkanSwapChain(
   swapChain_ = vulkan::UniqueHandle<VkSwapchainKHR>{
       swapChain, graphicsDevice.getRawDevice()};
   extent_ = extent;
+  format_ = surfaceFormat.format;
 
   vkGetSwapchainImagesKHR(
       graphicsDevice.getRawDevice(), swapChain, &imageCount, nullptr);
@@ -140,11 +199,7 @@ std::vector<VulkanImageView> VulkanSwapChain::getImageViews() const {
   result.reserve(swapChainImages_.size());
 
   for (const auto& swapImage : swapChainImages_) {
-    result.emplace_back(
-        *graphicsDevice_,
-        swapImage,
-        graphicsDevice_->physicalInfo()
-            .swapChainSupport.preferredFormat.format);
+    result.emplace_back(*graphicsDevice_, swapImage, format_);
   }
 
   return result;
