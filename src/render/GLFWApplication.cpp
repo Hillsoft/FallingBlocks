@@ -11,12 +11,9 @@
 #include <GLFW/glfw3.h>
 #include "render/Quad.hpp"
 #include "render/VulkanCommandBuffer.hpp"
-#include "render/VulkanCommandPool.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanPresentStack.hpp"
 #include "render/glfw_wrapper/Window.hpp"
-#include "render/vulkan/FenceBuilder.hpp"
-#include "render/vulkan/SemaphoreBuilder.hpp"
 
 namespace blocks::render {
 
@@ -33,61 +30,31 @@ glfw::Window makeWindow(std::function<void(int, int)> resizeHandler) {
   return window;
 }
 
-std::vector<VulkanCommandBuffer> makeCommandBuffers(
-    VulkanGraphicsDevice& device, VulkanCommandPool& commandPool) {
-  std::vector<VulkanCommandBuffer> commandBuffers;
-  commandBuffers.reserve(kMaxFramesInFlight);
-
-  for (int i = 0; i < kMaxFramesInFlight; i++) {
-    commandBuffers.emplace_back(device, commandPool);
-  }
-
-  return commandBuffers;
-}
-
-std::vector<GLFWApplication::PipelineSynchronisationSet>
-makeSynchronisationSets(VulkanGraphicsDevice& device) {
-  std::vector<GLFWApplication::PipelineSynchronisationSet> result;
-  result.reserve(kMaxFramesInFlight);
-
-  for (int i = 0; i < kMaxFramesInFlight; i++) {
-    result.emplace_back(
-        vulkan::SemaphoreBuilder{}.build(device.getRawDevice()),
-        vulkan::SemaphoreBuilder{}.build(device.getRawDevice()),
-        vulkan::FenceBuilder{}.setInitiallySignalled(true).build(
-            device.getRawDevice()));
-  }
-
-  return result;
-}
-
 } // namespace
 
 GLFWApplication::GLFWApplication()
-    : vulkan_(),
-#ifndef NDEBUG
-      debugMessenger_(vulkan_),
-#endif
-      surface_(vulkan_, makeWindow([&](int /* width */, int /* height */) {
-                 onWindowResize();
-               })),
-      graphics_(VulkanGraphicsDevice::make(vulkan_)),
-      vertexShader_(getQuadVertexShader(graphics_)),
-      fragmentShader_(graphics_, "shaders/fragment.spv"),
-      descriptorSetLayout_(graphics_),
-      descriptorPool_(graphics_, descriptorSetLayout_, kMaxFramesInFlight),
+    : render_(),
+      surface_(
+          render_.instance_, makeWindow([&](int /* width */, int /* height */) {
+            onWindowResize();
+          })),
+      vertexShader_(getQuadVertexShader(render_.graphics_)),
+      fragmentShader_(render_.graphics_, "shaders/fragment.spv"),
+      descriptorSetLayout_(render_.graphics_),
+      descriptorPool_(
+          render_.graphics_, descriptorSetLayout_, kMaxFramesInFlight),
       pipeline_(
-          graphics_,
+          render_.graphics_,
           VK_FORMAT_B8G8R8A8_SRGB,
           vertexShader_,
           fragmentShader_,
           descriptorSetLayout_),
-      presentStack_(graphics_, surface_, pipeline_.getRenderPass()),
-      commandPool_(graphics_),
-      commandBuffers_(makeCommandBuffers(graphics_, commandPool_)),
-      synchronisationSets_(makeSynchronisationSets(graphics_)),
-      vertexAttributes_(getQuadVertexAttributesBuffer(graphics_)),
-      texture_(graphics_, commandPool_, RESOURCE_DIR "/mandelbrot set.png") {
+      presentStack_(render_.graphics_, surface_, pipeline_.getRenderPass()),
+      vertexAttributes_(getQuadVertexAttributesBuffer(render_.graphics_)),
+      texture_(
+          render_.graphics_,
+          render_.commandPool_,
+          RESOURCE_DIR "/mandelbrot set.png") {
   const auto& descriptorSets = descriptorPool_.getDescriptorSets();
   std::vector<VkWriteDescriptorSet> descriptorWrites;
   descriptorWrites.reserve(descriptorSets.size());
@@ -109,7 +76,7 @@ GLFWApplication::GLFWApplication()
   }
 
   vkUpdateDescriptorSets(
-      graphics_.getRawDevice(),
+      render_.graphics_.getRawDevice(),
       static_cast<uint32_t>(descriptorWrites.size()),
       descriptorWrites.data(),
       0,
@@ -142,14 +109,14 @@ void GLFWApplication::run() {
               << "\nMax frame time: " << maxFrameTime << "\n";
   }
 
-  vkDeviceWaitIdle(graphics_.getRawDevice());
+  vkDeviceWaitIdle(render_.graphics_.getRawDevice());
 }
 
 void GLFWApplication::drawFrame() {
   vkWaitForFences(
-      graphics_.getRawDevice(),
+      render_.graphics_.getRawDevice(),
       1,
-      &synchronisationSets_[currentFrame_].inFlightFence.get(),
+      &render_.synchronisationSets_[currentFrame_].inFlightFence.get(),
       true,
       UINT64_MAX);
 
@@ -160,7 +127,7 @@ void GLFWApplication::drawFrame() {
   }
 
   VulkanPresentStack::FrameData presentFrame = presentStack_.getNextImageIndex(
-      synchronisationSets_[currentFrame_].imageAvailableSemaphore.get(),
+      render_.synchronisationSets_[currentFrame_].imageAvailableSemaphore.get(),
       nullptr);
 
   if (presentFrame.refreshRequired()) {
@@ -169,11 +136,11 @@ void GLFWApplication::drawFrame() {
   }
 
   vkResetFences(
-      graphics_.getRawDevice(),
+      render_.graphics_.getRawDevice(),
       1,
-      &synchronisationSets_[currentFrame_].inFlightFence.get());
+      &render_.synchronisationSets_[currentFrame_].inFlightFence.get());
 
-  commandBuffers_[currentFrame_].runRenderPass(
+  render_.commandBuffers_[currentFrame_].runRenderPass(
       pipeline_,
       presentFrame.getFrameBuffer(),
       presentStack_.extent(),
@@ -194,13 +161,16 @@ void GLFWApplication::drawFrame() {
         vkCmdDraw(buffer, 6, 1, 0, 0);
       });
 
-  commandBuffers_[currentFrame_].submit(
-      {synchronisationSets_[currentFrame_].imageAvailableSemaphore.get()},
-      {synchronisationSets_[currentFrame_].renderFinishedSemaphore.get()},
-      synchronisationSets_[currentFrame_].inFlightFence.get());
+  render_.commandBuffers_[currentFrame_].submit(
+      {render_.synchronisationSets_[currentFrame_]
+           .imageAvailableSemaphore.get()},
+      {render_.synchronisationSets_[currentFrame_]
+           .renderFinishedSemaphore.get()},
+      render_.synchronisationSets_[currentFrame_].inFlightFence.get());
 
   presentFrame.present(
-      synchronisationSets_[currentFrame_].renderFinishedSemaphore.get());
+      render_.synchronisationSets_[currentFrame_]
+          .renderFinishedSemaphore.get());
 
   currentFrame_ = (currentFrame_ + 1) % kMaxFramesInFlight;
 }

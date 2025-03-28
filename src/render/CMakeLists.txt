@@ -4,19 +4,14 @@ add_subdirectory(vulkan)
 add_library(render.glfwapplication STATIC "GLFWApplication.cpp" "GLFWApplication.hpp")
 target_link_libraries(render.glfwapplication
 	render.glfw_wrapper.window
-	render.vulkan.fencebuilder
-	render.vulkan.semaphorebuilder
-	render.vulkan.uniquehandle
+	render.rendersubsystem
 	render.quad
 	render.vulkanbuffer
 	render.vulkancommandbuffer
-	render.vulkancommandpool
-	render.vulkandebugmessenger
 	render.vulkandescriptorpool
 	render.vulkandescriptorsetlayout
 	render.vulkangraphicsdevice
 	render.vulkangraphicspipeline
-	render.vulkaninstance
 	render.vulkanpresentstack
 	render.vulkanshader
 	render.vulkansurface
@@ -28,6 +23,17 @@ target_link_libraries(render.quad
 	render.vulkanbuffer
 	render.vulkangraphicsdevice
 	render.vulkanshader)
+
+add_library(render.rendersubsystem STATIC "RenderSubSystem.cpp" "RenderSubSystem.hpp")
+target_link_libraries(render.rendersubsystem
+	render.vulkancommandbuffer
+	render.vulkancommandpool
+	render.vulkandebugmessenger
+	render.vulkangraphicsdevice
+	render.vulkaninstance
+	render.vulkan.fencebuilder
+	render.vulkan.semaphorebuilder
+	render.vulkan.uniquehandle)
 
 add_library(render.validationlayers INTERFACE "validationLayers.hpp")
 
