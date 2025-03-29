@@ -1,6 +1,9 @@
 #include "render/RenderSubSystem.hpp"
 
+#include <iostream>
+#include <stdexcept>
 #include <vector>
+#include <GLFW/glfw3.h>
 #include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
@@ -52,6 +55,19 @@ RenderSubSystem::RenderSubSystem()
       commandPool_(graphics_),
       commandBuffers_(makeCommandBuffers(graphics_, commandPool_)),
       synchronisationSets_(makeSynchronisationSets(graphics_)) {
+}
+
+RenderSubSystem::GLFWLifetimeScope::GLFWLifetimeScope() {
+  int result = glfwInit();
+  if (result == GLFW_FALSE) {
+    throw std::runtime_error{"Failed to initialise GLFW"};
+  }
+
+  std::cout << "GLFW initialised\n";
+}
+
+RenderSubSystem::GLFWLifetimeScope::~GLFWLifetimeScope() {
+  glfwTerminate();
 }
 
 } // namespace blocks::render

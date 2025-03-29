@@ -26,6 +26,12 @@ class RenderSubSystem {
   };
 
  private:
+  struct GLFWLifetimeScope {
+    GLFWLifetimeScope();
+    ~GLFWLifetimeScope();
+  };
+
+  [[no_unique_address]] GLFWLifetimeScope lifetimeScope_;
   VulkanInstance instance_;
 #ifndef NDEBUG
   VulkanDebugMessenger debugMessenger_;

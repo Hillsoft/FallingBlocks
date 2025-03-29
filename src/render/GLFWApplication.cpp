@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <functional>
 #include <iostream>
-#include <stdexcept>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -81,10 +80,6 @@ GLFWApplication::GLFWApplication()
       descriptorWrites.data(),
       0,
       nullptr);
-}
-
-GLFWApplication::~GLFWApplication() {
-  glfwTerminate();
 }
 
 void GLFWApplication::run() {
@@ -189,19 +184,6 @@ void GLFWApplication::resetSwapChain() {
   if (!(windowSize.first == 0 || windowSize.second == 0)) {
     presentStack_.reset();
   }
-}
-
-GLFWApplication::GLFWLifetimeScope::GLFWLifetimeScope() {
-  int result = glfwInit();
-  if (result == GLFW_FALSE) {
-    throw std::runtime_error{"Failed to initialise GLFW"};
-  }
-
-  std::cout << "GLFW initialised\n";
-}
-
-GLFWApplication::GLFWLifetimeScope::~GLFWLifetimeScope() {
-  glfwTerminate();
 }
 
 } // namespace blocks::render

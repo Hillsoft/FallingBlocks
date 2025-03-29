@@ -16,7 +16,7 @@ namespace blocks::render {
 class GLFWApplication {
  public:
   GLFWApplication();
-  ~GLFWApplication();
+  ~GLFWApplication() = default;
 
   GLFWApplication(const GLFWApplication& other) = delete;
   GLFWApplication(GLFWApplication&& other) = delete;
@@ -33,12 +33,6 @@ class GLFWApplication {
 
   void resetSwapChain();
 
-  struct GLFWLifetimeScope {
-    GLFWLifetimeScope();
-    ~GLFWLifetimeScope();
-  };
-
-  [[no_unique_address]] GLFWLifetimeScope lifetimeScope_;
   RenderSubSystem render_;
   VulkanSurface surface_;
   VulkanVertexShader vertexShader_;
