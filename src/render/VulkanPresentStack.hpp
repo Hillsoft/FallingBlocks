@@ -5,7 +5,6 @@
 #include <GLFW/glfw3.h>
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
-#include "render/VulkanRenderPass.hpp"
 #include "render/VulkanSurface.hpp"
 #include "render/VulkanSwapChain.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
@@ -48,7 +47,7 @@ class VulkanPresentStack {
   VulkanPresentStack(
       VulkanGraphicsDevice& device,
       VulkanSurface& surface,
-      VulkanRenderPass& renderPass);
+      VkRenderPass renderPass);
 
   FrameData getNextImageIndex(VkSemaphore semaphore, VkFence fence);
 
@@ -71,7 +70,7 @@ class VulkanPresentStack {
     SwapChainData(
         VulkanGraphicsDevice& device,
         VulkanSurface& surface,
-        VulkanRenderPass& renderPass);
+        VkRenderPass renderPass);
 
     VulkanSwapChain swapChain;
     std::vector<VulkanImageView> imageViews;
@@ -81,7 +80,7 @@ class VulkanPresentStack {
   util::Resettable<SwapChainData> swapChainData_;
   VulkanGraphicsDevice* device_;
   VulkanSurface* surface_;
-  VulkanRenderPass* renderPass_;
+  VkRenderPass renderPass_;
 };
 
 } // namespace blocks::render

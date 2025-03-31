@@ -116,7 +116,6 @@ add_library(render.vulkanpresentstack STATIC "VulkanPresentStack.cpp" "VulkanPre
 target_link_libraries(render.vulkanpresentstack
 	render.vulkangraphicsdevice
 	render.vulkanimageview
-	render.vulkanrenderpass
 	render.vulkansurface
 	render.vulkanswapchain
 	render.vulkan.framebufferbuilder

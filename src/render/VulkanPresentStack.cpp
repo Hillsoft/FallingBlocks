@@ -3,13 +3,11 @@
 #include <cstdint>
 #include <iostream>
 #include <optional>
+#include <span>
 #include <vector>
 #include <GLFW/glfw3.h>
-
-#include <span>
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
-#include "render/VulkanRenderPass.hpp"
 #include "render/VulkanSurface.hpp"
 #include "render/vulkan/FrameBufferBuilder.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
@@ -21,7 +19,7 @@ namespace {
 
 std::vector<vulkan::UniqueHandle<VkFramebuffer>> makeFrameBuffers(
     VulkanGraphicsDevice& device,
-    VulkanRenderPass& renderPass,
+    VkRenderPass renderPass,
     std::vector<VulkanImageView>& imageViews,
     VkExtent2D extent) {
   std::vector<vulkan::UniqueHandle<VkFramebuffer>> result;
@@ -31,7 +29,7 @@ std::vector<vulkan::UniqueHandle<VkFramebuffer>> makeFrameBuffers(
     VkImageView rawView = v.getRawImageView();
     result.emplace_back(
         vulkan::FrameBufferBuilder(
-            renderPass.getRawRenderPass(), std::span{&rawView, 1}, extent, 1)
+            renderPass, std::span{&rawView, 1}, extent, 1)
             .build(device.getRawDevice()));
   }
 
@@ -43,16 +41,16 @@ std::vector<vulkan::UniqueHandle<VkFramebuffer>> makeFrameBuffers(
 VulkanPresentStack::VulkanPresentStack(
     VulkanGraphicsDevice& device,
     VulkanSurface& surface,
-    VulkanRenderPass& renderPass)
+    VkRenderPass renderPass)
     : swapChainData_(device, surface, renderPass),
       device_(&device),
       surface_(&surface),
-      renderPass_(&renderPass) {}
+      renderPass_(renderPass) {}
 
 VulkanPresentStack::SwapChainData::SwapChainData(
     VulkanGraphicsDevice& device,
     VulkanSurface& surface,
-    VulkanRenderPass& renderPass)
+    VkRenderPass renderPass)
     : swapChain(surface, device),
       imageViews(swapChain.getImageViews()),
       frameBuffer(makeFrameBuffers(
@@ -72,7 +70,7 @@ VulkanPresentStack::FrameData VulkanPresentStack::getNextImageIndex(
 void VulkanPresentStack::reset() {
   std::cout << "Resetting swap chain\n";
   vkDeviceWaitIdle(device_->getRawDevice());
-  swapChainData_.reset(*device_, *surface_, *renderPass_);
+  swapChainData_.reset(*device_, *surface_, renderPass_);
 }
 
 VulkanPresentStack::FrameData::FrameData(

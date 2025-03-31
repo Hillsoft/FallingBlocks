@@ -48,7 +48,10 @@ GLFWApplication::GLFWApplication()
           vertexShader_,
           fragmentShader_,
           descriptorSetLayout_),
-      presentStack_(render_.graphics_, surface_, pipeline_.getRenderPass()),
+      presentStack_(
+          render_.graphics_,
+          surface_,
+          pipeline_.getRenderPass().getRawRenderPass()),
       vertexAttributes_(getQuadVertexAttributesBuffer(render_.graphics_)),
       texture_(
           render_.graphics_,
