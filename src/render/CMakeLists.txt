@@ -132,6 +132,7 @@ target_link_libraries(render.vulkanrawbuffer
 add_library(render.vulkanrenderpass STATIC "VulkanRenderPass.cpp" "VulkanRenderPass.hpp")
 target_link_libraries(render.vulkanrenderpass
 	render.vulkangraphicsdevice
+	render.vulkan.renderpassbuilder
 	render.vulkan.uniquehandle)
 
 add_library(render.vulkanshader STATIC "VulkanShader.cpp" "VulkanShader.hpp")
