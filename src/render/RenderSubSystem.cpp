@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
 #include "render/VulkanCommandBuffer.hpp"
@@ -96,6 +97,12 @@ UniqueWindowHandle::~UniqueWindowHandle() {
   }
 }
 
+UniqueRenderableHandle::~UniqueRenderableHandle() {
+  if (ref_.renderSystem != nullptr) {
+    ref_.renderSystem->destroyRenderable(ref_);
+  }
+}
+
 RenderSubSystem::RenderSubSystem()
     : instance_(),
 #ifndef NDEBUG
@@ -141,6 +148,19 @@ void RenderSubSystem::destroyWindow(WindowRef ref) {
 Window* RenderSubSystem::getWindow(WindowRef ref) {
   DEBUG_ASSERT(ref.id < windows_.size() && windows_[ref.id] != nullptr);
   return &*windows_[ref.id];
+}
+
+UniqueRenderableHandle RenderSubSystem::createRenderable() {
+  size_t id = renderables_.size();
+  renderables_.emplace_back(
+      std::in_place, graphics_, commandPool_, kMaxFramesInFlight);
+  return UniqueRenderableHandle{RenderableRef{id, *this}};
+}
+
+void RenderSubSystem::destroyRenderable(RenderableRef ref) {
+  DEBUG_ASSERT(
+      ref.id < renderables_.size() && renderables_[ref.id].has_value());
+  renderables_[ref.id].reset();
 }
 
 } // namespace blocks::render

@@ -22,6 +22,7 @@ constexpr int kMaxFramesInFlight = 2;
 GLFWApplication::GLFWApplication()
     : render_(),
       window_(render_.createWindow()),
+      renderable_(render_.createRenderable()),
       vertexShader_(getQuadVertexShader(render_.graphics_)),
       fragmentShader_(render_.graphics_, "shaders/fragment.spv"),
       descriptorSetLayout_(render_.graphics_),

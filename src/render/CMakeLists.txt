@@ -22,8 +22,21 @@ target_link_libraries(render.quad
 	render.vulkangraphicsdevice
 	render.vulkanshader)
 
+add_library(render.renderablequad "RenderableQuad.cpp" "RenderableQuad.hpp")
+target_link_libraries(render.renderablequad
+	render.quad
+	render.vulkanbuffer
+	render.vulkancommandpool
+	render.vulkandescriptorpool
+	render.vulkandescriptorsetlayout
+	render.vulkangraphicsdevice
+	render.vulkangraphicspipeline
+	render.vulkanshader
+	render.vulkantexture)
+
 add_library(render.rendersubsystem STATIC "RenderSubSystem.cpp" "RenderSubSystem.hpp")
 target_link_libraries(render.rendersubsystem
+	render.renderablequad
 	render.vulkancommandbuffer
 	render.vulkancommandpool
 	render.vulkandebugmessenger

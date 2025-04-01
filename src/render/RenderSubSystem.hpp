@@ -1,9 +1,11 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
+#include "render/RenderableQuad.hpp"
 #include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
@@ -63,6 +65,41 @@ class UniqueWindowHandle {
   WindowRef ref_;
 };
 
+struct RenderableRef {
+ private:
+  explicit RenderableRef(size_t id, RenderSubSystem& renderSystem)
+      : id(id), renderSystem(&renderSystem) {}
+
+  size_t id;
+  RenderSubSystem* renderSystem;
+
+ public:
+  friend class RenderSubSystem;
+  friend class UniqueRenderableHandle;
+};
+
+class UniqueRenderableHandle {
+ public:
+  explicit UniqueRenderableHandle(RenderableRef ref) : ref_(ref) {}
+  ~UniqueRenderableHandle();
+
+  UniqueRenderableHandle(const UniqueRenderableHandle& other) = delete;
+  UniqueRenderableHandle& operator=(const UniqueRenderableHandle& other) =
+      delete;
+
+  UniqueRenderableHandle(UniqueRenderableHandle&& other) noexcept
+      : ref_(other.ref_) {
+    other.ref_.renderSystem = nullptr;
+  }
+  UniqueRenderableHandle& operator=(UniqueRenderableHandle&& other) noexcept {
+    std::swap(ref_, other.ref_);
+    return *this;
+  }
+
+ private:
+  RenderableRef ref_;
+};
+
 class RenderSubSystem {
  public:
   RenderSubSystem();
@@ -77,6 +114,9 @@ class RenderSubSystem {
   void destroyWindow(WindowRef ref);
 
   Window* getWindow(WindowRef ref);
+
+  UniqueRenderableHandle createRenderable();
+  void destroyRenderable(RenderableRef ref);
 
  private:
   struct GLFWLifetimeScope {
@@ -95,6 +135,7 @@ class RenderSubSystem {
   vulkan::UniqueHandle<VkRenderPass> mainRenderPass_;
   std::vector<PipelineSynchronisationSet> synchronisationSets_;
   std::vector<std::unique_ptr<Window>> windows_;
+  std::vector<std::optional<RenderableQuad>> renderables_;
 
  public:
   friend class GLFWApplication;
