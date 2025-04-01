@@ -33,10 +33,7 @@ glfw::Window makeWindow(std::function<void(int, int)> resizeHandler) {
 
 GLFWApplication::GLFWApplication()
     : render_(),
-      surface_(
-          render_.instance_, makeWindow([&](int /* width */, int /* height */) {
-            onWindowResize();
-          })),
+      window_(render_.createWindow()),
       vertexShader_(getQuadVertexShader(render_.graphics_)),
       fragmentShader_(render_.graphics_, "shaders/fragment.spv"),
       descriptorSetLayout_(render_.graphics_),
@@ -48,10 +45,6 @@ GLFWApplication::GLFWApplication()
           vertexShader_,
           fragmentShader_,
           descriptorSetLayout_),
-      presentStack_(
-          render_.graphics_,
-          surface_,
-          pipeline_.getRenderPass().getRawRenderPass()),
       vertexAttributes_(getQuadVertexAttributesBuffer(render_.graphics_)),
       texture_(
           render_.graphics_,
@@ -86,11 +79,11 @@ GLFWApplication::GLFWApplication()
 }
 
 void GLFWApplication::run() {
-  while (!surface_.window().shouldClose()) {
+  while (!window_->shouldClose()) {
     std::chrono::microseconds maxFrameTime{0};
     std::chrono::microseconds totalFrameTime{0};
 
-    for (int i = 0; i < 1000 && !surface_.window().shouldClose(); i++) {
+    for (int i = 0; i < 1000 && !window_->shouldClose(); i++) {
       auto start = std::chrono::high_resolution_clock::now();
       glfwPollEvents();
       drawFrame();
@@ -124,9 +117,11 @@ void GLFWApplication::drawFrame() {
     return;
   }
 
-  VulkanPresentStack::FrameData presentFrame = presentStack_.getNextImageIndex(
-      render_.synchronisationSets_[currentFrame_].imageAvailableSemaphore.get(),
-      nullptr);
+  VulkanPresentStack::FrameData presentFrame =
+      window_->presentStack_.getNextImageIndex(
+          render_.synchronisationSets_[currentFrame_]
+              .imageAvailableSemaphore.get(),
+          nullptr);
 
   if (presentFrame.refreshRequired()) {
     resetSwapChain();
@@ -141,7 +136,7 @@ void GLFWApplication::drawFrame() {
   render_.commandBuffers_[currentFrame_].runRenderPass(
       pipeline_,
       presentFrame.getFrameBuffer(),
-      presentStack_.extent(),
+      window_->presentStack_.extent(),
       [&](VkCommandBuffer buffer) {
         vkCmdBindDescriptorSets(
             buffer,
@@ -178,14 +173,14 @@ void GLFWApplication::onWindowResize() {
 }
 
 void GLFWApplication::resetSwapChain() {
-  std::pair<int, int> windowSize = surface_.window().getCurrentWindowSize();
+  std::pair<int, int> windowSize = window_->getCurrentWindowSize();
   while ((windowSize.first == 0 || windowSize.second == 0) &&
-         !surface_.window().shouldClose()) {
+         !window_->shouldClose()) {
     glfwWaitEvents();
-    windowSize = surface_.window().getCurrentWindowSize();
+    windowSize = window_->getCurrentWindowSize();
   }
   if (!(windowSize.first == 0 || windowSize.second == 0)) {
-    presentStack_.reset();
+    window_->presentStack_.reset();
   }
 }
 

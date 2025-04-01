@@ -23,6 +23,14 @@ class Resettable {
     requires(std::is_trivially_destructible_v<T>)
   = default;
 
+  Resettable(const Resettable& other) : storage_(*other) {}
+  Resettable& operator=(const Resettable& other) { *storage_ = *other; }
+
+  Resettable(Resettable&& other) noexcept : storage_(std::move(*other)) {}
+  Resettable& operator=(Resettable&& other) noexcept {
+    *storage_ = std::move(*other);
+  }
+
   template <typename... TArgs>
   void reset(TArgs&&... args) {
     if constexpr (!std::is_trivially_destructible_v<T>) {

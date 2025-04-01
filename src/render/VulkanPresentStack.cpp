@@ -4,6 +4,7 @@
 #include <iostream>
 #include <optional>
 #include <span>
+#include <type_traits>
 #include <vector>
 #include <GLFW/glfw3.h>
 #include "render/VulkanGraphicsDevice.hpp"
@@ -40,12 +41,12 @@ std::vector<vulkan::UniqueHandle<VkFramebuffer>> makeFrameBuffers(
 
 VulkanPresentStack::VulkanPresentStack(
     VulkanGraphicsDevice& device,
-    VulkanSurface& surface,
+    VulkanSurface&& surface,
     VkRenderPass renderPass)
-    : swapChainData_(device, surface, renderPass),
-      device_(&device),
-      surface_(&surface),
-      renderPass_(renderPass) {}
+    : surface_(std::move(surface)),
+      renderPass_(renderPass),
+      swapChainData_(device, surface_, renderPass),
+      device_(&device) {}
 
 VulkanPresentStack::SwapChainData::SwapChainData(
     VulkanGraphicsDevice& device,
@@ -70,7 +71,7 @@ VulkanPresentStack::FrameData VulkanPresentStack::getNextImageIndex(
 void VulkanPresentStack::reset() {
   std::cout << "Resetting swap chain\n";
   vkDeviceWaitIdle(device_->getRawDevice());
-  swapChainData_.reset(*device_, *surface_, renderPass_);
+  swapChainData_.reset(*device_, surface_, renderPass_);
 }
 
 VulkanPresentStack::FrameData::FrameData(

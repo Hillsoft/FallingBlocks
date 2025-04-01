@@ -14,7 +14,6 @@ target_link_libraries(render.glfwapplication
 	render.vulkangraphicspipeline
 	render.vulkanpresentstack
 	render.vulkanshader
-	render.vulkansurface
 	render.vulkantexture)
 
 add_library(render.quad STATIC "Quad.cpp" "Quad.hpp")
@@ -31,9 +30,12 @@ target_link_libraries(render.rendersubsystem
 	render.vulkandebugmessenger
 	render.vulkangraphicsdevice
 	render.vulkaninstance
+	render.window
 	render.vulkan.fencebuilder
+	render.vulkan.renderpassbuilder
 	render.vulkan.semaphorebuilder
-	render.vulkan.uniquehandle)
+	render.vulkan.uniquehandle
+	util.debug)
 
 add_library(render.validationlayers INTERFACE "validationLayers.hpp")
 
@@ -167,3 +169,11 @@ target_link_libraries(render.vulkantexture
 	render.vulkan.commandbufferbuilder
 	render.vulkan.fencebuilder
 	render.vulkan.uniquehandle)
+
+add_library(render.window STATIC "Window.cpp" "Window.hpp")
+target_link_libraries(render.window
+	render.vulkangraphicsdevice
+	render.vulkaninstance
+	render.vulkanpresentstack
+	render.vulkansurface
+	render.glfw_wrapper.window)

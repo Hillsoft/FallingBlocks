@@ -6,9 +6,7 @@
 #include "render/VulkanDescriptorPool.hpp"
 #include "render/VulkanDescriptorSetLayout.hpp"
 #include "render/VulkanGraphicsPipeline.hpp"
-#include "render/VulkanPresentStack.hpp"
 #include "render/VulkanShader.hpp"
-#include "render/VulkanSurface.hpp"
 #include "render/VulkanTexture.hpp"
 
 namespace blocks::render {
@@ -34,13 +32,12 @@ class GLFWApplication {
   void resetSwapChain();
 
   RenderSubSystem render_;
-  VulkanSurface surface_;
+  UniqueWindowHandle window_;
   VulkanVertexShader vertexShader_;
   VulkanShader fragmentShader_;
   VulkanDescriptorSetLayout descriptorSetLayout_;
   VulkanDescriptorPool descriptorPool_;
   VulkanGraphicsPipeline pipeline_;
-  VulkanPresentStack presentStack_;
   VulkanBuffer vertexAttributes_;
   VulkanTexture texture_;
 

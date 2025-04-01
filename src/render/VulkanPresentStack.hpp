@@ -46,7 +46,7 @@ class VulkanPresentStack {
 
   VulkanPresentStack(
       VulkanGraphicsDevice& device,
-      VulkanSurface& surface,
+      VulkanSurface&& surface,
       VkRenderPass renderPass);
 
   FrameData getNextImageIndex(VkSemaphore semaphore, VkFence fence);
@@ -63,6 +63,9 @@ class VulkanPresentStack {
     return swapChainData_->swapChain.getSwapchainExtent();
   }
 
+  VulkanSurface& getSurface() { return surface_; }
+  const VulkanSurface& getSurface() const { return surface_; }
+
   void reset();
 
  private:
@@ -77,10 +80,10 @@ class VulkanPresentStack {
     std::vector<vulkan::UniqueHandle<VkFramebuffer>> frameBuffer;
   };
 
+  VulkanSurface surface_;
+  VkRenderPass renderPass_;
   util::Resettable<SwapChainData> swapChainData_;
   VulkanGraphicsDevice* device_;
-  VulkanSurface* surface_;
-  VkRenderPass renderPass_;
 };
 
 } // namespace blocks::render
