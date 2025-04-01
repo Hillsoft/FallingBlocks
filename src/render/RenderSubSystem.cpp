@@ -7,9 +7,11 @@
 #include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
+#include "render/RenderableQuad.hpp"
 #include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanPresentStack.hpp"
 #include "render/Window.hpp"
 #include "render/vulkan/FenceBuilder.hpp"
 #include "render/vulkan/RenderPassBuilder.hpp"
@@ -161,6 +163,95 @@ void RenderSubSystem::destroyRenderable(RenderableRef ref) {
   DEBUG_ASSERT(
       ref.id < renderables_.size() && renderables_[ref.id].has_value());
   renderables_[ref.id].reset();
+}
+
+void RenderSubSystem::drawObject(WindowRef target, RenderableRef ref) {
+  commands_.emplace_back(target, ref);
+}
+
+void RenderSubSystem::commitFrame() {
+  vkWaitForFences(
+      graphics_.getRawDevice(),
+      1,
+      &synchronisationSets_[currentFrame_].inFlightFence.get(),
+      true,
+      UINT64_MAX);
+
+  for (size_t i = 0; i < windows_.size(); i++) {
+    if (windows_[i] != nullptr) {
+      drawWindow(i);
+    }
+  }
+
+  currentFrame_ = (currentFrame_ + 1) % kMaxFramesInFlight;
+}
+
+void RenderSubSystem::drawWindow(size_t windowId) {
+  DEBUG_ASSERT(windowId < windows_.size() && windows_[windowId] != nullptr);
+  Window& window = *windows_[windowId];
+
+  if (window.requiresReset()) {
+    window.resetSwapChain();
+  }
+  if (!window.isDrawable()) {
+    // Presume the window will only become drawable after an event
+    glfwWaitEvents();
+  }
+
+  VulkanPresentStack::FrameData presentFrame =
+      window.presentStack_.getNextImageIndex(
+          synchronisationSets_[currentFrame_].imageAvailableSemaphore.get(),
+          nullptr);
+
+  if (presentFrame.refreshRequired()) {
+    window.resetSwapChain();
+    return;
+  }
+
+  vkResetFences(
+      graphics_.getRawDevice(),
+      1,
+      &synchronisationSets_[currentFrame_].inFlightFence.get());
+
+  for (const auto& command : commands_) {
+    if (command.target_.id == windowId) {
+      DEBUG_ASSERT(
+          command.obj_.id < renderables_.size() &&
+          renderables_[command.obj_.id].has_value());
+      RenderableQuad& renderable = *renderables_[command.obj_.id];
+
+      commandBuffers_[currentFrame_].runRenderPass(
+          renderable.pipeline_,
+          presentFrame.getFrameBuffer(),
+          window.presentStack_.extent(),
+          [&](VkCommandBuffer buffer) {
+            vkCmdBindDescriptorSets(
+                buffer,
+                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                renderable.pipeline_.getPipelineLayout().getRawLayout(),
+                0,
+                1,
+                &renderable.descriptorPool_.getDescriptorSets()[currentFrame_],
+                0,
+                nullptr);
+
+            VkBuffer vertexBuffer = renderable.vertexAttributes_.getRawBuffer();
+            VkDeviceSize offsets = 0;
+            vkCmdBindVertexBuffers(buffer, 0, 1, &vertexBuffer, &offsets);
+            vkCmdDraw(buffer, 6, 1, 0, 0);
+          });
+    }
+  }
+
+  commandBuffers_[currentFrame_].submit(
+      {synchronisationSets_[currentFrame_].imageAvailableSemaphore.get()},
+      {synchronisationSets_[currentFrame_].renderFinishedSemaphore.get()},
+      synchronisationSets_[currentFrame_].inFlightFence.get());
+
+  presentFrame.present(
+      synchronisationSets_[currentFrame_].renderFinishedSemaphore.get());
+
+  commands_.clear();
 }
 
 } // namespace blocks::render

@@ -12,6 +12,8 @@
 
 namespace blocks::render {
 
+class RenderSubSystem;
+
 class RenderableQuad {
  public:
   RenderableQuad(
@@ -27,6 +29,9 @@ class RenderableQuad {
   VulkanGraphicsPipeline pipeline_;
   VulkanBuffer vertexAttributes_;
   VulkanTexture texture_;
+
+ public:
+  friend class RenderSubSystem;
 };
 
 } // namespace blocks::render

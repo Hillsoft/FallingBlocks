@@ -8,6 +8,8 @@
 
 namespace blocks::render {
 
+class RenderSubSystem;
+
 class Window {
  public:
   Window(
@@ -39,6 +41,7 @@ class Window {
 
  public:
   friend class GLFWApplication;
+  friend class RenderSubSystem;
 };
 
 } // namespace blocks::render

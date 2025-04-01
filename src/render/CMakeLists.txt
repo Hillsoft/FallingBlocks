@@ -4,16 +4,7 @@ add_subdirectory(vulkan)
 add_library(render.glfwapplication STATIC "GLFWApplication.cpp" "GLFWApplication.hpp")
 target_link_libraries(render.glfwapplication
 	render.rendersubsystem
-	render.quad
-	render.vulkanbuffer
-	render.vulkancommandbuffer
-	render.vulkandescriptorpool
-	render.vulkandescriptorsetlayout
-	render.vulkangraphicsdevice
-	render.vulkangraphicspipeline
-	render.vulkanpresentstack
-	render.vulkanshader
-	render.vulkantexture)
+	render.vulkangraphicsdevice)
 
 add_library(render.quad STATIC "Quad.cpp" "Quad.hpp")
 target_link_libraries(render.quad
@@ -42,6 +33,7 @@ target_link_libraries(render.rendersubsystem
 	render.vulkandebugmessenger
 	render.vulkangraphicsdevice
 	render.vulkaninstance
+	render.vulkanpresentstack
 	render.window
 	render.vulkan.fencebuilder
 	render.vulkan.renderpassbuilder

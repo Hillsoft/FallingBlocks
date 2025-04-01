@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <optional>
 #include <utility>
@@ -96,6 +97,10 @@ class UniqueRenderableHandle {
     return *this;
   }
 
+  RenderableRef get() { return ref_; }
+  RenderableRef operator*() { return ref_; }
+  RenderableRef operator->() { return ref_; }
+
  private:
   RenderableRef ref_;
 };
@@ -118,7 +123,13 @@ class RenderSubSystem {
   UniqueRenderableHandle createRenderable();
   void destroyRenderable(RenderableRef ref);
 
+  void drawObject(WindowRef target, RenderableRef ref);
+
+  void commitFrame();
+
  private:
+  void drawWindow(size_t windowId);
+
   struct GLFWLifetimeScope {
     GLFWLifetimeScope();
     ~GLFWLifetimeScope();
@@ -136,6 +147,14 @@ class RenderSubSystem {
   std::vector<PipelineSynchronisationSet> synchronisationSets_;
   std::vector<std::unique_ptr<Window>> windows_;
   std::vector<std::optional<RenderableQuad>> renderables_;
+
+  struct DrawCommand {
+    WindowRef target_;
+    RenderableRef obj_;
+  };
+  std::vector<DrawCommand> commands_;
+
+  uint32_t currentFrame_ = 0;
 
  public:
   friend class GLFWApplication;
