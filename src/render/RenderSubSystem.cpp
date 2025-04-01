@@ -2,8 +2,8 @@
 
 #include <cstdint>
 #include <iostream>
+#include <memory>
 #include <stdexcept>
-#include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
 #include "render/VulkanCommandBuffer.hpp"
@@ -123,25 +123,23 @@ RenderSubSystem::GLFWLifetimeScope::~GLFWLifetimeScope() {
 
 UniqueWindowHandle RenderSubSystem::createWindow() {
   size_t id = windows_.size();
-  windows_.emplace_back(
-      std::in_place_t{},
-      Window{
-          instance_,
-          graphics_,
-          VkRenderPass{mainRenderPass_.get()},
-          800,
-          600,
-          "Vulkan"});
+  windows_.emplace_back(std::make_unique<Window>(
+      instance_,
+      graphics_,
+      VkRenderPass{mainRenderPass_.get()},
+      800,
+      600,
+      "Vulkan"));
   return UniqueWindowHandle{WindowRef{id, *this}};
 }
 
 void RenderSubSystem::destroyWindow(WindowRef ref) {
-  DEBUG_ASSERT(ref.id < windows_.size() && windows_[ref.id].has_value());
+  DEBUG_ASSERT(ref.id < windows_.size() && windows_[ref.id] != nullptr);
   windows_[ref.id].reset();
 }
 
 Window* RenderSubSystem::getWindow(WindowRef ref) {
-  DEBUG_ASSERT(ref.id < windows_.size() && windows_[ref.id].has_value());
+  DEBUG_ASSERT(ref.id < windows_.size() && windows_[ref.id] != nullptr);
   return &*windows_[ref.id];
 }
 

@@ -2,9 +2,7 @@
 
 #include <chrono>
 #include <cstdint>
-#include <functional>
 #include <iostream>
-#include <type_traits>
 #include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
@@ -12,22 +10,12 @@
 #include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanPresentStack.hpp"
-#include "render/glfw_wrapper/Window.hpp"
 
 namespace blocks::render {
 
 namespace {
 
 constexpr int kMaxFramesInFlight = 2;
-
-glfw::Window makeWindow(std::function<void(int, int)> resizeHandler) {
-  glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
-  glfw::Window window{800, 600, "Vulkan"};
-  window.setResizeHandler(std::move(resizeHandler));
-
-  return window;
-}
 
 } // namespace
 
@@ -111,10 +99,12 @@ void GLFWApplication::drawFrame() {
       true,
       UINT64_MAX);
 
-  if (shouldResetSwapChain_) {
-    resetSwapChain();
-    shouldResetSwapChain_ = false;
-    return;
+  if (window_->requiresReset()) {
+    window_->resetSwapChain();
+  }
+  if (!window_->isDrawable()) {
+    // Presume the window will only become drawable after an event
+    glfwWaitEvents();
   }
 
   VulkanPresentStack::FrameData presentFrame =
@@ -124,7 +114,7 @@ void GLFWApplication::drawFrame() {
           nullptr);
 
   if (presentFrame.refreshRequired()) {
-    resetSwapChain();
+    window_->resetSwapChain();
     return;
   }
 
@@ -166,22 +156,6 @@ void GLFWApplication::drawFrame() {
           .renderFinishedSemaphore.get());
 
   currentFrame_ = (currentFrame_ + 1) % kMaxFramesInFlight;
-}
-
-void GLFWApplication::onWindowResize() {
-  shouldResetSwapChain_ = true;
-}
-
-void GLFWApplication::resetSwapChain() {
-  std::pair<int, int> windowSize = window_->getCurrentWindowSize();
-  while ((windowSize.first == 0 || windowSize.second == 0) &&
-         !window_->shouldClose()) {
-    glfwWaitEvents();
-    windowSize = window_->getCurrentWindowSize();
-  }
-  if (!(windowSize.first == 0 || windowSize.second == 0)) {
-    window_->presentStack_.reset();
-  }
 }
 
 } // namespace blocks::render

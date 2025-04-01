@@ -3,7 +3,6 @@ add_subdirectory(vulkan)
 
 add_library(render.glfwapplication STATIC "GLFWApplication.cpp" "GLFWApplication.hpp")
 target_link_libraries(render.glfwapplication
-	render.glfw_wrapper.window
 	render.rendersubsystem
 	render.quad
 	render.vulkanbuffer

@@ -18,11 +18,24 @@ class Window {
       int height,
       const char* title);
 
+  Window(const Window& other) = delete;
+  Window& operator=(const Window& other) = delete;
+  Window(Window&& other) = delete;
+  Window& operator=(Window&& other) = delete;
+
   bool shouldClose() const;
   std::pair<int, int> getCurrentWindowSize() const;
 
+  void resetSwapChain();
+
+  bool requiresReset() const;
+  bool isDrawable() const;
+
  private:
+  void onResize();
+
   VulkanPresentStack presentStack_;
+  bool requiresReset_;
 
  public:
   friend class GLFWApplication;

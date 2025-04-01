@@ -1,5 +1,7 @@
 #include "render/Window.hpp"
 
+#include <functional>
+#include <type_traits>
 #include <utility>
 #include <GLFW/glfw3.h>
 #include "render/VulkanGraphicsDevice.hpp"
@@ -11,10 +13,15 @@ namespace blocks::render {
 
 namespace {
 
-glfw::Window makeWindow(int width, int height, const char* title) {
+glfw::Window makeWindow(
+    int width,
+    int height,
+    const char* title,
+    std::function<void(int, int)> resizeHandler) {
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
   glfw::Window window{width, height, title};
+  window.setResizeHandler(std::move(resizeHandler));
 
   return window;
 }
@@ -30,8 +37,11 @@ Window::Window(
     const char* title)
     : presentStack_(
           device,
-          VulkanSurface{instance, makeWindow(width, height, title)},
-          renderPass) {}
+          VulkanSurface{
+              instance,
+              makeWindow(width, height, title, [&](int, int) { onResize(); })},
+          renderPass),
+      requiresReset_(false) {}
 
 bool Window::shouldClose() const {
   return presentStack_.getSurface().window().shouldClose();
@@ -39,6 +49,26 @@ bool Window::shouldClose() const {
 
 std::pair<int, int> Window::getCurrentWindowSize() const {
   return presentStack_.getSurface().window().getCurrentWindowSize();
+}
+
+void Window::resetSwapChain() {
+  std::pair<int, int> windowSize = getCurrentWindowSize();
+  if (!(windowSize.first == 0 || windowSize.second == 0)) {
+    presentStack_.reset();
+    requiresReset_ = false;
+  }
+}
+
+bool Window::requiresReset() const {
+  return requiresReset_;
+}
+
+bool Window::isDrawable() const {
+  return !requiresReset_;
+}
+
+void Window::onResize() {
+  requiresReset_ = true;
 }
 
 } // namespace blocks::render

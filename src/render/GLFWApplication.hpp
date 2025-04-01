@@ -27,10 +27,6 @@ class GLFWApplication {
  private:
   void drawFrame();
 
-  void onWindowResize();
-
-  void resetSwapChain();
-
   RenderSubSystem render_;
   UniqueWindowHandle window_;
   VulkanVertexShader vertexShader_;
@@ -41,7 +37,6 @@ class GLFWApplication {
   VulkanBuffer vertexAttributes_;
   VulkanTexture texture_;
 
-  bool shouldResetSwapChain_ = 0;
   uint32_t currentFrame_ = 0;
 };
 

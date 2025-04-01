@@ -1,6 +1,6 @@
 #pragma once
 
-#include <optional>
+#include <memory>
 #include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
@@ -94,7 +94,7 @@ class RenderSubSystem {
   std::vector<VulkanCommandBuffer> commandBuffers_;
   vulkan::UniqueHandle<VkRenderPass> mainRenderPass_;
   std::vector<PipelineSynchronisationSet> synchronisationSets_;
-  std::vector<std::optional<Window>> windows_;
+  std::vector<std::unique_ptr<Window>> windows_;
 
  public:
   friend class GLFWApplication;
