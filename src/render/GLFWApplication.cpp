@@ -8,12 +8,6 @@
 
 namespace blocks::render {
 
-namespace {
-
-constexpr int kMaxFramesInFlight = 2;
-
-} // namespace
-
 GLFWApplication::GLFWApplication()
     : render_(),
       window_(render_.createWindow()),
