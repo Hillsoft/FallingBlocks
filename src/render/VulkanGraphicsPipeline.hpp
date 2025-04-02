@@ -5,7 +5,6 @@
 #include "render/VulkanDescriptorSetLayout.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanPipelineLayout.hpp"
-#include "render/VulkanRenderPass.hpp"
 #include "render/VulkanShader.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 
@@ -16,17 +15,16 @@ class VulkanGraphicsPipeline {
   VulkanGraphicsPipeline(
       VulkanGraphicsDevice& device,
       VkFormat imageFormat,
+      VkRenderPass renderPass,
       VulkanVertexShader& vertexShader,
       VulkanShader& fragmentShader,
       VulkanDescriptorSetLayout& descriptorLayout);
 
   VkPipeline getRawPipeline() { return pipeline_.get(); }
   VulkanPipelineLayout& getPipelineLayout() { return pipelineLayout_; }
-  VulkanRenderPass& getRenderPass() { return renderPass_; }
 
  private:
   VulkanPipelineLayout pipelineLayout_;
-  VulkanRenderPass renderPass_;
   vulkan::UniqueHandle<VkPipeline> pipeline_;
 };
 

@@ -143,7 +143,12 @@ UniqueRenderableHandle RenderSubSystem::createRenderable(
     const std::filesystem::path& texturePath) {
   size_t id = renderables_.size();
   renderables_.emplace_back(
-      std::in_place, texturePath, graphics_, commandPool_, kMaxFramesInFlight);
+      std::in_place,
+      texturePath,
+      graphics_,
+      commandPool_,
+      mainRenderPass_.get(),
+      kMaxFramesInFlight);
   return UniqueRenderableHandle{RenderableRef{id, *this}};
 }
 

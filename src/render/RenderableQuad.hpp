@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <GLFW/glfw3.h>
 #include "render/VulkanBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanDescriptorPool.hpp"
@@ -21,6 +22,7 @@ class RenderableQuad {
       const std::filesystem::path& texturePath,
       VulkanGraphicsDevice& device,
       VulkanCommandPool& commandPool,
+      VkRenderPass renderPass,
       uint32_t maxFramesInFlight);
 
  private:

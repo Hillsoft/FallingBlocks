@@ -15,12 +15,11 @@ namespace blocks::render {
 VulkanGraphicsPipeline::VulkanGraphicsPipeline(
     VulkanGraphicsDevice& device,
     VkFormat imageFormat,
+    VkRenderPass renderPass,
     VulkanVertexShader& vertexShader,
     VulkanShader& fragmentShader,
     VulkanDescriptorSetLayout& descriptorLayout)
-    : pipelineLayout_(device, descriptorLayout),
-      renderPass_(device, imageFormat),
-      pipeline_(nullptr, nullptr) {
+    : pipelineLayout_(device, descriptorLayout), pipeline_(nullptr, nullptr) {
   std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{
       VkPipelineShaderStageCreateInfo{}, VkPipelineShaderStageCreateInfo{}};
   shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -117,7 +116,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(
   pipelineInfo.pColorBlendState = &colorBlending;
   pipelineInfo.pDynamicState = &dynamicState;
   pipelineInfo.layout = pipelineLayout_.getRawLayout();
-  pipelineInfo.renderPass = renderPass_.getRawRenderPass();
+  pipelineInfo.renderPass = renderPass;
   pipelineInfo.subpass = 0;
   pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
   pipelineInfo.basePipelineIndex = 1;

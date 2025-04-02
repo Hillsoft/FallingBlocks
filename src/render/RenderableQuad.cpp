@@ -14,6 +14,7 @@ RenderableQuad::RenderableQuad(
     const std::filesystem::path& texturePath,
     VulkanGraphicsDevice& device,
     VulkanCommandPool& commandPool,
+    VkRenderPass renderPass,
     uint32_t maxFramesInFlight)
     : vertexShader_(getQuadVertexShader(device)),
       fragmentShader_(device, "shaders/fragment.spv"),
@@ -22,6 +23,7 @@ RenderableQuad::RenderableQuad(
       pipeline_(
           device,
           VK_FORMAT_B8G8R8A8_SRGB,
+          renderPass,
           vertexShader_,
           fragmentShader_,
           descriptorSetLayout_),
