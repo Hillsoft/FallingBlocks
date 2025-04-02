@@ -183,6 +183,8 @@ void RenderSubSystem::commitFrame() {
     }
   }
 
+  commands_.clear();
+
   currentFrame_ = (currentFrame_ + 1) % kMaxFramesInFlight;
 }
 
@@ -295,8 +297,6 @@ void RenderSubSystem::drawWindow(size_t windowId) {
 
   presentFrame.present(
       synchronisationSets_[currentFrame_].renderFinishedSemaphore.get());
-
-  commands_.clear();
 }
 
 } // namespace blocks::render
