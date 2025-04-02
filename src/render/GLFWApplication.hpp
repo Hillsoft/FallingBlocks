@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstdint>
 #include "render/RenderSubSystem.hpp"
 
 namespace blocks::render {

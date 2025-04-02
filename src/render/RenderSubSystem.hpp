@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <filesystem>
 #include <memory>
 #include <optional>
 #include <utility>
@@ -120,7 +121,8 @@ class RenderSubSystem {
 
   Window* getWindow(WindowRef ref);
 
-  UniqueRenderableHandle createRenderable();
+  UniqueRenderableHandle createRenderable(
+      const std::filesystem::path& texturePath);
   void destroyRenderable(RenderableRef ref);
 
   void drawObject(WindowRef target, RenderableRef ref);

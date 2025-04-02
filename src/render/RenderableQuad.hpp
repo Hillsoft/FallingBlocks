@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <filesystem>
 #include "render/VulkanBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanDescriptorPool.hpp"
@@ -17,6 +18,7 @@ class RenderSubSystem;
 class RenderableQuad {
  public:
   RenderableQuad(
+      const std::filesystem::path& texturePath,
       VulkanGraphicsDevice& device,
       VulkanCommandPool& commandPool,
       uint32_t maxFramesInFlight);

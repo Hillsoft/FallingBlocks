@@ -18,8 +18,8 @@ GLFWApplication::GLFWApplication()
     : render_(),
       window_(render_.createWindow()),
       window2_(render_.createWindow()),
-      renderable_(render_.createRenderable()),
-      renderable2_(render_.createRenderable()) {}
+      renderable_(render_.createRenderable(RESOURCE_DIR "/mandelbrot set.png")),
+      renderable2_(render_.createRenderable(RESOURCE_DIR "/test_image.bmp")) {}
 
 void GLFWApplication::run() {
   while (!window_->shouldClose()) {
@@ -50,7 +50,9 @@ void GLFWApplication::run() {
 void GLFWApplication::drawFrame() {
   if (shouldDraw_) {
     render_.drawObject(*window_, *renderable_);
+    render_.drawObject(*window2_, *renderable2_);
   } else {
+    render_.drawObject(*window_, *renderable2_);
     render_.drawObject(*window2_, *renderable_);
   }
   render_.commitFrame();

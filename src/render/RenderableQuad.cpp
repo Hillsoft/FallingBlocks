@@ -1,6 +1,7 @@
 #include "render/RenderableQuad.hpp"
 
 #include <cstdint>
+#include <filesystem>
 #include <vector>
 #include <GLFW/glfw3.h>
 #include "render/Quad.hpp"
@@ -10,6 +11,7 @@
 namespace blocks::render {
 
 RenderableQuad::RenderableQuad(
+    const std::filesystem::path& texturePath,
     VulkanGraphicsDevice& device,
     VulkanCommandPool& commandPool,
     uint32_t maxFramesInFlight)
@@ -24,7 +26,7 @@ RenderableQuad::RenderableQuad(
           fragmentShader_,
           descriptorSetLayout_),
       vertexAttributes_(getQuadVertexAttributesBuffer(device)),
-      texture_(device, commandPool, RESOURCE_DIR "/mandelbrot set.png") {
+      texture_(device, commandPool, texturePath) {
   const auto& descriptorSets = descriptorPool_.getDescriptorSets();
   std::vector<VkWriteDescriptorSet> descriptorWrites;
   descriptorWrites.reserve(descriptorSets.size());

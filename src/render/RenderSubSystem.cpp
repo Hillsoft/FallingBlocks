@@ -1,6 +1,7 @@
 #include "render/RenderSubSystem.hpp"
 
 #include <cstdint>
+#include <filesystem>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
@@ -9,7 +10,6 @@
 #include <GLFW/glfw3.h>
 #include "render/RenderableQuad.hpp"
 #include "render/VulkanCommandBuffer.hpp"
-#include "render/VulkanCommandPool.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanPresentStack.hpp"
 #include "render/Window.hpp"
@@ -139,10 +139,11 @@ Window* RenderSubSystem::getWindow(WindowRef ref) {
   return &*windows_[ref.id];
 }
 
-UniqueRenderableHandle RenderSubSystem::createRenderable() {
+UniqueRenderableHandle RenderSubSystem::createRenderable(
+    const std::filesystem::path& texturePath) {
   size_t id = renderables_.size();
   renderables_.emplace_back(
-      std::in_place, graphics_, commandPool_, kMaxFramesInFlight);
+      std::in_place, texturePath, graphics_, commandPool_, kMaxFramesInFlight);
   return UniqueRenderableHandle{RenderableRef{id, *this}};
 }
 
