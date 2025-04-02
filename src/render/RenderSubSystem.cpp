@@ -204,13 +204,15 @@ void RenderSubSystem::drawWindow(size_t windowId) {
   }
 
   VulkanPresentStack::FrameData presentFrame =
-      window.presentStack_.getNextImageIndex(
+      window.getPresentStack().getNextImageIndex(
           synchronisationSet.imageAvailableSemaphore.get(), nullptr);
 
   if (presentFrame.refreshRequired()) {
     window.resetSwapChain();
     return;
   }
+
+  VkExtent2D extent = window.getCurrentWindowExtent();
 
   vkResetFences(
       graphics_.getRawDevice(), 1, &synchronisationSet.inFlightFence.get());
@@ -234,7 +236,7 @@ void RenderSubSystem::drawWindow(size_t windowId) {
   renderPassInfo.renderPass = mainRenderPass_.get();
   renderPassInfo.framebuffer = presentFrame.getFrameBuffer();
   renderPassInfo.renderArea.offset = {0, 0};
-  renderPassInfo.renderArea.extent = window.presentStack_.extent();
+  renderPassInfo.renderArea.extent = extent;
 
   VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
   renderPassInfo.clearValueCount = 1;
@@ -246,15 +248,15 @@ void RenderSubSystem::drawWindow(size_t windowId) {
   VkViewport viewport{};
   viewport.x = 0.0f;
   viewport.y = 0.0f;
-  viewport.width = static_cast<float>(window.presentStack_.extent().width);
-  viewport.height = static_cast<float>(window.presentStack_.extent().height);
+  viewport.width = static_cast<float>(extent.width);
+  viewport.height = static_cast<float>(extent.height);
   viewport.minDepth = 0.0f;
   viewport.maxDepth = 1.0f;
   vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
   VkRect2D scissor{};
   scissor.offset = {0, 0};
-  scissor.extent = window.presentStack_.extent();
+  scissor.extent = extent;
   vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
   for (const auto& command : commands_) {
@@ -298,6 +300,10 @@ void RenderSubSystem::drawWindow(size_t windowId) {
       synchronisationSet.inFlightFence.get());
 
   presentFrame.present(synchronisationSet.renderFinishedSemaphore.get());
+}
+
+void RenderSubSystem::waitIdle() {
+  vkDeviceWaitIdle(graphics_.getRawDevice());
 }
 
 } // namespace blocks::render

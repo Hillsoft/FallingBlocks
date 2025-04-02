@@ -4,7 +4,6 @@
 #include <iostream>
 #include <utility>
 #include <GLFW/glfw3.h>
-#include "render/VulkanGraphicsDevice.hpp"
 
 namespace blocks::render {
 
@@ -38,7 +37,7 @@ void GLFWApplication::run() {
     shouldDraw_ = !shouldDraw_;
   }
 
-  vkDeviceWaitIdle(render_.graphics_.getRawDevice());
+  render_.waitIdle();
 }
 
 void GLFWApplication::drawFrame() {

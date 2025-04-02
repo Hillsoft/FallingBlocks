@@ -129,6 +129,8 @@ class RenderSubSystem {
 
   void commitFrame();
 
+  void waitIdle();
+
  private:
   void drawWindow(size_t windowId);
 
@@ -157,9 +159,6 @@ class RenderSubSystem {
   std::vector<DrawCommand> commands_;
 
   uint32_t currentFrame_ = 0;
-
- public:
-  friend class GLFWApplication;
 };
 
 } // namespace blocks::render

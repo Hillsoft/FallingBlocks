@@ -51,6 +51,10 @@ std::pair<int, int> Window::getCurrentWindowSize() const {
   return presentStack_.getSurface().window().getCurrentWindowSize();
 }
 
+VkExtent2D Window::getCurrentWindowExtent() const {
+  return presentStack_.extent();
+}
+
 void Window::resetSwapChain() {
   std::pair<int, int> windowSize = getCurrentWindowSize();
   if (!(windowSize.first == 0 || windowSize.second == 0)) {

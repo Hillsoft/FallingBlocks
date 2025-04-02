@@ -27,8 +27,11 @@ class Window {
 
   bool shouldClose() const;
   std::pair<int, int> getCurrentWindowSize() const;
+  VkExtent2D getCurrentWindowExtent() const;
 
   void resetSwapChain();
+
+  VulkanPresentStack& getPresentStack() { return presentStack_; }
 
   bool requiresReset() const;
   bool isDrawable() const;
@@ -38,10 +41,6 @@ class Window {
 
   VulkanPresentStack presentStack_;
   bool requiresReset_;
-
- public:
-  friend class GLFWApplication;
-  friend class RenderSubSystem;
 };
 
 } // namespace blocks::render
