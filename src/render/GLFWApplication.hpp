@@ -24,6 +24,7 @@ class GLFWApplication {
   RenderSubSystem render_;
   UniqueWindowHandle window_;
   UniqueRenderableHandle renderable_;
+  UniqueRenderableHandle renderable2_;
 
   bool shouldDraw_ = true;
 };

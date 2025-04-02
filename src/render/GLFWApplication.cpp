@@ -17,7 +17,8 @@ constexpr int kMaxFramesInFlight = 2;
 GLFWApplication::GLFWApplication()
     : render_(),
       window_(render_.createWindow()),
-      renderable_(render_.createRenderable()) {}
+      renderable_(render_.createRenderable()),
+      renderable2_(render_.createRenderable()) {}
 
 void GLFWApplication::run() {
   while (!window_->shouldClose()) {
@@ -46,7 +47,9 @@ void GLFWApplication::run() {
 }
 
 void GLFWApplication::drawFrame() {
-  render_.drawObject(*window_, *renderable_);
+  if (shouldDraw_) {
+    render_.drawObject(*window_, *renderable_);
+  }
   render_.commitFrame();
 }
 
