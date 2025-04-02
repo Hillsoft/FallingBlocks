@@ -25,32 +25,13 @@ namespace {
 
 constexpr int kMaxFramesInFlight = 2;
 
-std::vector<VulkanCommandBuffer> makeCommandBuffers(
-    VulkanGraphicsDevice& device, VulkanCommandPool& commandPool) {
-  std::vector<VulkanCommandBuffer> commandBuffers;
-  commandBuffers.reserve(kMaxFramesInFlight);
-
-  for (int i = 0; i < kMaxFramesInFlight; i++) {
-    commandBuffers.emplace_back(device, commandPool);
-  }
-
-  return commandBuffers;
-}
-
-std::vector<RenderSubSystem::PipelineSynchronisationSet>
-makeSynchronisationSets(VulkanGraphicsDevice& device) {
-  std::vector<RenderSubSystem::PipelineSynchronisationSet> result;
-  result.reserve(kMaxFramesInFlight);
-
-  for (int i = 0; i < kMaxFramesInFlight; i++) {
-    result.emplace_back(
-        vulkan::SemaphoreBuilder{}.build(device.getRawDevice()),
-        vulkan::SemaphoreBuilder{}.build(device.getRawDevice()),
-        vulkan::FenceBuilder{}.setInitiallySignalled(true).build(
-            device.getRawDevice()));
-  }
-
-  return result;
+RenderSubSystem::PipelineSynchronisationSet makeSynchronisationSet(
+    VulkanGraphicsDevice& device) {
+  return {
+      vulkan::SemaphoreBuilder{}.build(device.getRawDevice()),
+      vulkan::SemaphoreBuilder{}.build(device.getRawDevice()),
+      vulkan::FenceBuilder{}.setInitiallySignalled(true).build(
+          device.getRawDevice())};
 }
 
 vulkan::UniqueHandle<VkRenderPass> makeMainRenderPass(VkDevice device) {
@@ -112,9 +93,9 @@ RenderSubSystem::RenderSubSystem()
 #endif
       graphics_(VulkanGraphicsDevice::make(instance_)),
       commandPool_(graphics_),
-      commandBuffers_(makeCommandBuffers(graphics_, commandPool_)),
+      commandBuffers_(),
       mainRenderPass_(makeMainRenderPass(graphics_.getRawDevice())),
-      synchronisationSets_(makeSynchronisationSets(graphics_)) {
+      synchronisationSets_() {
 }
 
 RenderSubSystem::GLFWLifetimeScope::GLFWLifetimeScope() {
@@ -139,6 +120,12 @@ UniqueWindowHandle RenderSubSystem::createWindow() {
       800,
       600,
       "Vulkan"));
+
+  for (size_t i = 0; i < kMaxFramesInFlight; i++) {
+    synchronisationSets_.emplace_back(makeSynchronisationSet(graphics_));
+    commandBuffers_.emplace_back(graphics_, commandPool_);
+  }
+
   return UniqueWindowHandle{WindowRef{id, *this}};
 }
 
@@ -170,10 +157,18 @@ void RenderSubSystem::drawObject(WindowRef target, RenderableRef ref) {
 }
 
 void RenderSubSystem::commitFrame() {
+  std::vector<VkFence> fences;
+  fences.reserve(windows_.size());
+  for (size_t i = 0; i < windows_.size(); i++) {
+    fences.emplace_back(
+        synchronisationSets_[i * kMaxFramesInFlight + currentFrame_]
+            .inFlightFence.get());
+  }
+
   vkWaitForFences(
       graphics_.getRawDevice(),
-      1,
-      &synchronisationSets_[currentFrame_].inFlightFence.get(),
+      static_cast<uint32_t>(fences.size()),
+      fences.data(),
       true,
       UINT64_MAX);
 
@@ -191,6 +186,8 @@ void RenderSubSystem::commitFrame() {
 void RenderSubSystem::drawWindow(size_t windowId) {
   DEBUG_ASSERT(windowId < windows_.size() && windows_[windowId] != nullptr);
   Window& window = *windows_[windowId];
+  PipelineSynchronisationSet& synchronisationSet =
+      synchronisationSets_[windowId * kMaxFramesInFlight + currentFrame_];
 
   if (window.requiresReset()) {
     window.resetSwapChain();
@@ -202,8 +199,7 @@ void RenderSubSystem::drawWindow(size_t windowId) {
 
   VulkanPresentStack::FrameData presentFrame =
       window.presentStack_.getNextImageIndex(
-          synchronisationSets_[currentFrame_].imageAvailableSemaphore.get(),
-          nullptr);
+          synchronisationSet.imageAvailableSemaphore.get(), nullptr);
 
   if (presentFrame.refreshRequired()) {
     window.resetSwapChain();
@@ -211,11 +207,11 @@ void RenderSubSystem::drawWindow(size_t windowId) {
   }
 
   vkResetFences(
-      graphics_.getRawDevice(),
-      1,
-      &synchronisationSets_[currentFrame_].inFlightFence.get());
+      graphics_.getRawDevice(), 1, &synchronisationSet.inFlightFence.get());
 
-  VkCommandBuffer commandBuffer = commandBuffers_[currentFrame_].getRawBuffer();
+  VkCommandBuffer commandBuffer =
+      commandBuffers_[windowId * kMaxFramesInFlight + currentFrame_]
+          .getRawBuffer();
   vkResetCommandBuffer(commandBuffer, 0);
 
   VkCommandBufferBeginInfo beginInfo{};
@@ -290,13 +286,12 @@ void RenderSubSystem::drawWindow(size_t windowId) {
     throw std::runtime_error{"Failed to record command buffer"};
   }
 
-  commandBuffers_[currentFrame_].submit(
-      {synchronisationSets_[currentFrame_].imageAvailableSemaphore.get()},
-      {synchronisationSets_[currentFrame_].renderFinishedSemaphore.get()},
-      synchronisationSets_[currentFrame_].inFlightFence.get());
+  commandBuffers_[windowId * kMaxFramesInFlight + currentFrame_].submit(
+      {synchronisationSet.imageAvailableSemaphore.get()},
+      {synchronisationSet.renderFinishedSemaphore.get()},
+      synchronisationSet.inFlightFence.get());
 
-  presentFrame.present(
-      synchronisationSets_[currentFrame_].renderFinishedSemaphore.get());
+  presentFrame.present(synchronisationSet.renderFinishedSemaphore.get());
 }
 
 } // namespace blocks::render

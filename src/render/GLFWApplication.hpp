@@ -23,6 +23,7 @@ class GLFWApplication {
 
   RenderSubSystem render_;
   UniqueWindowHandle window_;
+  UniqueWindowHandle window2_;
   UniqueRenderableHandle renderable_;
   UniqueRenderableHandle renderable2_;
 
