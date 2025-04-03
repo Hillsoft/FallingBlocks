@@ -29,7 +29,7 @@ class RenderableQuad {
       uint32_t maxFramesInFlight);
 
   void setPosition(math::Vec<float, 2> pos0, math::Vec<float, 2> pos1);
-  void bindDynamicDescriptors(VkDevice device, uint32_t currentFrame);
+  void updateDynamicUniforms(VkDevice device, uint32_t currentFrame);
 
  private:
   VulkanVertexShader vertexShader_;

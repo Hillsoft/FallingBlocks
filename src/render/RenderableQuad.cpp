@@ -76,6 +76,25 @@ RenderableQuad::RenderableQuad(
     curWrite.pImageInfo = &imageInfo;
   }
 
+  std::vector<VkDescriptorBufferInfo> bufferInfos;
+  bufferInfos.reserve(maxFramesInFlight);
+
+  for (size_t i = 0; i < maxFramesInFlight; i++) {
+    auto& bufferInfo = bufferInfos.emplace_back();
+    bufferInfo.buffer = uniformBuffers_[i].getRawBuffer();
+    bufferInfo.offset = 0;
+    bufferInfo.range = sizeof(UniformData);
+
+    auto& curWrite = descriptorWrites.emplace_back();
+    curWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    curWrite.dstSet = descriptorPool_.getDescriptorSets()[i];
+    curWrite.dstBinding = 1;
+    curWrite.dstArrayElement = 0;
+    curWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    curWrite.descriptorCount = 1;
+    curWrite.pBufferInfo = &bufferInfo;
+  }
+
   vkUpdateDescriptorSets(
       device.getRawDevice(),
       static_cast<uint32_t>(descriptorWrites.size()),
@@ -90,29 +109,13 @@ void RenderableQuad::setPosition(
   pos1_ = pos1;
 }
 
-void RenderableQuad::bindDynamicDescriptors(
+void RenderableQuad::updateDynamicUniforms(
     VkDevice device, uint32_t currentFrame) {
   UniformData* uniformData = reinterpret_cast<UniformData*>(
       uniformBuffers_[currentFrame].getMappedBuffer());
 
   uniformData->pos0 = pos0_;
   uniformData->pos1 = pos1_;
-
-  VkDescriptorBufferInfo bufferInfo{};
-  bufferInfo.buffer = uniformBuffers_[currentFrame].getRawBuffer();
-  bufferInfo.offset = 0;
-  bufferInfo.range = sizeof(UniformData);
-
-  VkWriteDescriptorSet descriptorWrite{};
-  descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-  descriptorWrite.dstSet = descriptorPool_.getDescriptorSets()[currentFrame];
-  descriptorWrite.dstBinding = 1;
-  descriptorWrite.dstArrayElement = 0;
-  descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-  descriptorWrite.descriptorCount = 1;
-  descriptorWrite.pBufferInfo = &bufferInfo;
-
-  vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
 }
 
 } // namespace blocks::render
