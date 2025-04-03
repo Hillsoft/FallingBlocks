@@ -1,6 +1,5 @@
 #include "render/VulkanRawBuffer.hpp"
 
-#include <span>
 #include <stdexcept>
 #include <GLFW/glfw3.h>
 
@@ -10,13 +9,11 @@
 namespace blocks::render {
 
 VulkanRawBuffer::VulkanRawBuffer(
-    VulkanGraphicsDevice& device,
-    std::span<char> data,
-    VkBufferUsageFlags usageFlags)
+    VulkanGraphicsDevice& device, size_t size, VkBufferUsageFlags usageFlags)
     : buffer_(nullptr, nullptr) {
   VkBufferCreateInfo bufferInfo{};
   bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-  bufferInfo.size = data.size();
+  bufferInfo.size = size;
   bufferInfo.usage = usageFlags;
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 

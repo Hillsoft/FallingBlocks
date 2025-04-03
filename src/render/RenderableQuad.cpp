@@ -4,11 +4,35 @@
 #include <filesystem>
 #include <vector>
 #include <GLFW/glfw3.h>
+#include "math/vec.hpp"
 #include "render/Quad.hpp"
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
+#include "render/VulkanMappedBuffer.hpp"
 
 namespace blocks::render {
+
+namespace {
+
+struct UniformData {
+  math::Vec<float, 2> pos0;
+  math::Vec<float, 2> pos1;
+};
+
+std::vector<VulkanMappedBuffer> makeUniformBuffers(
+    VulkanGraphicsDevice& device, uint32_t maxFramesInFlight) {
+  std::vector<VulkanMappedBuffer> result;
+  result.reserve(maxFramesInFlight);
+
+  for (size_t i = 0; i < maxFramesInFlight; i++) {
+    result.emplace_back(
+        device, sizeof(UniformData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
+  }
+
+  return result;
+}
+
+} // namespace
 
 RenderableQuad::RenderableQuad(
     const std::filesystem::path& texturePath,
@@ -28,7 +52,10 @@ RenderableQuad::RenderableQuad(
           fragmentShader_,
           descriptorSetLayout_),
       vertexAttributes_(getQuadVertexAttributesBuffer(device)),
-      texture_(device, commandPool, texturePath) {
+      uniformBuffers_(makeUniformBuffers(device, maxFramesInFlight)),
+      texture_(device, commandPool, texturePath),
+      pos0_(-1.0f, -1.0f),
+      pos1_(1.0f, 1.0f) {
   const auto& descriptorSets = descriptorPool_.getDescriptorSets();
   std::vector<VkWriteDescriptorSet> descriptorWrites;
   descriptorWrites.reserve(descriptorSets.size());
@@ -55,6 +82,37 @@ RenderableQuad::RenderableQuad(
       descriptorWrites.data(),
       0,
       nullptr);
+}
+
+void RenderableQuad::setPosition(
+    math::Vec<float, 2> pos0, math::Vec<float, 2> pos1) {
+  pos0_ = pos0;
+  pos1_ = pos1;
+}
+
+void RenderableQuad::bindDynamicDescriptors(
+    VkDevice device, uint32_t currentFrame) {
+  UniformData* uniformData = reinterpret_cast<UniformData*>(
+      uniformBuffers_[currentFrame].getMappedBuffer());
+
+  uniformData->pos0 = pos0_;
+  uniformData->pos1 = pos1_;
+
+  VkDescriptorBufferInfo bufferInfo{};
+  bufferInfo.buffer = uniformBuffers_[currentFrame].getRawBuffer();
+  bufferInfo.offset = 0;
+  bufferInfo.range = sizeof(UniformData);
+
+  VkWriteDescriptorSet descriptorWrite{};
+  descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+  descriptorWrite.dstSet = descriptorPool_.getDescriptorSets()[currentFrame];
+  descriptorWrite.dstBinding = 1;
+  descriptorWrite.dstArrayElement = 0;
+  descriptorWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  descriptorWrite.descriptorCount = 1;
+  descriptorWrite.pBufferInfo = &bufferInfo;
+
+  vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
 }
 
 } // namespace blocks::render

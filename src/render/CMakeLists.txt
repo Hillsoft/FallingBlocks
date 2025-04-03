@@ -14,6 +14,7 @@ target_link_libraries(render.quad
 
 add_library(render.renderablequad "RenderableQuad.cpp" "RenderableQuad.hpp")
 target_link_libraries(render.renderablequad
+	math.vec
 	render.quad
 	render.vulkanbuffer
 	render.vulkancommandpool
@@ -21,6 +22,7 @@ target_link_libraries(render.renderablequad
 	render.vulkandescriptorsetlayout
 	render.vulkangraphicsdevice
 	render.vulkangraphicspipeline
+	render.vulkanmappedbuffer
 	render.vulkanshader
 	render.vulkantexture)
 
@@ -107,6 +109,12 @@ add_library(render.vulkaninstance STATIC "VulkanInstance.cpp" "VulkanInstance.hp
 target_link_libraries(render.vulkaninstance INTERFACE
 	render.validationlayers
 	render.vulkan.uniquehandle)
+
+add_library(render.vulkanmappedbuffer STATIC "VulkanMappedBuffer.cpp" "VulkanMappedBuffer.hpp")
+target_link_libraries(render.vulkanmappedbuffer
+	render.vulkandevicememory
+	render.vulkangraphicsdevice
+	render.vulkanrawbuffer)
 
 add_library(render.vulkanpipelinelayout STATIC "VulkanPipelineLayout.cpp" "VulkanPipelineLayout.hpp")
 target_link_libraries(render.vulkanpipelinelayout

@@ -1,5 +1,7 @@
 #include "render/VulkanDescriptorSetLayout.hpp"
 
+#include <array>
+#include <cstdint>
 #include <stdexcept>
 #include <GLFW/glfw3.h>
 #include "render/VulkanGraphicsDevice.hpp"
@@ -10,18 +12,24 @@ namespace blocks::render {
 VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(
     VulkanGraphicsDevice& device)
     : descriptorSet_(nullptr, nullptr) {
-  VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-  samplerLayoutBinding.binding = 0;
-  samplerLayoutBinding.descriptorCount = 1;
-  samplerLayoutBinding.descriptorType =
+  std::array<VkDescriptorSetLayoutBinding, 2> samplerLayoutBindings{};
+  samplerLayoutBindings[0].binding = 0;
+  samplerLayoutBindings[0].descriptorCount = 1;
+  samplerLayoutBindings[0].descriptorType =
       VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  samplerLayoutBinding.pImmutableSamplers = nullptr;
-  samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+  samplerLayoutBindings[0].pImmutableSamplers = nullptr;
+  samplerLayoutBindings[0].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+  samplerLayoutBindings[1].binding = 1;
+  samplerLayoutBindings[1].descriptorCount = 1;
+  samplerLayoutBindings[1].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  samplerLayoutBindings[1].pImmutableSamplers = nullptr;
+  samplerLayoutBindings[1].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
   VkDescriptorSetLayoutCreateInfo layoutInfo{};
   layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-  layoutInfo.bindingCount = 1;
-  layoutInfo.pBindings = &samplerLayoutBinding;
+  layoutInfo.bindingCount = static_cast<uint32_t>(samplerLayoutBindings.size());
+  layoutInfo.pBindings = samplerLayoutBindings.data();
 
   VkDescriptorSetLayout layout;
   if (vkCreateDescriptorSetLayout(

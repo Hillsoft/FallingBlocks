@@ -21,12 +21,12 @@ struct VertexData {
 };
 
 std::vector<VertexData> vertices = {
-    {{-1.0f, 1.0f}, {0.0f, 0.0f}},
-    {{-1.0f, -1.0f}, {0.0f, 1.0f}},
-    {{1.0f, -1.0f}, {1.0f, 1.0f}},
+    {{0.0f, 1.0f}, {0.0f, 0.0f}},
+    {{0.0f, 0.0f}, {0.0f, 1.0f}},
+    {{1.0f, 0.0f}, {1.0f, 1.0f}},
     {{1.0f, 1.0f}, {1.0f, 0.0f}},
-    {{-1.0f, 1.0f}, {0.0f, 0.0f}},
-    {{1.0f, -1.0f}, {1.0f, 1.0f}}};
+    {{0.0f, 1.0f}, {0.0f, 0.0f}},
+    {{1.0f, 0.0f}, {1.0f, 1.0f}}};
 
 constexpr VkVertexInputBindingDescription kBindingDescription = []() {
   VkVertexInputBindingDescription bindingDescription{};

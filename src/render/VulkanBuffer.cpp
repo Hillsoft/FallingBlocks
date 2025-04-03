@@ -12,7 +12,7 @@ VulkanBuffer::VulkanBuffer(
     VulkanGraphicsDevice& device,
     std::span<char> data,
     VkBufferUsageFlags usageFlags)
-    : rawBuffer_(device, data, usageFlags), memory_(device, rawBuffer_) {
+    : rawBuffer_(device, data.size(), usageFlags), memory_(device, rawBuffer_) {
   vkBindBufferMemory(
       device.getRawDevice(),
       rawBuffer_.getRawBuffer(),

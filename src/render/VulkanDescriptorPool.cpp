@@ -1,5 +1,6 @@
 #include "render/VulkanDescriptorPool.hpp"
 
+#include <array>
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
@@ -15,14 +16,17 @@ VulkanDescriptorPool::VulkanDescriptorPool(
     VulkanDescriptorSetLayout& layout,
     int maxFramesInFlight)
     : pool_(nullptr, nullptr) {
-  VkDescriptorPoolSize poolSize{};
-  poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-  poolSize.descriptorCount = static_cast<uint32_t>(maxFramesInFlight);
+  std::array<VkDescriptorPoolSize, 2> poolSizes{};
+  poolSizes[0].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+  poolSizes[0].descriptorCount = static_cast<uint32_t>(maxFramesInFlight);
+
+  poolSizes[1].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+  poolSizes[1].descriptorCount = static_cast<uint32_t>(maxFramesInFlight);
 
   VkDescriptorPoolCreateInfo poolInfo{};
   poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-  poolInfo.poolSizeCount = 1;
-  poolInfo.pPoolSizes = &poolSize;
+  poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+  poolInfo.pPoolSizes = poolSizes.data();
   poolInfo.maxSets = static_cast<uint32_t>(maxFramesInFlight);
 
   VkDescriptorPool pool;

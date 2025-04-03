@@ -1,6 +1,5 @@
 #pragma once
 
-#include <span>
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
@@ -11,9 +10,7 @@ namespace blocks::render {
 class VulkanRawBuffer {
  public:
   VulkanRawBuffer(
-      VulkanGraphicsDevice& device,
-      std::span<char> data,
-      VkBufferUsageFlags usageFlags);
+      VulkanGraphicsDevice& device, size_t size, VkBufferUsageFlags usageFlags);
 
   VkBuffer getRawBuffer() { return buffer_.get(); }
 

@@ -266,6 +266,9 @@ void RenderSubSystem::drawWindow(size_t windowId) {
           renderables_[command.obj_.id].has_value());
       RenderableQuad& renderable = *renderables_[command.obj_.id];
 
+      renderable.bindDynamicDescriptors(
+          graphics_.getRawDevice(), currentFrame_);
+
       vkCmdBindPipeline(
           commandBuffer,
           VK_PIPELINE_BIND_POINT_GRAPHICS,

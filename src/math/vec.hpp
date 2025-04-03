@@ -26,6 +26,8 @@ class Vec {
  public:
   Vec(const Vec& other) = default;
   Vec(Vec&& other) = default;
+  Vec& operator=(const Vec& other) = default;
+  Vec& operator=(Vec&& other) = default;
 
   template <typename... TArgs>
   Vec(TArgs&&... args)
