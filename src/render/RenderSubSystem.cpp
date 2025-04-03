@@ -74,6 +74,14 @@ const Window* WindowRef::get() const {
   return renderSystem->getWindow(*this);
 }
 
+RenderableQuad* RenderableRef::get() {
+  return renderSystem->getRenderable(*this);
+}
+
+const RenderableQuad* RenderableRef::get() const {
+  return renderSystem->getRenderable(*this);
+}
+
 UniqueWindowHandle::~UniqueWindowHandle() {
   if (ref_.renderSystem != nullptr) {
     ref_.renderSystem->destroyWindow(ref_);
@@ -137,6 +145,12 @@ void RenderSubSystem::destroyWindow(WindowRef ref) {
 Window* RenderSubSystem::getWindow(WindowRef ref) {
   DEBUG_ASSERT(ref.id < windows_.size() && windows_[ref.id] != nullptr);
   return &*windows_[ref.id];
+}
+
+RenderableQuad* RenderSubSystem::getRenderable(RenderableRef ref) {
+  DEBUG_ASSERT(
+      ref.id < renderables_.size() && renderables_[ref.id].has_value());
+  return &*renderables_[ref.id];
 }
 
 UniqueRenderableHandle RenderSubSystem::createRenderable(

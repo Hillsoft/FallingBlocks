@@ -78,6 +78,13 @@ struct RenderableRef {
  public:
   friend class RenderSubSystem;
   friend class UniqueRenderableHandle;
+
+  RenderableQuad* get();
+  const RenderableQuad* get() const;
+  RenderableQuad& operator*() { return *get(); }
+  const RenderableQuad& operator*() const { return *get(); }
+  RenderableQuad* operator->() { return get(); }
+  const RenderableQuad* operator->() const { return get(); }
 };
 
 class UniqueRenderableHandle {
@@ -124,6 +131,8 @@ class RenderSubSystem {
   UniqueRenderableHandle createRenderable(
       const std::filesystem::path& texturePath);
   void destroyRenderable(RenderableRef ref);
+
+  RenderableQuad* getRenderable(RenderableRef ref);
 
   void drawObject(WindowRef target, RenderableRef ref);
 

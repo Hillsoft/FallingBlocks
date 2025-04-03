@@ -4,6 +4,7 @@
 #include <iostream>
 #include <utility>
 #include <GLFW/glfw3.h>
+#include "math/vec.hpp"
 
 namespace blocks::render {
 
@@ -22,6 +23,7 @@ void GLFWApplication::run() {
     for (int i = 0; i < 1000 && !window_->shouldClose(); i++) {
       auto start = std::chrono::high_resolution_clock::now();
       glfwPollEvents();
+      update();
       drawFrame();
       auto end = std::chrono::high_resolution_clock::now();
 
@@ -29,6 +31,10 @@ void GLFWApplication::run() {
           std::chrono::duration_cast<std::chrono::microseconds>(end - start);
       totalFrameTime += curFrameTime;
       maxFrameTime = std::max(maxFrameTime, curFrameTime);
+
+      timeMs_ +=
+          std::chrono::duration_cast<std::chrono::milliseconds>(curFrameTime)
+              .count();
     }
 
     std::cout << "FPS: " << 1000000.0f / (totalFrameTime / 1000).count()
@@ -38,6 +44,11 @@ void GLFWApplication::run() {
   }
 
   render_.waitIdle();
+}
+
+void GLFWApplication::update() {
+  math::Vec2 pos0{static_cast<float>(timeMs_ % 1000) / 1000.0f, 0.0f};
+  renderable_->setPosition(pos0, pos0 + math::Vec2{0.2f, 0.2f});
 }
 
 void GLFWApplication::drawFrame() {

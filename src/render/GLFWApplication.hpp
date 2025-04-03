@@ -18,6 +18,7 @@ class GLFWApplication {
   void run();
 
  private:
+  void update();
   void drawFrame();
 
   RenderSubSystem render_;
@@ -26,6 +27,7 @@ class GLFWApplication {
   UniqueRenderableHandle renderable_;
   UniqueRenderableHandle renderable2_;
 
+  size_t timeMs_ = 0;
   bool shouldDraw_ = true;
 };
 
