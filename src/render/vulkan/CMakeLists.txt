@@ -18,6 +18,10 @@ add_library(render.vulkan.semaphorebuilder "SemaphoreBuilder.hpp" "SemaphoreBuil
 target_link_libraries(render.vulkan.semaphorebuilder
 	render.vulkan.uniquehandle)
 
+add_library(render.vulkan.surfacebuilder "SurfaceBuilder.hpp" "SurfaceBuilder.cpp")
+target_link_libraries(render.vulkan.surfacebuilder
+	render.vulkan.uniquehandle)
+
 add_library(render.vulkan.uniquehandle "UniqueHandle.hpp" "UniqueHandleDeleters.hpp" "UniqueHandleDeleters.cpp")
 target_link_libraries(render.vulkan.uniquehandle
 	util.debug)

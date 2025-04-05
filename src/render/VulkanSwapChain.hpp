@@ -7,13 +7,15 @@
 
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
-#include "render/VulkanSurface.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
 class VulkanSwapChain {
  public:
-  VulkanSwapChain(VulkanSurface& surface, VulkanGraphicsDevice& graphicsDevice);
+  VulkanSwapChain(
+      GLFWwindow* window,
+      VkSurfaceKHR surface,
+      VulkanGraphicsDevice& graphicsDevice);
 
   std::vector<VulkanImageView> getImageViews() const;
 

@@ -6,7 +6,6 @@
 #include <GLFW/glfw3.h>
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanInstance.hpp"
-#include "render/VulkanSurface.hpp"
 #include "render/glfw_wrapper/Window.hpp"
 
 namespace blocks::render {
@@ -36,19 +35,18 @@ Window::Window(
     int height,
     const char* title)
     : presentStack_(
+          instance.getRawInstance(),
           device,
-          VulkanSurface{
-              instance,
-              makeWindow(width, height, title, [&](int, int) { onResize(); })},
+          makeWindow(width, height, title, [&](int, int) { onResize(); }),
           renderPass),
       requiresReset_(false) {}
 
 bool Window::shouldClose() const {
-  return presentStack_.getSurface().window().shouldClose();
+  return presentStack_.getWindow().shouldClose();
 }
 
 std::pair<int, int> Window::getCurrentWindowSize() const {
-  return presentStack_.getSurface().window().getCurrentWindowSize();
+  return presentStack_.getWindow().getCurrentWindowSize();
 }
 
 VkExtent2D Window::getCurrentWindowExtent() const {

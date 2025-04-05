@@ -9,8 +9,9 @@
 #include <GLFW/glfw3.h>
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
-#include "render/VulkanSurface.hpp"
+#include "render/glfw_wrapper/Window.hpp"
 #include "render/vulkan/FrameBufferBuilder.hpp"
+#include "render/vulkan/SurfaceBuilder.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 #include "util/resettable.hpp"
 
@@ -40,19 +41,24 @@ std::vector<vulkan::UniqueHandle<VkFramebuffer>> makeFrameBuffers(
 } // namespace
 
 VulkanPresentStack::VulkanPresentStack(
+    VkInstance instance,
     VulkanGraphicsDevice& device,
-    VulkanSurface&& surface,
+    glfw::Window window,
     VkRenderPass renderPass)
-    : surface_(std::move(surface)),
+    : window_(std::move(window)),
+      surface_(
+          vulkan::createSurfaceForWindow(instance, window_.getRawWindow())),
       renderPass_(renderPass),
-      swapChainData_(device, surface_, renderPass),
+      swapChainData_(
+          device, window_.getRawWindow(), surface_.get(), renderPass),
       device_(&device) {}
 
 VulkanPresentStack::SwapChainData::SwapChainData(
     VulkanGraphicsDevice& device,
-    VulkanSurface& surface,
+    GLFWwindow* window,
+    VkSurfaceKHR surface,
     VkRenderPass renderPass)
-    : swapChain(surface, device),
+    : swapChain(window, surface, device),
       imageViews(swapChain.getImageViews()),
       frameBuffer(makeFrameBuffers(
           device, renderPass, imageViews, swapChain.getSwapchainExtent())) {}
@@ -71,7 +77,8 @@ VulkanPresentStack::FrameData VulkanPresentStack::getNextImageIndex(
 void VulkanPresentStack::reset() {
   std::cout << "Resetting swap chain\n";
   vkDeviceWaitIdle(device_->getRawDevice());
-  swapChainData_.reset(*device_, surface_, renderPass_);
+  swapChainData_.reset(
+      *device_, window_.getRawWindow(), surface_.get(), renderPass_);
 }
 
 VulkanPresentStack::FrameData::FrameData(

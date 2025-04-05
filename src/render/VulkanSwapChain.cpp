@@ -11,8 +11,6 @@
 
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
-#include "render/VulkanSurface.hpp"
-#include "render/glfw_wrapper/Window.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 #include "util/debug.hpp"
 
@@ -40,14 +38,14 @@ VkPresentModeKHR chooseSwapPresentMode(
 }
 
 VkExtent2D chooseSwapExtent(
-    glfw::Window& window, const VkSurfaceCapabilitiesKHR& capabilities) {
+    GLFWwindow* window, const VkSurfaceCapabilitiesKHR& capabilities) {
   if (capabilities.currentExtent.width !=
       std::numeric_limits<uint32_t>::max()) {
     // Required to use given extent
     return capabilities.currentExtent;
   } else {
     int width, height;
-    glfwGetFramebufferSize(window.getRawWindow(), &width, &height);
+    glfwGetFramebufferSize(window, &width, &height);
 
     VkExtent2D actualExtent = {
         static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
@@ -79,33 +77,29 @@ VkSurfaceFormatKHR chooseSwapSurfaceFormat(
 }
 
 SwapChainSupportDetails getSwapChainSupportDetails(
-    VkPhysicalDevice device, VulkanSurface& surface) {
+    VkPhysicalDevice device, VkSurfaceKHR surface) {
   SwapChainSupportDetails details;
 
   vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
-      device, surface.getRawSurface(), &details.capabilities);
+      device, surface, &details.capabilities);
 
   uint32_t formatCount;
-  vkGetPhysicalDeviceSurfaceFormatsKHR(
-      device, surface.getRawSurface(), &formatCount, nullptr);
+  vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
 
   if (formatCount != 0) {
     details.formats.resize(formatCount);
     vkGetPhysicalDeviceSurfaceFormatsKHR(
-        device, surface.getRawSurface(), &formatCount, details.formats.data());
+        device, surface, &formatCount, details.formats.data());
   }
 
   uint32_t presentModeCount;
   vkGetPhysicalDeviceSurfacePresentModesKHR(
-      device, surface.getRawSurface(), &presentModeCount, nullptr);
+      device, surface, &presentModeCount, nullptr);
 
   if (presentModeCount != 0) {
     details.presentModes.resize(presentModeCount);
     vkGetPhysicalDeviceSurfacePresentModesKHR(
-        device,
-        surface.getRawSurface(),
-        &presentModeCount,
-        details.presentModes.data());
+        device, surface, &presentModeCount, details.presentModes.data());
   }
 
   details.preferredFormat = chooseSwapSurfaceFormat(details.formats);
@@ -120,7 +114,9 @@ SwapChainSupportDetails getSwapChainSupportDetails(
 } // namespace
 
 VulkanSwapChain::VulkanSwapChain(
-    VulkanSurface& surface, VulkanGraphicsDevice& graphicsDevice)
+    GLFWwindow* window,
+    VkSurfaceKHR surface,
+    VulkanGraphicsDevice& graphicsDevice)
     : graphicsDevice_(&graphicsDevice),
       swapChain_(nullptr, nullptr),
       queue_(graphicsDevice.getPresentQueue()) {
@@ -130,8 +126,7 @@ VulkanSwapChain::VulkanSwapChain(
   VkSurfaceFormatKHR surfaceFormat = swapChainSupport.preferredFormat;
   VkPresentModeKHR presentMode =
       chooseSwapPresentMode(swapChainSupport.presentModes);
-  VkExtent2D extent =
-      chooseSwapExtent(surface.window(), swapChainSupport.capabilities);
+  VkExtent2D extent = chooseSwapExtent(window, swapChainSupport.capabilities);
 
   uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
   if (swapChainSupport.capabilities.maxImageCount > 0 &&
@@ -141,7 +136,7 @@ VulkanSwapChain::VulkanSwapChain(
 
   VkSwapchainCreateInfoKHR createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-  createInfo.surface = surface.getRawSurface();
+  createInfo.surface = surface;
   createInfo.minImageCount = imageCount;
   createInfo.imageFormat = surfaceFormat.format;
   createInfo.imageColorSpace = surfaceFormat.colorSpace;

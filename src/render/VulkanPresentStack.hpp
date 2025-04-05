@@ -5,8 +5,8 @@
 #include <GLFW/glfw3.h>
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanImageView.hpp"
-#include "render/VulkanSurface.hpp"
 #include "render/VulkanSwapChain.hpp"
+#include "render/glfw_wrapper/Window.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 #include "util/debug.hpp"
 #include "util/resettable.hpp"
@@ -45,8 +45,9 @@ class VulkanPresentStack {
   };
 
   VulkanPresentStack(
+      VkInstance instance,
       VulkanGraphicsDevice& device,
-      VulkanSurface&& surface,
+      glfw::Window window,
       VkRenderPass renderPass);
 
   FrameData getNextImageIndex(VkSemaphore semaphore, VkFence fence);
@@ -63,8 +64,8 @@ class VulkanPresentStack {
     return swapChainData_->swapChain.getSwapchainExtent();
   }
 
-  VulkanSurface& getSurface() { return surface_; }
-  const VulkanSurface& getSurface() const { return surface_; }
+  glfw::Window& getWindow() { return window_; }
+  const glfw::Window& getWindow() const { return window_; }
 
   void reset();
 
@@ -72,7 +73,8 @@ class VulkanPresentStack {
   struct SwapChainData {
     SwapChainData(
         VulkanGraphicsDevice& device,
-        VulkanSurface& surface,
+        GLFWwindow* window,
+        VkSurfaceKHR surface,
         VkRenderPass renderPass);
 
     VulkanSwapChain swapChain;
@@ -80,7 +82,8 @@ class VulkanPresentStack {
     std::vector<vulkan::UniqueHandle<VkFramebuffer>> frameBuffer;
   };
 
-  VulkanSurface surface_;
+  glfw::Window window_;
+  vulkan::UniqueHandle<VkSurfaceKHR> surface_;
   VkRenderPass renderPass_;
   util::Resettable<SwapChainData> swapChainData_;
   VulkanGraphicsDevice* device_;

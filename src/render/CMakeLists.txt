@@ -125,11 +125,12 @@ target_link_libraries(render.vulkanpipelinelayout
 
 add_library(render.vulkanpresentstack STATIC "VulkanPresentStack.cpp" "VulkanPresentStack.hpp")
 target_link_libraries(render.vulkanpresentstack
+	render.glfw_wrapper.window
 	render.vulkangraphicsdevice
 	render.vulkanimageview
-	render.vulkansurface
 	render.vulkanswapchain
 	render.vulkan.framebufferbuilder
+	render.vulkan.surfacebuilder
 	render.vulkan.uniquehandle
 	util.debug
 	util.resettable)
@@ -145,18 +146,10 @@ target_link_libraries(render.vulkanshader
 	render.vulkan.uniquehandle
 	util.file)
 
-add_library(render.vulkansurface STATIC "VulkanSurface.cpp" "VulkanSurface.hpp")
-target_link_libraries(render.vulkansurface
-	render.glfw_wrapper.window
-	render.vulkaninstance
-	render.vulkan.uniquehandle)
-
 add_library(render.vulkanswapchain STATIC "VulkanSwapChain.cpp" "VulkanSwapChain.hpp")
 target_link_libraries(render.vulkanswapchain
-	render.glfw_wrapper.window
 	render.vulkangraphicsdevice
 	render.vulkanimageview
-	render.vulkansurface
 	render.vulkan.uniquehandle
 	util.debug)
 
@@ -178,5 +171,4 @@ target_link_libraries(render.window
 	render.vulkangraphicsdevice
 	render.vulkaninstance
 	render.vulkanpresentstack
-	render.vulkansurface
 	render.glfw_wrapper.window)
