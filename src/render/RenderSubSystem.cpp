@@ -126,7 +126,7 @@ UniqueWindowHandle RenderSubSystem::createWindow() {
       graphics_,
       VkRenderPass{mainRenderPass_.get()},
       800,
-      600,
+      800,
       "Vulkan"));
 
   for (size_t i = 0; i < kMaxFramesInFlight; i++) {

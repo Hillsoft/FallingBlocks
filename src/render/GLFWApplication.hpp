@@ -1,5 +1,6 @@
 #pragma once
 
+#include "math/vec.hpp"
 #include "render/RenderSubSystem.hpp"
 
 namespace blocks::render {
@@ -18,17 +19,18 @@ class GLFWApplication {
   void run();
 
  private:
-  void update();
+  void update(float deltaTimeSeconds);
   void drawFrame();
 
   RenderSubSystem render_;
   UniqueWindowHandle window_;
-  UniqueWindowHandle window2_;
   UniqueRenderableHandle renderable_;
   UniqueRenderableHandle renderable2_;
 
-  size_t timeMs_ = 0;
-  bool shouldDraw_ = true;
+  math::Vec2 pos1_;
+  math::Vec2 v1_;
+  math::Vec2 pos2_;
+  math::Vec2 v2_;
 };
 
 } // namespace blocks::render
