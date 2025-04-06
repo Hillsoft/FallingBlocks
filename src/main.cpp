@@ -1,9 +1,7 @@
-#include <iostream>
-
-#include "render/GLFWApplication.hpp"
+#include "Application.hpp"
 
 int main() {
-  blocks::render::GLFWApplication vulkan{};
+  blocks::Application vulkan{};
 
   vulkan.run();
 

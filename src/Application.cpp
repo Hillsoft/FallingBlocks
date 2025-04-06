@@ -1,4 +1,4 @@
-#include "render/GLFWApplication.hpp"
+#include "Application.hpp"
 
 #include <chrono>
 #include <cstdlib>
@@ -7,7 +7,7 @@
 #include <GLFW/glfw3.h>
 #include "math/vec.hpp"
 
-namespace blocks::render {
+namespace blocks {
 
 namespace {
 
@@ -47,7 +47,7 @@ float randFloat(float lo, float hi) {
 
 } // namespace
 
-GLFWApplication::GLFWApplication()
+Application::Application()
     : render_(),
       window_(render_.createWindow()),
       renderable_(render_.createRenderable(RESOURCE_DIR "/mandelbrot set.png")),
@@ -61,7 +61,7 @@ GLFWApplication::GLFWApplication()
           randFloat(-1.0f, 1.0f - objSize.y())),
       v2_(randFloat(-1.0f, 1.0f), randFloat(-1.0f, 1.0f)) {}
 
-void GLFWApplication::run() {
+void Application::run() {
   float prevFrameTimeSecs = 0;
   while (!window_->shouldClose()) {
     std::chrono::microseconds maxFrameTime{0};
@@ -93,7 +93,7 @@ void GLFWApplication::run() {
   render_.waitIdle();
 }
 
-void GLFWApplication::update(float deltaTimeSeconds) {
+void Application::update(float deltaTimeSeconds) {
   pos1_ = stepPos(pos1_, v1_, deltaTimeSeconds);
   pos2_ = stepPos(pos2_, v2_, deltaTimeSeconds);
 
@@ -101,10 +101,10 @@ void GLFWApplication::update(float deltaTimeSeconds) {
   renderable2_->setPosition(pos2_, pos2_ + objSize);
 }
 
-void GLFWApplication::drawFrame() {
+void Application::drawFrame() {
   render_.drawObject(*window_, *renderable_);
   render_.drawObject(*window_, *renderable2_);
   render_.commitFrame();
 }
 
-} // namespace blocks::render
+} // namespace blocks

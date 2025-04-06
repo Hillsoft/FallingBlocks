@@ -21,7 +21,6 @@
 
 namespace blocks::render {
 
-class GLFWApplication;
 class RenderSubSystem;
 
 struct WindowRef {
