@@ -17,7 +17,7 @@ class HeapArena {
   HeapArena& operator=(const HeapArena& other) = delete;
 
   HeapArena(HeapArena&& other) noexcept
-      : data_(other.data_), size_(other.size_), cursor_(other.cursor_) {
+      : data_(other.data_), cursor_(other.cursor_), size_(other.size_) {
     other.data_ = nullptr;
   }
   HeapArena& operator=(HeapArena&& other) noexcept {

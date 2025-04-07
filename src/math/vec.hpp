@@ -32,7 +32,7 @@ class Vec {
   template <typename... TArgs>
   Vec(TArgs&&... args)
     requires(std::conjunction_v<std::is_convertible<TArgs, TNum>...>)
-      : data_(std::forward<TArgs>(args)...) {}
+      : data_{std::forward<TArgs>(args)...} {}
 
   template <typename TNum2>
   Vec(const Vec<TNum2, size>& other)

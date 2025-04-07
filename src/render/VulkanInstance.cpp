@@ -96,7 +96,7 @@ VulkanInstance::VulkanInstance() : instance_(nullptr) {
   createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
   createInfo.pApplicationInfo = &appInfo;
 
-  if constexpr (kEnableValidationLayers) {
+  if (kEnableValidationLayers) {
     std::cout << "Using validation layers\n";
     if (checkValidationLayers()) {
       createInfo.enabledLayerCount =

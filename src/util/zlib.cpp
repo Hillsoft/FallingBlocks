@@ -102,9 +102,11 @@ class HuffmanTree {
       : nodes_() {
     nodes_.reserve(2 * codeLengths.size() - 1);
 
+#ifndef NDEBUG
     for (const auto& l : codeLengths) {
       DEBUG_ASSERT(l <= kMaxHuffmanCodeLength);
     }
+#endif
 
     std::array<unsigned int, kMaxHuffmanCodeLength + 1> blCount{};
     for (const auto& l : codeLengths) {
@@ -156,12 +158,8 @@ class HuffmanTree {
     DEBUG_ASSERT(nodes_.size() > 0);
     const Node* curNode = &nodes_[0];
 
-    unsigned short code = 0;
-
     while (!curNode->isLeaf) {
       bool rightNext = stream.consumeBit();
-      code <<= 1;
-      code += rightNext ? 1 : 0;
       short nextNodeIndex = rightNext ? curNode->r : curNode->l;
       if (nextNodeIndex == std::numeric_limits<short>::max()) {
         throw std::runtime_error{"Corrupt zlib data"};
@@ -383,7 +381,7 @@ std::vector<unsigned char> zlibDecompress(std::span<const unsigned char> data) {
   if (data.size() < 2) {
     throw std::runtime_error{"Corrupt zlib data"};
   }
-  ZlibHeader header = readZlibHeader(data[0], data[1]);
+  readZlibHeader(data[0], data[1]);
 
   data = data.subspan(2);
   BitStream stream(data);

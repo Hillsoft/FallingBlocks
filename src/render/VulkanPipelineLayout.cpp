@@ -1,5 +1,6 @@
 #include "render/VulkanPipelineLayout.hpp"
 
+#include <stdexcept>
 #include <GLFW/glfw3.h>
 #include "render/VulkanDescriptorSetLayout.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
@@ -20,6 +21,10 @@ VulkanPipelineLayout::VulkanPipelineLayout(
   VkPipelineLayout layout;
   VkResult result = vkCreatePipelineLayout(
       device.getRawDevice(), &pipelineLayoutInfo, nullptr, &layout);
+
+  if (result != VK_SUCCESS) {
+    throw std::runtime_error{"Failed to create pipeline layout"};
+  }
 
   layout_ =
       vulkan::UniqueHandle<VkPipelineLayout>{layout, device.getRawDevice()};

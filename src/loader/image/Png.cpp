@@ -24,6 +24,8 @@ using Color = math::Vec<unsigned short, 3>;
 
 namespace {
 
+constexpr unsigned short sZero = static_cast<unsigned short>(0);
+
 using crc_type = uint32_t;
 
 /* Table of CRCs of all 8-bit messages. */
@@ -233,28 +235,28 @@ Image loadPng(std::span<const unsigned char> data) {
     FilterMode filterMode = static_cast<FilterMode>(rawFilterMode);
 
     for (size_t x = 0; x < header.width; x++) {
-      size_t pixelOffset = 1 + 3 * x + rowSize * y;
       if (filterMode == FilterMode::NONE) {
         Color col = readDecompressed(x, y);
         writeOut(col);
       } else if (filterMode == FilterMode::SUB) {
-        Color prev = x != 0 ? readOut(x - 1, y) : Color{0, 0, 0};
+        Color prev = x != 0 ? readOut(x - 1, y) : Color{sZero, sZero, sZero};
         Color raw = readDecompressed(x, y);
         writeOut(raw + prev);
       } else if (filterMode == FilterMode::UP) {
-        Color prev = y != 0 ? readOut(x, y - 1) : Color{0, 0, 0};
+        Color prev = y != 0 ? readOut(x, y - 1) : Color{sZero, sZero, sZero};
         Color raw = readDecompressed(x, y);
         writeOut(raw + prev);
       } else if (filterMode == FilterMode::AVERAGE) {
-        Color prevX = x != 0 ? readOut(x - 1, y) : Color{0, 0, 0};
-        Color prevY = y != 0 ? readOut(x, y - 1) : Color{0, 0, 0};
+        Color prevX = x != 0 ? readOut(x - 1, y) : Color{sZero, sZero, sZero};
+        Color prevY = y != 0 ? readOut(x, y - 1) : Color{sZero, sZero, sZero};
         Color raw = readDecompressed(x, y);
         writeOut(raw + (prevX + prevY) / static_cast<unsigned short>(2));
       } else if (filterMode == FilterMode::PAETH) {
-        Color prevX = x != 0 ? readOut(x - 1, y) : Color{0, 0, 0};
-        Color prevY = y != 0 ? readOut(x, y - 1) : Color{0, 0, 0};
-        Color prevXY =
-            x != 0 && y != 0 ? readOut(x - 1, y - 1) : Color{0, 0, 0};
+        Color prevX = x != 0 ? readOut(x - 1, y) : Color{sZero, sZero, sZero};
+        Color prevY = y != 0 ? readOut(x, y - 1) : Color{sZero, sZero, sZero};
+        Color prevXY = x != 0 && y != 0
+            ? readOut(x - 1, y - 1)
+            : Color{sZero, sZero, sZero};
         Color raw = readDecompressed(x, y);
         Color predictor;
 

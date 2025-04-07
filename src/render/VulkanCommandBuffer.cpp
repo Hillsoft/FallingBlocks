@@ -24,7 +24,7 @@ void VulkanCommandBuffer::submit(
     VkFence signalFence) {
   std::vector<VkPipelineStageFlags> waitStages;
   waitStages.reserve(waitSemaphores.size());
-  for (const auto& semaphore : waitSemaphores) {
+  for (size_t i = 0; i < waitSemaphores.size(); i++) {
     waitStages.emplace_back(VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT);
   }
 

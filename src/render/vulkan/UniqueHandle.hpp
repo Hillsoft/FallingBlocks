@@ -2,8 +2,8 @@
 
 #include <memory>
 #include <type_traits>
-
 #include "render/vulkan/UniqueHandleDeleters.hpp"
+#include "util/portability.hpp"
 
 namespace blocks::render::vulkan {
 
@@ -43,7 +43,7 @@ class UniqueHandle {
 
  private:
   T handle_;
-  [[no_unique_address]] Deleter deleter_;
+  NO_UNIQUE_ADDRESS Deleter deleter_;
 };
 
 } // namespace blocks::render::vulkan

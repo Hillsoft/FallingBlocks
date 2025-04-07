@@ -14,6 +14,7 @@
 #include "render/VulkanInstance.hpp"
 #include "render/Window.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
+#include "util/portability.hpp"
 
 #ifndef NDEBUG
 #include "render/VulkanDebugMessenger.hpp"
@@ -56,6 +57,7 @@ class UniqueWindowHandle {
   }
   UniqueWindowHandle& operator=(UniqueWindowHandle&& other) noexcept {
     std::swap(ref_, other.ref_);
+    return *this;
   }
 
   WindowRef get() { return ref_; }
@@ -147,7 +149,7 @@ class RenderSubSystem {
     ~GLFWLifetimeScope();
   };
 
-  [[no_unique_address]] GLFWLifetimeScope lifetimeScope_;
+  NO_UNIQUE_ADDRESS GLFWLifetimeScope lifetimeScope_;
   VulkanInstance instance_;
 #ifndef NDEBUG
   VulkanDebugMessenger debugMessenger_;
