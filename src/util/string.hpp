@@ -54,6 +54,25 @@ struct StringConverter<TArg, TArgs...> : public StringConverter<TArgs...> {
   }
 };
 
+template <typename TArg, typename... TArgs>
+  requires std::is_same_v<std::remove_cvref_t<TArg>, std::string_view>
+struct StringConverter<TArg, TArgs...> : public StringConverter<TArgs...> {
+  StringConverter(std::string_view c, TArgs&&... rest)
+      : StringConverter<TArgs...>(std::forward<TArgs>(rest)...),
+        estimatedSizeCache_(c.size()) {}
+
+  size_t estimateSize() const {
+    return estimatedSizeCache_ + StringConverter<TArgs...>::estimateSize();
+  }
+
+  void append(std::string& output, std::string_view c, TArgs&&... rest) {
+    output.append(c);
+    StringConverter<TArgs...>::append(output, std::forward<TArgs>(rest)...);
+  }
+
+  const size_t estimatedSizeCache_;
+};
+
 } // namespace detail
 
 template <typename... TArgs>

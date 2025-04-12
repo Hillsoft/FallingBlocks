@@ -1,4 +1,10 @@
 add_subdirectory(image)
+add_subdirectory(test)
+
+add_library(loader.config STATIC "Config.hpp" "Config.cpp")
+target_link_libraries(loader.config
+	util.file
+	util.string)
 
 add_library(loader.image INTERFACE "Image.hpp")
 
