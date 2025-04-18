@@ -27,14 +27,25 @@ class Window {
     resizeHandler_ = std::move(resizeHandler);
   }
 
+  void setKeyEventHandler(
+      std::function<void(int key, int scancode, int action, int mods)>
+          keyHandler) {
+    keyEventHandler_ = std::move(keyHandler);
+  }
+
   GLFWwindow* getRawWindow() { return window_; }
 
  private:
   GLFWwindow* window_;
   std::function<void(int width, int height)> resizeHandler_;
+  std::function<void(int key, int scancode, int action, int mods)>
+      keyEventHandler_;
 
   static void frameBufferResizeCallback(
       GLFWwindow* window, int width, int height);
+
+  static void keyCallback(
+      GLFWwindow* window, int key, int scancode, int action, int mods);
 };
 
 } // namespace blocks::render::glfw

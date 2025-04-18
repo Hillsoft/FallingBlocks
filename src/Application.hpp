@@ -1,5 +1,6 @@
 #pragma once
 
+#include "input/InputSubSystem.hpp"
 #include "math/vec.hpp"
 #include "render/RenderSubSystem.hpp"
 
@@ -24,6 +25,8 @@ class Application {
 
   render::RenderSubSystem render_;
   render::UniqueWindowHandle window_;
+  input::InputSubSystem input_;
+
   render::UniqueRenderableHandle renderable_;
   render::UniqueRenderableHandle renderable2_;
 

@@ -50,6 +50,7 @@ float randFloat(float lo, float hi) {
 Application::Application()
     : render_(),
       window_(render_.createWindow()),
+      input_(window_->getPresentStack().getWindow()),
       renderable_(render_.createRenderable(RESOURCE_DIR "/mandelbrot set.png")),
       renderable2_(render_.createRenderable(RESOURCE_DIR "/test_image.bmp")),
       pos1_(

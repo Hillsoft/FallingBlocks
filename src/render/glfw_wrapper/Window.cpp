@@ -20,6 +20,7 @@ Window::Window(int width, int height, const char* title)
 
   glfwSetWindowUserPointer(window_, this);
   glfwSetFramebufferSizeCallback(window_, frameBufferResizeCallback);
+  glfwSetKeyCallback(window_, keyCallback);
 }
 
 Window::~Window() {
@@ -59,6 +60,14 @@ void Window::frameBufferResizeCallback(
     GLFWwindow* window, int width, int height) {
   auto appWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
   appWindow->resizeHandler_(width, height);
+}
+
+void Window::keyCallback(
+    GLFWwindow* window, int key, int scancode, int action, int mods) {
+  auto appWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+  if (appWindow->keyEventHandler_) {
+    appWindow->keyEventHandler_(key, scancode, action, mods);
+  }
 }
 
 } // namespace blocks::render::glfw
