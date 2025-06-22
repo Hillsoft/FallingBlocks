@@ -2,6 +2,7 @@
 
 #include <array>
 #include <bit>
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <limits>
@@ -51,22 +52,29 @@ constexpr std::array<crc_type, 256> crc_table = []() {
    should be initialized to all 1's, and the transmitted value
    is the 1's complement of the final running CRC (see the
    crc() routine below)). */
-crc_type update_crc(crc_type c, const unsigned char* buf, size_t len) {
+crc_type update_crc(crc_type c, const std::byte* buf, size_t len) {
   for (size_t n = 0; n < len; n++) {
-    c = crc_table[(c ^ buf[n]) & 0xff] ^ (c >> 8);
+    c = crc_table[(c ^ static_cast<crc_type>(buf[n])) & 0xff] ^ (c >> 8);
   }
   return c;
 }
 
 /* Return the CRC of the bytes buf[0..len-1]. */
-crc_type crc(std::span<const unsigned char> data) {
+crc_type crc(std::span<const std::byte> data) {
   return update_crc(0xffffffffL, data.data(), data.size()) ^ 0xffffffffL;
 }
 
-constexpr std::array<unsigned char, 8> kPngHeader{
-    137, 80, 78, 71, 13, 10, 26, 10};
+constexpr std::array<std::byte, 8> kPngHeader{
+    std::byte{137},
+    std::byte{80},
+    std::byte{78},
+    std::byte{71},
+    std::byte{13},
+    std::byte{10},
+    std::byte{26},
+    std::byte{10}};
 
-bool checkSignature(std::span<const unsigned char>& data) {
+bool checkSignature(std::span<const std::byte>& data) {
   if (data.size() < kPngHeader.size()) {
     return false;
   }
@@ -79,17 +87,19 @@ bool checkSignature(std::span<const unsigned char>& data) {
   return true;
 }
 
-uint32_t readBigEndian(std::span<const unsigned char> data) {
+uint32_t readBigEndian(std::span<const std::byte> data) {
   DEBUG_ASSERT(data.size() >= 4);
-  return (data[0] << 24) | (data[1] << 16) | (data[2] << 8) | data[3];
+  return (static_cast<uint32_t>(data[0]) << 24) |
+      (static_cast<uint32_t>(data[1]) << 16) |
+      (static_cast<uint32_t>(data[2]) << 8) | static_cast<uint32_t>(data[3]);
 }
 
 struct Chunk {
-  std::array<unsigned char, 4> type;
-  std::span<const unsigned char> data;
+  std::array<std::byte, 4> type;
+  std::span<const std::byte> data;
 };
 
-Chunk readChunk(std::span<const unsigned char>& data) {
+Chunk readChunk(std::span<const std::byte>& data) {
   Chunk outChunk{};
 
   if (data.size() < 8) {
@@ -136,17 +146,17 @@ struct PngHeader {
   uint8_t interlace;
 };
 
-PngHeader readPngHeader(std::span<const unsigned char> data) {
+PngHeader readPngHeader(std::span<const std::byte> data) {
   DEBUG_ASSERT(data.size() == 13);
 
   PngHeader header{};
   header.width = readBigEndian(data.subspan(0));
   header.height = readBigEndian(data.subspan(4));
-  header.bitDepth = data[8];
-  header.colorType = data[9];
-  header.compression = data[10];
-  header.filter = data[11];
-  header.interlace = data[12];
+  header.bitDepth = static_cast<uint8_t>(data[8]);
+  header.colorType = static_cast<uint8_t>(data[9]);
+  header.compression = static_cast<uint8_t>(data[10]);
+  header.filter = static_cast<uint8_t>(data[11]);
+  header.interlace = static_cast<uint8_t>(data[12]);
 
   return header;
 }
@@ -162,12 +172,10 @@ enum FilterMode {
 } // namespace
 
 Image loadPng(const std::filesystem::path& path) {
-  std::vector<char> data = util::readFileBytes(path);
-  return loadPng(std::span<unsigned char>(
-      reinterpret_cast<unsigned char*>(data.data()), data.size()));
+  return loadPng(util::readFileBytes(path));
 }
 
-Image loadPng(std::span<const unsigned char> data) {
+Image loadPng(std::span<const std::byte> data) {
   if (!checkSignature(data)) {
     throw std::runtime_error{"Corrupt PNG"};
   }
@@ -180,18 +188,20 @@ Image loadPng(std::span<const unsigned char> data) {
     throw std::runtime_error{"Unsupported PNG format"};
   }
 
-  std::vector<unsigned char> imgData;
+  std::vector<std::byte> imgData;
 
   while (data.size() > 0) {
     Chunk chunk = readChunk(data);
-    if (chunk.type == std::array<unsigned char, 4>{'I', 'D', 'A', 'T'}) {
+    if (chunk.type ==
+        std::array<std::byte, 4>{
+            std::byte{'I'}, std::byte{'D'}, std::byte{'A'}, std::byte{'T'}}) {
       for (auto c : chunk.data) {
         imgData.push_back(c);
       }
     }
   }
 
-  std::vector<unsigned char> decompressedData =
+  std::vector<std::byte> decompressedData =
       util::zlibDecompress(std::span(imgData.begin(), imgData.end()));
 
   size_t rowSize = 3 * header.width + 1;
@@ -200,35 +210,37 @@ Image loadPng(std::span<const unsigned char> data) {
   }
 
   size_t outRowSize = 4 * header.width;
-  std::vector<char> outData;
+  std::vector<std::byte> outData;
   outData.reserve(header.width * header.height * 4);
 
   auto readDecompressed = [&](size_t x, size_t y) {
     size_t pixelOffset = 1 + 3 * x + rowSize * y;
     math::Vec<unsigned short, 3> out{
-        decompressedData[pixelOffset],
-        decompressedData[pixelOffset + 1],
-        decompressedData[pixelOffset + 2]};
+        static_cast<unsigned short>(decompressedData[pixelOffset]),
+        static_cast<unsigned short>(decompressedData[pixelOffset + 1]),
+        static_cast<unsigned short>(decompressedData[pixelOffset + 2])};
     return out;
   };
   auto readOut = [&](size_t x, size_t y) {
     size_t pixelOffset = 4 * x + y * outRowSize;
     math::Vec<unsigned short, 3> out{
-        static_cast<unsigned char>(outData[pixelOffset]),
-        static_cast<unsigned char>(outData[pixelOffset + 1]),
-        static_cast<unsigned char>(outData[pixelOffset + 2])};
+        static_cast<unsigned short>(outData[pixelOffset]),
+        static_cast<unsigned short>(outData[pixelOffset + 1]),
+        static_cast<unsigned short>(outData[pixelOffset + 2])};
     return out;
   };
 
   auto writeOut = [&](Color col) {
-    outData.emplace_back(static_cast<unsigned char>(col.at(0)));
-    outData.emplace_back(static_cast<unsigned char>(col.at(1)));
-    outData.emplace_back(static_cast<unsigned char>(col.at(2)));
-    outData.emplace_back(std::numeric_limits<char>::max());
+    outData.emplace_back(static_cast<std::byte>(col.at(0)));
+    outData.emplace_back(static_cast<std::byte>(col.at(1)));
+    outData.emplace_back(static_cast<std::byte>(col.at(2)));
+    outData.emplace_back(
+        static_cast<std::byte>(std::numeric_limits<char>::max()));
   };
 
   for (size_t y = 0; y < header.height; y++) {
-    unsigned char rawFilterMode = decompressedData[rowSize * y];
+    unsigned char rawFilterMode =
+        static_cast<unsigned char>(decompressedData[rowSize * y]);
     if (rawFilterMode > 4) {
       throw std::runtime_error{"Corrupt PNG"};
     }

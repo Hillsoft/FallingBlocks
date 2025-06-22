@@ -68,7 +68,7 @@ VulkanBuffer getQuadVertexAttributesBuffer(VulkanGraphicsDevice& device) {
   return VulkanBuffer{
       device,
       std::span{
-          reinterpret_cast<char*>(vertices.data()),
+          reinterpret_cast<std::byte*>(vertices.data()),
           sizeof(VertexData) * vertices.size()},
       VK_BUFFER_USAGE_VERTEX_BUFFER_BIT};
 }

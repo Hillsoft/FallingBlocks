@@ -1,6 +1,7 @@
 #include "util/zlib.hpp"
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <span>
@@ -16,8 +17,7 @@ namespace {
 
 class BitStream {
  public:
-  BitStream(std::span<const unsigned char> data)
-      : data_(data), byteOffset_(0) {}
+  BitStream(std::span<const std::byte> data) : data_(data), byteOffset_(0) {}
 
   uint64_t peekBits(int bitCount) const {
     DEBUG_ASSERT(bitCount <= 64);
@@ -36,7 +36,9 @@ class BitStream {
       int curBitCount = std::min(8 - curByteOffset, bitCount);
       uint8_t mask = 0xFF >> (8 - curBitCount - curByteOffset);
       uint64_t curParts =
-          static_cast<uint64_t>(mask & data_[dataOffset]) >> curByteOffset;
+          static_cast<uint64_t>(
+              mask & static_cast<uint8_t>(data_[dataOffset])) >>
+          curByteOffset;
 
       result |= curParts << shift;
 
@@ -65,7 +67,7 @@ class BitStream {
     if (data_.size() == 0) {
       throw std::runtime_error{"Out-of-bounds bitstream read"};
     }
-    bool result = ((data_[0] >> byteOffset_) & 0b1) > 0;
+    bool result = ((static_cast<uint8_t>(data_[0]) >> byteOffset_) & 0b1) > 0;
     byteOffset_ += 1;
     data_ = data_.subspan(byteOffset_ / 8);
     byteOffset_ %= 8;
@@ -80,7 +82,7 @@ class BitStream {
   }
 
  private:
-  std::span<const unsigned char> data_;
+  std::span<const std::byte> data_;
   int byteOffset_;
 };
 
@@ -233,16 +235,18 @@ struct ZlibHeader {
 };
 
 ZlibHeader readZlibHeader(
-    unsigned char compressionByte, unsigned char additionalFlags) {
-  uint16_t combined = compressionByte << 8 | additionalFlags;
+    std::byte compressionByte, std::byte additionalFlags) {
+  uint16_t combined = (static_cast<uint16_t>(compressionByte) << 8) |
+      static_cast<uint16_t>(additionalFlags);
   if (combined % 31 != 0) {
     throw std::runtime_error{"Corrupt zlib data"};
   }
 
   ZlibHeader header{};
-  header.compressionMethod = compressionByte & 0b1111;
-  header.compressionInfo = (compressionByte >> 4) & 0b1111;
-  header.presetDictionary = (additionalFlags & (1 << 5)) > 0;
+  header.compressionMethod = static_cast<uint8_t>(compressionByte) & 0b1111;
+  header.compressionInfo = static_cast<uint8_t>(compressionByte >> 4) & 0b1111;
+  header.presetDictionary =
+      (static_cast<uint8_t>(additionalFlags) & (1 << 5)) > 0;
   return header;
 }
 
@@ -347,11 +351,11 @@ CompressedBlockTrees readDynamicCodesBlockHeader(BitStream& stream) {
 void decodeBlock(
     const CompressedBlockTrees& trees,
     BitStream& stream,
-    std::vector<unsigned char>& out) {
+    std::vector<std::byte>& out) {
   while (true) {
     short symbol = trees.literalHuffmanEncoding.lookup(stream);
     if (symbol < 256) {
-      out.emplace_back(static_cast<unsigned char>(symbol));
+      out.emplace_back(static_cast<std::byte>(symbol));
     } else if (symbol == 256) {
       break;
     } else if (symbol > 256) {
@@ -377,7 +381,7 @@ void decodeBlock(
 
 } // namespace
 
-std::vector<unsigned char> zlibDecompress(std::span<const unsigned char> data) {
+std::vector<std::byte> zlibDecompress(std::span<const std::byte> data) {
   if (data.size() < 2) {
     throw std::runtime_error{"Corrupt zlib data"};
   }
@@ -386,7 +390,7 @@ std::vector<unsigned char> zlibDecompress(std::span<const unsigned char> data) {
   data = data.subspan(2);
   BitStream stream(data);
 
-  std::vector<unsigned char> result;
+  std::vector<std::byte> result;
 
   while (true) {
     BlockHeader blockHead = readBlockHeader(stream);

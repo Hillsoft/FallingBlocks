@@ -7,6 +7,7 @@
 #include <vector>
 #include <GLFW/glfw3.h>
 
+#include <cstddef>
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 #include "util/file.hpp"
@@ -16,7 +17,7 @@ namespace blocks::render {
 VulkanShader::VulkanShader(
     VulkanGraphicsDevice& device, const std::filesystem::path& shaderPath)
     : shaderModule_(nullptr, nullptr) {
-  std::vector<char> shaderData = util::readFileBytes(shaderPath);
+  std::vector<std::byte> shaderData = util::readFileBytes(shaderPath);
 
   VkShaderModuleCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;

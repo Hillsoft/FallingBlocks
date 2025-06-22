@@ -1,16 +1,16 @@
 #include "render/VulkanBuffer.hpp"
 
+#include <cstddef>
 #include <cstring>
 #include <span>
 #include <GLFW/glfw3.h>
-
 #include "render/VulkanGraphicsDevice.hpp"
 
 namespace blocks::render {
 
 VulkanBuffer::VulkanBuffer(
     VulkanGraphicsDevice& device,
-    std::span<char> data,
+    std::span<std::byte> data,
     VkBufferUsageFlags usageFlags)
     : rawBuffer_(device, data.size(), usageFlags), memory_(device, rawBuffer_) {
   vkBindBufferMemory(

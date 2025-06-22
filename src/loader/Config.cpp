@@ -170,7 +170,7 @@ std::vector<long> extractIntList(
 } // namespace
 
 Config::Config(const std::filesystem::path& path)
-    : rawData_(util::readFileBytes(path)),
+    : rawData_(util::readFileChars(path)),
       keyValuePairs_(getPairs(rawData_)),
       foundKeys_() {}
 

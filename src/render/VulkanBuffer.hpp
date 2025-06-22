@@ -1,8 +1,8 @@
 #pragma once
 
+#include <cstddef>
 #include <span>
 #include <GLFW/glfw3.h>
-
 #include "render/VulkanDeviceMemory.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanRawBuffer.hpp"
@@ -13,7 +13,7 @@ class VulkanBuffer {
  public:
   VulkanBuffer(
       VulkanGraphicsDevice& device,
-      std::span<char> data,
+      std::span<std::byte> data,
       VkBufferUsageFlags usageFlags);
 
   VkBuffer getRawBuffer() { return rawBuffer_.getRawBuffer(); }

@@ -5,6 +5,7 @@
 
 namespace util {
 
-std::vector<char> readFileBytes(const std::filesystem::path& path);
+std::vector<std::byte> readFileBytes(const std::filesystem::path& path);
+std::vector<char> readFileChars(const std::filesystem::path& path);
 
-}
+} // namespace util

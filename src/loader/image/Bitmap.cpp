@@ -1,6 +1,7 @@
 #include "loader/image/Bitmap.hpp"
 
 #include <bit>
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <limits>
@@ -52,7 +53,7 @@ Image loadBitmap(const std::filesystem::path& path) {
   return loadBitmap(util::readFileBytes(path));
 }
 
-Image loadBitmap(const std::vector<char>& data) {
+Image loadBitmap(const std::vector<std::byte>& data) {
   if (data.size() < sizeof(BitmapHeader)) {
     throw std::runtime_error{"Corrupt bitmap"};
   }
@@ -106,24 +107,24 @@ Image loadBitmap(const std::vector<char>& data) {
       sizeof(BitmapHeader) + sizeof(BitmapInfoHeader)) {
     throw std::runtime_error{"Corrupt bitmap"};
   }
-  const char* bitmapData =
+  const std::byte* bitmapData =
       data.data() + sizeof(BitmapHeader) + sizeof(BitmapInfoHeader);
 
-  std::vector<char> outData;
+  std::vector<std::byte> outData;
   outData.resize(imageWidth * imageHeight * 4);
 
   for (uint32_t y = 0; y < imageHeight; y++) {
     for (uint32_t x = 0; x < imageWidth; x++) {
-      const char* pixel = bitmapData + y * rowSize + x * 3;
-      char r = pixel[0];
-      char g = pixel[1];
-      char b = pixel[2];
+      const std::byte* pixel = bitmapData + y * rowSize + x * 3;
+      std::byte r = pixel[0];
+      std::byte g = pixel[1];
+      std::byte b = pixel[2];
 
-      char* outPixel = &outData[0] + 4 * (y * imageWidth + x);
+      std::byte* outPixel = &outData[0] + 4 * (y * imageWidth + x);
       outPixel[0] = r;
       outPixel[1] = g;
       outPixel[2] = b;
-      outPixel[3] = std::numeric_limits<char>::max();
+      outPixel[3] = static_cast<std::byte>(std::numeric_limits<char>::max());
     }
   }
 
