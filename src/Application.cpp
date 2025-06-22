@@ -60,7 +60,8 @@ Application::Application()
       pos2_(
           randFloat(-1.0f, 1.0f - objSize.x()),
           randFloat(-1.0f, 1.0f - objSize.y())),
-      v2_(randFloat(-1.0f, 1.0f), randFloat(-1.0f, 1.0f)) {}
+      v2_(randFloat(-1.0f, 1.0f), randFloat(-1.0f, 1.0f)),
+      inputHandler_(input_, *this) {}
 
 void Application::run() {
   float prevFrameTimeSecs = 0;
@@ -106,6 +107,13 @@ void Application::drawFrame() {
   render_.drawObject(*window_, *renderable_);
   render_.drawObject(*window_, *renderable2_);
   render_.commitFrame();
+}
+
+void Application::InputHandler::onKeyPress(int key) {
+  if (key == GLFW_KEY_SPACE) {
+    app_->v1_ *= -1.0f;
+    app_->v2_ *= -1.0f;
+  }
 }
 
 } // namespace blocks

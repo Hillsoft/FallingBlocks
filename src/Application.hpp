@@ -1,5 +1,6 @@
 #pragma once
 
+#include "input/InputHandler.hpp"
 #include "input/InputSubSystem.hpp"
 #include "math/vec.hpp"
 #include "render/RenderSubSystem.hpp"
@@ -20,6 +21,17 @@ class Application {
   void run();
 
  private:
+  class InputHandler : public input::InputHandler {
+   public:
+    InputHandler(input::InputSubSystem& inputSystem, Application& app)
+        : input::InputHandler(inputSystem), app_(&app) {}
+
+    void onKeyPress(int key) final;
+
+   private:
+    Application* app_;
+  };
+
   void update(float deltaTimeSeconds);
   void drawFrame();
 
@@ -34,6 +46,8 @@ class Application {
   math::Vec2 v1_;
   math::Vec2 pos2_;
   math::Vec2 v2_;
+
+  InputHandler inputHandler_;
 };
 
 } // namespace blocks
