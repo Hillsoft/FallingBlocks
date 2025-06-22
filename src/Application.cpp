@@ -54,6 +54,7 @@ Application::Application()
           RESOURCE_DIR "/mandelbrot set.png")),
       renderable2_(GlobalSubSystemStack::get().renderSystem().createRenderable(
           RESOURCE_DIR "/test_image.bmp")),
+      paddle_(),
       pos1_(
           randFloat(-1.0f, 1.0f - objSize.x()),
           randFloat(-1.0f, 1.0f - objSize.y())),
@@ -102,6 +103,8 @@ void Application::update(float deltaTimeSeconds) {
 
   renderable_->setPosition(pos1_, pos1_ + objSize);
   renderable2_->setPosition(pos2_, pos2_ + objSize);
+
+  paddle_.update(deltaTimeSeconds);
 }
 
 void Application::drawFrame() {
@@ -109,6 +112,7 @@ void Application::drawFrame() {
   auto window = GlobalSubSystemStack::get().window();
   render.drawObject(window, *renderable_);
   render.drawObject(window, *renderable2_);
+  paddle_.draw();
   render.commitFrame();
 }
 

@@ -1,0 +1,57 @@
+#include "game/Paddle.hpp"
+
+#include <utility>
+#include <GLFW/glfw3.h>
+#include "GlobalSubSystemStack.hpp"
+#include "input/InputHandler.hpp"
+#include "math/vec.hpp"
+
+namespace blocks::game {
+
+namespace {
+
+constexpr float kPaddleWidth = 0.3f;
+constexpr float kPaddleHeight = 0.1f;
+
+constexpr float kPaddleSpeed = 1.0f;
+
+} // namespace
+
+Paddle::Paddle()
+    : input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
+      pos_(-kPaddleWidth / 2.f, 0.8f),
+      sprite_(GlobalSubSystemStack::get().renderSystem().createRenderable(
+          RESOURCE_DIR "/mandelbrot set.png")) {}
+
+void Paddle::update(float deltaTimeSeconds) {
+  pos_ += deltaTimeSeconds * vel_;
+
+  pos_.x() = std::min(1.0f - kPaddleWidth, pos_.x());
+  pos_.x() = std::max(-1.0f, pos_.x());
+}
+
+void Paddle::draw() {
+  auto& render = GlobalSubSystemStack::get().renderSystem();
+  auto window = GlobalSubSystemStack::get().window();
+
+  sprite_->setPosition(pos_, pos_ + math::Vec2(kPaddleWidth, kPaddleHeight));
+  render.drawObject(window, *sprite_);
+}
+
+void Paddle::onKeyPress(int key) {
+  if (key == GLFW_KEY_RIGHT) {
+    vel_ = math::Vec2(kPaddleSpeed, 0.0f);
+  } else if (key == GLFW_KEY_LEFT) {
+    vel_ = math::Vec2(-kPaddleSpeed, 0.0f);
+  }
+}
+
+void Paddle::onKeyRelease(int key) {
+  if (key == GLFW_KEY_RIGHT && vel_.x() > 0.0f) {
+    vel_ = 0.0f;
+  } else if (key == GLFW_KEY_LEFT && vel_.x() < 0.0f) {
+    vel_ = 0.0f;
+  }
+}
+
+} // namespace blocks::game

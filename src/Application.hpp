@@ -1,5 +1,6 @@
 #pragma once
 
+#include "game/Paddle.hpp"
 #include "input/InputHandler.hpp"
 #include "math/vec.hpp"
 #include "render/RenderSubSystem.hpp"
@@ -27,6 +28,8 @@ class Application : public input::InputHandler {
 
   render::UniqueRenderableHandle renderable_;
   render::UniqueRenderableHandle renderable2_;
+
+  game::Paddle paddle_;
 
   math::Vec2 pos1_;
   math::Vec2 v1_;
