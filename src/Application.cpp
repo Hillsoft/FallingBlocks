@@ -3,6 +3,7 @@
 #include <chrono>
 #include <iostream>
 #include <utility>
+#include <vector>
 #include <GLFW/glfw3.h>
 #include "GlobalSubSystemStack.hpp"
 #include "input/InputHandler.hpp"
@@ -12,7 +13,9 @@ namespace blocks {
 Application::Application()
     : input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
       paddle_(),
-      ball_() {}
+      balls_() {
+  balls_.emplace_back();
+}
 
 void Application::run() {
   auto& subsystems = GlobalSubSystemStack::get();
@@ -49,16 +52,24 @@ void Application::run() {
 
 void Application::update(float deltaTimeSeconds) {
   paddle_.update(deltaTimeSeconds);
-  ball_.update(deltaTimeSeconds);
+  for (auto& ball : balls_) {
+    ball.update(deltaTimeSeconds);
+  }
 }
 
 void Application::drawFrame() {
   auto& render = GlobalSubSystemStack::get().renderSystem();
-  ball_.draw();
+  for (auto& ball : balls_) {
+    ball.draw();
+  }
   paddle_.draw();
   render.commitFrame();
 }
 
-void Application::onKeyPress(int key) {}
+void Application::onKeyPress(int key) {
+  if (key == GLFW_KEY_SPACE) {
+    balls_.emplace_back();
+  }
+}
 
 } // namespace blocks
