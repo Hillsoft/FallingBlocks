@@ -1,8 +1,11 @@
 #pragma once
 
+#include <vector>
 #include "render/glfw_wrapper/Window.hpp"
 
 namespace blocks::input {
+
+class InputHandler;
 
 class InputSubSystem {
  public:
@@ -16,10 +19,14 @@ class InputSubSystem {
 
   ~InputSubSystem();
 
+  void registerHandler(InputHandler& handler);
+  void unregisterHandler(InputHandler& handler);
+
  private:
   void handleKeyEvent(int key, int scancode, int action, int mods);
 
   render::glfw::Window* window_;
+  std::vector<InputHandler*> handlers_;
 };
 
 } // namespace blocks::input
