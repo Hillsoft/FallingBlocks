@@ -131,6 +131,16 @@ Vec<TNum, size> operator*(TNum fac, const Vec<TNum, size>& a)
 }
 
 template <typename TNum, size_t size>
+Vec<TNum, size>& operator*=(Vec<TNum, size>& a, TNum fac)
+  requires(std::is_arithmetic_v<TNum>)
+{
+  for (size_t i = 0; i < size; i++) {
+    a.at(i) *= fac;
+  }
+  return a;
+}
+
+template <typename TNum, size_t size>
 Vec<TNum, size> operator/(const Vec<TNum, size>& a, TNum d)
   requires(std::is_arithmetic_v<TNum>)
 {
