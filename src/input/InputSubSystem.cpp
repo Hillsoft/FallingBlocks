@@ -1,6 +1,5 @@
 #include "input/InputSubSystem.hpp"
 
-#include <iostream>
 #include <string_view>
 #include <vector>
 #include <GLFW/glfw3.h>
@@ -12,6 +11,7 @@ namespace blocks::input {
 
 namespace {
 
+#if FALSE
 std::string_view getKeyName(int key) {
   switch (key) {
     case GLFW_KEY_SPACE:
@@ -258,6 +258,7 @@ std::string_view getKeyName(int key) {
       return "Unknown";
   }
 }
+#endif
 
 } // namespace
 
