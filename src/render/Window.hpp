@@ -25,6 +25,7 @@ class Window {
   Window(Window&& other) = delete;
   Window& operator=(Window&& other) = delete;
 
+  void close();
   bool shouldClose() const;
   std::pair<int, int> getCurrentWindowSize() const;
   VkExtent2D getCurrentWindowExtent() const;

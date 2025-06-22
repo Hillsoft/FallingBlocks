@@ -41,6 +41,10 @@ Window::Window(
           renderPass),
       requiresReset_(false) {}
 
+void Window::close() {
+  glfwSetWindowShouldClose(presentStack_.getWindow().getRawWindow(), GLFW_TRUE);
+}
+
 bool Window::shouldClose() const {
   return presentStack_.getWindow().shouldClose();
 }

@@ -70,6 +70,9 @@ void Application::onKeyPress(int key) {
   if (key == GLFW_KEY_SPACE) {
     balls_.emplace_back();
   }
+  if (key == GLFW_KEY_ESCAPE) {
+    GlobalSubSystemStack::get().window()->close();
+  }
 }
 
 } // namespace blocks
