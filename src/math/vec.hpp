@@ -109,6 +109,16 @@ Vec<TNum, size> operator+(const Vec<TNum, size>& a, const Vec<TNum, size>& b)
 }
 
 template <typename TNum, size_t size>
+Vec<TNum, size> operator+=(Vec<TNum, size>& a, const Vec<TNum, size>& b)
+  requires(std::is_arithmetic_v<TNum>)
+{
+  for (size_t i = 0; i < size; i++) {
+    a.at(i) += b.at(i);
+  }
+  return a;
+}
+
+template <typename TNum, size_t size>
 Vec<TNum, size> operator-(const Vec<TNum, size>& a, const Vec<TNum, size>& b)
   requires(std::is_arithmetic_v<TNum>)
 {
