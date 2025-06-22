@@ -66,7 +66,8 @@ add_subdirectory(src)
 
 add_executable(FallingBlocks "src/main.cpp")
 target_link_libraries(FallingBlocks
-	application)
+	application
+	globalsubsystemstack)
 
 add_shader("vertex.glsl" "vertex.spv")
 add_shader("fragment.glsl" "fragment.spv")

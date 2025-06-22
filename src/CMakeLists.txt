@@ -6,6 +6,13 @@ add_subdirectory(util)
 
 add_library(application STATIC "Application.cpp" "Application.hpp")
 target_link_libraries(application
+	globalsubsystemstack
 	input.inputsubsystem
 	math.vec
 	render.rendersubsystem)
+
+add_library(globalsubsystemstack STATIC "GlobalSubSystemStack.cpp" "GlobalSubSystemStack.hpp")
+target_link_libraries(globalsubsystemstack
+	input.inputsubsystem
+	render.rendersubsystem
+	util.debug)

@@ -1,13 +1,12 @@
 #pragma once
 
 #include "input/InputHandler.hpp"
-#include "input/InputSubSystem.hpp"
 #include "math/vec.hpp"
 #include "render/RenderSubSystem.hpp"
 
 namespace blocks {
 
-class Application {
+class Application : public input::InputHandler {
  public:
   Application();
   ~Application() = default;
@@ -20,24 +19,11 @@ class Application {
 
   void run();
 
+  void onKeyPress(int key) final;
+
  private:
-  class InputHandler : public input::InputHandler {
-   public:
-    InputHandler(input::InputSubSystem& inputSystem, Application& app)
-        : input::InputHandler(inputSystem), app_(&app) {}
-
-    void onKeyPress(int key) final;
-
-   private:
-    Application* app_;
-  };
-
   void update(float deltaTimeSeconds);
   void drawFrame();
-
-  render::RenderSubSystem render_;
-  render::UniqueWindowHandle window_;
-  input::InputSubSystem input_;
 
   render::UniqueRenderableHandle renderable_;
   render::UniqueRenderableHandle renderable2_;
@@ -46,8 +32,6 @@ class Application {
   math::Vec2 v1_;
   math::Vec2 pos2_;
   math::Vec2 v2_;
-
-  InputHandler inputHandler_;
 };
 
 } // namespace blocks

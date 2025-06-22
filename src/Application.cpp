@@ -5,6 +5,7 @@
 #include <iostream>
 #include <utility>
 #include <GLFW/glfw3.h>
+#include "GlobalSubSystemStack.hpp"
 #include "math/vec.hpp"
 
 namespace blocks {
@@ -48,11 +49,11 @@ float randFloat(float lo, float hi) {
 } // namespace
 
 Application::Application()
-    : render_(),
-      window_(render_.createWindow()),
-      input_(window_->getPresentStack().getWindow()),
-      renderable_(render_.createRenderable(RESOURCE_DIR "/mandelbrot set.png")),
-      renderable2_(render_.createRenderable(RESOURCE_DIR "/test_image.bmp")),
+    : input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
+      renderable_(GlobalSubSystemStack::get().renderSystem().createRenderable(
+          RESOURCE_DIR "/mandelbrot set.png")),
+      renderable2_(GlobalSubSystemStack::get().renderSystem().createRenderable(
+          RESOURCE_DIR "/test_image.bmp")),
       pos1_(
           randFloat(-1.0f, 1.0f - objSize.x()),
           randFloat(-1.0f, 1.0f - objSize.y())),
@@ -60,16 +61,16 @@ Application::Application()
       pos2_(
           randFloat(-1.0f, 1.0f - objSize.x()),
           randFloat(-1.0f, 1.0f - objSize.y())),
-      v2_(randFloat(-1.0f, 1.0f), randFloat(-1.0f, 1.0f)),
-      inputHandler_(input_, *this) {}
+      v2_(randFloat(-1.0f, 1.0f), randFloat(-1.0f, 1.0f)) {}
 
 void Application::run() {
+  auto& subsystems = GlobalSubSystemStack::get();
   float prevFrameTimeSecs = 0;
-  while (!window_->shouldClose()) {
+  while (!subsystems.window()->shouldClose()) {
     std::chrono::microseconds maxFrameTime{0};
     std::chrono::microseconds totalFrameTime{0};
 
-    for (int i = 0; i < 1000 && !window_->shouldClose(); i++) {
+    for (int i = 0; i < 1000 && !subsystems.window()->shouldClose(); i++) {
       auto start = std::chrono::high_resolution_clock::now();
       glfwPollEvents();
       update(prevFrameTimeSecs);
@@ -92,7 +93,7 @@ void Application::run() {
               << "\nMax frame time: " << maxFrameTime << "\n";
   }
 
-  render_.waitIdle();
+  subsystems.renderSystem().waitIdle();
 }
 
 void Application::update(float deltaTimeSeconds) {
@@ -104,15 +105,17 @@ void Application::update(float deltaTimeSeconds) {
 }
 
 void Application::drawFrame() {
-  render_.drawObject(*window_, *renderable_);
-  render_.drawObject(*window_, *renderable2_);
-  render_.commitFrame();
+  auto& render = GlobalSubSystemStack::get().renderSystem();
+  auto window = GlobalSubSystemStack::get().window();
+  render.drawObject(window, *renderable_);
+  render.drawObject(window, *renderable2_);
+  render.commitFrame();
 }
 
-void Application::InputHandler::onKeyPress(int key) {
+void Application::onKeyPress(int key) {
   if (key == GLFW_KEY_SPACE) {
-    app_->v1_ *= -1.0f;
-    app_->v2_ *= -1.0f;
+    v1_ *= -1.0f;
+    v2_ *= -1.0f;
   }
 }
 
