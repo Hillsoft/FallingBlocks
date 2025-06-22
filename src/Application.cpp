@@ -1,68 +1,18 @@
 #include "Application.hpp"
 
 #include <chrono>
-#include <cstdlib>
 #include <iostream>
 #include <utility>
 #include <GLFW/glfw3.h>
 #include "GlobalSubSystemStack.hpp"
-#include "math/vec.hpp"
+#include "input/InputHandler.hpp"
 
 namespace blocks {
 
-namespace {
-
-math::Vec2 objSize{0.2f, 0.2f};
-
-math::Vec2 stepPos(math::Vec2 pos, math::Vec2& vel, float deltaTimeSeconds) {
-  math::Vec2 newPos = pos + deltaTimeSeconds * vel;
-  math::Vec2 newPos2 = newPos + objSize;
-
-  if (newPos2.x() > 1.0f) {
-    vel.x() *= -1.0f;
-    newPos.x() = 1.0f - objSize.x();
-  }
-  if (newPos.x() < -1.0f) {
-    vel.x() *= -1.0f;
-    newPos.x() = -1.0f;
-  }
-
-  if (newPos2.y() > 1.0f) {
-    vel.y() *= -1.0f;
-    newPos.y() = 1.0f - objSize.y();
-  }
-  if (newPos.y() < -1.0f) {
-    vel.y() *= -1.0f;
-    newPos.y() = -1.0f;
-  }
-
-  return newPos;
-}
-
-float randFloat(float lo, float hi) {
-  float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-  r *= (hi - lo);
-  r += lo;
-  return r;
-}
-
-} // namespace
-
 Application::Application()
     : input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
-      renderable_(GlobalSubSystemStack::get().renderSystem().createRenderable(
-          RESOURCE_DIR "/mandelbrot set.png")),
-      renderable2_(GlobalSubSystemStack::get().renderSystem().createRenderable(
-          RESOURCE_DIR "/test_image.bmp")),
       paddle_(),
-      pos1_(
-          randFloat(-1.0f, 1.0f - objSize.x()),
-          randFloat(-1.0f, 1.0f - objSize.y())),
-      v1_(randFloat(-1.0f, 1.0f), randFloat(-1.0f, 1.0f)),
-      pos2_(
-          randFloat(-1.0f, 1.0f - objSize.x()),
-          randFloat(-1.0f, 1.0f - objSize.y())),
-      v2_(randFloat(-1.0f, 1.0f), randFloat(-1.0f, 1.0f)) {}
+      ball_() {}
 
 void Application::run() {
   auto& subsystems = GlobalSubSystemStack::get();
@@ -98,29 +48,17 @@ void Application::run() {
 }
 
 void Application::update(float deltaTimeSeconds) {
-  pos1_ = stepPos(pos1_, v1_, deltaTimeSeconds);
-  pos2_ = stepPos(pos2_, v2_, deltaTimeSeconds);
-
-  renderable_->setPosition(pos1_, pos1_ + objSize);
-  renderable2_->setPosition(pos2_, pos2_ + objSize);
-
   paddle_.update(deltaTimeSeconds);
+  ball_.update(deltaTimeSeconds);
 }
 
 void Application::drawFrame() {
   auto& render = GlobalSubSystemStack::get().renderSystem();
-  auto window = GlobalSubSystemStack::get().window();
-  render.drawObject(window, *renderable_);
-  render.drawObject(window, *renderable2_);
+  ball_.draw();
   paddle_.draw();
   render.commitFrame();
 }
 
-void Application::onKeyPress(int key) {
-  if (key == GLFW_KEY_SPACE) {
-    v1_ *= -1.0f;
-    v2_ *= -1.0f;
-  }
-}
+void Application::onKeyPress(int key) {}
 
 } // namespace blocks

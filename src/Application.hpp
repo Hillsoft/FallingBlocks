@@ -1,9 +1,8 @@
 #pragma once
 
+#include "game/Ball.hpp"
 #include "game/Paddle.hpp"
 #include "input/InputHandler.hpp"
-#include "math/vec.hpp"
-#include "render/RenderSubSystem.hpp"
 
 namespace blocks {
 
@@ -26,15 +25,8 @@ class Application : public input::InputHandler {
   void update(float deltaTimeSeconds);
   void drawFrame();
 
-  render::UniqueRenderableHandle renderable_;
-  render::UniqueRenderableHandle renderable2_;
-
   game::Paddle paddle_;
-
-  math::Vec2 pos1_;
-  math::Vec2 v1_;
-  math::Vec2 pos2_;
-  math::Vec2 v2_;
+  game::Ball ball_;
 };
 
 } // namespace blocks
