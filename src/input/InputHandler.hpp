@@ -1,18 +1,14 @@
 #pragma once
 
+#include "util/raii_helpers.hpp"
+
 namespace blocks::input {
 
 class InputSubSystem;
 
-class InputHandler {
+class InputHandler : private util::no_copy_move {
  public:
   InputHandler(InputSubSystem& inputSystem);
-
-  InputHandler(const InputHandler& other) = delete;
-  InputHandler& operator=(const InputHandler& other) = delete;
-
-  InputHandler(InputHandler&& other) = delete;
-  InputHandler& operator=(InputHandler&& other) = delete;
 
   virtual ~InputHandler();
 
