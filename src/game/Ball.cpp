@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include "GlobalSubSystemStack.hpp"
 #include "math/vec.hpp"
+#include "physics/RectCollider.hpp"
 
 namespace blocks::game {
 
@@ -20,14 +21,17 @@ float randFloat(float lo, float hi) {
 } // namespace
 
 Ball::Ball()
-    : pos_(-kBallSize / 2.f, -kBallSize / 2.f),
+    : physics::RectCollider(
+          GlobalSubSystemStack::get().physicsScene(),
+          math::Vec2{-kBallSize / 2.f, -kBallSize / 2.f},
+          math::Vec2{kBallSize / 2.f, kBallSize / 2.f}),
       vel_(randFloat(-1.f, 1.f), randFloat(-1.f, 1.f)),
       sprite_(GlobalSubSystemStack::get().renderSystem().createRenderable(
           RESOURCE_DIR "/test_image.bmp")) {}
 
 void Ball::update(float deltaTimeSeconds) {
   math::Vec2 objSize(kBallSize, kBallSize);
-  math::Vec2 newPos = pos_ + deltaTimeSeconds * vel_;
+  math::Vec2 newPos = getP0() + deltaTimeSeconds * vel_;
   math::Vec2 newPos2 = newPos + objSize;
 
   if (newPos2.x() > 1.0f) {
@@ -48,15 +52,20 @@ void Ball::update(float deltaTimeSeconds) {
     newPos.y() = -1.0f;
   }
 
-  pos_ = newPos;
+  setP0(newPos);
+  setP1(newPos2);
 }
 
 void Ball::draw() {
   auto& render = GlobalSubSystemStack::get().renderSystem();
   auto window = GlobalSubSystemStack::get().window();
 
-  sprite_->setPosition(pos_, pos_ + math::Vec2(kBallSize, kBallSize));
+  sprite_->setPosition(getP0(), getP1());
   render.drawObject(window, *sprite_);
+}
+
+void Ball::handleCollision(physics::RectCollider& other) {
+  vel_.y() = -std::abs(vel_.y());
 }
 
 } // namespace blocks::game

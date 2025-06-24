@@ -2,10 +2,12 @@
 
 #include <chrono>
 #include <iostream>
+#include <memory>
 #include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
 #include "GlobalSubSystemStack.hpp"
+#include "game/Ball.hpp"
 #include "input/InputHandler.hpp"
 
 namespace blocks {
@@ -14,7 +16,7 @@ Application::Application()
     : input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
       paddle_(),
       balls_() {
-  balls_.emplace_back();
+  balls_.push_back(std::make_unique<game::Ball>());
 }
 
 void Application::run() {
@@ -53,14 +55,16 @@ void Application::run() {
 void Application::update(float deltaTimeSeconds) {
   paddle_.update(deltaTimeSeconds);
   for (auto& ball : balls_) {
-    ball.update(deltaTimeSeconds);
+    ball->update(deltaTimeSeconds);
   }
+
+  GlobalSubSystemStack::get().physicsScene().run();
 }
 
 void Application::drawFrame() {
   auto& render = GlobalSubSystemStack::get().renderSystem();
   for (auto& ball : balls_) {
-    ball.draw();
+    ball->draw();
   }
   paddle_.draw();
   render.commitFrame();

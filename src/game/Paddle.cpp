@@ -5,6 +5,7 @@
 #include "GlobalSubSystemStack.hpp"
 #include "input/InputHandler.hpp"
 #include "math/vec.hpp"
+#include "physics/RectCollider.hpp"
 
 namespace blocks::game {
 
@@ -19,22 +20,29 @@ constexpr float kPaddleSpeed = 1.0f;
 
 Paddle::Paddle()
     : input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
-      pos_(-kPaddleWidth / 2.f, 0.8f),
+      physics::RectCollider(
+          GlobalSubSystemStack::get().physicsScene(),
+          math::Vec2{-kPaddleWidth / 2.f, 0.8f},
+          math::Vec2{kPaddleWidth / 2.f, 0.9f}),
       sprite_(GlobalSubSystemStack::get().renderSystem().createRenderable(
           RESOURCE_DIR "/mandelbrot set.png")) {}
 
 void Paddle::update(float deltaTimeSeconds) {
-  pos_ += deltaTimeSeconds * vel_;
+  math::Vec2 pos = getP0();
+  pos += deltaTimeSeconds * vel_;
 
-  pos_.x() = std::min(1.0f - kPaddleWidth, pos_.x());
-  pos_.x() = std::max(-1.0f, pos_.x());
+  pos.x() = std::min(1.0f - kPaddleWidth, pos.x());
+  pos.x() = std::max(-1.0f, pos.x());
+
+  setP0(pos);
+  setP1(pos + math::Vec2{kPaddleWidth, kPaddleHeight});
 }
 
 void Paddle::draw() {
   auto& render = GlobalSubSystemStack::get().renderSystem();
   auto window = GlobalSubSystemStack::get().window();
 
-  sprite_->setPosition(pos_, pos_ + math::Vec2(kPaddleWidth, kPaddleHeight));
+  sprite_->setPosition(getP0(), getP1());
   render.drawObject(window, *sprite_);
 }
 

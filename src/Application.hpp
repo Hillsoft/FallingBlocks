@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <vector>
 #include "game/Ball.hpp"
 #include "game/Paddle.hpp"
@@ -27,7 +28,7 @@ class Application : public input::InputHandler {
   void drawFrame();
 
   game::Paddle paddle_;
-  std::vector<game::Ball> balls_;
+  std::vector<std::unique_ptr<game::Ball>> balls_;
 };
 
 } // namespace blocks

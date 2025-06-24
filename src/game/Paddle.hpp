@@ -2,11 +2,12 @@
 
 #include "input/InputHandler.hpp"
 #include "math/vec.hpp"
+#include "physics/RectCollider.hpp"
 #include "render/RenderSubSystem.hpp"
 
 namespace blocks::game {
 
-class Paddle : public input::InputHandler {
+class Paddle : public input::InputHandler, physics::RectCollider {
  public:
   Paddle();
 
@@ -17,7 +18,6 @@ class Paddle : public input::InputHandler {
   void onKeyRelease(int key) final;
 
  private:
-  math::Vec2 pos_;
   math::Vec2 vel_;
   render::UniqueRenderableHandle sprite_;
 };
