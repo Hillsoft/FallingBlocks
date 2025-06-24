@@ -9,7 +9,7 @@ namespace blocks::physics {
 class RectCollider : private util::no_copy_move {
  public:
   RectCollider(PhysicsScene& scene, math::Vec2 p0, math::Vec2 p1);
-  ~RectCollider();
+  virtual ~RectCollider();
 
   bool testCollision(const RectCollider& other) const;
 
