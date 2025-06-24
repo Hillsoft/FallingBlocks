@@ -1,6 +1,7 @@
 #pragma once
 
 #include "input/InputSubSystem.hpp"
+#include "physics/PhysicsScene.hpp"
 #include "render/RenderSubSystem.hpp"
 
 namespace blocks {
@@ -18,11 +19,13 @@ class GlobalSubSystemStack {
 
   static GlobalSubSystemStack& get();
 
+  physics::PhysicsScene& physicsScene();
   render::RenderSubSystem& renderSystem();
   render::WindowRef window();
   input::InputSubSystem& inputSystem();
 
  private:
+  physics::PhysicsScene physics_;
   render::RenderSubSystem render_;
   render::UniqueWindowHandle window_;
   input::InputSubSystem input_;

@@ -1,6 +1,7 @@
 #include "GlobalSubSystemStack.hpp"
 
 #include "input/InputSubSystem.hpp"
+#include "physics/PhysicsScene.hpp"
 #include "render/RenderSubSystem.hpp"
 #include "util/debug.hpp"
 
@@ -13,7 +14,8 @@ GlobalSubSystemStack* globalStack = nullptr;
 } // namespace
 
 GlobalSubSystemStack::GlobalSubSystemStack()
-    : render_(),
+    : physics_(),
+      render_(),
       window_(render_.createWindow()),
       input_(window_->getPresentStack().getWindow()) {
   DEBUG_ASSERT(globalStack == nullptr);
@@ -28,6 +30,10 @@ GlobalSubSystemStack::~GlobalSubSystemStack() {
 GlobalSubSystemStack& GlobalSubSystemStack::get() {
   DEBUG_ASSERT(globalStack != nullptr);
   return *globalStack;
+}
+
+physics::PhysicsScene& GlobalSubSystemStack::physicsScene() {
+  return physics_;
 }
 
 render::RenderSubSystem& GlobalSubSystemStack::renderSystem() {
