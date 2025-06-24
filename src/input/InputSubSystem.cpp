@@ -272,6 +272,7 @@ InputSubSystem::InputSubSystem(render::glfw::Window& window)
 InputSubSystem::~InputSubSystem() {
   window_->setKeyEventHandler([](int key, int scancode, int action, int mods) {
   });
+  DEBUG_ASSERT(handlers_.empty());
 }
 
 void InputSubSystem::handleKeyEvent(

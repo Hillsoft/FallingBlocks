@@ -10,6 +10,7 @@ class RectCollider;
 class PhysicsScene : private util::no_copy_move {
  public:
   PhysicsScene();
+  ~PhysicsScene();
 
   void registerCollider(RectCollider& collider);
   void unregisterCollider(RectCollider& collider);

@@ -8,6 +8,10 @@ namespace blocks::physics {
 
 PhysicsScene::PhysicsScene() {}
 
+PhysicsScene::~PhysicsScene() {
+  DEBUG_ASSERT(colliders_.empty());
+}
+
 void PhysicsScene::registerCollider(RectCollider& collider) {
   DEBUG_ASSERT(
       std::find(colliders_.begin(), colliders_.end(), &collider) ==
