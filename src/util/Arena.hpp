@@ -1,10 +1,11 @@
 #pragma once
 
 #include <utility>
+#include "util/raii_helpers.hpp"
 
 namespace util {
 
-class HeapArena {
+class HeapArena : private util::no_copy {
  public:
   HeapArena(size_t size) : cursor_(0), size_(size) { data_ = new char[size]; }
   ~HeapArena() {
@@ -12,9 +13,6 @@ class HeapArena {
       delete[] data_;
     }
   }
-
-  HeapArena(const HeapArena& other) = delete;
-  HeapArena& operator=(const HeapArena& other) = delete;
 
   HeapArena(HeapArena&& other) noexcept
       : data_(other.data_), cursor_(other.cursor_), size_(other.size_) {

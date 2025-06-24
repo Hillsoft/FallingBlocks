@@ -4,16 +4,14 @@
 #include <type_traits>
 #include <utility>
 #include <GLFW/glfw3.h>
+#include "util/raii_helpers.hpp"
 
 namespace blocks::render::glfw {
 
-class Window {
+class Window : private util::no_copy {
  public:
   Window(int width, int height, const char* title);
   ~Window();
-
-  Window(const Window& other) = delete;
-  Window& operator=(const Window& other) = delete;
 
   Window(Window&& other) noexcept;
   Window& operator=(Window&& other) noexcept;

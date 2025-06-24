@@ -11,11 +11,13 @@ target_link_libraries(application
 	game.ball
 	game.paddle
 	globalsubsystemstack
-	input.inputsubsystem)
+	input.inputsubsystem
+	util.raii_helpers)
 
 add_library(globalsubsystemstack STATIC "GlobalSubSystemStack.cpp" "GlobalSubSystemStack.hpp")
 target_link_libraries(globalsubsystemstack
 	input.inputsubsystem
 	physics.physicsscene
 	render.rendersubsystem
-	util.debug)
+	util.debug
+	util.raii_helpers)

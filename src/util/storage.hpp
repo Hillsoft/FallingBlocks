@@ -2,11 +2,12 @@
 
 #include <type_traits>
 #include <utility>
+#include "util/raii_helpers.hpp"
 
 namespace util {
 
 template <typename T>
-class StorageFor {
+class StorageFor : private util::no_copy_move {
  public:
   explicit constexpr StorageFor() {}
 
@@ -14,12 +15,6 @@ class StorageFor {
   explicit constexpr StorageFor(Args&&... args) {
     emplace(std::forward<Args>(args)...);
   }
-
-  StorageFor(const StorageFor& other) = delete;
-  StorageFor(StorageFor&& other) = delete;
-
-  StorageFor& operator=(const StorageFor& other) = delete;
-  StorageFor& operator=(StorageFor&& other) = delete;
 
   template <typename... Args>
   void emplace(Args&&... args) {

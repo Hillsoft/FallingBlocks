@@ -2,20 +2,15 @@
 
 #include <vector>
 #include "render/glfw_wrapper/Window.hpp"
+#include "util/raii_helpers.hpp"
 
 namespace blocks::input {
 
 class InputHandler;
 
-class InputSubSystem {
+class InputSubSystem : private util::no_copy_move {
  public:
   InputSubSystem(render::glfw::Window& window);
-
-  InputSubSystem(const InputSubSystem& other) = delete;
-  InputSubSystem& operator=(const InputSubSystem& other) = delete;
-
-  InputSubSystem(InputSubSystem&& other) = delete;
-  InputSubSystem& operator=(InputSubSystem&& other) = delete;
 
   ~InputSubSystem();
 

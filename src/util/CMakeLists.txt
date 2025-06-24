@@ -1,6 +1,8 @@
 add_subdirectory(test)
 
 add_library(util.arena STATIC "Arena.hpp" "Arena.cpp")
+target_link_libraries(util.arena
+	util.raii_helpers)
 
 add_library(util.basic_match INTERFACE "basic_math.hpp")
 
@@ -17,6 +19,8 @@ target_link_libraries(util.resettable INTERFACE
 	util.storage)
 
 add_library(util.storage INTERFACE "storage.hpp")
+target_link_libraries(util.storage INTERFACE
+	util.raii_helpers)
 
 add_library(util.string INTERFACE "string.hpp")
 

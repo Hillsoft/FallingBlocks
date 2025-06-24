@@ -37,7 +37,8 @@ target_link_libraries(render.rendersubsystem
 	render.vulkan.semaphorebuilder
 	render.vulkan.uniquehandle
 	util.debug
-	util.portability)
+	util.portability
+	util.raii_helpers)
 
 add_library(render.validationlayers INTERFACE "validationLayers.hpp")
 

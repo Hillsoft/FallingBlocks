@@ -15,6 +15,7 @@
 #include "render/Window.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 #include "util/portability.hpp"
+#include "util/raii_helpers.hpp"
 
 #ifndef NDEBUG
 #include "render/VulkanDebugMessenger.hpp"
@@ -44,13 +45,10 @@ struct WindowRef {
   const Window* operator->() const { return get(); }
 };
 
-class UniqueWindowHandle {
+class UniqueWindowHandle : private util::no_copy {
  public:
   explicit UniqueWindowHandle(WindowRef ref) : ref_(ref) {}
   ~UniqueWindowHandle();
-
-  UniqueWindowHandle(const UniqueWindowHandle& other) = delete;
-  UniqueWindowHandle& operator=(const UniqueWindowHandle& other) = delete;
 
   UniqueWindowHandle(UniqueWindowHandle&& other) noexcept : ref_(other.ref_) {
     other.ref_.renderSystem = nullptr;
@@ -88,14 +86,10 @@ struct RenderableRef {
   const RenderableQuad* operator->() const { return get(); }
 };
 
-class UniqueRenderableHandle {
+class UniqueRenderableHandle : private util::no_copy {
  public:
   explicit UniqueRenderableHandle(RenderableRef ref) : ref_(ref) {}
   ~UniqueRenderableHandle();
-
-  UniqueRenderableHandle(const UniqueRenderableHandle& other) = delete;
-  UniqueRenderableHandle& operator=(const UniqueRenderableHandle& other) =
-      delete;
 
   UniqueRenderableHandle(UniqueRenderableHandle&& other) noexcept
       : ref_(other.ref_) {

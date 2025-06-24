@@ -3,10 +3,11 @@
 #include "input/InputSubSystem.hpp"
 #include "physics/PhysicsScene.hpp"
 #include "render/RenderSubSystem.hpp"
+#include "util/raii_helpers.hpp"
 
 namespace blocks {
 
-class GlobalSubSystemStack {
+class GlobalSubSystemStack : private util::no_copy_move {
  public:
   GlobalSubSystemStack();
 
