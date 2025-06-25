@@ -14,6 +14,11 @@ add_library(util.portability INTERFACE "portability.hpp")
 
 add_library(util.raii_helpers INTERFACE "raii_helpers.hpp")
 
+add_library(util.registry INTERFACE "Registry.hpp")
+target_link_libraries(util.registry INTERFACE
+	util.debug
+	util.raii_helpers)
+
 add_library(util.resettable INTERFACE "resettable.hpp")
 target_link_libraries(util.resettable INTERFACE
 	util.storage)
