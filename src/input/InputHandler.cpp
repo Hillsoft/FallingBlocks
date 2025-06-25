@@ -1,16 +1,11 @@
 #include "input/InputHandler.hpp"
 
 #include "input/InputSubSystem.hpp"
+#include "util/Registry.hpp"
 
 namespace blocks::input {
 
 InputHandler::InputHandler(InputSubSystem& inputSystem)
-    : inputSystem_(&inputSystem) {
-  inputSystem.registerHandler(*this);
-}
-
-InputHandler::~InputHandler() {
-  inputSystem_->unregisterHandler(*this);
-}
+    : RegistryItem(inputSystem) {}
 
 } // namespace blocks::input

@@ -1,11 +1,9 @@
 #include "input/InputSubSystem.hpp"
 
 #include <string_view>
-#include <vector>
 #include <GLFW/glfw3.h>
 #include "input/InputHandler.hpp"
 #include "render/glfw_wrapper/Window.hpp"
-#include "util/debug.hpp"
 
 namespace blocks::input {
 
@@ -272,32 +270,16 @@ InputSubSystem::InputSubSystem(render::glfw::Window& window)
 InputSubSystem::~InputSubSystem() {
   window_->setKeyEventHandler([](int key, int scancode, int action, int mods) {
   });
-  DEBUG_ASSERT(handlers_.empty());
 }
 
 void InputSubSystem::handleKeyEvent(
     int key, int scancode, int action, int mods) {
-  for (auto& h : handlers_) {
+  for (auto& h : getRegisteredItems()) {
     if (action == GLFW_PRESS) {
       h->onKeyPress(key);
     } else if (action == GLFW_RELEASE) {
       h->onKeyRelease(key);
     }
-  }
-}
-
-void InputSubSystem::registerHandler(InputHandler& handler) {
-  DEBUG_ASSERT(
-      std::find(handlers_.begin(), handlers_.end(), &handler) ==
-      handlers_.end());
-  handlers_.push_back(&handler);
-}
-
-void InputSubSystem::unregisterHandler(InputHandler& handler) {
-  decltype(handlers_)::iterator it;
-  while ((it = std::find(handlers_.begin(), handlers_.end(), &handler)),
-         it != handlers_.end()) {
-    handlers_.erase(it);
   }
 }
 
