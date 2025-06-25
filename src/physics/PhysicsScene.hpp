@@ -1,24 +1,16 @@
 #pragma once
 
-#include <vector>
-#include "util/raii_helpers.hpp"
+#include "util/Registry.hpp"
 
 namespace blocks::physics {
 
 class RectCollider;
 
-class PhysicsScene : private util::no_copy_move {
+class PhysicsScene : public util::Registry<RectCollider, PhysicsScene> {
  public:
   PhysicsScene();
-  ~PhysicsScene();
-
-  void registerCollider(RectCollider& collider);
-  void unregisterCollider(RectCollider& collider);
 
   void run();
-
- private:
-  std::vector<RectCollider*> colliders_;
 };
 
 } // namespace blocks::physics

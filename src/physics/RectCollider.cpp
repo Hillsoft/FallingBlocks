@@ -3,17 +3,12 @@
 #include <utility>
 #include "math/vec.hpp"
 #include "physics/PhysicsScene.hpp"
+#include "util/Registry.hpp"
 
 namespace blocks::physics {
 
 RectCollider::RectCollider(PhysicsScene& scene, math::Vec2 p0, math::Vec2 p1)
-    : scene_(&scene), p0_(p0), p1_(p1) {
-  scene.registerCollider(*this);
-}
-
-RectCollider::~RectCollider() {
-  scene_->unregisterCollider(*this);
-}
+    : RegistryItem(scene), p0_(p0), p1_(p1) {}
 
 bool RectCollider::testCollision(const RectCollider& other) const {
   math::Vec2 overlapP0{
