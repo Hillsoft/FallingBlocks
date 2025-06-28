@@ -10,9 +10,11 @@ add_subdirectory(util)
 add_library(application STATIC "Application.cpp" "Application.hpp")
 target_link_libraries(application
 	game.ball
+	game.block
 	game.paddle
 	globalsubsystemstack
 	input.inputsubsystem
+	math.vec
 	util.raii_helpers)
 
 add_library(globalsubsystemstack STATIC "GlobalSubSystemStack.cpp" "GlobalSubSystemStack.hpp")

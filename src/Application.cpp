@@ -8,7 +8,9 @@
 #include <GLFW/glfw3.h>
 #include "GlobalSubSystemStack.hpp"
 #include "game/Ball.hpp"
+#include "game/Block.hpp"
 #include "input/InputHandler.hpp"
+#include "math/vec.hpp"
 
 namespace blocks {
 
@@ -17,6 +19,15 @@ Application::Application()
       paddle_(),
       balls_() {
   balls_.push_back(std::make_unique<game::Ball>());
+
+  for (int i = 0; i < 10; i++) {
+    float x = (2.f * static_cast<float>(i) / 10.f) - 1.f;
+    for (int j = 0; j < 2; j++) {
+      float y = static_cast<float>(j) * 0.1f - 1.f;
+      blocks_.push_back(std::make_unique<game::Block>(
+          math::Vec2{x, y}, math::Vec2{x + 0.2f, y + 0.1f}));
+    }
+  }
 }
 
 void Application::run() {

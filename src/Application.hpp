@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include "game/Ball.hpp"
+#include "game/Block.hpp"
 #include "game/Paddle.hpp"
 #include "input/InputHandler.hpp"
 #include "util/raii_helpers.hpp"
@@ -24,6 +25,7 @@ class Application : public input::InputHandler {
 
   game::Paddle paddle_;
   std::vector<std::unique_ptr<game::Ball>> balls_;
+  std::vector<std::unique_ptr<game::Block>> blocks_;
 };
 
 } // namespace blocks

@@ -7,6 +7,14 @@ target_link_libraries(game.ball
 	physics.physicsscene
 	render.rendersubsystem)
 
+add_library(game.block "Block.hpp" "Block.cpp")
+target_link_libraries(game.block
+	engine.drawableregistry
+	globalsubsystemstack
+	math.vec
+	physics.physicsscene
+	render.rendersubsystem)
+
 add_library(game.paddle "Paddle.hpp" "Paddle.cpp")
 target_link_libraries(game.paddle
 	engine.drawableregistry
