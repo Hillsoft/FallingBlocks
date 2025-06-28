@@ -25,7 +25,9 @@ Paddle::Paddle()
       physics::RectCollider(
           GlobalSubSystemStack::get().physicsScene(),
           math::Vec2{-kPaddleWidth / 2.f, 0.8f},
-          math::Vec2{kPaddleWidth / 2.f, 0.9f}),
+          math::Vec2{kPaddleWidth / 2.f, 0.9f},
+          0b1,
+          0),
       TickHandler(GlobalSubSystemStack::get().tickSystem()),
       Drawable(GlobalSubSystemStack::get().drawableScene()),
       sprite_(GlobalSubSystemStack::get().renderSystem().createRenderable(

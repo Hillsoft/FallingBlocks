@@ -26,7 +26,9 @@ Ball::Ball()
     : physics::RectCollider(
           GlobalSubSystemStack::get().physicsScene(),
           math::Vec2{-kBallSize / 2.f, -kBallSize / 2.f},
-          math::Vec2{kBallSize / 2.f, kBallSize / 2.f}),
+          math::Vec2{kBallSize / 2.f, kBallSize / 2.f},
+          0,
+          0b1),
       TickHandler(GlobalSubSystemStack::get().tickSystem()),
       Drawable(GlobalSubSystemStack::get().drawableScene()),
       vel_(randFloat(-1.f, 1.f), randFloat(-1.f, 1.f)),

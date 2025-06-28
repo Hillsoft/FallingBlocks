@@ -1,5 +1,6 @@
 #include "physics/RectCollider.hpp"
 
+#include <cstdint>
 #include <utility>
 #include "math/vec.hpp"
 #include "physics/PhysicsScene.hpp"
@@ -7,8 +8,17 @@
 
 namespace blocks::physics {
 
-RectCollider::RectCollider(PhysicsScene& scene, math::Vec2 p0, math::Vec2 p1)
-    : RegistryItem(scene), p0_(p0), p1_(p1) {}
+RectCollider::RectCollider(
+    PhysicsScene& scene,
+    math::Vec2 p0,
+    math::Vec2 p1,
+    uint64_t produceEventLayers,
+    uint64_t receiveEventLayers)
+    : RegistryItem(scene),
+      produceEventsForLayers_(produceEventLayers),
+      receiveEventsForLayers_(receiveEventLayers),
+      p0_(p0),
+      p1_(p1) {}
 
 bool RectCollider::testCollision(const RectCollider& other) const {
   math::Vec2 overlapP0{

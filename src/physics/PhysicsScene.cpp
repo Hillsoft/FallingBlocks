@@ -12,8 +12,14 @@ void PhysicsScene::run() {
   for (size_t i = 0; i < colliders.size(); i++) {
     for (size_t j = i + 1; j < colliders.size(); j++) {
       if (colliders[i]->testCollision(*colliders[j])) {
-        colliders[i]->handleCollision(*colliders[j]);
-        colliders[j]->handleCollision(*colliders[i]);
+        if ((colliders[i]->getReceiveEventLayers() &
+             colliders[j]->getProduceEventLayers()) > 0) {
+          colliders[i]->handleCollision(*colliders[j]);
+        }
+        if ((colliders[j]->getReceiveEventLayers() &
+             colliders[i]->getProduceEventLayers()) > 0) {
+          colliders[j]->handleCollision(*colliders[i]);
+        }
       }
     }
   }
