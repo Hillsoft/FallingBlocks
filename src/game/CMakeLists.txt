@@ -2,6 +2,8 @@ add_library(game.ball "Ball.hpp" "Ball.cpp")
 target_link_libraries(game.ball
 	engine.drawableregistry
 	engine.tickregistry
+	game.block
+	game.paddle
 	globalsubsystemstack
 	math.vec
 	physics.physicsscene

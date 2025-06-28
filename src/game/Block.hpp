@@ -7,7 +7,7 @@
 
 namespace blocks::game {
 
-class Block : public physics::RectCollider, Drawable {
+class Block : public physics::RectCollider, public Drawable {
  public:
   Block(math::Vec2 p0, math::Vec2 p1);
 

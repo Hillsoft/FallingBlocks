@@ -4,6 +4,8 @@
 #include "GlobalSubSystemStack.hpp"
 #include "engine/DrawableRegistry.hpp"
 #include "engine/TickRegistry.hpp"
+#include "game/Block.hpp"
+#include "game/Paddle.hpp"
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
 
@@ -28,7 +30,7 @@ Ball::Ball()
           math::Vec2{-kBallSize / 2.f, -kBallSize / 2.f},
           math::Vec2{kBallSize / 2.f, kBallSize / 2.f},
           0,
-          0b1),
+          0b11),
       TickHandler(GlobalSubSystemStack::get().tickSystem()),
       Drawable(GlobalSubSystemStack::get().drawableScene()),
       vel_(randFloat(-1.f, 1.f), randFloat(-1.f, 1.f)),
@@ -71,7 +73,11 @@ void Ball::draw() {
 }
 
 void Ball::handleCollision(physics::RectCollider& other) {
-  vel_.y() = -std::abs(vel_.y());
+  if (dynamic_cast<Paddle*>(&other) != nullptr) {
+    vel_.y() = -std::abs(vel_.y());
+  } else if (dynamic_cast<Block*>(&other) != nullptr) {
+    vel_.y() = std::abs(vel_.y());
+  }
 }
 
 } // namespace blocks::game
