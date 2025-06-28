@@ -73,7 +73,7 @@ void Application::drawFrame() {
 void Application::onKeyPress(int key) {
   if (key == GLFW_KEY_SPACE) {
     for (int i = 0; i < 100; i++)
-      balls_.emplace_back();
+      balls_.emplace_back(std::make_unique<game::Ball>());
   }
   if (key == GLFW_KEY_ESCAPE) {
     GlobalSubSystemStack::get().window()->close();
