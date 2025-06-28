@@ -17,7 +17,8 @@ add_library(util.raii_helpers INTERFACE "raii_helpers.hpp")
 add_library(util.registry INTERFACE "Registry.hpp")
 target_link_libraries(util.registry INTERFACE
 	util.debug
-	util.raii_helpers)
+	util.raii_helpers
+	util.synchronized)
 
 add_library(util.resettable INTERFACE "resettable.hpp")
 target_link_libraries(util.resettable INTERFACE
@@ -28,6 +29,8 @@ target_link_libraries(util.storage INTERFACE
 	util.raii_helpers)
 
 add_library(util.string INTERFACE "string.hpp")
+
+add_library(util.synchronized INTERFACE "Synchronized.hpp")
 
 add_library(util.zlib STATIC "zlib.hpp" "zlib.cpp")
 target_link_libraries(util.zlib

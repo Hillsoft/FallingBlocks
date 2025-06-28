@@ -274,7 +274,7 @@ InputSubSystem::~InputSubSystem() {
 
 void InputSubSystem::handleKeyEvent(
     int key, int scancode, int action, int mods) {
-  for (auto& h : getRegisteredItems()) {
+  for (auto& h : *getRegisteredItemsWrite()) {
     if (action == GLFW_PRESS) {
       h->onKeyPress(key);
     } else if (action == GLFW_RELEASE) {
