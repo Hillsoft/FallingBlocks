@@ -1,5 +1,7 @@
 #pragma once
 
+#include "engine/DrawableRegistry.hpp"
+#include "engine/TickRegistry.hpp"
 #include "input/InputHandler.hpp"
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
@@ -7,12 +9,16 @@
 
 namespace blocks::game {
 
-class Paddle : public input::InputHandler, physics::RectCollider {
+class Paddle
+    : public input::InputHandler,
+      physics::RectCollider,
+      TickHandler,
+      Drawable {
  public:
   Paddle();
 
-  void update(float deltaTimeSeconds);
-  void draw();
+  void update(float deltaTimeSeconds) final;
+  void draw() final;
 
   void onKeyPress(int key) final;
   void onKeyRelease(int key) final;

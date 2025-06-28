@@ -2,6 +2,8 @@
 
 #include <cstdlib>
 #include "GlobalSubSystemStack.hpp"
+#include "engine/DrawableRegistry.hpp"
+#include "engine/TickRegistry.hpp"
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
 
@@ -25,6 +27,8 @@ Ball::Ball()
           GlobalSubSystemStack::get().physicsScene(),
           math::Vec2{-kBallSize / 2.f, -kBallSize / 2.f},
           math::Vec2{kBallSize / 2.f, kBallSize / 2.f}),
+      TickHandler(GlobalSubSystemStack::get().tickSystem()),
+      Drawable(GlobalSubSystemStack::get().drawableScene()),
       vel_(randFloat(-1.f, 1.f), randFloat(-1.f, 1.f)),
       sprite_(GlobalSubSystemStack::get().renderSystem().createRenderable(
           RESOURCE_DIR "/test_image.bmp")) {}

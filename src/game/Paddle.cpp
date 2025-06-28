@@ -3,6 +3,8 @@
 #include <utility>
 #include <GLFW/glfw3.h>
 #include "GlobalSubSystemStack.hpp"
+#include "engine/DrawableRegistry.hpp"
+#include "engine/TickRegistry.hpp"
 #include "input/InputHandler.hpp"
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
@@ -24,6 +26,8 @@ Paddle::Paddle()
           GlobalSubSystemStack::get().physicsScene(),
           math::Vec2{-kPaddleWidth / 2.f, 0.8f},
           math::Vec2{kPaddleWidth / 2.f, 0.9f}),
+      TickHandler(GlobalSubSystemStack::get().tickSystem()),
+      Drawable(GlobalSubSystemStack::get().drawableScene()),
       sprite_(GlobalSubSystemStack::get().renderSystem().createRenderable(
           RESOURCE_DIR "/mandelbrot set.png")) {}
 

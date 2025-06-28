@@ -1,5 +1,7 @@
 #include "GlobalSubSystemStack.hpp"
 
+#include "engine/DrawableRegistry.hpp"
+#include "engine/TickRegistry.hpp"
 #include "input/InputSubSystem.hpp"
 #include "physics/PhysicsScene.hpp"
 #include "render/RenderSubSystem.hpp"
@@ -17,7 +19,9 @@ GlobalSubSystemStack::GlobalSubSystemStack()
     : physics_(),
       render_(),
       window_(render_.createWindow()),
-      input_(window_->getPresentStack().getWindow()) {
+      input_(window_->getPresentStack().getWindow()),
+      tick_(),
+      drawableScene_() {
   DEBUG_ASSERT(globalStack == nullptr);
   globalStack = this;
 }
@@ -46,6 +50,14 @@ render::WindowRef GlobalSubSystemStack::window() {
 
 input::InputSubSystem& GlobalSubSystemStack::inputSystem() {
   return input_;
+}
+
+TickRegistry& GlobalSubSystemStack::tickSystem() {
+  return tick_;
+}
+
+DrawableRegistry& GlobalSubSystemStack::drawableScene() {
+  return drawableScene_;
 }
 
 } // namespace blocks

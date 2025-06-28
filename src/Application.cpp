@@ -53,20 +53,14 @@ void Application::run() {
 }
 
 void Application::update(float deltaTimeSeconds) {
-  paddle_.update(deltaTimeSeconds);
-  for (auto& ball : balls_) {
-    ball->update(deltaTimeSeconds);
-  }
+  GlobalSubSystemStack::get().tickSystem().update(deltaTimeSeconds);
 
   GlobalSubSystemStack::get().physicsScene().run();
 }
 
 void Application::drawFrame() {
   auto& render = GlobalSubSystemStack::get().renderSystem();
-  for (auto& ball : balls_) {
-    ball->draw();
-  }
-  paddle_.draw();
+  GlobalSubSystemStack::get().drawableScene().drawAll();
   render.commitFrame();
 }
 
