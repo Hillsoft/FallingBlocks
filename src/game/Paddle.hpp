@@ -11,9 +11,9 @@ namespace blocks::game {
 
 class Paddle
     : public input::InputHandler,
-      physics::RectCollider,
-      TickHandler,
-      Drawable {
+      public physics::RectCollider,
+      public TickHandler,
+      public Drawable {
  public:
   Paddle();
 

@@ -8,7 +8,7 @@
 
 namespace blocks::game {
 
-class Ball : public physics::RectCollider, TickHandler, Drawable {
+class Ball : public physics::RectCollider, public TickHandler, public Drawable {
  public:
   Ball();
 
