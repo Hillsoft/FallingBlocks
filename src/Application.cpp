@@ -67,6 +67,8 @@ void Application::update(float deltaTimeSeconds) {
   GlobalSubSystemStack::get().tickSystem().update(deltaTimeSeconds);
 
   GlobalSubSystemStack::get().physicsScene().run();
+
+  scene_.cleanupPendingDestruction();
 }
 
 void Application::drawFrame() {

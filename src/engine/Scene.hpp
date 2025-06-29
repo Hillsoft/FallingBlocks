@@ -19,9 +19,11 @@ class Scene {
   }
 
   void destroyActor(Actor* actor);
+  void cleanupPendingDestruction();
 
  private:
   std::vector<std::unique_ptr<Actor>> actors_;
+  std::vector<std::unique_ptr<Actor>> pendingDestruction_;
 };
 
 } // namespace blocks
