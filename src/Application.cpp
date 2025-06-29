@@ -64,16 +64,12 @@ void Application::run() {
 }
 
 void Application::update(float deltaTimeSeconds) {
-  scene_.getTickRegistry().update(deltaTimeSeconds);
-
-  scene_.getPhysicsScene().run();
-
-  scene_.cleanupPendingDestruction();
+  scene_.stepSimulation(deltaTimeSeconds);
 }
 
 void Application::drawFrame() {
   auto& render = GlobalSubSystemStack::get().renderSystem();
-  scene_.getDrawableScene().drawAll();
+  scene_.drawAll();
   render.commitFrame();
 }
 

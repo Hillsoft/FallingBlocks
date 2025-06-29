@@ -17,6 +17,18 @@ void Scene::destroyActor(Actor* actor) {
   }
 }
 
+void Scene::stepSimulation(float deltaTimeSeconds) {
+  getTickRegistry().update(deltaTimeSeconds);
+
+  getPhysicsScene().run();
+
+  cleanupPendingDestruction();
+}
+
+void Scene::drawAll() {
+  getDrawableScene().drawAll();
+}
+
 void Scene::cleanupPendingDestruction() {
   pendingDestruction_.clear();
 }

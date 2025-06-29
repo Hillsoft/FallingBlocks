@@ -22,7 +22,9 @@ class Scene {
   }
 
   void destroyActor(Actor* actor);
-  void cleanupPendingDestruction();
+
+  void stepSimulation(float deltaTimeSeconds);
+  void drawAll();
 
   physics::PhysicsScene& getPhysicsScene() { return physics_; }
   const physics::PhysicsScene& getPhysicsScene() const { return physics_; }
@@ -32,6 +34,8 @@ class Scene {
   const DrawableRegistry& getDrawableScene() const { return drawableScene_; }
 
  private:
+  void cleanupPendingDestruction();
+
   physics::PhysicsScene physics_;
   TickRegistry tick_;
   DrawableRegistry drawableScene_;
