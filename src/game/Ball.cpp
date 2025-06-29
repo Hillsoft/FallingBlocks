@@ -2,7 +2,9 @@
 
 #include <cstdlib>
 #include "GlobalSubSystemStack.hpp"
+#include "engine/Actor.hpp"
 #include "engine/DrawableRegistry.hpp"
+#include "engine/Scene.hpp"
 #include "engine/TickRegistry.hpp"
 #include "game/Block.hpp"
 #include "game/Paddle.hpp"
@@ -24,8 +26,9 @@ float randFloat(float lo, float hi) {
 
 } // namespace
 
-Ball::Ball()
-    : physics::RectCollider(
+Ball::Ball(Scene& scene)
+    : Actor(scene),
+      physics::RectCollider(
           GlobalSubSystemStack::get().physicsScene(),
           math::Vec2{-kBallSize / 2.f, -kBallSize / 2.f},
           math::Vec2{kBallSize / 2.f, kBallSize / 2.f},

@@ -1,12 +1,7 @@
 #pragma once
 
-#include <memory>
-#include <vector>
-#include "game/Ball.hpp"
-#include "game/Block.hpp"
-#include "game/Paddle.hpp"
+#include "engine/Scene.hpp"
 #include "input/InputHandler.hpp"
-#include "util/raii_helpers.hpp"
 
 namespace blocks {
 
@@ -23,9 +18,7 @@ class Application : public input::InputHandler {
   void update(float deltaTimeSeconds);
   void drawFrame();
 
-  game::Paddle paddle_;
-  std::vector<std::unique_ptr<game::Ball>> balls_;
-  std::vector<std::unique_ptr<game::Block>> blocks_;
+  Scene scene_;
 };
 
 } // namespace blocks

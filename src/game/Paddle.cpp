@@ -3,7 +3,9 @@
 #include <utility>
 #include <GLFW/glfw3.h>
 #include "GlobalSubSystemStack.hpp"
+#include "engine/Actor.hpp"
 #include "engine/DrawableRegistry.hpp"
+#include "engine/Scene.hpp"
 #include "engine/TickRegistry.hpp"
 #include "input/InputHandler.hpp"
 #include "math/vec.hpp"
@@ -20,8 +22,9 @@ constexpr float kPaddleSpeed = 1.0f;
 
 } // namespace
 
-Paddle::Paddle()
-    : input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
+Paddle::Paddle(Scene& scene)
+    : Actor(scene),
+      input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
       physics::RectCollider(
           GlobalSubSystemStack::get().physicsScene(),
           math::Vec2{-kPaddleWidth / 2.f, 0.8f},

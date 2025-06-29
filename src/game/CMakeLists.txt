@@ -1,6 +1,8 @@
 add_library(game.ball "Ball.hpp" "Ball.cpp")
 target_link_libraries(game.ball
+	engine.actor
 	engine.drawableregistry
+	engine.scene
 	engine.tickregistry
 	game.block
 	game.paddle
@@ -11,7 +13,9 @@ target_link_libraries(game.ball
 
 add_library(game.block "Block.hpp" "Block.cpp")
 target_link_libraries(game.block
+	engine.actor
 	engine.drawableregistry
+	engine.scene
 	globalsubsystemstack
 	math.vec
 	physics.physicsscene
@@ -19,7 +23,9 @@ target_link_libraries(game.block
 
 add_library(game.paddle "Paddle.hpp" "Paddle.cpp")
 target_link_libraries(game.paddle
+	engine.actor
 	engine.drawableregistry
+	engine.scene
 	engine.tickregistry
 	globalsubsystemstack
 	input.inputsubsystem

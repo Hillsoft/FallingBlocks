@@ -1,6 +1,8 @@
 #pragma once
 
+#include "engine/Actor.hpp"
 #include "engine/DrawableRegistry.hpp"
+#include "engine/Scene.hpp"
 #include "engine/TickRegistry.hpp"
 #include "input/InputHandler.hpp"
 #include "math/vec.hpp"
@@ -10,12 +12,13 @@
 namespace blocks::game {
 
 class Paddle
-    : public input::InputHandler,
+    : public Actor,
+      public input::InputHandler,
       public physics::RectCollider,
       public TickHandler,
       public Drawable {
  public:
-  Paddle();
+  Paddle(Scene& scene);
 
   void update(float deltaTimeSeconds) final;
   void draw() final;
