@@ -155,6 +155,7 @@ class RenderSubSystem {
   std::vector<PipelineSynchronisationSet> synchronisationSets_;
   std::vector<std::unique_ptr<Window>> windows_;
   std::vector<std::optional<RenderableQuad>> renderables_;
+  std::vector<RenderableQuad> renderablesPendingDestruction_;
 
   struct DrawCommand {
     WindowRef target_;

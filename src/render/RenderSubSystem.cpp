@@ -169,6 +169,7 @@ UniqueRenderableHandle RenderSubSystem::createRenderable(
 void RenderSubSystem::destroyRenderable(RenderableRef ref) {
   DEBUG_ASSERT(
       ref.id < renderables_.size() && renderables_[ref.id].has_value());
+  renderablesPendingDestruction_.emplace_back(std::move(*renderables_[ref.id]));
   renderables_[ref.id].reset();
 }
 
