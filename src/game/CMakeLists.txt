@@ -21,6 +21,16 @@ target_link_libraries(game.block
 	physics.physicsscene
 	render.rendersubsystem)
 
+add_library(game.loadingscreen "LoadingScreen.hpp" "LoadingScreen.cpp")
+target_link_libraries(game.loadingscreen
+	engine.actor
+	engine.drawableregistry
+	engine.scene
+	engine.tickregistry
+	globalsubsystemstack
+	math.vec
+	render.rendersubsystem)
+
 add_library(game.paddle "Paddle.hpp" "Paddle.cpp")
 target_link_libraries(game.paddle
 	engine.actor

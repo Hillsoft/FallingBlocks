@@ -9,6 +9,7 @@
 #include "engine/Scene.hpp"
 #include "game/Ball.hpp"
 #include "game/Block.hpp"
+#include "game/LoadingScreen.hpp"
 #include "game/Paddle.hpp"
 #include "input/InputHandler.hpp"
 #include "math/vec.hpp"
@@ -17,17 +18,18 @@ namespace blocks {
 
 Application::Application()
     : input::InputHandler(GlobalSubSystemStack::get().inputSystem()) {
-  scene_.createActor<game::Paddle>();
-  scene_.createActor<game::Ball>();
+  scene_.createActor<game::LoadingScreen>();
+  // scene_.createActor<game::Paddle>();
+  // scene_.createActor<game::Ball>();
 
-  for (int i = 0; i < 10; i++) {
-    float x = (2.f * static_cast<float>(i) / 10.f) - 1.f;
-    for (int j = 0; j < 2; j++) {
-      float y = static_cast<float>(j) * 0.1f - 1.f;
-      scene_.createActor<game::Block>(
-          math::Vec2{x, y}, math::Vec2{x + 0.2f, y + 0.1f});
-    }
-  }
+  // for (int i = 0; i < 10; i++) {
+  //   float x = (2.f * static_cast<float>(i) / 10.f) - 1.f;
+  //   for (int j = 0; j < 2; j++) {
+  //     float y = static_cast<float>(j) * 0.1f - 1.f;
+  //     scene_.createActor<game::Block>(
+  //         math::Vec2{x, y}, math::Vec2{x + 0.2f, y + 0.1f});
+  //   }
+  // }
 }
 
 void Application::run() {

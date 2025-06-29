@@ -12,6 +12,7 @@ target_link_libraries(application
 	engine.scene
 	game.ball
 	game.block
+	game.loadingscreen
 	game.paddle
 	globalsubsystemstack
 	input.inputsubsystem
