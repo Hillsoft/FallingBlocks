@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
+#include <iostream>
 #include <limits>
 #include <span>
 #include <stdexcept>
@@ -183,9 +184,17 @@ Image loadPng(std::span<const std::byte> data) {
   Chunk headerChunk = readChunk(data);
   PngHeader header = readPngHeader(headerChunk.data);
 
-  if (header.bitDepth != 8 || header.colorType != 2 ||
+  if (header.bitDepth != 8 ||
+      (header.colorType != 2 && header.colorType != 6) ||
       header.compression != 0) {
     throw std::runtime_error{"Unsupported PNG format"};
+  }
+
+  bool hasAlpha = header.colorType == 6;
+  if (hasAlpha) {
+    std::cout
+        << "Warning: transparent PNGs not supported, alpha bit will be discarded"
+        << std::endl;
   }
 
   std::vector<std::byte> imgData;
@@ -204,7 +213,9 @@ Image loadPng(std::span<const std::byte> data) {
   std::vector<std::byte> decompressedData =
       util::zlibDecompress(std::span(imgData.begin(), imgData.end()));
 
-  size_t rowSize = 3 * header.width + 1;
+  size_t pixelSizeBytes = hasAlpha ? 4 : 3;
+
+  size_t rowSize = pixelSizeBytes * header.width + 1;
   if (decompressedData.size() != rowSize * header.height) {
     throw std::runtime_error{"Corrupt PNG"};
   }
@@ -214,7 +225,7 @@ Image loadPng(std::span<const std::byte> data) {
   outData.reserve(header.width * header.height * 4);
 
   auto readDecompressed = [&](size_t x, size_t y) {
-    size_t pixelOffset = 1 + 3 * x + rowSize * y;
+    size_t pixelOffset = 1 + pixelSizeBytes * x + rowSize * y;
     math::Vec<unsigned short, 3> out{
         static_cast<unsigned short>(decompressedData[pixelOffset]),
         static_cast<unsigned short>(decompressedData[pixelOffset + 1]),
