@@ -9,7 +9,10 @@ target_link_libraries(engine.drawableregistry
 
 add_library(engine.scene STATIC "Scene.hpp" "Scene.cpp")
 target_link_libraries(engine.scene
-	engine.actor)
+	engine.actor
+	engine.drawableregistry
+	engine.tickregistry
+	physics.physicsscene)
 
 add_library(engine.tickregistry STATIC "TickRegistry.hpp" "TickRegistry.cpp")
 target_link_libraries(engine.tickregistry

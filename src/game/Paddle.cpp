@@ -26,13 +26,13 @@ Paddle::Paddle(Scene& scene)
     : Actor(scene),
       input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
       physics::RectCollider(
-          GlobalSubSystemStack::get().physicsScene(),
+          scene.getPhysicsScene(),
           math::Vec2{-kPaddleWidth / 2.f, 0.8f},
           math::Vec2{kPaddleWidth / 2.f, 0.9f},
           0b1,
           0),
-      TickHandler(GlobalSubSystemStack::get().tickSystem()),
-      Drawable(GlobalSubSystemStack::get().drawableScene()),
+      TickHandler(scene.getTickRegistry()),
+      Drawable(scene.getDrawableScene()),
       sprite_(GlobalSubSystemStack::get().renderSystem().createRenderable(
           RESOURCE_DIR "/mandelbrot set.png")) {}
 

@@ -11,9 +11,8 @@ namespace blocks::game {
 
 Block::Block(Scene& scene, math::Vec2 p0, math::Vec2 p1)
     : Actor(scene),
-      physics::RectCollider(
-          GlobalSubSystemStack::get().physicsScene(), p0, p1, 0b10, 0),
-      Drawable(GlobalSubSystemStack::get().drawableScene()),
+      physics::RectCollider(scene.getPhysicsScene(), p0, p1, 0b10, 0),
+      Drawable(scene.getDrawableScene()),
       sprite_(GlobalSubSystemStack::get().renderSystem().createRenderable(
           RESOURCE_DIR "/mandelbrot set.png")) {}
 

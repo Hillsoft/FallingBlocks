@@ -29,13 +29,13 @@ float randFloat(float lo, float hi) {
 Ball::Ball(Scene& scene)
     : Actor(scene),
       physics::RectCollider(
-          GlobalSubSystemStack::get().physicsScene(),
+          scene.getPhysicsScene(),
           math::Vec2{-kBallSize / 2.f, -kBallSize / 2.f},
           math::Vec2{kBallSize / 2.f, kBallSize / 2.f},
           0,
           0b11),
-      TickHandler(GlobalSubSystemStack::get().tickSystem()),
-      Drawable(GlobalSubSystemStack::get().drawableScene()),
+      TickHandler(scene.getTickRegistry()),
+      Drawable(scene.getDrawableScene()),
       vel_(randFloat(-1.f, 1.f), randFloat(-1.f, 1.f)),
       sprite_(GlobalSubSystemStack::get().renderSystem().createRenderable(
           RESOURCE_DIR "/test_image.bmp")) {}
