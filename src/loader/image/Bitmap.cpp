@@ -120,7 +120,8 @@ Image loadBitmap(const std::vector<std::byte>& data) {
       std::byte g = pixel[1];
       std::byte b = pixel[2];
 
-      std::byte* outPixel = &outData[0] + 4 * (y * imageWidth + x);
+      std::byte* outPixel = &outData[0] +
+          4 * ((imageHeight - 1 - y) * imageWidth + (imageWidth - 1 - x));
       outPixel[0] = r;
       outPixel[1] = g;
       outPixel[2] = b;
