@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "util/debug.hpp"
+#include "util/portability.hpp"
 #include "util/raii_helpers.hpp"
 
 namespace blocks {
@@ -9,7 +10,7 @@ namespace blocks {
 class Scene;
 
 class Actor {
-  [[no_unique_address]] util::no_copy_move noCopyMoveTag_;
+  UNUSEDPRIVATEMEMBER(NO_UNIQUE_ADDRESS util::no_copy_move noCopyMoveTag_);
 
  private:
   struct ControlBlock {

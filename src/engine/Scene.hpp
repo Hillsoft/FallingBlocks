@@ -16,7 +16,7 @@ class Scene {
   template <typename TActor, typename... TArgs>
   Actor::Ref<TActor> createActor(TArgs... args) {
     auto actor = std::make_unique<TActor>(*this, std::forward<TArgs>(args)...);
-    auto ref = actor->getRef().to<TActor>();
+    auto ref = actor->getRef().template to<TActor>();
     actors_.emplace_back(std::move(actor));
     return ref;
   }

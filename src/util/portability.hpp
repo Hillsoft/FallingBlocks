@@ -5,3 +5,12 @@
 #else
 #define NO_UNIQUE_ADDRESS
 #endif
+
+#if __clang__
+#define UNUSEDPRIVATEMEMBER(x)                                       \
+  _Pragma("clang diagnostic push")                                   \
+      _Pragma("clang diagnostic ignored \"-Wunused-private-field\"") \
+          x _Pragma("clang diagnostic pop")
+#else
+#define UNUSEDPRIVATEMEMBER(x) x
+#endif
