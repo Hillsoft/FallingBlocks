@@ -18,7 +18,9 @@ class Application : public input::InputHandler {
   void update(float deltaTimeSeconds);
   void drawFrame();
 
-  Scene scene_;
+  Scene loadingScene_;
+  Scene mainScene_;
+  Scene* currentScene_;
 };
 
 } // namespace blocks

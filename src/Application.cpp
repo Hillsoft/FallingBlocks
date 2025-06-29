@@ -2,7 +2,6 @@
 
 #include <chrono>
 #include <iostream>
-#include <memory>
 #include <utility>
 #include <GLFW/glfw3.h>
 #include "GlobalSubSystemStack.hpp"
@@ -16,20 +15,28 @@
 
 namespace blocks {
 
-Application::Application()
-    : input::InputHandler(GlobalSubSystemStack::get().inputSystem()) {
-  scene_.createActor<game::LoadingScreen>();
-  // scene_.createActor<game::Paddle>();
-  // scene_.createActor<game::Ball>();
+namespace {
 
-  // for (int i = 0; i < 10; i++) {
-  //   float x = (2.f * static_cast<float>(i) / 10.f) - 1.f;
-  //   for (int j = 0; j < 2; j++) {
-  //     float y = static_cast<float>(j) * 0.1f - 1.f;
-  //     scene_.createActor<game::Block>(
-  //         math::Vec2{x, y}, math::Vec2{x + 0.2f, y + 0.1f});
-  //   }
-  // }
+void populateMainScene(Scene& scene) {
+  scene.createActor<game::Paddle>();
+  scene.createActor<game::Ball>();
+
+  for (int i = 0; i < 10; i++) {
+    float x = (2.f * static_cast<float>(i) / 10.f) - 1.f;
+    for (int j = 0; j < 2; j++) {
+      float y = static_cast<float>(j) * 0.1f - 1.f;
+      scene.createActor<game::Block>(
+          math::Vec2{x, y}, math::Vec2{x + 0.2f, y + 0.1f});
+    }
+  }
+}
+
+} // namespace
+
+Application::Application()
+    : input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
+      currentScene_(&loadingScene_) {
+  loadingScene_.createActor<game::LoadingScreen>();
 }
 
 void Application::run() {
@@ -55,6 +62,11 @@ void Application::run() {
           std::chrono::duration_cast<std::chrono::microseconds>(curFrameTime)
               .count() /
           1000000.0f;
+
+      if (currentScene_ != &mainScene_) {
+        populateMainScene(mainScene_);
+        currentScene_ = &mainScene_;
+      }
     }
 
     std::cout << "FPS: " << 1000000.0f / (totalFrameTime / 1000).count()
@@ -66,19 +78,19 @@ void Application::run() {
 }
 
 void Application::update(float deltaTimeSeconds) {
-  scene_.stepSimulation(deltaTimeSeconds);
+  currentScene_->stepSimulation(deltaTimeSeconds);
 }
 
 void Application::drawFrame() {
   auto& render = GlobalSubSystemStack::get().renderSystem();
-  scene_.drawAll();
+  currentScene_->drawAll();
   render.commitFrame();
 }
 
 void Application::onKeyPress(int key) {
   if (key == GLFW_KEY_SPACE) {
     for (int i = 0; i < 100; i++)
-      scene_.createActor<game::Ball>();
+      currentScene_->createActor<game::Ball>();
   }
   if (key == GLFW_KEY_ESCAPE) {
     GlobalSubSystemStack::get().window()->close();
