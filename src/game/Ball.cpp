@@ -78,8 +78,9 @@ void Ball::draw() {
 void Ball::handleCollision(physics::RectCollider& other) {
   if (dynamic_cast<Paddle*>(&other) != nullptr) {
     vel_.y() = -std::abs(vel_.y());
-  } else if (dynamic_cast<Block*>(&other) != nullptr) {
+  } else if (auto block = dynamic_cast<Block*>(&other); block != nullptr) {
     vel_.y() = std::abs(vel_.y());
+    getScene()->destroyActor(block);
   }
 }
 
