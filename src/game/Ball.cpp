@@ -16,6 +16,7 @@ namespace blocks::game {
 namespace {
 
 constexpr float kBallSize = 0.05f;
+constexpr float kBounceDirectionalStrength = 5.f;
 
 float randFloat(float lo, float hi) {
   float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
@@ -76,8 +77,14 @@ void Ball::draw() {
 }
 
 void Ball::handleCollision(physics::RectCollider& other) {
-  if (dynamic_cast<Paddle*>(&other) != nullptr) {
+  if (auto paddle = dynamic_cast<Paddle*>(&other); paddle != nullptr) {
     vel_.y() = -std::abs(vel_.y());
+
+    math::Vec2 ballCenter = (getP0() + getP1()) / 2.f;
+    math::Vec2 paddleCenter = (paddle->getP0() + paddle->getP1()) / 2.f;
+
+    vel_.x() = kBounceDirectionalStrength * (ballCenter.x() - paddleCenter.x());
+
   } else if (auto block = dynamic_cast<Block*>(&other); block != nullptr) {
     vel_.y() = std::abs(vel_.y());
     getScene()->destroyActor(block);
