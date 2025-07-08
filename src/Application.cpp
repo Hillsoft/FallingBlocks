@@ -18,17 +18,26 @@ namespace blocks {
 namespace {
 
 void populateMainScene(Scene& scene) {
+  auto start = std::chrono::high_resolution_clock::now();
+
   scene.createActor<game::Paddle>();
   scene.createActor<game::Ball>();
 
   for (int i = 0; i < 10; i++) {
     float x = (2.f * static_cast<float>(i) / 10.f) - 1.f;
-    for (int j = 0; j < 2; j++) {
+    for (int j = 0; j < 4; j++) {
       float y = static_cast<float>(j) * 0.1f - 1.f;
       scene.createActor<game::Block>(
           math::Vec2{x, y}, math::Vec2{x + 0.2f, y + 0.1f});
     }
   }
+
+  auto end = std::chrono::high_resolution_clock::now();
+  std::cout
+      << "Loaded scene in "
+      << std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
+             .count()
+      << "ms" << std::endl;
 }
 
 } // namespace
