@@ -100,7 +100,8 @@ RenderSubSystem::RenderSubSystem()
       debugMessenger_(instance_),
 #endif
       graphics_(VulkanGraphicsDevice::make(instance_)),
-      commandPool_(graphics_),
+      commandPool_(graphics_, false),
+      loadingCommandPool_(graphics_, true),
       commandBuffers_(),
       mainRenderPass_(makeMainRenderPass(graphics_.getRawDevice())),
       synchronisationSets_() {
@@ -160,7 +161,7 @@ UniqueRenderableHandle RenderSubSystem::createRenderable(
       std::in_place,
       texturePath,
       graphics_,
-      commandPool_,
+      loadingCommandPool_,
       mainRenderPass_.get(),
       kMaxFramesInFlight);
   return UniqueRenderableHandle{RenderableRef{id, *this}};

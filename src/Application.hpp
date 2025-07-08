@@ -1,5 +1,7 @@
 #pragma once
 
+#include <atomic>
+#include <thread>
 #include "engine/Scene.hpp"
 #include "input/InputHandler.hpp"
 
@@ -21,6 +23,8 @@ class Application : public input::InputHandler {
   Scene loadingScene_;
   Scene mainScene_;
   Scene* currentScene_;
+  std::jthread loadThread_;
+  std::atomic<bool> loadComplete_ = false;
 };
 
 } // namespace blocks

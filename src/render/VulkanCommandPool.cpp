@@ -9,8 +9,12 @@
 
 namespace blocks::render {
 
-VulkanCommandPool::VulkanCommandPool(VulkanGraphicsDevice& device)
-    : queue_(device.getGraphicsQueue()), commandPool_(nullptr, nullptr) {
+VulkanCommandPool::VulkanCommandPool(
+    VulkanGraphicsDevice& device, bool loadingQueue)
+    : queue_(
+          loadingQueue ? device.getGraphicsLoadingQueue()
+                       : device.getGraphicsQueue()),
+      commandPool_(nullptr, nullptr) {
   VkCommandPoolCreateInfo poolInfo{};
   poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
   poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;

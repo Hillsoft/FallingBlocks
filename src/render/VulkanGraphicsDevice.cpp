@@ -192,7 +192,7 @@ void makeQueueCreateInfo(
     VkDeviceQueueCreateInfo& queueCreateInfo = result.createInfo.emplace_back();
     queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     queueCreateInfo.queueFamilyIndex = queueFamily;
-    queueCreateInfo.queueCount = 1;
+    queueCreateInfo.queueCount = queueFamily == *indices.graphicsFamily ? 2 : 1;
     queueCreateInfo.pQueuePriorities = &result.queuePriority;
   }
 }
@@ -210,10 +210,12 @@ VulkanGraphicsDevice::PhysicalDeviceInfo::PhysicalDeviceInfo(
 VulkanGraphicsDevice::VulkanGraphicsDevice(
     vulkan::UniqueHandle<VkDevice> device,
     VkQueue graphicsQueue,
+    VkQueue graphicsLoadingQueue,
     VkQueue presentQueue,
     std::unique_ptr<PhysicalDeviceInfo> physicalInfo)
     : device_(std::move(device)),
       graphicsQueue_(graphicsQueue),
+      graphicsLoadingQueue_(graphicsLoadingQueue),
       presentQueue_(presentQueue),
       physicalInfo_(std::move(physicalInfo)) {}
 
@@ -261,6 +263,12 @@ VulkanGraphicsDevice VulkanGraphicsDevice::make(VulkanInstance& instance) {
       physicalDevice->queueFamilies.graphicsFamily.value(),
       0,
       &graphicsQueue);
+  VkQueue graphicsLoadingQueue;
+  vkGetDeviceQueue(
+      device,
+      physicalDevice->queueFamilies.graphicsFamily.value(),
+      1,
+      &graphicsLoadingQueue);
   VkQueue presentQueue;
   vkGetDeviceQueue(
       device,
@@ -271,6 +279,7 @@ VulkanGraphicsDevice VulkanGraphicsDevice::make(VulkanInstance& instance) {
   return {
       vulkan::UniqueHandle<VkDevice>{device},
       graphicsQueue,
+      graphicsLoadingQueue,
       presentQueue,
       std::move(physicalDevice)};
 }

@@ -9,7 +9,7 @@ namespace blocks::render {
 
 class VulkanCommandPool {
  public:
-  VulkanCommandPool(VulkanGraphicsDevice& device);
+  VulkanCommandPool(VulkanGraphicsDevice& device, bool loadingQueue);
 
   VkCommandPool getRawCommandPool() { return commandPool_.get(); }
   VkQueue getQueue() { return queue_; }

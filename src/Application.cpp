@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <thread>
 #include <utility>
 #include <GLFW/glfw3.h>
 #include "GlobalSubSystemStack.hpp"
@@ -44,11 +45,19 @@ void populateMainScene(Scene& scene) {
 
 Application::Application()
     : input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
-      currentScene_(&loadingScene_) {
+      currentScene_(&loadingScene_),
+      loadThread_() {
   loadingScene_.createActor<game::LoadingScreen>();
 }
 
 void Application::run() {
+  if (currentScene_ != &mainScene_) {
+    loadThread_ = std::jthread{[&]() {
+      populateMainScene(mainScene_);
+      loadComplete_.store(true, std::memory_order_release);
+    }};
+  }
+
   auto& subsystems = GlobalSubSystemStack::get();
   float prevFrameTimeSecs = 0;
   while (!subsystems.window()->shouldClose()) {
@@ -72,8 +81,8 @@ void Application::run() {
               .count() /
           1000000.0f;
 
-      if (currentScene_ != &mainScene_) {
-        populateMainScene(mainScene_);
+      if (currentScene_ != &mainScene_ &&
+          loadComplete_.load(std::memory_order_acquire)) {
         currentScene_ = &mainScene_;
       }
     }

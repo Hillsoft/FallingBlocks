@@ -32,17 +32,20 @@ class VulkanGraphicsDevice {
 
   VkDevice getRawDevice() { return device_.get(); }
   VkQueue getGraphicsQueue() { return graphicsQueue_; }
+  VkQueue getGraphicsLoadingQueue() { return graphicsLoadingQueue_; }
   VkQueue getPresentQueue() { return presentQueue_; }
 
  private:
   VulkanGraphicsDevice(
       vulkan::UniqueHandle<VkDevice> device,
       VkQueue graphicsQueue,
+      VkQueue graphicsLoadingQueue,
       VkQueue presentQueue,
       std::unique_ptr<PhysicalDeviceInfo> physicalInfo);
 
   vulkan::UniqueHandle<VkDevice> device_;
   VkQueue graphicsQueue_;
+  VkQueue graphicsLoadingQueue_;
   VkQueue presentQueue_;
   std::unique_ptr<PhysicalDeviceInfo> physicalInfo_;
 };

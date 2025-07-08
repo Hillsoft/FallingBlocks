@@ -150,6 +150,7 @@ class RenderSubSystem {
 #endif
   VulkanGraphicsDevice graphics_;
   VulkanCommandPool commandPool_;
+  VulkanCommandPool loadingCommandPool_;
   std::vector<VulkanCommandBuffer> commandBuffers_;
   vulkan::UniqueHandle<VkRenderPass> mainRenderPass_;
   std::vector<PipelineSynchronisationSet> synchronisationSets_;
