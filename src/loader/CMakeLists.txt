@@ -1,3 +1,4 @@
+add_subdirectory(font)
 add_subdirectory(image)
 add_subdirectory(test)
 
