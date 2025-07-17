@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <filesystem>
 #include <iostream>
+#include <memory>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <string_view>
@@ -16,6 +18,13 @@
 namespace blocks::loader {
 
 namespace {
+
+class CharToGlyphMap {
+ public:
+  virtual ~CharToGlyphMap() {}
+
+  virtual uint16_t mapChar(uint32_t unicodeChar) = 0;
+};
 
 struct Fixed {
   uint32_t rawValue;
@@ -33,6 +42,7 @@ struct UFWord {
 
 constexpr Fixed kExpectedVersion = {0x00010000};
 
+constexpr uint32_t kTagCmap = 0x636D6170;
 constexpr uint32_t kTagHead = 0x68656164;
 constexpr uint32_t kTagName = 0x6E616D65;
 
@@ -189,6 +199,198 @@ NameTable readNameTable(std::span<const std::byte> data) {
   return result;
 }
 
+// Two-byte encoding, sparse data
+class Format4Map : public CharToGlyphMap {
+ public:
+  Format4Map(
+      uint16_t segCount,
+      std::vector<uint16_t> endCodes,
+      std::vector<uint16_t> startCodes,
+      std::vector<uint16_t> idDelta,
+      std::vector<uint16_t> idRangeOffset,
+      std::vector<uint16_t> glyphIndices)
+      : segCount_(segCount),
+        endCodes_(std::move(endCodes)),
+        startCodes_(std::move(startCodes)),
+        idDelta_(std::move(idDelta)),
+        idRangeOffset_(std::move(idRangeOffset)),
+        glyphIndices_(std::move(glyphIndices)) {
+    DEBUG_ASSERT(endCodes_.size() == segCount_);
+    DEBUG_ASSERT(startCodes_.size() == segCount_);
+    DEBUG_ASSERT(idDelta_.size() == segCount_);
+    DEBUG_ASSERT(idRangeOffset_.size() == segCount_);
+  }
+
+  uint16_t mapChar(uint32_t unicodeChar) final {
+    if (unicodeChar > 0xFFFF) {
+      return 0;
+    }
+    uint16_t charValue = static_cast<uint16_t>(unicodeChar);
+
+    int segmentIndex = 0;
+    for (; segmentIndex < segCount_; segmentIndex++) {
+      if (endCodes_[segmentIndex] >= charValue) {
+        break;
+      }
+    }
+
+    if (startCodes_[segmentIndex] < charValue) {
+      return 0;
+    }
+
+    if (idRangeOffset_[segmentIndex] != 0) {
+      int glyphIndexArrayIndex = idRangeOffset_[segmentIndex] / 2 + charValue -
+          startCodes_[segmentIndex] - (segCount_ - segmentIndex);
+      return glyphIndices_[glyphIndexArrayIndex];
+    } else {
+      return idDelta_[segmentIndex] + charValue;
+    }
+  }
+
+ private:
+  uint16_t segCount_;
+  std::vector<uint16_t> endCodes_;
+  std::vector<uint16_t> startCodes_;
+  std::vector<uint16_t> idDelta_;
+  std::vector<uint16_t> idRangeOffset_;
+  std::vector<uint16_t> glyphIndices_;
+};
+
+Format4Map readCharMapSubtableFormat4(std::span<const std::byte> data) {
+  uint16_t length = readBigEndian<uint16_t>(data);
+  // We've already read the format and length
+  if (length < 14 || data.size() < length - 4) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+  data = data.subspan(0, length - 4);
+
+  // language code, unused
+  readBigEndian<uint16_t>(data);
+  uint16_t segCount2 = readBigEndian<uint16_t>(data);
+  uint16_t segCount = segCount2 / 2;
+  // search range, unused
+  readBigEndian<uint16_t>(data);
+  // entry selector, unused
+  readBigEndian<uint16_t>(data);
+  // range shift, unused
+  readBigEndian<uint16_t>(data);
+
+  if (length < 16 + 8 * segCount) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+
+  auto readSegCountVec = [&]() {
+    std::vector<uint16_t> result;
+    result.reserve(segCount);
+    for (int i = 0; i < segCount; i++) {
+      result.emplace_back(readBigEndian<uint16_t>(data));
+    }
+    return result;
+  };
+
+  std::vector<uint16_t> endCodes = readSegCountVec();
+
+  uint16_t padding = readBigEndian<uint16_t>(data);
+  if (padding != 0) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+
+  std::vector<uint16_t> startCodes = readSegCountVec();
+  std::vector<uint16_t> idDelta = readSegCountVec();
+  std::vector<uint16_t> idRangeOffset = readSegCountVec();
+
+  size_t glyphIndexCount = data.size() / 2;
+  std::vector<uint16_t> glyphIndices;
+  glyphIndices.reserve(glyphIndexCount);
+  for (int i = 0; i < glyphIndexCount; i++) {
+    glyphIndices.emplace_back(readBigEndian<uint16_t>(data));
+  }
+
+  for (int i = 0; i < segCount; i++) {
+    // validate glyph indices lookup
+    if (idRangeOffset[i] == 0) {
+      continue;
+    }
+
+    int glyphIndexArrayIndex =
+        idRangeOffset[i] / 2 + startCodes[i] - startCodes[i] - (segCount - i);
+    if (glyphIndexArrayIndex < 0 ||
+        glyphIndexArrayIndex >= glyphIndices.size()) {
+      throw std::runtime_error{"Corrupt font file"};
+    }
+
+    glyphIndexArrayIndex =
+        idRangeOffset[i] / 2 + endCodes[i] - startCodes[i] - (segCount - i);
+    if (glyphIndexArrayIndex < 0 ||
+        glyphIndexArrayIndex >= glyphIndices.size()) {
+      throw std::runtime_error{"Corrupt font file"};
+    }
+  }
+
+  return Format4Map(
+      segCount,
+      std::move(endCodes),
+      std::move(startCodes),
+      std::move(idDelta),
+      std::move(idRangeOffset),
+      std::move(glyphIndices));
+}
+
+std::unique_ptr<CharToGlyphMap> readCharMapTable(
+    std::span<const std::byte> data) {
+  struct SubtableHeader {
+    uint16_t platformId;
+    uint16_t platformSpecificId;
+    uint32_t offset;
+  };
+
+  const std::span<const std::byte> originalData = data;
+
+  if (data.size() < 4) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+  uint16_t version = readBigEndian<uint16_t>(data);
+  if (version != 0) {
+    throw std::runtime_error{"Unsupported font file"};
+  }
+  uint16_t subtableCount = readBigEndian<uint16_t>(data);
+
+  if (data.size() < 8 * static_cast<size_t>(subtableCount)) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+
+  std::optional<SubtableHeader> m_selectedSubtable;
+
+  for (int i = 0; i < subtableCount; i++) {
+    SubtableHeader current{
+        .platformId = readBigEndian<uint16_t>(data),
+        .platformSpecificId = readBigEndian<uint16_t>(data),
+        .offset = readBigEndian<uint32_t>(data)};
+    // Only support one cmap type for now
+    if (current.platformId == 0 && current.platformSpecificId == 3) {
+      m_selectedSubtable.emplace(current);
+    }
+  }
+  if (!m_selectedSubtable.has_value()) {
+    throw std::runtime_error{"Unsupported font file"};
+  }
+  const SubtableHeader& selectedSubtable = *m_selectedSubtable;
+
+  data = originalData.subspan(selectedSubtable.offset);
+  if (data.size() < 2) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+
+  uint16_t format = readBigEndian<uint16_t>(data);
+
+  switch (format) {
+    case 4:
+      return std::make_unique<Format4Map>(readCharMapSubtableFormat4(data));
+    default:
+      throw std::runtime_error{"Unsupported font file"};
+  }
+}
+
 std::span<const std::byte> getTableContents(
     std::span<const std::byte> data,
     const TableDirectoryEntry& tableDescriptor) {
@@ -297,6 +499,14 @@ void loadFont(const std::span<const std::byte> data) {
       throw std::runtime_error{"Corrupt font file"};
     }
     return readNameTable(getTableContents(data, *entryPtr));
+  }();
+
+  std::unique_ptr<CharToGlyphMap> charMap = [&]() {
+    const auto entryPtr = lookupTable(tableDirectory, kTagCmap);
+    if (entryPtr == nullptr) {
+      throw std::runtime_error{"Corrupt font file"};
+    }
+    return readCharMapTable(getTableContents(data, *entryPtr));
   }();
 }
 
