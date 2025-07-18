@@ -11,7 +11,6 @@
 #include <stdexcept>
 #include <string_view>
 #include <type_traits>
-#include <variant>
 #include <vector>
 #include "util/debug.hpp"
 #include "util/file.hpp"
@@ -20,21 +19,10 @@ namespace blocks::loader {
 
 namespace {
 
-class CharToGlyphMap {
- public:
-  virtual ~CharToGlyphMap() {}
-
-  virtual uint16_t mapChar(uint32_t unicodeChar) = 0;
-};
-
 struct Fixed {
   uint32_t rawValue;
 
   auto operator<=>(const Fixed&) const = default;
-};
-
-struct FWord {
-  int16_t rawValue;
 };
 
 struct UFWord {
@@ -476,13 +464,6 @@ GlyphLocations readGlyphLocations(
   }
 }
 
-struct SimpleGlpyhData {
-  std::vector<uint16_t> endPoints;
-  std::vector<int16_t> xCoords;
-  std::vector<int16_t> yCoords;
-  std::vector<bool> onCurve;
-};
-
 SimpleGlpyhData readSimpleGlyph(
     int16_t numContours, std::span<const std::byte>& data) {
   struct GlyphFlags {
@@ -616,17 +597,6 @@ SimpleGlpyhData readSimpleGlyph(
       std::move(onCurve)};
 }
 
-struct CompoundGlyphData {
-  uint16_t glpyhIndex;
-  float a;
-  float b;
-  float c;
-  float d;
-  int32_t e;
-  int32_t f;
-  bool areOffsets; // otherwise are points
-};
-
 std::vector<CompoundGlyphData> readCompoundGlyph(
     std::span<const std::byte>& data) {
   struct CompoundFlag {
@@ -723,15 +693,6 @@ std::vector<CompoundGlyphData> readCompoundGlyph(
   return result;
 }
 
-struct GlyphData {
-  FWord xMin;
-  FWord yMin;
-  FWord xMax;
-  FWord yMax;
-  std::variant<std::monostate, SimpleGlpyhData, std::vector<CompoundGlyphData>>
-      data;
-};
-
 std::vector<GlyphData> readGlyphTable(
     const GlyphLocations& glyphLocations, std::span<const std::byte> data) {
   std::vector<GlyphData> result;
@@ -826,15 +787,6 @@ HorizontalHeader readHorizontalHeader(std::span<const std::byte> data) {
   return header;
 }
 
-struct HorizontalMetrics {
-  struct Entry {
-    uint16_t advanceWidth;
-    int16_t leftSideBearing;
-  };
-
-  std::vector<Entry> data;
-};
-
 HorizontalMetrics readHorizontalMetrics(
     const MaximumProfile& maxProfile,
     const HorizontalHeader& hheader,
@@ -905,11 +857,11 @@ const TableDirectoryEntry* lookupTable(
 
 } // namespace
 
-void loadFont(const std::filesystem::path& path) {
+Font loadFont(const std::filesystem::path& path) {
   return loadFont(util::readFileBytes(path));
 }
 
-void loadFont(const std::span<const std::byte> data) {
+Font loadFont(const std::span<const std::byte> data) {
   const OffsetSubtable offsetSubtable =
       readOffsetSubtable(data.subspan(0, sizeof(OffsetSubtable)));
 
@@ -1022,6 +974,11 @@ void loadFont(const std::span<const std::byte> data) {
     return readHorizontalMetrics(
         maxProfile, horizontalHeader, getTableContents(data, *entryPtr));
   }();
+
+  return Font{
+      .charMap = std::move(charMap),
+      .glyphs = std::move(glyphs),
+      .horizontalMetrics = std::move(horizontalMetrics)};
 }
 
 } // namespace blocks::loader
