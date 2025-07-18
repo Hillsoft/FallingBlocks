@@ -46,6 +46,8 @@ constexpr Fixed kExpectedVersion = {0x00010000};
 constexpr uint32_t kTagCmap = 0x636D6170;
 constexpr uint32_t kTagGlyf = 0x676C7966;
 constexpr uint32_t kTagHead = 0x68656164;
+constexpr uint32_t kTagHhea = 0x68686561;
+constexpr uint32_t kTagHmtx = 0x686D7478;
 constexpr uint32_t kTagLoca = 0x6C6F6361;
 constexpr uint32_t kTagMaxp = 0x6D617870;
 constexpr uint32_t kTagName = 0x6E616D65;
@@ -780,6 +782,87 @@ std::vector<GlyphData> readGlyphTable(
   return result;
 }
 
+struct HorizontalHeader {
+  Fixed version;
+  FWord ascent;
+  FWord descent;
+  FWord lineGap;
+  UFWord advanceWidthMax;
+  FWord minLeftSideBearing;
+  FWord minRightSideBearing;
+  FWord xMaxExtent;
+  int16_t caretSlopeRise;
+  int16_t caretSlopeRun;
+  FWord caretOffset;
+  int16_t metricDataFormat;
+  uint16_t numOfLongHorMetrics;
+};
+
+HorizontalHeader readHorizontalHeader(std::span<const std::byte> data) {
+  if (data.size() != 36) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+  HorizontalHeader header{};
+  header.version = {readBigEndian<uint32_t>(data)};
+  if (header.version != Fixed{0x00010000}) {
+    throw std::runtime_error{"Unsupported font file"};
+  }
+  header.ascent = {readBigEndian<int16_t>(data)};
+  header.descent = {readBigEndian<int16_t>(data)};
+  header.lineGap = {readBigEndian<int16_t>(data)};
+  header.advanceWidthMax = {readBigEndian<uint16_t>(data)};
+  header.minLeftSideBearing = {readBigEndian<int16_t>(data)};
+  header.minRightSideBearing = {readBigEndian<int16_t>(data)};
+  header.xMaxExtent = {readBigEndian<int16_t>(data)};
+  header.caretSlopeRise = readBigEndian<int16_t>(data);
+  header.caretSlopeRun = readBigEndian<int16_t>(data);
+  header.caretOffset = {readBigEndian<int16_t>(data)};
+  data = data.subspan(8);
+  header.metricDataFormat = readBigEndian<int16_t>(data);
+  header.numOfLongHorMetrics = readBigEndian<uint16_t>(data);
+  if (header.numOfLongHorMetrics == 0) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+  return header;
+}
+
+struct HorizontalMetrics {
+  struct Entry {
+    uint16_t advanceWidth;
+    int16_t leftSideBearing;
+  };
+
+  std::vector<Entry> data;
+};
+
+HorizontalMetrics readHorizontalMetrics(
+    const MaximumProfile& maxProfile,
+    const HorizontalHeader& hheader,
+    std::span<const std::byte> data) {
+  if (data.size() !=
+      2 * static_cast<size_t>(maxProfile.numGlyphs) +
+          2 * static_cast<size_t>(hheader.numOfLongHorMetrics)) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+
+  HorizontalMetrics metrics;
+  metrics.data.reserve(maxProfile.numGlyphs);
+
+  uint16_t lastAdvanceWidth = 0;
+  for (int i = 0; i < hheader.numOfLongHorMetrics; i++) {
+    HorizontalMetrics::Entry cur{
+        readBigEndian<uint16_t>(data), readBigEndian<int16_t>(data)};
+    lastAdvanceWidth = cur.advanceWidth;
+    metrics.data.emplace_back(cur);
+  }
+
+  for (int i = 0; i < maxProfile.numGlyphs - hheader.numOfLongHorMetrics; i++) {
+    metrics.data.emplace_back(lastAdvanceWidth, readBigEndian<int16_t>(data));
+  }
+
+  return metrics;
+}
+
 std::span<const std::byte> getTableContents(
     std::span<const std::byte> data,
     const TableDirectoryEntry& tableDescriptor) {
@@ -921,6 +1004,23 @@ void loadFont(const std::span<const std::byte> data) {
       throw std::runtime_error{"Corrupt font file"};
     }
     return readGlyphTable(glyphLocations, getTableContents(data, *entryPtr));
+  }();
+
+  HorizontalHeader horizontalHeader = [&]() {
+    const auto entryPtr = lookupTable(tableDirectory, kTagHhea);
+    if (entryPtr == nullptr) {
+      throw std::runtime_error{"Corrupt font file"};
+    }
+    return readHorizontalHeader(getTableContents(data, *entryPtr));
+  }();
+
+  HorizontalMetrics horizontalMetrics = [&]() {
+    const auto entryPtr = lookupTable(tableDirectory, kTagHmtx);
+    if (entryPtr == nullptr) {
+      throw std::runtime_error{"Corrupt font file"};
+    }
+    return readHorizontalMetrics(
+        maxProfile, horizontalHeader, getTableContents(data, *entryPtr));
   }();
 }
 
