@@ -361,7 +361,8 @@ std::unique_ptr<CharToGlyphMap> readCharMapTable(
         .platformSpecificId = readBigEndian<uint16_t>(data),
         .offset = readBigEndian<uint32_t>(data)};
     // Only support one cmap type for now
-    if (current.platformId == 0 && current.platformSpecificId == 3) {
+    if ((current.platformId == 0 && current.platformSpecificId == 3) ||
+        (current.platformId == 3 && current.platformSpecificId == 1)) {
       m_selectedSubtable.emplace(current);
     }
   }
