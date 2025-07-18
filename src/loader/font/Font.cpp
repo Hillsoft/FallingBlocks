@@ -4,7 +4,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
-#include <iostream>
 #include <memory>
 #include <optional>
 #include <span>
@@ -889,14 +888,6 @@ Font loadFont(const std::span<const std::byte> data) {
     if (entry.tag == kTagHead) {
       checksumValid = getTableChecksum(data) == 0xB1B0AFBA;
     }
-
-    std::cout
-        << static_cast<char>((entry.tag >> 24) & 0xff)
-        << static_cast<char>((entry.tag >> 16) & 0xff)
-        << static_cast<char>((entry.tag >> 8) & 0xff)
-        << static_cast<char>((entry.tag >> 0) & 0xff) << ": "
-        << (checksumValid ? "Checksum valid" : "Checksum invalid") << ", "
-        << entry.length << " bytes" << std::endl;
 
     if (!checksumValid) {
       throw std::runtime_error{"Corrupt font file"};
