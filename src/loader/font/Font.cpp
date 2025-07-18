@@ -707,7 +707,7 @@ std::vector<GlyphData> readGlyphTable(
       throw std::runtime_error{"Corrupt font file"};
     }
     if (curSize == 0) {
-      result.emplace_back(GlyphData{0, 0, 0, 0, std::monostate{}});
+      result.emplace_back(GlyphData{{0}, {0}, {0}, {0}, std::monostate{}});
       continue;
     }
 
