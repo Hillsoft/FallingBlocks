@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include "util/debug.hpp"
 #include "util/portability.hpp"
 #include "util/raii_helpers.hpp"
 
@@ -9,53 +8,19 @@ namespace blocks {
 
 class Scene;
 
-class Actor {
+class Actor : public std::enable_shared_from_this<Actor> {
   UNUSEDPRIVATEMEMBER(NO_UNIQUE_ADDRESS util::no_copy_move noCopyMoveTag_);
 
- private:
-  struct ControlBlock {
-    bool isAlive = false;
-  };
-
  public:
-  template <typename TActor = Actor>
-  class Ref {
-   public:
-    Ref(TActor* actor)
-        : actor_(actor),
-          control_(actor != nullptr ? actor->control_ : nullptr) {}
-
-    template <typename TOtherActor>
-    Ref<TOtherActor> to() const {
-      return {dynamic_cast<TOtherActor*>(actor_)};
-    }
-
-    bool isAlive() const { return control_ != nullptr && control_->isAlive; }
-
-    TActor& operator*() const {
-      DEBUG_ASSERT(isAlive());
-      return *actor_;
-    }
-    TActor* operator->() const {
-      DEBUG_ASSERT(isAlive());
-      return actor_;
-    }
-
-   private:
-    TActor* actor_;
-    std::shared_ptr<ControlBlock> control_;
-  };
-
   Actor(Scene& scene);
-  virtual ~Actor() { control_->isAlive = false; }
+  virtual ~Actor() = default;
 
-  Ref<Actor> getRef() { return {this}; }
-  Ref<const Actor> getRef() const { return this; }
+  std::weak_ptr<Actor> getRef() { return {weak_from_this()}; }
+  std::weak_ptr<const Actor> getRef() const { return weak_from_this(); }
 
   Scene* getScene() const { return scene_; }
 
  private:
-  std::shared_ptr<ControlBlock> control_;
   Scene* scene_;
 };
 

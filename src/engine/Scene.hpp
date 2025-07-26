@@ -14,9 +14,9 @@ class Scene {
   Scene() {}
 
   template <typename TActor, typename... TArgs>
-  Actor::Ref<TActor> createActor(TArgs... args) {
-    auto actor = std::make_unique<TActor>(*this, std::forward<TArgs>(args)...);
-    auto ref = actor->getRef().template to<TActor>();
+  std::weak_ptr<TActor> createActor(TArgs... args) {
+    auto actor = std::make_shared<TActor>(*this, std::forward<TArgs>(args)...);
+    std::weak_ptr<TActor> ref = actor;
     actors_.emplace_back(std::move(actor));
     return ref;
   }
@@ -40,8 +40,8 @@ class Scene {
   TickRegistry tick_;
   DrawableRegistry drawableScene_;
 
-  std::vector<std::unique_ptr<Actor>> actors_;
-  std::vector<std::unique_ptr<Actor>> pendingDestruction_;
+  std::vector<std::shared_ptr<Actor>> actors_;
+  std::vector<std::shared_ptr<Actor>> pendingDestruction_;
 };
 
 } // namespace blocks

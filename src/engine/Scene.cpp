@@ -11,7 +11,7 @@ void Scene::destroyActor(Actor* actor) {
         return actor == uniq_ptr.get();
       });
   if (it != actors_.end()) {
-    std::unique_ptr<Actor> deleted{std::move(*it)};
+    std::shared_ptr<Actor> deleted{std::move(*it)};
     actors_.erase(it);
     pendingDestruction_.emplace_back(std::move(deleted));
   }
@@ -30,6 +30,9 @@ void Scene::drawAll() {
 }
 
 void Scene::cleanupPendingDestruction() {
+  for ([[maybe_unused]] const auto& actor : pendingDestruction_) {
+    DEBUG_ASSERT(actor.use_count() == 1);
+  }
   pendingDestruction_.clear();
 }
 
