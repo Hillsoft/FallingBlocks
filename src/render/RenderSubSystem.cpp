@@ -104,6 +104,7 @@ RenderSubSystem::RenderSubSystem()
       loadingCommandPool_(graphics_, true),
       commandBuffers_(),
       mainRenderPass_(makeMainRenderPass(graphics_.getRawDevice())),
+      shaderProgramManager_(graphics_, mainRenderPass_.get()),
       synchronisationSets_() {
 }
 
@@ -161,6 +162,7 @@ UniqueRenderableHandle RenderSubSystem::createRenderable(
       std::in_place,
       texturePath,
       graphics_,
+      shaderProgramManager_,
       loadingCommandPool_,
       mainRenderPass_.get(),
       kMaxFramesInFlight);
@@ -287,12 +289,12 @@ void RenderSubSystem::drawWindow(size_t windowId) {
       vkCmdBindPipeline(
           commandBuffer,
           VK_PIPELINE_BIND_POINT_GRAPHICS,
-          renderable.shaderProgram_.pipeline_.getRawPipeline());
+          renderable.shaderProgram_->pipeline_.getRawPipeline());
 
       vkCmdBindDescriptorSets(
           commandBuffer,
           VK_PIPELINE_BIND_POINT_GRAPHICS,
-          renderable.shaderProgram_.pipeline_.getPipelineLayout()
+          renderable.shaderProgram_->pipeline_.getPipelineLayout()
               .getRawLayout(),
           0,
           1,

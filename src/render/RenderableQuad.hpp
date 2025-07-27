@@ -12,6 +12,7 @@
 #include "render/VulkanMappedBuffer.hpp"
 #include "render/VulkanShaderProgram.hpp"
 #include "render/VulkanTexture.hpp"
+#include "render/resource/ShaderProgramManager.hpp"
 
 namespace blocks::render {
 
@@ -22,6 +23,7 @@ class RenderableQuad {
   RenderableQuad(
       const std::filesystem::path& texturePath,
       VulkanGraphicsDevice& device,
+      ShaderProgramManager& programManager,
       VulkanCommandPool& commandPool,
       VkRenderPass renderPass,
       uint32_t maxFramesInFlight);
@@ -30,7 +32,7 @@ class RenderableQuad {
   void updateDynamicUniforms(VkDevice device, uint32_t currentFrame);
 
  private:
-  VulkanShaderProgram shaderProgram_;
+  VulkanShaderProgram* shaderProgram_;
   VulkanDescriptorPool descriptorPool_;
   VulkanBuffer vertexAttributes_;
   std::vector<VulkanMappedBuffer> uniformBuffers_;

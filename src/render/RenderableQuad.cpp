@@ -7,10 +7,10 @@
 #include "math/vec.hpp"
 #include "render/Quad.hpp"
 #include "render/VulkanCommandPool.hpp"
-#include "render/VulkanDescriptorSetLayout.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanMappedBuffer.hpp"
-#include "render/VulkanShader.hpp"
+#include "render/resource/ShaderProgramManager.hpp"
+#include "render/shaders/Tex2DShader.hpp"
 
 namespace blocks::render {
 
@@ -39,17 +39,13 @@ std::vector<VulkanMappedBuffer> makeUniformBuffers(
 RenderableQuad::RenderableQuad(
     const std::filesystem::path& texturePath,
     VulkanGraphicsDevice& device,
+    ShaderProgramManager& programManager,
     VulkanCommandPool& commandPool,
     VkRenderPass renderPass,
     uint32_t maxFramesInFlight)
-    : shaderProgram_(
-          device,
-          renderPass,
-          getQuadVertexShader(device),
-          VulkanShader{device, "shaders/fragment.spv"},
-          VulkanDescriptorSetLayout{device}),
+    : shaderProgram_(&programManager.getOrCreate<Tex2DShader>()),
       descriptorPool_(
-          device, shaderProgram_.getDescriptorSetLayout(), maxFramesInFlight),
+          device, shaderProgram_->getDescriptorSetLayout(), maxFramesInFlight),
       vertexAttributes_(getQuadVertexAttributesBuffer(device)),
       uniformBuffers_(makeUniformBuffers(device, maxFramesInFlight)),
       texture_(device, commandPool, texturePath),

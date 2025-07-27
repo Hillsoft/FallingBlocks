@@ -1,4 +1,6 @@
 add_subdirectory(glfw_wrapper)
+add_subdirectory(resource)
+add_subdirectory(shaders)
 add_subdirectory(vulkan)
 
 add_library(render.quad STATIC "Quad.cpp" "Quad.hpp")
@@ -12,19 +14,20 @@ add_library(render.renderablequad "RenderableQuad.cpp" "RenderableQuad.hpp")
 target_link_libraries(render.renderablequad
 	math.vec
 	render.quad
+	render.resource.shaderprogrammanager
+	render.shaders.tex2dshader
 	render.vulkanbuffer
 	render.vulkancommandpool
 	render.vulkandescriptorpool
-	render.vulkandescriptorsetlayout
 	render.vulkangraphicsdevice
 	render.vulkanmappedbuffer
-	render.vulkanshader
 	render.vulkanshaderprogram
 	render.vulkantexture)
 
 add_library(render.rendersubsystem STATIC "RenderSubSystem.cpp" "RenderSubSystem.hpp")
 target_link_libraries(render.rendersubsystem
 	render.renderablequad
+	render.resource.shaderprogrammanager
 	render.vulkancommandbuffer
 	render.vulkancommandpool
 	render.vulkandebugmessenger
