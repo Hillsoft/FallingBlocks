@@ -22,6 +22,7 @@
 #ifndef NDEBUG
 #include "render/VulkanDebugMessenger.hpp"
 #endif
+#include <span>
 
 namespace blocks::render {
 
@@ -111,6 +112,12 @@ class UniqueRenderableHandle : private util::no_copy {
 };
 
 class RenderSubSystem {
+ private:
+  struct DrawCommand {
+    WindowRef target_;
+    RenderableRef obj_;
+  };
+
  public:
   RenderSubSystem();
 
@@ -138,7 +145,7 @@ class RenderSubSystem {
   void waitIdle();
 
  private:
-  void drawWindow(size_t windowId);
+  void drawWindow(size_t windowId, std::span<DrawCommand> windowCommands);
 
   struct GLFWLifetimeScope {
     GLFWLifetimeScope();
@@ -162,10 +169,6 @@ class RenderSubSystem {
   std::vector<std::optional<RenderableQuad>> renderables_;
   std::vector<RenderableQuad> renderablesPendingDestruction_;
 
-  struct DrawCommand {
-    WindowRef target_;
-    RenderableRef obj_;
-  };
   std::vector<DrawCommand> commands_;
 
   uint32_t currentFrame_ = 0;

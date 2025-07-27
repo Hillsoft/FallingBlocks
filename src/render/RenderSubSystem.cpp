@@ -1,9 +1,11 @@
 #include "render/RenderSubSystem.hpp"
 
+#include <algorithm>
 #include <cstdint>
 #include <filesystem>
 #include <iostream>
 #include <memory>
+#include <span>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -196,10 +198,31 @@ void RenderSubSystem::commitFrame() {
       true,
       UINT64_MAX);
 
+  // Pre-sort commands by window
+  if (windows_.size() > 1) {
+    std::sort(
+        commands_.begin(), commands_.end(), [](const auto& a, const auto& b) {
+          return a.target_.id < b.target_.id;
+        });
+  }
+
+  size_t commandIndex = 0;
   for (size_t i = 0; i < windows_.size(); i++) {
-    if (windows_[i] != nullptr) {
-      drawWindow(i);
+    size_t commandIndexStart = commandIndex;
+    size_t commandIndexEnd = commandIndexStart;
+    for (; commandIndexEnd < commands_.size() &&
+         commands_[commandIndexEnd].target_.id == i;
+         commandIndexEnd++) {
     }
+
+    if (windows_[i] != nullptr) {
+      drawWindow(
+          i,
+          {commands_.begin() + commandIndexStart,
+           commands_.begin() + commandIndexEnd});
+    }
+
+    commandIndex = commandIndexEnd;
   }
 
   commands_.clear();
@@ -207,7 +230,8 @@ void RenderSubSystem::commitFrame() {
   currentFrame_ = (currentFrame_ + 1) % kMaxFramesInFlight;
 }
 
-void RenderSubSystem::drawWindow(size_t windowId) {
+void RenderSubSystem::drawWindow(
+    size_t windowId, std::span<DrawCommand> windowCommands) {
   DEBUG_ASSERT(windowId < windows_.size() && windows_[windowId] != nullptr);
   Window& window = *windows_[windowId];
   PipelineSynchronisationSet& synchronisationSet =
@@ -277,36 +301,51 @@ void RenderSubSystem::drawWindow(size_t windowId) {
   scissor.extent = extent;
   vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-  for (const auto& command : commands_) {
-    if (command.target_.id == windowId) {
-      DEBUG_ASSERT(
-          command.obj_.id < renderables_.size() &&
-          renderables_[command.obj_.id].has_value());
-      RenderableQuad& renderable = *renderables_[command.obj_.id];
+  for ([[maybe_unused]] const auto& command : commands_) {
+    DEBUG_ASSERT(
+        command.target_.id == windowId &&
+        command.obj_.id < renderables_.size() &&
+        renderables_[command.obj_.id].has_value());
+  }
 
-      renderable.updateDynamicUniforms(graphics_.getRawDevice(), currentFrame_);
+  std::sort(
+      commands_.begin(), commands_.end(), [](const auto& a, const auto& b) {
+        return a.obj_.id < b.obj_.id;
+      });
 
-      vkCmdBindPipeline(
-          commandBuffer,
-          VK_PIPELINE_BIND_POINT_GRAPHICS,
-          renderable.shaderProgram_->pipeline_.getRawPipeline());
-
-      vkCmdBindDescriptorSets(
-          commandBuffer,
-          VK_PIPELINE_BIND_POINT_GRAPHICS,
-          renderable.shaderProgram_->pipeline_.getPipelineLayout()
-              .getRawLayout(),
-          0,
-          1,
-          &renderable.descriptorPool_.getDescriptorSets()[currentFrame_],
-          0,
-          nullptr);
-
-      VkBuffer vertexBuffer = renderable.vertexAttributes_.getRawBuffer();
-      VkDeviceSize offsets = 0;
-      vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, &offsets);
-      vkCmdDraw(commandBuffer, 6, 1, 0, 0);
+  size_t groupStart = 0;
+  while (groupStart < commands_.size()) {
+    size_t groupEnd = groupStart;
+    for (; groupEnd < commands_.size() &&
+         commands_[groupEnd].obj_.id == commands_[groupStart].obj_.id;
+         groupEnd++) {
     }
+
+    RenderableQuad& renderable = *renderables_[commands_[groupStart].obj_.id];
+
+    renderable.updateDynamicUniforms(graphics_.getRawDevice(), currentFrame_);
+
+    vkCmdBindPipeline(
+        commandBuffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        renderable.shaderProgram_->pipeline_.getRawPipeline());
+
+    vkCmdBindDescriptorSets(
+        commandBuffer,
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        renderable.shaderProgram_->pipeline_.getPipelineLayout().getRawLayout(),
+        0,
+        1,
+        &renderable.descriptorPool_.getDescriptorSets()[currentFrame_],
+        0,
+        nullptr);
+
+    VkBuffer vertexBuffer = renderable.vertexAttributes_.getRawBuffer();
+    VkDeviceSize offsets = 0;
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, &offsets);
+    vkCmdDraw(commandBuffer, 6, 1, 0, 0);
+
+    groupStart = groupEnd;
   }
 
   vkCmdEndRenderPass(commandBuffer);
