@@ -1,6 +1,6 @@
 add_library(engine.actor STATIC "Actor.hpp" "Actor.cpp")
 target_link_libraries(engine.actor
-	util.debug
+	util.portability
 	util.raii_helpers)
 
 add_library(engine.drawableregistry STATIC "DrawableRegistry.hpp" "DrawableRegistry.cpp")
