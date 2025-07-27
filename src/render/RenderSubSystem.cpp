@@ -19,7 +19,9 @@
 #include "render/vulkan/RenderPassBuilder.hpp"
 #include "render/vulkan/SemaphoreBuilder.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
+#include "util/Generator.hpp"
 #include "util/debug.hpp"
+#include "util/vec_generators.hpp"
 
 namespace blocks::render {
 
@@ -206,23 +208,26 @@ void RenderSubSystem::commitFrame() {
         });
   }
 
-  size_t commandIndex = 0;
-  for (size_t i = 0; i < windows_.size(); i++) {
-    size_t commandIndexStart = commandIndex;
-    size_t commandIndexEnd = commandIndexStart;
-    for (; commandIndexEnd < commands_.size() &&
-         commands_[commandIndexEnd].target_.id == i;
-         commandIndexEnd++) {
-    }
+  util::Generator<std::span<DrawCommand>> windowGroups = util::vec::genGroups(
+      std::span<DrawCommand>{commands_.begin(), commands_.end()},
+      [](const DrawCommand& a, const DrawCommand& b) {
+        return a.target_.id == b.target_.id;
+      });
 
+  for (size_t i = 0; i < windows_.size() && !windowGroups.isDone(); i++) {
     if (windows_[i] != nullptr) {
-      drawWindow(
-          i,
-          {commands_.begin() + commandIndexStart,
-           commands_.begin() + commandIndexEnd});
+      // We may have draw commands for null windows, so need to find the right
+      // windowGroup
+      std::span<DrawCommand> curGroup;
+      do {
+        curGroup = windowGroups();
+      } while (curGroup[0].target_.id != i && !windowGroups.isDone());
+      // Just in case we hit the last group without finding any commands
+      if (curGroup[0].target_.id != i) {
+        curGroup = {};
+      }
+      drawWindow(i, curGroup);
     }
-
-    commandIndex = commandIndexEnd;
   }
 
   commands_.clear();
@@ -301,7 +306,7 @@ void RenderSubSystem::drawWindow(
   scissor.extent = extent;
   vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-  for ([[maybe_unused]] const auto& command : commands_) {
+  for ([[maybe_unused]] const auto& command : windowCommands) {
     DEBUG_ASSERT(
         command.target_.id == windowId &&
         command.obj_.id < renderables_.size() &&
@@ -309,19 +314,23 @@ void RenderSubSystem::drawWindow(
   }
 
   std::sort(
-      commands_.begin(), commands_.end(), [](const auto& a, const auto& b) {
-        return a.obj_.id < b.obj_.id;
+      windowCommands.begin(),
+      windowCommands.end(),
+      [](const auto& a, const auto& b) { return a.obj_.id < b.obj_.id; });
+
+  util::Generator<std::span<DrawCommand>> objGroups = util::vec::genGroups(
+      windowCommands, [](const DrawCommand& a, const DrawCommand& b) {
+        return a.obj_.id == b.obj_.id;
       });
 
-  size_t groupStart = 0;
-  while (groupStart < commands_.size()) {
-    size_t groupEnd = groupStart;
-    for (; groupEnd < commands_.size() &&
-         commands_[groupEnd].obj_.id == commands_[groupStart].obj_.id;
-         groupEnd++) {
-    }
+  while (!objGroups.isDone()) {
+    std::span<DrawCommand> curGroup = objGroups();
 
-    RenderableQuad& renderable = *renderables_[commands_[groupStart].obj_.id];
+    // Temporary debug assert, this should be removed when we implement proper
+    // instanced rendering
+    DEBUG_ASSERT(curGroup.size() == 1);
+
+    RenderableQuad& renderable = *renderables_[curGroup[0].obj_.id];
 
     renderable.updateDynamicUniforms(graphics_.getRawDevice(), currentFrame_);
 
@@ -344,8 +353,6 @@ void RenderSubSystem::drawWindow(
     VkDeviceSize offsets = 0;
     vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, &offsets);
     vkCmdDraw(commandBuffer, 6, 1, 0, 0);
-
-    groupStart = groupEnd;
   }
 
   vkCmdEndRenderPass(commandBuffer);
