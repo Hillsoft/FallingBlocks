@@ -287,12 +287,13 @@ void RenderSubSystem::drawWindow(size_t windowId) {
       vkCmdBindPipeline(
           commandBuffer,
           VK_PIPELINE_BIND_POINT_GRAPHICS,
-          renderable.pipeline_.getRawPipeline());
+          renderable.shaderProgram_.pipeline_.getRawPipeline());
 
       vkCmdBindDescriptorSets(
           commandBuffer,
           VK_PIPELINE_BIND_POINT_GRAPHICS,
-          renderable.pipeline_.getPipelineLayout().getRawLayout(),
+          renderable.shaderProgram_.pipeline_.getPipelineLayout()
+              .getRawLayout(),
           0,
           1,
           &renderable.descriptorPool_.getDescriptorSets()[currentFrame_],

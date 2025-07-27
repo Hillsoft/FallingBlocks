@@ -8,11 +8,9 @@
 #include "render/VulkanBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanDescriptorPool.hpp"
-#include "render/VulkanDescriptorSetLayout.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanGraphicsPipeline.hpp"
 #include "render/VulkanMappedBuffer.hpp"
-#include "render/VulkanShader.hpp"
+#include "render/VulkanShaderProgram.hpp"
 #include "render/VulkanTexture.hpp"
 
 namespace blocks::render {
@@ -32,11 +30,8 @@ class RenderableQuad {
   void updateDynamicUniforms(VkDevice device, uint32_t currentFrame);
 
  private:
-  VulkanVertexShader vertexShader_;
-  VulkanShader fragmentShader_;
-  VulkanDescriptorSetLayout descriptorSetLayout_;
+  VulkanShaderProgram shaderProgram_;
   VulkanDescriptorPool descriptorPool_;
-  VulkanGraphicsPipeline pipeline_;
   VulkanBuffer vertexAttributes_;
   std::vector<VulkanMappedBuffer> uniformBuffers_;
   VulkanTexture texture_;

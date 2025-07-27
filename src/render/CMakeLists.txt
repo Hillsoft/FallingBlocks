@@ -17,9 +17,9 @@ target_link_libraries(render.renderablequad
 	render.vulkandescriptorpool
 	render.vulkandescriptorsetlayout
 	render.vulkangraphicsdevice
-	render.vulkangraphicspipeline
 	render.vulkanmappedbuffer
 	render.vulkanshader
+	render.vulkanshaderprogram
 	render.vulkantexture)
 
 add_library(render.rendersubsystem STATIC "RenderSubSystem.cpp" "RenderSubSystem.hpp")
@@ -142,6 +142,13 @@ target_link_libraries(render.vulkanshader
 	render.vulkangraphicsdevice
 	render.vulkan.uniquehandle
 	util.file)
+
+add_library(render.vulkanshaderprogram STATIC "VulkanShaderProgram.cpp" "VulkanShaderProgram.hpp")
+target_link_libraries(render.vulkanshaderprogram
+	render.vulkandescriptorsetlayout
+	render.vulkangraphicsdevice
+	render.vulkangraphicspipeline
+	render.vulkanshader)
 
 add_library(render.vulkanswapchain STATIC "VulkanSwapChain.cpp" "VulkanSwapChain.hpp")
 target_link_libraries(render.vulkanswapchain

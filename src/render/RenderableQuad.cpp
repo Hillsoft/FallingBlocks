@@ -7,8 +7,10 @@
 #include "math/vec.hpp"
 #include "render/Quad.hpp"
 #include "render/VulkanCommandPool.hpp"
+#include "render/VulkanDescriptorSetLayout.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanMappedBuffer.hpp"
+#include "render/VulkanShader.hpp"
 
 namespace blocks::render {
 
@@ -40,17 +42,14 @@ RenderableQuad::RenderableQuad(
     VulkanCommandPool& commandPool,
     VkRenderPass renderPass,
     uint32_t maxFramesInFlight)
-    : vertexShader_(getQuadVertexShader(device)),
-      fragmentShader_(device, "shaders/fragment.spv"),
-      descriptorSetLayout_(device),
-      descriptorPool_(device, descriptorSetLayout_, maxFramesInFlight),
-      pipeline_(
+    : shaderProgram_(
           device,
-          VK_FORMAT_B8G8R8A8_SRGB,
           renderPass,
-          vertexShader_,
-          fragmentShader_,
-          descriptorSetLayout_),
+          getQuadVertexShader(device),
+          VulkanShader{device, "shaders/fragment.spv"},
+          VulkanDescriptorSetLayout{device}),
+      descriptorPool_(
+          device, shaderProgram_.getDescriptorSetLayout(), maxFramesInFlight),
       vertexAttributes_(getQuadVertexAttributesBuffer(device)),
       uniformBuffers_(makeUniformBuffers(device, maxFramesInFlight)),
       texture_(device, commandPool, texturePath),
