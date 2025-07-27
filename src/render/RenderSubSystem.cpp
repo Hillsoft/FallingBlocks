@@ -105,6 +105,7 @@ RenderSubSystem::RenderSubSystem()
       commandBuffers_(),
       mainRenderPass_(makeMainRenderPass(graphics_.getRawDevice())),
       shaderProgramManager_(graphics_, mainRenderPass_.get()),
+      textureManager_(graphics_, {graphics_, true}),
       synchronisationSets_() {
 }
 
@@ -163,8 +164,7 @@ UniqueRenderableHandle RenderSubSystem::createRenderable(
       texturePath,
       graphics_,
       shaderProgramManager_,
-      loadingCommandPool_,
-      mainRenderPass_.get(),
+      textureManager_,
       kMaxFramesInFlight);
   return UniqueRenderableHandle{RenderableRef{id, *this}};
 }

@@ -6,10 +6,10 @@
 #include <GLFW/glfw3.h>
 #include "math/vec.hpp"
 #include "render/Quad.hpp"
-#include "render/VulkanCommandPool.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanMappedBuffer.hpp"
 #include "render/resource/ShaderProgramManager.hpp"
+#include "render/resource/TextureManager.hpp"
 #include "render/shaders/Tex2DShader.hpp"
 
 namespace blocks::render {
@@ -40,15 +40,14 @@ RenderableQuad::RenderableQuad(
     const std::filesystem::path& texturePath,
     VulkanGraphicsDevice& device,
     ShaderProgramManager& programManager,
-    VulkanCommandPool& commandPool,
-    VkRenderPass renderPass,
+    TextureManager& textureManager,
     uint32_t maxFramesInFlight)
     : shaderProgram_(&programManager.getOrCreate<Tex2DShader>()),
       descriptorPool_(
           device, shaderProgram_->getDescriptorSetLayout(), maxFramesInFlight),
       vertexAttributes_(getQuadVertexAttributesBuffer(device)),
       uniformBuffers_(makeUniformBuffers(device, maxFramesInFlight)),
-      texture_(device, commandPool, texturePath),
+      texture_(&textureManager.getOrCreate(texturePath)),
       pos0_(-1.0f, -1.0f),
       pos1_(1.0f, 1.0f) {
   const auto& descriptorSets = descriptorPool_.getDescriptorSets();
@@ -57,8 +56,8 @@ RenderableQuad::RenderableQuad(
 
   VkDescriptorImageInfo imageInfo{};
   imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-  imageInfo.imageView = texture_.getImageView().getRawImageView();
-  imageInfo.sampler = texture_.getSampler();
+  imageInfo.imageView = texture_->getImageView().getRawImageView();
+  imageInfo.sampler = texture_->getSampler();
 
   for (const auto& set : descriptorSets) {
     auto& curWrite = descriptorWrites.emplace_back();

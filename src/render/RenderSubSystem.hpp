@@ -14,6 +14,7 @@
 #include "render/VulkanInstance.hpp"
 #include "render/Window.hpp"
 #include "render/resource/ShaderProgramManager.hpp"
+#include "render/resource/TextureManager.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 #include "util/portability.hpp"
 #include "util/raii_helpers.hpp"
@@ -155,6 +156,7 @@ class RenderSubSystem {
   std::vector<VulkanCommandBuffer> commandBuffers_;
   vulkan::UniqueHandle<VkRenderPass> mainRenderPass_;
   ShaderProgramManager shaderProgramManager_;
+  TextureManager textureManager_;
   std::vector<PipelineSynchronisationSet> synchronisationSets_;
   std::vector<std::unique_ptr<Window>> windows_;
   std::vector<std::optional<RenderableQuad>> renderables_;
