@@ -36,6 +36,27 @@ class Generator : no_copy {
   using promise_type = Promise;
   using handle_type = std::coroutine_handle<promise_type>;
 
+  struct Iterator {
+   public:
+    explicit Iterator(Generator* gen) : gen_(gen) {}
+
+    Iterator& operator++() {
+      gen_->resume();
+      if (gen_->isDone()) {
+        gen_ = nullptr;
+      }
+      return *this;
+    }
+
+    T& operator*() { return gen_->peekValue(); }
+
+    bool operator==(const Iterator& other) { return gen_ == other.gen_; }
+    bool operator!=(const Iterator& other) { return gen_ != other.gen_; }
+
+   private:
+    Generator* gen_;
+  };
+
  private:
   Generator(handle_type h) : h_(h) {}
 
@@ -71,12 +92,32 @@ class Generator : no_copy {
     return std::move(*h_.promise().value_);
   }
 
+  Iterator begin() {
+    if (!full_) {
+      fill();
+    }
+    return Iterator{this};
+  }
+  Iterator end() { return Iterator{nullptr}; }
+
  private:
+  void resume() {
+    h_();
+    full_ = true;
+  }
+
   void fill() {
     if (!full_) {
-      h_();
-      full_ = true;
+      resume();
     }
+  }
+
+  T& peekValue() {
+    DEBUG_ASSERT(full_);
+    if (h_.promise().exception_) {
+      std::rethrow_exception(h_.promise().exception_);
+    }
+    return *h_.promise().value_;
   }
 
   handle_type h_;

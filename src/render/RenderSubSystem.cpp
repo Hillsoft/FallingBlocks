@@ -323,9 +323,7 @@ void RenderSubSystem::drawWindow(
         return a.obj_.id == b.obj_.id;
       });
 
-  while (!objGroups.isDone()) {
-    std::span<DrawCommand> curGroup = objGroups();
-
+  for (const auto& curGroup : objGroups) {
     // Temporary debug assert, this should be removed when we implement proper
     // instanced rendering
     DEBUG_ASSERT(curGroup.size() == 1);
