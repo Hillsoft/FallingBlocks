@@ -63,3 +63,25 @@ TEST(GeneratorTest, UpToThree) {
   EXPECT_EQ(intGen(), 3);
   EXPECT_TRUE(intGen.isDone());
 }
+
+TEST(GeneratorTest, vecSimpleGroups) {
+  std::array<int, 5> arr{1, 1, 3, 3, 1};
+  util::Generator<std::span<int>> groups =
+      util::vec::genGroups(std::span<int>{arr});
+  std::span<int> curr = groups();
+  EXPECT_EQ(curr.size(), 2);
+  EXPECT_TRUE(std::all_of(curr.begin(), curr.end(), [](const auto& x) {
+    return x == 1;
+  }));
+  curr = groups();
+  EXPECT_EQ(curr.size(), 2);
+  EXPECT_TRUE(std::all_of(curr.begin(), curr.end(), [](const auto& x) {
+    return x == 3;
+  }));
+  curr = groups();
+  EXPECT_EQ(curr.size(), 1);
+  EXPECT_TRUE(std::all_of(curr.begin(), curr.end(), [](const auto& x) {
+    return x == 1;
+  }));
+  EXPECT_TRUE(groups.isDone());
+}

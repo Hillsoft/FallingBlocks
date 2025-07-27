@@ -36,6 +36,10 @@ add_library(util.string INTERFACE "string.hpp")
 
 add_library(util.synchronized INTERFACE "Synchronized.hpp")
 
+add_library(util.vec_generators INTERFACE "vec_generators.hpp")
+target_link_libraries(util.vec_generators INTERFACE
+	util.generator)
+
 add_library(util.zlib STATIC "zlib.hpp" "zlib.cpp")
 target_link_libraries(util.zlib
 	util.debug)
