@@ -10,6 +10,10 @@ add_library(util.debug INTERFACE "debug.hpp")
 
 add_library(util.file STATIC "file.cpp" "file.hpp")
 
+add_library(util.generator INTERFACE "Generator.hpp")
+target_link_libraries(util.generator INTERFACE
+	util.raii_helpers)
+
 add_library(util.portability INTERFACE "portability.hpp")
 
 add_library(util.raii_helpers INTERFACE "raii_helpers.hpp")
