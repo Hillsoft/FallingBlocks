@@ -4,6 +4,7 @@
 #include <exception>
 #include <optional>
 #include <type_traits>
+#include "util/debug.hpp"
 #include "util/raii_helpers.hpp"
 
 namespace util {
