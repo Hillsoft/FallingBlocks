@@ -99,8 +99,8 @@ class Generator : no_copy {
 
  private:
   void resume() {
-    h_();
     full_ = true;
+    h_();
   }
 
   void fill() {
