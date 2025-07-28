@@ -3,6 +3,11 @@ add_subdirectory(resource)
 add_subdirectory(shaders)
 add_subdirectory(vulkan)
 
+add_library(render.forwardallocatemappedbuffer STATIC "ForwardAllocateMappedBuffer.cpp" "ForwardAllocateMappedBuffer.hpp")
+target_link_libraries(render.forwardallocatemappedbuffer
+	render.vulkangraphicsdevice
+	render.vulkanmappedbuffer)
+
 add_library(render.quad STATIC "Quad.cpp" "Quad.hpp")
 target_link_libraries(render.quad
 	math.vec
