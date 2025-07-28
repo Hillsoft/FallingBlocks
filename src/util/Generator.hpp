@@ -13,7 +13,6 @@ class Generator : no_copy {
  private:
   struct Promise {
     std::optional<T> value_;
-    std::exception_ptr exception_;
 
     Generator get_return_object() {
       return Generator{std::coroutine_handle<Promise>::from_promise(*this)};
@@ -27,7 +26,7 @@ class Generator : no_copy {
       return {};
     }
 
-    void unhandled_exception() { exception_ = std::current_exception(); }
+    [[noreturn]] void unhandled_exception() { throw; }
 
     void return_void() {}
   };
@@ -86,9 +85,6 @@ class Generator : no_copy {
   T operator()() {
     fill();
     full_ = false;
-    if (h_.promise().exception_) {
-      std::rethrow_exception(h_.promise().exception_);
-    }
     return std::move(*h_.promise().value_);
   }
 
@@ -114,9 +110,6 @@ class Generator : no_copy {
 
   T& peekValue() {
     DEBUG_ASSERT(full_);
-    if (h_.promise().exception_) {
-      std::rethrow_exception(h_.promise().exception_);
-    }
     return *h_.promise().value_;
   }
 
