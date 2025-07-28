@@ -4,6 +4,7 @@
 #include <array>
 #include <memory>
 #include <span>
+#include <stdexcept>
 #include "util/Generator.hpp"
 #include "util/vec_generators.hpp"
 
@@ -84,4 +85,16 @@ TEST(GeneratorTest, vecSimpleGroups) {
     return x == 1;
   }));
   EXPECT_TRUE(groups.isDone());
+}
+
+util::Generator<int> throwException() {
+  throw std::runtime_error{"Oops"};
+  co_return;
+}
+
+TEST(GeneratorTest, exceptionTest) {
+  util::Generator<int> exceptionGenerator = throwException();
+
+  EXPECT_THROW(exceptionGenerator(), std::runtime_error);
+  EXPECT_TRUE(exceptionGenerator.isDone());
 }
