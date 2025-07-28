@@ -38,22 +38,25 @@ class Generator : no_copy {
 
   struct Iterator {
    public:
-    explicit Iterator(Generator* gen) : gen_(gen) {}
+    explicit Iterator(Generator* gen)
+        : h_(gen != nullptr ? gen->h_ : nullptr), gen_(gen) {}
 
     Iterator& operator++() {
-      gen_->resume();
-      if (gen_->isDone()) {
+      h_();
+      if (h_.done()) {
         gen_ = nullptr;
+        h_ = nullptr;
       }
       return *this;
     }
 
-    T& operator*() { return gen_->peekValue(); }
+    T& operator*() { return *h_.promise().value_; }
 
     bool operator==(const Iterator& other) { return gen_ == other.gen_; }
     bool operator!=(const Iterator& other) { return gen_ != other.gen_; }
 
    private:
+    handle_type h_;
     Generator* gen_;
   };
 
