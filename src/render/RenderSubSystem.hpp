@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
+#include "render/ForwardAllocateMappedBuffer.hpp"
 #include "render/RenderableQuad.hpp"
 #include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
@@ -168,6 +169,7 @@ class RenderSubSystem {
   std::vector<std::unique_ptr<Window>> windows_;
   std::vector<std::optional<RenderableQuad>> renderables_;
   std::vector<RenderableQuad> renderablesPendingDestruction_;
+  std::vector<ForwardAllocateMappedBuffer> instanceDataBuffers_;
 
   std::vector<DrawCommand> commands_;
 

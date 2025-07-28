@@ -25,12 +25,13 @@ target_link_libraries(render.renderablequad
 	render.vulkanbuffer
 	render.vulkandescriptorpool
 	render.vulkangraphicsdevice
-	render.vulkanmappedbuffer
 	render.vulkanshaderprogram
 	render.vulkantexture)
 
 add_library(render.rendersubsystem STATIC "RenderSubSystem.cpp" "RenderSubSystem.hpp")
 target_link_libraries(render.rendersubsystem
+	math.vec
+	render.forwardallocatemappedbuffer
 	render.renderablequad
 	render.resource.shaderprogrammanager
 	render.resource.texturemanager

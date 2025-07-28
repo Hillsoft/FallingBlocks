@@ -7,34 +7,11 @@
 #include "math/vec.hpp"
 #include "render/Quad.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanMappedBuffer.hpp"
 #include "render/resource/ShaderProgramManager.hpp"
 #include "render/resource/TextureManager.hpp"
 #include "render/shaders/Tex2DShader.hpp"
 
 namespace blocks::render {
-
-namespace {
-
-struct UniformData {
-  math::Vec<float, 2> pos0;
-  math::Vec<float, 2> pos1;
-};
-
-std::vector<VulkanMappedBuffer> makeUniformBuffers(
-    VulkanGraphicsDevice& device, uint32_t maxFramesInFlight) {
-  std::vector<VulkanMappedBuffer> result;
-  result.reserve(maxFramesInFlight);
-
-  for (size_t i = 0; i < maxFramesInFlight; i++) {
-    result.emplace_back(
-        device, sizeof(UniformData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT);
-  }
-
-  return result;
-}
-
-} // namespace
 
 RenderableQuad::RenderableQuad(
     const std::filesystem::path& texturePath,
@@ -46,7 +23,6 @@ RenderableQuad::RenderableQuad(
       descriptorPool_(
           device, shaderProgram_->getDescriptorSetLayout(), maxFramesInFlight),
       vertexAttributes_(getQuadVertexAttributesBuffer(device)),
-      uniformBuffers_(makeUniformBuffers(device, maxFramesInFlight)),
       texture_(&textureManager.getOrCreate(texturePath)),
       pos0_(-1.0f, -1.0f),
       pos1_(1.0f, 1.0f) {
@@ -70,25 +46,6 @@ RenderableQuad::RenderableQuad(
     curWrite.pImageInfo = &imageInfo;
   }
 
-  std::vector<VkDescriptorBufferInfo> bufferInfos;
-  bufferInfos.reserve(maxFramesInFlight);
-
-  for (size_t i = 0; i < maxFramesInFlight; i++) {
-    auto& bufferInfo = bufferInfos.emplace_back();
-    bufferInfo.buffer = uniformBuffers_[i].getRawBuffer();
-    bufferInfo.offset = 0;
-    bufferInfo.range = sizeof(UniformData);
-
-    auto& curWrite = descriptorWrites.emplace_back();
-    curWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    curWrite.dstSet = descriptorPool_.getDescriptorSets()[i];
-    curWrite.dstBinding = 1;
-    curWrite.dstArrayElement = 0;
-    curWrite.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    curWrite.descriptorCount = 1;
-    curWrite.pBufferInfo = &bufferInfo;
-  }
-
   vkUpdateDescriptorSets(
       device.getRawDevice(),
       static_cast<uint32_t>(descriptorWrites.size()),
@@ -101,15 +58,6 @@ void RenderableQuad::setPosition(
     math::Vec<float, 2> pos0, math::Vec<float, 2> pos1) {
   pos0_ = pos0;
   pos1_ = pos1;
-}
-
-void RenderableQuad::updateDynamicUniforms(
-    VkDevice device, uint32_t currentFrame) {
-  UniformData* uniformData = reinterpret_cast<UniformData*>(
-      uniformBuffers_[currentFrame].getMappedBuffer());
-
-  uniformData->pos0 = pos0_;
-  uniformData->pos1 = pos1_;
 }
 
 } // namespace blocks::render

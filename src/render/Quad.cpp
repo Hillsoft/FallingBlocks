@@ -28,18 +28,24 @@ std::vector<VertexData> vertices = {
     {{0.0f, 1.0f}, {0.0f, 1.0f}},
     {{1.0f, 0.0f}, {1.0f, 0.0f}}};
 
-constexpr VkVertexInputBindingDescription kBindingDescription = []() {
-  VkVertexInputBindingDescription bindingDescription{};
-  bindingDescription.binding = 0;
-  bindingDescription.stride = sizeof(VertexData);
-  bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+constexpr std::array<VkVertexInputBindingDescription, 2> kBindingDescription =
+    []() {
+      std::array<VkVertexInputBindingDescription, 2> bindingDescriptions{};
 
-  return bindingDescription;
-}();
+      bindingDescriptions[0].binding = 0;
+      bindingDescriptions[0].stride = sizeof(VertexData);
+      bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 
-constexpr std::array<VkVertexInputAttributeDescription, 2>
+      bindingDescriptions[1].binding = 1;
+      bindingDescriptions[1].stride = sizeof(VertexData);
+      bindingDescriptions[1].inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
+
+      return bindingDescriptions;
+    }();
+
+constexpr std::array<VkVertexInputAttributeDescription, 4>
     kInputAttributeDescriptions = []() {
-      std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
+      std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
 
       attributeDescriptions[0].binding = 0;
       attributeDescriptions[0].location = 0;
@@ -51,6 +57,16 @@ constexpr std::array<VkVertexInputAttributeDescription, 2>
       attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
       attributeDescriptions[1].offset = offsetof(VertexData, uv);
 
+      attributeDescriptions[2].binding = 1;
+      attributeDescriptions[2].location = 2;
+      attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+      attributeDescriptions[2].offset = offsetof(VertexData, position);
+
+      attributeDescriptions[3].binding = 1;
+      attributeDescriptions[3].location = 3;
+      attributeDescriptions[3].format = VK_FORMAT_R32G32_SFLOAT;
+      attributeDescriptions[3].offset = offsetof(VertexData, uv);
+
       return attributeDescriptions;
     }();
 
@@ -59,7 +75,7 @@ constexpr std::array<VkVertexInputAttributeDescription, 2>
 VulkanVertexShader getQuadVertexShader(VulkanGraphicsDevice& device) {
   return VulkanVertexShader{
       device,
-      {kBindingDescription},
+      {kBindingDescription.begin(), kBindingDescription.end()},
       {kInputAttributeDescriptions.begin(), kInputAttributeDescriptions.end()},
       "shaders/vertex.spv"};
 }

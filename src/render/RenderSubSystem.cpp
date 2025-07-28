@@ -1,6 +1,7 @@
 #include "render/RenderSubSystem.hpp"
 
 #include <algorithm>
+#include <array>
 #include <cstdint>
 #include <filesystem>
 #include <iostream>
@@ -10,6 +11,8 @@
 #include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
+#include "math/vec.hpp"
+#include "render/ForwardAllocateMappedBuffer.hpp"
 #include "render/RenderableQuad.hpp"
 #include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
@@ -110,7 +113,15 @@ RenderSubSystem::RenderSubSystem()
       mainRenderPass_(makeMainRenderPass(graphics_.getRawDevice())),
       shaderProgramManager_(graphics_, mainRenderPass_.get()),
       textureManager_(graphics_, {graphics_, true}),
-      synchronisationSets_() {
+      synchronisationSets_(),
+      instanceDataBuffers_([&]() {
+        std::vector<ForwardAllocateMappedBuffer> result;
+        result.reserve(kMaxFramesInFlight);
+        for (int i = 0; i < kMaxFramesInFlight; i++) {
+          result.emplace_back(graphics_, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
+        }
+        return result;
+      }()) {
 }
 
 RenderSubSystem::GLFWLifetimeScope::GLFWLifetimeScope() {
@@ -200,6 +211,8 @@ void RenderSubSystem::commitFrame() {
       true,
       UINT64_MAX);
 
+  instanceDataBuffers_[currentFrame_].reset();
+
   // Pre-sort commands by window
   if (windows_.size() > 1) {
     std::sort(
@@ -241,6 +254,8 @@ void RenderSubSystem::drawWindow(
   Window& window = *windows_[windowId];
   PipelineSynchronisationSet& synchronisationSet =
       synchronisationSets_[windowId * kMaxFramesInFlight + currentFrame_];
+  ForwardAllocateMappedBuffer& instanceDataAllocator =
+      instanceDataBuffers_[currentFrame_];
 
   if (window.requiresReset()) {
     window.resetSwapChain();
@@ -328,9 +343,19 @@ void RenderSubSystem::drawWindow(
     // instanced rendering
     DEBUG_ASSERT(curGroup.size() == 1);
 
+    struct UniformData {
+      math::Vec<float, 2> pos0;
+      math::Vec<float, 2> pos1;
+    };
+
     RenderableQuad& renderable = *renderables_[curGroup[0].obj_.id];
 
-    renderable.updateDynamicUniforms(graphics_.getRawDevice(), currentFrame_);
+    ForwardAllocateMappedBuffer::Allocation instanceAlloc =
+        instanceDataAllocator.alloc(sizeof(UniformData));
+    UniformData* uniformData =
+        reinterpret_cast<UniformData*>(instanceAlloc.ptr);
+    uniformData->pos0 = renderable.pos0_;
+    uniformData->pos1 = renderable.pos1_;
 
     vkCmdBindPipeline(
         commandBuffer,
@@ -348,8 +373,10 @@ void RenderSubSystem::drawWindow(
         nullptr);
 
     VkBuffer vertexBuffer = renderable.vertexAttributes_.getRawBuffer();
-    VkDeviceSize offsets = 0;
-    vkCmdBindVertexBuffers(commandBuffer, 0, 1, &vertexBuffer, &offsets);
+    std::array<VkBuffer, 2> vertexBuffers{vertexBuffer, instanceAlloc.buffer};
+    std::array<VkDeviceSize, 2> offsets{0, instanceAlloc.bufferOffset};
+    vkCmdBindVertexBuffers(
+        commandBuffer, 0, 2, vertexBuffers.data(), offsets.data());
     vkCmdDraw(commandBuffer, 6, 1, 0, 0);
   }
 
