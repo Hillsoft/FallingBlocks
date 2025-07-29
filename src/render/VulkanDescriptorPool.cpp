@@ -5,7 +5,6 @@
 #include <stdexcept>
 #include <vector>
 #include <GLFW/glfw3.h>
-#include "render/VulkanDescriptorSetLayout.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 
@@ -13,7 +12,7 @@ namespace blocks::render {
 
 VulkanDescriptorPool::VulkanDescriptorPool(
     VulkanGraphicsDevice& device,
-    VulkanDescriptorSetLayout& layout,
+    VkDescriptorSetLayout layout,
     int maxFramesInFlight)
     : pool_(nullptr, nullptr) {
   std::array<VkDescriptorPoolSize, 2> poolSizes{};
@@ -37,8 +36,7 @@ VulkanDescriptorPool::VulkanDescriptorPool(
 
   pool_ = vulkan::UniqueHandle<VkDescriptorPool>(pool, device.getRawDevice());
 
-  std::vector<VkDescriptorSetLayout> rawLayouts(
-      maxFramesInFlight, layout.getRawLayout());
+  std::vector<VkDescriptorSetLayout> rawLayouts(maxFramesInFlight, layout);
   VkDescriptorSetAllocateInfo allocInfo{};
   allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
   allocInfo.descriptorPool = pool;

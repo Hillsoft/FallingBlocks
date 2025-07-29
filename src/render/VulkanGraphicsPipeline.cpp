@@ -5,7 +5,6 @@
 #include <stdexcept>
 #include <GLFW/glfw3.h>
 
-#include "render/VulkanDescriptorSetLayout.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanShader.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
@@ -18,7 +17,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(
     VkRenderPass renderPass,
     VulkanVertexShader& vertexShader,
     VulkanShader& fragmentShader,
-    VulkanDescriptorSetLayout& descriptorLayout)
+    VkDescriptorSetLayout descriptorLayout)
     : pipelineLayout_(device, descriptorLayout), pipeline_(nullptr, nullptr) {
   std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages{
       VkPipelineShaderStageCreateInfo{}, VkPipelineShaderStageCreateInfo{}};

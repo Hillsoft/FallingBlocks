@@ -2,7 +2,6 @@
 
 #include <GLFW/glfw3.h>
 
-#include "render/VulkanDescriptorSetLayout.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanPipelineLayout.hpp"
 #include "render/VulkanShader.hpp"
@@ -18,7 +17,7 @@ class VulkanGraphicsPipeline {
       VkRenderPass renderPass,
       VulkanVertexShader& vertexShader,
       VulkanShader& fragmentShader,
-      VulkanDescriptorSetLayout& descriptorLayout);
+      VkDescriptorSetLayout descriptorLayout);
 
   VkPipeline getRawPipeline() { return pipeline_.get(); }
   VulkanPipelineLayout& getPipelineLayout() { return pipelineLayout_; }

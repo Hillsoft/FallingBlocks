@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <GLFW/glfw3.h>
-#include "render/VulkanDescriptorSetLayout.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 
@@ -12,7 +11,7 @@ class VulkanDescriptorPool {
  public:
   VulkanDescriptorPool(
       VulkanGraphicsDevice& device,
-      VulkanDescriptorSetLayout& layout,
+      VkDescriptorSetLayout layout,
       int maxFramesInFlight);
 
   const std::vector<VkDescriptorSet>& getDescriptorSets() const {

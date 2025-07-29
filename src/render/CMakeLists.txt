@@ -79,14 +79,7 @@ target_link_libraries(render.vulkandebugmessenger
 
 add_library(render.vulkandescriptorpool STATIC "VulkanDescriptorPool.cpp" "VulkanDescriptorPool.hpp")
 target_link_libraries(render.vulkandescriptorpool
-	render.vulkandescriptorsetlayout
 	render.vulkangraphicsdevice
-	render.vulkan.uniquehandle)
-
-add_library(render.vulkandescriptorsetlayout STATIC "VulkanDescriptorSetLayout.cpp" "VulkanDescriptorSetLayout.hpp")
-target_link_libraries(render.vulkandescriptorsetlayout
-	render.vulkangraphicsdevice
-	render.vulkan.descriptorsetlayoutbuilder
 	render.vulkan.uniquehandle)
 
 add_library(render.vulkandevicememory STATIC "VulkanDeviceMemory.cpp" "VulkanDeviceMemory.hpp")
@@ -104,7 +97,6 @@ target_link_libraries(render.vulkangraphicsdevice
 
 add_library(render.vulkangraphicspipeline STATIC "VulkanGraphicsPipeline.cpp" "VulkanGraphicsPipeline.hpp")
 target_link_libraries(render.vulkangraphicspipeline
-	render.vulkandescriptorsetlayout
 	render.vulkangraphicsdevice
 	render.vulkanpipelinelayout
 	render.vulkanshader
@@ -128,7 +120,6 @@ target_link_libraries(render.vulkanmappedbuffer
 
 add_library(render.vulkanpipelinelayout STATIC "VulkanPipelineLayout.cpp" "VulkanPipelineLayout.hpp")
 target_link_libraries(render.vulkanpipelinelayout
-	render.vulkandescriptorsetlayout
 	render.vulkangraphicsdevice
 	render.vulkan.uniquehandle)
 
@@ -157,10 +148,10 @@ target_link_libraries(render.vulkanshader
 
 add_library(render.vulkanshaderprogram STATIC "VulkanShaderProgram.cpp" "VulkanShaderProgram.hpp")
 target_link_libraries(render.vulkanshaderprogram
-	render.vulkandescriptorsetlayout
 	render.vulkangraphicsdevice
 	render.vulkangraphicspipeline
-	render.vulkanshader)
+	render.vulkanshader
+	render.vulkan.uniquehandle)
 
 add_library(render.vulkanswapchain STATIC "VulkanSwapChain.cpp" "VulkanSwapChain.hpp")
 target_link_libraries(render.vulkanswapchain
