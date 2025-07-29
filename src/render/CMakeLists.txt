@@ -3,6 +3,13 @@ add_subdirectory(resource)
 add_subdirectory(shaders)
 add_subdirectory(vulkan)
 
+add_library(render.font STATIC "Font.cpp" "Font.hpp")
+target_link_libraries(render.font
+	globalsubsystemstack
+	loader.font.font
+	math.vec
+	render.rendersubsystem)
+
 add_library(render.forwardallocatemappedbuffer STATIC "ForwardAllocateMappedBuffer.cpp" "ForwardAllocateMappedBuffer.hpp")
 target_link_libraries(render.forwardallocatemappedbuffer
 	render.vulkangraphicsdevice
