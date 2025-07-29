@@ -2,6 +2,10 @@ add_library(render.vulkan.commandbufferbuilder "CommandBufferBuilder.hpp" "Comma
 target_link_libraries(render.vulkan.commandbufferbuilder
 	render.vulkan.uniquehandle)
 
+add_library(render.vulkan.descriptorsetlayoutbuilder "DescriptorSetLayoutBuilder.hpp" "DescriptorSetLayoutBuilder.cpp")
+target_link_libraries(render.vulkan.descriptorsetlayoutbuilder
+	render.vulkan.uniquehandle)
+
 add_library(render.vulkan.fencebuilder "FenceBuilder.hpp" "FenceBuilder.cpp")
 target_link_libraries(render.vulkan.fencebuilder
 	render.vulkan.uniquehandle)

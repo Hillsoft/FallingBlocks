@@ -86,6 +86,7 @@ target_link_libraries(render.vulkandescriptorpool
 add_library(render.vulkandescriptorsetlayout STATIC "VulkanDescriptorSetLayout.cpp" "VulkanDescriptorSetLayout.hpp")
 target_link_libraries(render.vulkandescriptorsetlayout
 	render.vulkangraphicsdevice
+	render.vulkan.descriptorsetlayoutbuilder
 	render.vulkan.uniquehandle)
 
 add_library(render.vulkandevicememory STATIC "VulkanDeviceMemory.cpp" "VulkanDeviceMemory.hpp")
