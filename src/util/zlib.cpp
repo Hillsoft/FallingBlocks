@@ -215,7 +215,7 @@ CompressedBlockTrees fixedTrees = {
             lengths[i] = 7;
           }
           for (int i = 280; i <= 287; i++) {
-            lengths[i] = 9;
+            lengths[i] = 8;
           }
           return HuffmanTree{std::span<const short>{lengths}};
         }(),
