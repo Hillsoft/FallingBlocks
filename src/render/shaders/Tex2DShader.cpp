@@ -22,11 +22,6 @@ VulkanShaderProgram Tex2DShader::makeProgram(
               VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
               1,
               VK_SHADER_STAGE_FRAGMENT_BIT)
-          .addBinding(
-              1,
-              VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
-              1,
-              VK_SHADER_STAGE_VERTEX_BIT)
           .build(device.getRawDevice())};
 }
 
