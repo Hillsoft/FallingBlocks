@@ -227,7 +227,7 @@ class Format4Map : public CharToGlyphMap {
       }
     }
 
-    if (startCodes_[segmentIndex] < charValue) {
+    if (startCodes_[segmentIndex] > charValue) {
       return 0;
     }
 
