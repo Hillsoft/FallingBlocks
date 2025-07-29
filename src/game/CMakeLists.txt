@@ -42,3 +42,13 @@ target_link_libraries(game.paddle
 	math.vec
 	physics.physicsscene
 	render.rendersubsystem)
+
+add_library(game.testtext "TestText.hpp" "TestText.cpp")
+target_link_libraries(game.testtext
+	engine.actor
+	engine.drawableregistry
+	engine.scene
+	globalsubsystemstack
+	loader.font.font
+	math.vec
+	render.font)

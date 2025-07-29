@@ -14,6 +14,7 @@ target_link_libraries(application
 	game.block
 	game.loadingscreen
 	game.paddle
+	game.testtext
 	globalsubsystemstack
 	input.inputsubsystem
 	math.vec)

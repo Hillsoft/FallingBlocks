@@ -11,6 +11,7 @@
 #include "game/Block.hpp"
 #include "game/LoadingScreen.hpp"
 #include "game/Paddle.hpp"
+#include "game/TestText.hpp"
 #include "input/InputHandler.hpp"
 #include "math/vec.hpp"
 
@@ -32,6 +33,8 @@ void populateMainScene(Scene& scene) {
           math::Vec2{x, y}, math::Vec2{x + 0.2f, y + 0.1f});
     }
   }
+
+  scene.createActor<game::TestText>();
 
   auto end = std::chrono::high_resolution_clock::now();
   std::cout
