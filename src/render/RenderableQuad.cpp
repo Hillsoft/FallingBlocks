@@ -4,7 +4,6 @@
 #include <filesystem>
 #include <vector>
 #include <GLFW/glfw3.h>
-#include "math/vec.hpp"
 #include "render/Quad.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/resource/ShaderProgramManager.hpp"
@@ -23,9 +22,7 @@ RenderableQuad::RenderableQuad(
       descriptorPool_(
           device, shaderProgram_->getDescriptorSetLayout(), maxFramesInFlight),
       vertexAttributes_(getQuadVertexAttributesBuffer(device)),
-      texture_(&textureManager.getOrCreate(texturePath)),
-      pos0_(-1.0f, -1.0f),
-      pos1_(1.0f, 1.0f) {
+      texture_(&textureManager.getOrCreate(texturePath)) {
   const auto& descriptorSets = descriptorPool_.getDescriptorSets();
   std::vector<VkWriteDescriptorSet> descriptorWrites;
   descriptorWrites.reserve(descriptorSets.size());
@@ -52,12 +49,6 @@ RenderableQuad::RenderableQuad(
       descriptorWrites.data(),
       0,
       nullptr);
-}
-
-void RenderableQuad::setPosition(
-    math::Vec<float, 2> pos0, math::Vec<float, 2> pos1) {
-  pos0_ = pos0;
-  pos1_ = pos1;
 }
 
 } // namespace blocks::render

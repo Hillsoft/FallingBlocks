@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <filesystem>
-#include "math/vec.hpp"
 #include "render/VulkanBuffer.hpp"
 #include "render/VulkanDescriptorPool.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
@@ -24,16 +23,11 @@ class RenderableQuad {
       TextureManager& textureManager,
       uint32_t maxFramesInFlight);
 
-  void setPosition(math::Vec<float, 2> pos0, math::Vec<float, 2> pos1);
-
  private:
   VulkanShaderProgram* shaderProgram_;
   VulkanDescriptorPool descriptorPool_;
   VulkanBuffer vertexAttributes_;
   VulkanTexture* texture_;
-
-  math::Vec<float, 2> pos0_;
-  math::Vec<float, 2> pos1_;
 
  public:
   friend class RenderSubSystem;

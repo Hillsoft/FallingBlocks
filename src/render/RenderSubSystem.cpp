@@ -191,8 +191,9 @@ void RenderSubSystem::destroyRenderable(RenderableRef ref) {
   renderables_[ref.id].reset();
 }
 
-void RenderSubSystem::drawObject(WindowRef target, RenderableRef ref) {
-  commands_.emplace_back(target, ref);
+void RenderSubSystem::drawObject(
+    WindowRef target, RenderableRef ref, math::Vec2 pos0, math::Vec2 pos1) {
+  commands_.emplace_back(target, ref, pos0, pos1);
 }
 
 void RenderSubSystem::commitFrame() {
@@ -354,8 +355,8 @@ void RenderSubSystem::drawWindow(
         instanceDataAllocator.alloc(sizeof(UniformData));
     UniformData* uniformData =
         reinterpret_cast<UniformData*>(instanceAlloc.ptr);
-    uniformData->pos0 = renderable.pos0_;
-    uniformData->pos1 = renderable.pos1_;
+    uniformData->pos0 = curGroup[0].pos0_;
+    uniformData->pos1 = curGroup[0].pos1_;
 
     vkCmdBindPipeline(
         commandBuffer,

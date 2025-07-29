@@ -22,10 +22,7 @@ LoadingScreen::LoadingScreen(Scene& scene)
       image1_(GlobalSubSystemStack::get().renderSystem().createRenderable(
           RESOURCE_DIR "/loading0.png")),
       image2_(GlobalSubSystemStack::get().renderSystem().createRenderable(
-          RESOURCE_DIR "/loading1.png")) {
-  image1_->setPosition(math::Vec2{-1.f, -1.f}, math::Vec2{1.f, 1.f});
-  image2_->setPosition(math::Vec2{-1.f, -1.f}, math::Vec2{1.f, 1.f});
-}
+          RESOURCE_DIR "/loading1.png")) {}
 
 void LoadingScreen::update(float deltaTimeSeconds) {
   toTransition -= deltaTimeSeconds;
@@ -38,9 +35,11 @@ void LoadingScreen::update(float deltaTimeSeconds) {
 void LoadingScreen::draw() {
   auto window = GlobalSubSystemStack::get().window();
   if (firstActive_) {
-    GlobalSubSystemStack::get().renderSystem().drawObject(window, *image1_);
+    GlobalSubSystemStack::get().renderSystem().drawObject(
+        window, *image1_, math::Vec2{-1.f, -1.f}, math::Vec2{1.f, 1.f});
   } else {
-    GlobalSubSystemStack::get().renderSystem().drawObject(window, *image2_);
+    GlobalSubSystemStack::get().renderSystem().drawObject(
+        window, *image2_, math::Vec2{-1.f, -1.f}, math::Vec2{1.f, 1.f});
   }
 }
 

@@ -4,9 +4,11 @@
 #include <filesystem>
 #include <memory>
 #include <optional>
+#include <span>
 #include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
+#include "math/vec.hpp"
 #include "render/ForwardAllocateMappedBuffer.hpp"
 #include "render/RenderableQuad.hpp"
 #include "render/VulkanCommandBuffer.hpp"
@@ -23,7 +25,6 @@
 #ifndef NDEBUG
 #include "render/VulkanDebugMessenger.hpp"
 #endif
-#include <span>
 
 namespace blocks::render {
 
@@ -117,6 +118,9 @@ class RenderSubSystem {
   struct DrawCommand {
     WindowRef target_;
     RenderableRef obj_;
+
+    math::Vec<float, 2> pos0_;
+    math::Vec<float, 2> pos1_;
   };
 
  public:
@@ -139,7 +143,8 @@ class RenderSubSystem {
 
   RenderableQuad* getRenderable(RenderableRef ref);
 
-  void drawObject(WindowRef target, RenderableRef ref);
+  void drawObject(
+      WindowRef target, RenderableRef ref, math::Vec2 pos0, math::Vec2 pos1);
 
   void commitFrame();
 

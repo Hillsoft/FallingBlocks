@@ -17,7 +17,6 @@ target_link_libraries(render.quad
 
 add_library(render.renderablequad "RenderableQuad.cpp" "RenderableQuad.hpp")
 target_link_libraries(render.renderablequad
-	math.vec
 	render.quad
 	render.resource.shaderprogrammanager
 	render.resource.texturemanager

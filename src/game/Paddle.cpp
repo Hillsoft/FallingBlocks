@@ -51,8 +51,7 @@ void Paddle::draw() {
   auto& render = GlobalSubSystemStack::get().renderSystem();
   auto window = GlobalSubSystemStack::get().window();
 
-  sprite_->setPosition(getP0(), getP1());
-  render.drawObject(window, *sprite_);
+  render.drawObject(window, *sprite_, getP0(), getP1());
 }
 
 void Paddle::onKeyPress(int key) {
