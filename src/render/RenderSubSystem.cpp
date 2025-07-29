@@ -340,23 +340,22 @@ void RenderSubSystem::drawWindow(
       });
 
   for (const auto& curGroup : objGroups) {
-    // Temporary debug assert, this should be removed when we implement proper
-    // instanced rendering
-    DEBUG_ASSERT(curGroup.size() == 1);
-
     struct UniformData {
       math::Vec<float, 2> pos0;
       math::Vec<float, 2> pos1;
     };
 
+    // All commands in the group have the same renderable object,
     RenderableQuad& renderable = *renderables_[curGroup[0].obj_.id];
 
     ForwardAllocateMappedBuffer::Allocation instanceAlloc =
-        instanceDataAllocator.alloc(sizeof(UniformData));
+        instanceDataAllocator.alloc(sizeof(UniformData) * curGroup.size());
     UniformData* uniformData =
         reinterpret_cast<UniformData*>(instanceAlloc.ptr);
-    uniformData->pos0 = curGroup[0].pos0_;
-    uniformData->pos1 = curGroup[0].pos1_;
+    for (size_t i = 0; i < curGroup.size(); i++) {
+      uniformData[i].pos0 = curGroup[i].pos0_;
+      uniformData[i].pos1 = curGroup[i].pos1_;
+    }
 
     vkCmdBindPipeline(
         commandBuffer,
@@ -378,7 +377,7 @@ void RenderSubSystem::drawWindow(
     std::array<VkDeviceSize, 2> offsets{0, instanceAlloc.bufferOffset};
     vkCmdBindVertexBuffers(
         commandBuffer, 0, 2, vertexBuffers.data(), offsets.data());
-    vkCmdDraw(commandBuffer, 6, 1, 0, 0);
+    vkCmdDraw(commandBuffer, 6, static_cast<uint32_t>(curGroup.size()), 0, 0);
   }
 
   vkCmdEndRenderPass(commandBuffer);

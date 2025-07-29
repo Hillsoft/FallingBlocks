@@ -52,6 +52,11 @@ void Paddle::draw() {
   auto window = GlobalSubSystemStack::get().window();
 
   render.drawObject(window, *sprite_, getP0(), getP1());
+  render.drawObject(
+      window,
+      *sprite_,
+      getP0() + math::Vec2(0.0f, kPaddleHeight),
+      getP1() + math::Vec2(0.0f, kPaddleHeight));
 }
 
 void Paddle::onKeyPress(int key) {
