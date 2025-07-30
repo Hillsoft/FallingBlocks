@@ -464,7 +464,7 @@ GlyphLocations readGlyphLocations(
   }
 }
 
-SimpleGlpyhData readSimpleGlyph(
+SimpleGlyphData readSimpleGlyph(
     int16_t numContours, std::span<const std::byte>& data) {
   struct GlyphFlags {
     uint8_t value;

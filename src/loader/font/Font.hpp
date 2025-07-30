@@ -21,7 +21,7 @@ class CharToGlyphMap {
   virtual uint16_t mapChar(uint32_t unicodeChar) = 0;
 };
 
-struct SimpleGlpyhData {
+struct SimpleGlyphData {
   std::vector<uint16_t> endPoints;
   std::vector<int16_t> xCoords;
   std::vector<int16_t> yCoords;
@@ -44,7 +44,7 @@ struct GlyphData {
   FWord yMin;
   FWord xMax;
   FWord yMax;
-  std::variant<std::monostate, SimpleGlpyhData, std::vector<CompoundGlyphData>>
+  std::variant<std::monostate, SimpleGlyphData, std::vector<CompoundGlyphData>>
       data;
 };
 
