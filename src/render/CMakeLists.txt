@@ -52,6 +52,7 @@ target_link_libraries(render.rendersubsystem
 	render.vulkan.renderpassbuilder
 	render.vulkan.semaphorebuilder
 	render.vulkan.uniquehandle
+	util.blockforwardallocatedarena
 	util.debug
 	util.generator
 	util.portability

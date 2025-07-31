@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <cstring>
 #include <filesystem>
 #include <iostream>
 #include <memory>
@@ -193,7 +194,14 @@ void RenderSubSystem::destroyRenderable(RenderableRef ref) {
 
 void RenderSubSystem::drawObject(
     WindowRef target, RenderableRef ref, math::Vec2 pos0, math::Vec2 pos1) {
-  commands_.emplace_back(target, ref, pos0, pos1);
+  struct UniformData {
+    math::Vec<float, 2> pos0;
+    math::Vec<float, 2> pos1;
+  };
+  UniformData* uniformData = instanceDataCPUBuffer_.allocate<UniformData>();
+  uniformData->pos0 = pos0;
+  uniformData->pos1 = pos1;
+  commands_.emplace_back(target, ref, uniformData);
 }
 
 void RenderSubSystem::commitFrame() {
@@ -245,6 +253,7 @@ void RenderSubSystem::commitFrame() {
   }
 
   commands_.clear();
+  instanceDataCPUBuffer_.reset();
 
   currentFrame_ = (currentFrame_ + 1) % kMaxFramesInFlight;
 }
@@ -353,8 +362,8 @@ void RenderSubSystem::drawWindow(
     UniformData* uniformData =
         reinterpret_cast<UniformData*>(instanceAlloc.ptr);
     for (size_t i = 0; i < curGroup.size(); i++) {
-      uniformData[i].pos0 = curGroup[i].pos0_;
-      uniformData[i].pos1 = curGroup[i].pos1_;
+      std::memcpy(
+          uniformData + i, curGroup[i].instanceData_, sizeof(UniformData));
     }
 
     vkCmdBindPipeline(

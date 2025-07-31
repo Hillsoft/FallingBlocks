@@ -19,6 +19,7 @@
 #include "render/resource/ShaderProgramManager.hpp"
 #include "render/resource/TextureManager.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
+#include "util/BlockForwardAllocatedArena.hpp"
 #include "util/portability.hpp"
 #include "util/raii_helpers.hpp"
 
@@ -119,8 +120,7 @@ class RenderSubSystem {
     WindowRef target_;
     RenderableRef obj_;
 
-    math::Vec<float, 2> pos0_;
-    math::Vec<float, 2> pos1_;
+    void* instanceData_;
   };
 
  public:
@@ -175,6 +175,7 @@ class RenderSubSystem {
   std::vector<std::optional<RenderableQuad>> renderables_;
   std::vector<RenderableQuad> renderablesPendingDestruction_;
   std::vector<ForwardAllocateMappedBuffer> instanceDataBuffers_;
+  util::BlockForwardAllocatedArena instanceDataCPUBuffer_;
 
   std::vector<DrawCommand> commands_;
 
