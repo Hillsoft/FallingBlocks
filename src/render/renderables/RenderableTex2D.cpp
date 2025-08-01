@@ -62,7 +62,6 @@ RenderableObject RenderableTex2D::create(
       shaderProgram,
       std::move(descriptorPool),
       std::move(vertexAttributes),
-      texture,
       sizeof(InstanceData)};
 }
 

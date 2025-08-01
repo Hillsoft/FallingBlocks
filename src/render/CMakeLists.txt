@@ -27,15 +27,9 @@ target_link_libraries(render.quad
 
 add_library(render.renderableobject "RenderableObject.cpp" "RenderableObject.hpp")
 target_link_libraries(render.renderableobject
-	render.quad
-	render.resource.shaderprogrammanager
-	render.resource.texturemanager
-	render.shaders.tex2dshader
 	render.vulkanbuffer
 	render.vulkandescriptorpool
-	render.vulkangraphicsdevice
-	render.vulkanshaderprogram
-	render.vulkantexture)
+	render.vulkanshaderprogram)
 
 add_library(render.rendersubsystem STATIC "RenderSubSystem.cpp" "RenderSubSystem.hpp")
 target_link_libraries(render.rendersubsystem
