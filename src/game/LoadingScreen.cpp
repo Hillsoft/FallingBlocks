@@ -36,10 +36,10 @@ void LoadingScreen::draw() {
   auto window = GlobalSubSystemStack::get().window();
   if (firstActive_) {
     GlobalSubSystemStack::get().renderSystem().drawObject(
-        window, *image1_, math::Vec2{-1.f, -1.f}, math::Vec2{1.f, 1.f});
+        window, *image1_, {math::Vec2{-1.f, -1.f}, math::Vec2{1.f, 1.f}});
   } else {
     GlobalSubSystemStack::get().renderSystem().drawObject(
-        window, *image2_, math::Vec2{-1.f, -1.f}, math::Vec2{1.f, 1.f});
+        window, *image2_, {math::Vec2{-1.f, -1.f}, math::Vec2{1.f, 1.f}});
   }
 }
 

@@ -6,6 +6,7 @@
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
 #include "render/RenderSubSystem.hpp"
+#include "render/RenderableQuad.hpp"
 
 namespace blocks::game {
 
@@ -16,7 +17,7 @@ class Block : public Actor, public physics::RectCollider, public Drawable {
   void draw() final;
 
  private:
-  render::UniqueRenderableHandle sprite_;
+  render::UniqueRenderableHandle<render::UniformData> sprite_;
 };
 
 } // namespace blocks::game

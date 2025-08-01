@@ -11,6 +11,7 @@
 #include "loader/font/Font.hpp"
 #include "math/vec.hpp"
 #include "render/RenderSubSystem.hpp"
+#include "render/RenderableQuad.hpp"
 #include "util/debug.hpp"
 
 namespace blocks::render {
@@ -22,7 +23,7 @@ constexpr float kFontScale = 1 / 10000.0f;
 float drawChar(
     RenderSubSystem& render,
     const loader::Font& fontData,
-    RenderableRef renderableObject,
+    RenderableRef<UniformData> renderableObject,
     WindowRef window,
     uint32_t c,
     math::Vec2 pos) {
@@ -34,16 +35,16 @@ float drawChar(
     render.drawObject(
         window,
         renderableObject,
-        pos +
-            math::Vec2{
-                static_cast<float>(metrics.leftSideBearing) * kFontScale +
-                    static_cast<float>(glyph.xMin.rawValue) * kFontScale,
-                -static_cast<float>(glyph.yMax.rawValue) * kFontScale},
-        pos +
-            math::Vec2{
-                static_cast<float>(metrics.leftSideBearing) * kFontScale +
-                    static_cast<float>(glyph.xMax.rawValue) * kFontScale,
-                -static_cast<float>(glyph.yMin.rawValue) * kFontScale});
+        {pos +
+             math::Vec2{
+                 static_cast<float>(metrics.leftSideBearing) * kFontScale +
+                     static_cast<float>(glyph.xMin.rawValue) * kFontScale,
+                 -static_cast<float>(glyph.yMax.rawValue) * kFontScale},
+         pos +
+             math::Vec2{
+                 static_cast<float>(metrics.leftSideBearing) * kFontScale +
+                     static_cast<float>(glyph.xMax.rawValue) * kFontScale,
+                 -static_cast<float>(glyph.yMin.rawValue) * kFontScale}});
   } else if (std::holds_alternative<std::vector<loader::CompoundGlyphData>>(
                  glyph.data)) {
     for (const auto& subGlyphDetails :
@@ -81,16 +82,16 @@ float drawChar(
       render.drawObject(
           window,
           renderableObject,
-          pos +
-              transformPos(math::Vec2{
-                  static_cast<float>(metrics.leftSideBearing) * kFontScale +
-                      static_cast<float>(subGlyph.xMin.rawValue) * kFontScale,
-                  -static_cast<float>(subGlyph.yMax.rawValue) * kFontScale}),
-          pos +
-              transformPos(math::Vec2{
-                  static_cast<float>(metrics.leftSideBearing) * kFontScale +
-                      static_cast<float>(subGlyph.xMax.rawValue) * kFontScale,
-                  -static_cast<float>(subGlyph.yMin.rawValue) * kFontScale}));
+          {pos +
+               transformPos(math::Vec2{
+                   static_cast<float>(metrics.leftSideBearing) * kFontScale +
+                       static_cast<float>(subGlyph.xMin.rawValue) * kFontScale,
+                   -static_cast<float>(subGlyph.yMax.rawValue) * kFontScale}),
+           pos +
+               transformPos(math::Vec2{
+                   static_cast<float>(metrics.leftSideBearing) * kFontScale +
+                       static_cast<float>(subGlyph.xMax.rawValue) * kFontScale,
+                   -static_cast<float>(subGlyph.yMin.rawValue) * kFontScale})});
     }
   }
 

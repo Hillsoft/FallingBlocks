@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <filesystem>
+#include "math/vec.hpp"
 #include "render/VulkanBuffer.hpp"
 #include "render/VulkanDescriptorPool.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
@@ -14,6 +15,11 @@ namespace blocks::render {
 
 class RenderSubSystem;
 
+struct UniformData {
+  math::Vec<float, 2> pos0;
+  math::Vec<float, 2> pos1;
+};
+
 class RenderableQuad {
  public:
   RenderableQuad(
@@ -22,6 +28,9 @@ class RenderableQuad {
       ShaderProgramManager& programManager,
       TextureManager& textureManager,
       uint32_t maxFramesInFlight);
+
+ public:
+  size_t getInstanceDataSize() const { return instanceDataSize_; }
 
  private:
   VulkanShaderProgram* shaderProgram_;

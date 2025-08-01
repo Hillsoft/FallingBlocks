@@ -5,6 +5,7 @@
 #include "engine/Scene.hpp"
 #include "engine/TickRegistry.hpp"
 #include "render/RenderSubSystem.hpp"
+#include "render/RenderableQuad.hpp"
 
 namespace blocks::game {
 
@@ -16,8 +17,8 @@ class LoadingScreen : public Actor, public Drawable, public TickHandler {
   void draw() final;
 
  private:
-  render::UniqueRenderableHandle image1_;
-  render::UniqueRenderableHandle image2_;
+  render::UniqueRenderableHandle<render::UniformData> image1_;
+  render::UniqueRenderableHandle<render::UniformData> image2_;
   float toTransition = 0.f;
   bool firstActive_ = true;
 };

@@ -5,6 +5,7 @@
 #include "loader/font/Font.hpp"
 #include "math/vec.hpp"
 #include "render/RenderSubSystem.hpp"
+#include "render/RenderableQuad.hpp"
 
 namespace blocks::render {
 
@@ -17,7 +18,7 @@ class Font {
  private:
   RenderSubSystem* render_;
   loader::Font fontData_;
-  UniqueRenderableHandle renderableObject_;
+  UniqueRenderableHandle<UniformData> renderableObject_;
 };
 
 } // namespace blocks::render

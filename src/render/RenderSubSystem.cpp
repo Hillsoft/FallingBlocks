@@ -12,7 +12,6 @@
 #include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
-#include "math/vec.hpp"
 #include "render/ForwardAllocateMappedBuffer.hpp"
 #include "render/RenderableQuad.hpp"
 #include "render/VulkanCommandBuffer.hpp"
@@ -82,23 +81,17 @@ const Window* WindowRef::get() const {
   return renderSystem->getWindow(*this);
 }
 
-RenderableQuad* RenderableRef::get() {
-  return renderSystem->getRenderable(*this);
+RenderableQuad* GenericRenderableRef::get() {
+  return renderSystem_->getRenderable(*this);
 }
 
-const RenderableQuad* RenderableRef::get() const {
-  return renderSystem->getRenderable(*this);
+const RenderableQuad* GenericRenderableRef::get() const {
+  return renderSystem_->getRenderable(*this);
 }
 
 UniqueWindowHandle::~UniqueWindowHandle() {
   if (ref_.renderSystem != nullptr) {
     ref_.renderSystem->destroyWindow(ref_);
-  }
-}
-
-UniqueRenderableHandle::~UniqueRenderableHandle() {
-  if (ref_.renderSystem != nullptr) {
-    ref_.renderSystem->destroyRenderable(ref_);
   }
 }
 
@@ -166,13 +159,13 @@ Window* RenderSubSystem::getWindow(WindowRef ref) {
   return &*windows_[ref.id];
 }
 
-RenderableQuad* RenderSubSystem::getRenderable(RenderableRef ref) {
+RenderableQuad* RenderSubSystem::getRenderable(GenericRenderableRef ref) {
   DEBUG_ASSERT(
       ref.id < renderables_.size() && renderables_[ref.id].has_value());
   return &*renderables_[ref.id];
 }
 
-UniqueRenderableHandle RenderSubSystem::createRenderable(
+UniqueRenderableHandle<UniformData> RenderSubSystem::createRenderable(
     const std::filesystem::path& texturePath) {
   size_t id = renderables_.size();
   renderables_.emplace_back(
@@ -182,27 +175,19 @@ UniqueRenderableHandle RenderSubSystem::createRenderable(
       shaderProgramManager_,
       textureManager_,
       kMaxFramesInFlight);
-  return UniqueRenderableHandle{RenderableRef{id, *this}};
+  return UniqueRenderableHandle{RenderableRef<UniformData>{id, *this}};
 }
 
-void RenderSubSystem::destroyRenderable(RenderableRef ref) {
+void RenderSubSystem::destroyRenderable(GenericRenderableRef ref) {
   DEBUG_ASSERT(
       ref.id < renderables_.size() && renderables_[ref.id].has_value());
   renderablesPendingDestruction_.emplace_back(std::move(*renderables_[ref.id]));
   renderables_[ref.id].reset();
 }
 
-void RenderSubSystem::drawObject(
-    WindowRef target, RenderableRef ref, math::Vec2 pos0, math::Vec2 pos1) {
-  struct UniformData {
-    math::Vec<float, 2> pos0;
-    math::Vec<float, 2> pos1;
-  };
-  DEBUG_ASSERT(sizeof(UniformData) == ref->instanceDataSize_);
-  UniformData* uniformData = instanceDataCPUBuffer_.allocate<UniformData>();
-  uniformData->pos0 = pos0;
-  uniformData->pos1 = pos1;
-  commands_.emplace_back(target, ref, uniformData);
+void RenderSubSystem::drawObjectRaw(
+    WindowRef target, GenericRenderableRef ref, void* instanceData) {
+  commands_.emplace_back(target, ref, instanceData);
 }
 
 void RenderSubSystem::commitFrame() {

@@ -7,6 +7,7 @@
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
 #include "render/RenderSubSystem.hpp"
+#include "render/RenderableQuad.hpp"
 
 namespace blocks::game {
 
@@ -25,7 +26,7 @@ class Ball
 
  private:
   math::Vec2 vel_;
-  render::UniqueRenderableHandle sprite_;
+  render::UniqueRenderableHandle<render::UniformData> sprite_;
 };
 
 } // namespace blocks::game

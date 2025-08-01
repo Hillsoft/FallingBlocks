@@ -8,6 +8,7 @@ target_link_libraries(render.font
 	globalsubsystemstack
 	loader.font.font
 	math.vec
+	render.renderablequad
 	render.rendersubsystem)
 
 add_library(render.forwardallocatemappedbuffer STATIC "ForwardAllocateMappedBuffer.cpp" "ForwardAllocateMappedBuffer.hpp")
@@ -24,6 +25,7 @@ target_link_libraries(render.quad
 
 add_library(render.renderablequad "RenderableQuad.cpp" "RenderableQuad.hpp")
 target_link_libraries(render.renderablequad
+	math.vec
 	render.quad
 	render.resource.shaderprogrammanager
 	render.resource.texturemanager
@@ -36,7 +38,6 @@ target_link_libraries(render.renderablequad
 
 add_library(render.rendersubsystem STATIC "RenderSubSystem.cpp" "RenderSubSystem.hpp")
 target_link_libraries(render.rendersubsystem
-	math.vec
 	render.forwardallocatemappedbuffer
 	render.renderablequad
 	render.resource.shaderprogrammanager

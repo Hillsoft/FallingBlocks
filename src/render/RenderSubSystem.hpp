@@ -8,7 +8,6 @@
 #include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
-#include "math/vec.hpp"
 #include "render/ForwardAllocateMappedBuffer.hpp"
 #include "render/RenderableQuad.hpp"
 #include "render/VulkanCommandBuffer.hpp"
@@ -20,6 +19,7 @@
 #include "render/resource/TextureManager.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 #include "util/BlockForwardAllocatedArena.hpp"
+#include "util/debug.hpp"
 #include "util/portability.hpp"
 #include "util/raii_helpers.hpp"
 
@@ -72,17 +72,19 @@ class UniqueWindowHandle : private util::no_copy {
   WindowRef ref_;
 };
 
-struct RenderableRef {
- private:
-  explicit RenderableRef(size_t id, RenderSubSystem& renderSystem)
-      : id(id), renderSystem(&renderSystem) {}
+struct GenericRenderableRef {
+ public:
+  explicit GenericRenderableRef(size_t id, RenderSubSystem& renderSystem)
+      : id(id), renderSystem_(&renderSystem) {}
 
+ private:
   size_t id;
-  RenderSubSystem* renderSystem;
+  RenderSubSystem* renderSystem_;
 
  public:
   friend class RenderSubSystem;
-  friend class UniqueRenderableHandle;
+
+  RenderSubSystem* renderSystem() { return renderSystem_; }
 
   RenderableQuad* get();
   const RenderableQuad* get() const;
@@ -92,33 +94,63 @@ struct RenderableRef {
   const RenderableQuad* operator->() const { return get(); }
 };
 
+template <typename TInstanceData>
+struct RenderableRef {
+ public:
+  explicit RenderableRef() : rawRef_(0, nullptr) {}
+  explicit RenderableRef(size_t id, RenderSubSystem& renderSystem)
+      : rawRef_(id, renderSystem) {
+    DEBUG_ASSERT(sizeof(TInstanceData) == get()->getInstanceDataSize());
+  }
+
+ private:
+  GenericRenderableRef rawRef_;
+
+ public:
+  friend class RenderSubSystem;
+
+  RenderSubSystem* renderSystem() { return rawRef_.renderSystem(); }
+
+  RenderableQuad* get() { return rawRef_.get(); }
+  const RenderableQuad* get() const { return rawRef_.get(); }
+  RenderableQuad& operator*() { return *get(); }
+  const RenderableQuad& operator*() const { return *get(); }
+  RenderableQuad* operator->() { return get(); }
+  const RenderableQuad* operator->() const { return get(); }
+};
+
+template <typename TInstanceData>
 class UniqueRenderableHandle : private util::no_copy {
  public:
-  explicit UniqueRenderableHandle(RenderableRef ref) : ref_(ref) {}
-  ~UniqueRenderableHandle();
+  explicit UniqueRenderableHandle(RenderableRef<TInstanceData> ref)
+      : ref_(ref) {}
+  ~UniqueRenderableHandle() {
+    if (ref_.renderSystem() != nullptr) {
+      ref_.renderSystem()->destroyRenderable(ref_);
+    }
+  }
 
-  UniqueRenderableHandle(UniqueRenderableHandle&& other) noexcept
-      : ref_(other.ref_) {
-    other.ref_.renderSystem = nullptr;
+  UniqueRenderableHandle(UniqueRenderableHandle&& other) noexcept : ref_() {
+    std::swap(ref_, other.ref_);
   }
   UniqueRenderableHandle& operator=(UniqueRenderableHandle&& other) noexcept {
     std::swap(ref_, other.ref_);
     return *this;
   }
 
-  RenderableRef get() { return ref_; }
-  RenderableRef operator*() { return ref_; }
-  RenderableRef operator->() { return ref_; }
+  RenderableRef<TInstanceData> get() { return ref_; }
+  RenderableRef<TInstanceData> operator*() { return ref_; }
+  RenderableRef<TInstanceData> operator->() { return ref_; }
 
  private:
-  RenderableRef ref_;
+  RenderableRef<TInstanceData> ref_;
 };
 
 class RenderSubSystem {
  private:
   struct DrawCommand {
     WindowRef target_;
-    RenderableRef obj_;
+    GenericRenderableRef obj_;
 
     void* instanceData_;
   };
@@ -137,20 +169,35 @@ class RenderSubSystem {
 
   Window* getWindow(WindowRef ref);
 
-  UniqueRenderableHandle createRenderable(
+  UniqueRenderableHandle<UniformData> createRenderable(
       const std::filesystem::path& texturePath);
-  void destroyRenderable(RenderableRef ref);
+  void destroyRenderable(GenericRenderableRef ref);
+  template <typename TInstanceData>
+  void destroyRenderable(RenderableRef<TInstanceData> ref) {
+    destroyRenderable(ref.rawRef_);
+  }
 
-  RenderableQuad* getRenderable(RenderableRef ref);
+  RenderableQuad* getRenderable(GenericRenderableRef ref);
 
+  template <typename TInstanceData>
   void drawObject(
-      WindowRef target, RenderableRef ref, math::Vec2 pos0, math::Vec2 pos1);
+      WindowRef target,
+      RenderableRef<TInstanceData> ref,
+      const TInstanceData& instanceData) {
+    drawObjectRaw(
+        target,
+        ref.rawRef_,
+        instanceDataCPUBuffer_.allocate<TInstanceData>(instanceData));
+  }
 
   void commitFrame();
 
   void waitIdle();
 
  private:
+  void drawObjectRaw(
+      WindowRef target, GenericRenderableRef ref, void* instanceData);
+
   void drawWindow(size_t windowId, std::span<DrawCommand> windowCommands);
 
   struct GLFWLifetimeScope {
