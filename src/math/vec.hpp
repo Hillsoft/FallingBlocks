@@ -96,6 +96,7 @@ class Vec {
 static_assert(sizeof(float) == 4);
 using Vec2 = Vec<float, 2>;
 using Vec3 = Vec<float, 3>;
+using Vec4 = Vec<float, 4>;
 
 template <typename TNum, size_t size>
 Vec<TNum, size> operator+(const Vec<TNum, size>& a, const Vec<TNum, size>& b)

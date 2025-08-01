@@ -11,7 +11,7 @@
 #include "loader/font/Font.hpp"
 #include "math/vec.hpp"
 #include "render/RenderSubSystem.hpp"
-#include "render/renderables/RenderableTex2D.hpp"
+#include "render/renderables/RenderableColor2D.hpp"
 #include "util/debug.hpp"
 
 namespace blocks::render {
@@ -23,7 +23,7 @@ constexpr float kFontScale = 1 / 10000.0f;
 float drawChar(
     RenderSubSystem& render,
     const loader::Font& fontData,
-    RenderableRef<RenderableTex2D::InstanceData> renderableObject,
+    RenderableRef<RenderableColor2D::InstanceData> renderableObject,
     WindowRef window,
     uint32_t c,
     math::Vec2 pos) {
@@ -44,7 +44,8 @@ float drawChar(
              math::Vec2{
                  static_cast<float>(metrics.leftSideBearing) * kFontScale +
                      static_cast<float>(glyph.xMax.rawValue) * kFontScale,
-                 -static_cast<float>(glyph.yMin.rawValue) * kFontScale}});
+                 -static_cast<float>(glyph.yMin.rawValue) * kFontScale},
+         math::Vec4{0.6f, 1.0f, 0.6f, 1.0f}});
   } else if (std::holds_alternative<std::vector<loader::CompoundGlyphData>>(
                  glyph.data)) {
     for (const auto& subGlyphDetails :
@@ -91,7 +92,8 @@ float drawChar(
                transformPos(math::Vec2{
                    static_cast<float>(metrics.leftSideBearing) * kFontScale +
                        static_cast<float>(subGlyph.xMax.rawValue) * kFontScale,
-                   -static_cast<float>(subGlyph.yMin.rawValue) * kFontScale})});
+                   -static_cast<float>(subGlyph.yMin.rawValue) * kFontScale}),
+           math::Vec4{0.6f, 0.6f, 1.0f, 1.0f}});
     }
   }
 
@@ -103,8 +105,7 @@ float drawChar(
 Font::Font(RenderSubSystem& renderSystem, loader::Font font)
     : render_(&renderSystem),
       fontData_(std::move(font)),
-      renderableObject_(renderSystem.createRenderable<RenderableTex2D>(
-          RESOURCE_DIR "/white.png")) {}
+      renderableObject_(renderSystem.createRenderable<RenderableColor2D>()) {}
 
 void Font::drawStringASCII(std::string_view str, math::Vec2 pos) {
   auto window = GlobalSubSystemStack::get().window();

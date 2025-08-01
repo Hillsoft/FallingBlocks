@@ -9,7 +9,7 @@ target_link_libraries(render.font
 	globalsubsystemstack
 	loader.font.font
 	math.vec
-	render.renderables.renderabletex2d
+	render.renderables.renderablecolor2d
 	render.rendersubsystem
 	util.debug)
 

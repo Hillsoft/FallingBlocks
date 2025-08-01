@@ -4,7 +4,7 @@
 #include "loader/font/Font.hpp"
 #include "math/vec.hpp"
 #include "render/RenderSubSystem.hpp"
-#include "render/renderables/RenderableTex2D.hpp"
+#include "render/renderables/RenderableColor2D.hpp"
 
 namespace blocks::render {
 
@@ -17,7 +17,7 @@ class Font {
  private:
   RenderSubSystem* render_;
   loader::Font fontData_;
-  UniqueRenderableHandle<render::RenderableTex2D::InstanceData>
+  UniqueRenderableHandle<render::RenderableColor2D::InstanceData>
       renderableObject_;
 };
 

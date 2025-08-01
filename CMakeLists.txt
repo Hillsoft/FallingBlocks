@@ -71,6 +71,8 @@ target_link_libraries(FallingBlocks
 
 add_shader("vertex.glsl" "vertex.spv")
 add_shader("fragment.glsl" "fragment.spv")
+add_shader("colVertex.glsl" "colVertex.spv")
+add_shader("colFragment.glsl" "colFragment.spv")
 add_custom_target(shader_bytecode DEPENDS ${SHADER_OUTPUT})
 
 set_target_properties("${CMAKE_PROJECT_NAME}" PROPERTIES ADDITIONAL_CLEAN_FILES "${CMAKE_CURRENT_BINARY_DIR}/res")
