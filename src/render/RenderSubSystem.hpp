@@ -75,6 +75,7 @@ class UniqueWindowHandle : private util::no_copy {
 
 struct GenericRenderableRef {
  public:
+  explicit GenericRenderableRef() : id(0), renderSystem_(nullptr) {}
   explicit GenericRenderableRef(size_t id, RenderSubSystem& renderSystem)
       : id(id), renderSystem_(&renderSystem) {}
 
@@ -98,7 +99,7 @@ struct GenericRenderableRef {
 template <typename TInstanceData>
 struct RenderableRef {
  public:
-  explicit RenderableRef() : rawRef_(0, nullptr) {}
+  explicit RenderableRef() : rawRef_() {}
   explicit RenderableRef(size_t id, RenderSubSystem& renderSystem)
       : rawRef_(id, renderSystem) {
     DEBUG_ASSERT(sizeof(TInstanceData) == get()->getInstanceDataSize());

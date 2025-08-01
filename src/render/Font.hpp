@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstdint>
 #include <string_view>
 #include "loader/font/Font.hpp"
 #include "math/vec.hpp"

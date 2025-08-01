@@ -1,6 +1,6 @@
 #include "game/Paddle.hpp"
 
-#include <utility>
+#include <algorithm>
 #include <GLFW/glfw3.h>
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Actor.hpp"
