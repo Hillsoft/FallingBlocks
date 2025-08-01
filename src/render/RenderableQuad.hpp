@@ -28,6 +28,7 @@ class RenderableQuad {
   VulkanDescriptorPool descriptorPool_;
   VulkanBuffer vertexAttributes_;
   VulkanTexture* texture_;
+  size_t instanceDataSize_;
 
  public:
   friend class RenderSubSystem;

@@ -22,7 +22,8 @@ RenderableQuad::RenderableQuad(
       descriptorPool_(
           device, shaderProgram_->getDescriptorSetLayout(), maxFramesInFlight),
       vertexAttributes_(getQuadVertexAttributesBuffer(device)),
-      texture_(&textureManager.getOrCreate(texturePath)) {
+      texture_(&textureManager.getOrCreate(texturePath)),
+      instanceDataSize_(16) {
   const auto& descriptorSets = descriptorPool_.getDescriptorSets();
   std::vector<VkWriteDescriptorSet> descriptorWrites;
   descriptorWrites.reserve(descriptorSets.size());

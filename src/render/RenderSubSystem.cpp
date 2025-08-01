@@ -198,6 +198,7 @@ void RenderSubSystem::drawObject(
     math::Vec<float, 2> pos0;
     math::Vec<float, 2> pos1;
   };
+  DEBUG_ASSERT(sizeof(UniformData) == ref->instanceDataSize_);
   UniformData* uniformData = instanceDataCPUBuffer_.allocate<UniformData>();
   uniformData->pos0 = pos0;
   uniformData->pos1 = pos1;
@@ -349,21 +350,19 @@ void RenderSubSystem::drawWindow(
       });
 
   for (const auto& curGroup : objGroups) {
-    struct UniformData {
-      math::Vec<float, 2> pos0;
-      math::Vec<float, 2> pos1;
-    };
-
     // All commands in the group have the same renderable object,
     RenderableQuad& renderable = *renderables_[curGroup[0].obj_.id];
 
     ForwardAllocateMappedBuffer::Allocation instanceAlloc =
-        instanceDataAllocator.alloc(sizeof(UniformData) * curGroup.size());
-    UniformData* uniformData =
-        reinterpret_cast<UniformData*>(instanceAlloc.ptr);
+        instanceDataAllocator.alloc(
+            renderable.instanceDataSize_ * curGroup.size());
     for (size_t i = 0; i < curGroup.size(); i++) {
       std::memcpy(
-          uniformData + i, curGroup[i].instanceData_, sizeof(UniformData));
+          reinterpret_cast<void*>(
+              reinterpret_cast<size_t>(instanceAlloc.ptr) +
+              i * renderable.instanceDataSize_),
+          curGroup[i].instanceData_,
+          renderable.instanceDataSize_);
     }
 
     vkCmdBindPipeline(
