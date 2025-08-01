@@ -10,6 +10,7 @@
 #include "input/InputHandler.hpp"
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
+#include "render/renderables/RenderableTex2D.hpp"
 
 namespace blocks::game {
 
@@ -33,8 +34,10 @@ Paddle::Paddle(Scene& scene)
           0),
       TickHandler(scene.getTickRegistry()),
       Drawable(scene.getDrawableScene()),
-      sprite_(GlobalSubSystemStack::get().renderSystem().createRenderable(
-          RESOURCE_DIR "/mandelbrot set.png")) {}
+      sprite_(GlobalSubSystemStack::get()
+                  .renderSystem()
+                  .createRenderable<render::RenderableTex2D>(
+                      RESOURCE_DIR "/mandelbrot set.png")) {}
 
 void Paddle::update(float deltaTimeSeconds) {
   math::Vec2 pos = getP0();

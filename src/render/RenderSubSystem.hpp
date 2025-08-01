@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <filesystem>
 #include <memory>
 #include <optional>
 #include <span>
@@ -28,6 +27,8 @@
 #endif
 
 namespace blocks::render {
+
+constexpr int kMaxFramesInFlight = 2;
 
 class RenderSubSystem;
 
@@ -169,8 +170,20 @@ class RenderSubSystem {
 
   Window* getWindow(WindowRef ref);
 
-  UniqueRenderableHandle<UniformData> createRenderable(
-      const std::filesystem::path& texturePath);
+  template <typename TConcreteRenderable, typename... TArgs>
+  UniqueRenderableHandle<typename TConcreteRenderable::InstanceData>
+  createRenderable(TArgs&&... args) {
+    size_t id = renderables_.size();
+    renderables_.emplace_back(TConcreteRenderable::create(
+        std::forward<TArgs>(args)...,
+        graphics_,
+        shaderProgramManager_,
+        textureManager_,
+        kMaxFramesInFlight));
+    return UniqueRenderableHandle{
+        RenderableRef<typename TConcreteRenderable::InstanceData>{id, *this}};
+  }
+
   void destroyRenderable(GenericRenderableRef ref);
   template <typename TInstanceData>
   void destroyRenderable(RenderableRef<TInstanceData> ref) {

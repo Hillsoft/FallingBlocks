@@ -8,7 +8,7 @@
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
 #include "render/RenderSubSystem.hpp"
-#include "render/RenderableObject.hpp"
+#include "render/renderables/RenderableTex2D.hpp"
 
 namespace blocks::game {
 
@@ -29,7 +29,7 @@ class Paddle
 
  private:
   math::Vec2 vel_;
-  render::UniqueRenderableHandle<render::UniformData> sprite_;
+  render::UniqueRenderableHandle<render::RenderableTex2D::InstanceData> sprite_;
 };
 
 } // namespace blocks::game

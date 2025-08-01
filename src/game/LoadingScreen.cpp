@@ -6,6 +6,7 @@
 #include "engine/Scene.hpp"
 #include "engine/TickRegistry.hpp"
 #include "math/vec.hpp"
+#include "render/renderables/RenderableTex2D.hpp"
 
 namespace blocks::game {
 
@@ -19,10 +20,14 @@ LoadingScreen::LoadingScreen(Scene& scene)
     : Actor(scene),
       Drawable(scene.getDrawableScene()),
       TickHandler(scene.getTickRegistry()),
-      image1_(GlobalSubSystemStack::get().renderSystem().createRenderable(
-          RESOURCE_DIR "/loading0.png")),
-      image2_(GlobalSubSystemStack::get().renderSystem().createRenderable(
-          RESOURCE_DIR "/loading1.png")) {}
+      image1_(GlobalSubSystemStack::get()
+                  .renderSystem()
+                  .createRenderable<render::RenderableTex2D>(
+                      RESOURCE_DIR "/loading0.png")),
+      image2_(GlobalSubSystemStack::get()
+                  .renderSystem()
+                  .createRenderable<render::RenderableTex2D>(
+                      RESOURCE_DIR "/loading1.png")) {}
 
 void LoadingScreen::update(float deltaTimeSeconds) {
   toTransition -= deltaTimeSeconds;

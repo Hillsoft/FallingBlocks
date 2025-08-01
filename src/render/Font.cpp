@@ -11,7 +11,7 @@
 #include "loader/font/Font.hpp"
 #include "math/vec.hpp"
 #include "render/RenderSubSystem.hpp"
-#include "render/RenderableObject.hpp"
+#include "render/renderables/RenderableTex2D.hpp"
 #include "util/debug.hpp"
 
 namespace blocks::render {
@@ -23,7 +23,7 @@ constexpr float kFontScale = 1 / 10000.0f;
 float drawChar(
     RenderSubSystem& render,
     const loader::Font& fontData,
-    RenderableRef<UniformData> renderableObject,
+    RenderableRef<RenderableTex2D::InstanceData> renderableObject,
     WindowRef window,
     uint32_t c,
     math::Vec2 pos) {
@@ -103,8 +103,8 @@ float drawChar(
 Font::Font(RenderSubSystem& renderSystem, loader::Font font)
     : render_(&renderSystem),
       fontData_(std::move(font)),
-      renderableObject_(
-          renderSystem.createRenderable(RESOURCE_DIR "/white.png")) {}
+      renderableObject_(renderSystem.createRenderable<RenderableTex2D>(
+          RESOURCE_DIR "/white.png")) {}
 
 void Font::drawStringASCII(std::string_view str, math::Vec2 pos) {
   auto window = GlobalSubSystemStack::get().window();

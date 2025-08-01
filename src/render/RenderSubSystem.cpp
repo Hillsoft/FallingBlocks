@@ -4,7 +4,6 @@
 #include <array>
 #include <cstdint>
 #include <cstring>
-#include <filesystem>
 #include <iostream>
 #include <memory>
 #include <span>
@@ -29,8 +28,6 @@
 namespace blocks::render {
 
 namespace {
-
-constexpr int kMaxFramesInFlight = 2;
 
 RenderSubSystem::PipelineSynchronisationSet makeSynchronisationSet(
     VulkanGraphicsDevice& device) {
@@ -163,19 +160,6 @@ RenderableObject* RenderSubSystem::getRenderable(GenericRenderableRef ref) {
   DEBUG_ASSERT(
       ref.id < renderables_.size() && renderables_[ref.id].has_value());
   return &*renderables_[ref.id];
-}
-
-UniqueRenderableHandle<UniformData> RenderSubSystem::createRenderable(
-    const std::filesystem::path& texturePath) {
-  size_t id = renderables_.size();
-  renderables_.emplace_back(
-      std::in_place,
-      texturePath,
-      graphics_,
-      shaderProgramManager_,
-      textureManager_,
-      kMaxFramesInFlight);
-  return UniqueRenderableHandle{RenderableRef<UniformData>{id, *this}};
 }
 
 void RenderSubSystem::destroyRenderable(GenericRenderableRef ref) {

@@ -10,6 +10,7 @@
 #include "game/Paddle.hpp"
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
+#include "render/renderables/RenderableTex2D.hpp"
 
 namespace blocks::game {
 
@@ -38,8 +39,10 @@ Ball::Ball(Scene& scene)
       TickHandler(scene.getTickRegistry()),
       Drawable(scene.getDrawableScene()),
       vel_(randFloat(-1.f, 1.f), randFloat(-1.f, 1.f)),
-      sprite_(GlobalSubSystemStack::get().renderSystem().createRenderable(
-          RESOURCE_DIR "/test_image.bmp")) {}
+      sprite_(GlobalSubSystemStack::get()
+                  .renderSystem()
+                  .createRenderable<render::RenderableTex2D>(
+                      RESOURCE_DIR "/test_image.bmp")) {}
 
 void Ball::update(float deltaTimeSeconds) {
   math::Vec2 objSize(kBallSize, kBallSize);

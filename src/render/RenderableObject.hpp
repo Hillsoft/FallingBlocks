@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <filesystem>
-#include "math/vec.hpp"
+#include <utility>
 #include "render/VulkanBuffer.hpp"
 #include "render/VulkanDescriptorPool.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
@@ -15,11 +15,6 @@ namespace blocks::render {
 
 class RenderSubSystem;
 
-struct UniformData {
-  math::Vec<float, 2> pos0;
-  math::Vec<float, 2> pos1;
-};
-
 class RenderableObject {
  public:
   RenderableObject(
@@ -28,6 +23,17 @@ class RenderableObject {
       ShaderProgramManager& programManager,
       TextureManager& textureManager,
       uint32_t maxFramesInFlight);
+  RenderableObject(
+      VulkanShaderProgram* shaderProgram,
+      VulkanDescriptorPool descriptorPool,
+      VulkanBuffer vertexAttributes,
+      VulkanTexture* texture,
+      size_t instanceDataSize)
+      : shaderProgram_(shaderProgram),
+        descriptorPool_(std::move(descriptorPool)),
+        vertexAttributes_(std::move(vertexAttributes)),
+        texture_(texture),
+        instanceDataSize_(instanceDataSize) {}
 
  public:
   size_t getInstanceDataSize() const { return instanceDataSize_; }

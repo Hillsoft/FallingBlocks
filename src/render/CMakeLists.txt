@@ -1,4 +1,5 @@
 add_subdirectory(glfw_wrapper)
+add_subdirectory(renderables)
 add_subdirectory(resource)
 add_subdirectory(shaders)
 add_subdirectory(vulkan)
@@ -8,8 +9,9 @@ target_link_libraries(render.font
 	globalsubsystemstack
 	loader.font.font
 	math.vec
-	render.renderableobject
-	render.rendersubsystem)
+	render.renderables.renderabletex2d
+	render.rendersubsystem
+	util.debug)
 
 add_library(render.forwardallocatemappedbuffer STATIC "ForwardAllocateMappedBuffer.cpp" "ForwardAllocateMappedBuffer.hpp")
 target_link_libraries(render.forwardallocatemappedbuffer
@@ -25,7 +27,6 @@ target_link_libraries(render.quad
 
 add_library(render.renderableobject "RenderableObject.cpp" "RenderableObject.hpp")
 target_link_libraries(render.renderableobject
-	math.vec
 	render.quad
 	render.resource.shaderprogrammanager
 	render.resource.texturemanager

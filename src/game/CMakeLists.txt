@@ -9,7 +9,7 @@ target_link_libraries(game.ball
 	globalsubsystemstack
 	math.vec
 	physics.physicsscene
-	render.renderableobject
+	render.renderables.renderabletex2d
 	render.rendersubsystem)
 
 add_library(game.block "Block.hpp" "Block.cpp")
@@ -20,7 +20,7 @@ target_link_libraries(game.block
 	globalsubsystemstack
 	math.vec
 	physics.physicsscene
-	render.renderableobject
+	render.renderables.renderabletex2d
 	render.rendersubsystem)
 
 add_library(game.loadingscreen "LoadingScreen.hpp" "LoadingScreen.cpp")
@@ -31,7 +31,7 @@ target_link_libraries(game.loadingscreen
 	engine.tickregistry
 	globalsubsystemstack
 	math.vec
-	render.renderableobject
+	render.renderables.renderabletex2d
 	render.rendersubsystem)
 
 add_library(game.paddle "Paddle.hpp" "Paddle.cpp")
@@ -44,7 +44,7 @@ target_link_libraries(game.paddle
 	input.inputsubsystem
 	math.vec
 	physics.physicsscene
-	render.renderableobject
+	render.renderables.renderabletex2d
 	render.rendersubsystem)
 
 add_library(game.testtext "TestText.hpp" "TestText.cpp")
