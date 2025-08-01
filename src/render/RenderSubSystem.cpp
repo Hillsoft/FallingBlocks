@@ -13,7 +13,7 @@
 #include <vector>
 #include <GLFW/glfw3.h>
 #include "render/ForwardAllocateMappedBuffer.hpp"
-#include "render/RenderableQuad.hpp"
+#include "render/RenderableObject.hpp"
 #include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanPresentStack.hpp"
@@ -81,11 +81,11 @@ const Window* WindowRef::get() const {
   return renderSystem->getWindow(*this);
 }
 
-RenderableQuad* GenericRenderableRef::get() {
+RenderableObject* GenericRenderableRef::get() {
   return renderSystem_->getRenderable(*this);
 }
 
-const RenderableQuad* GenericRenderableRef::get() const {
+const RenderableObject* GenericRenderableRef::get() const {
   return renderSystem_->getRenderable(*this);
 }
 
@@ -159,7 +159,7 @@ Window* RenderSubSystem::getWindow(WindowRef ref) {
   return &*windows_[ref.id];
 }
 
-RenderableQuad* RenderSubSystem::getRenderable(GenericRenderableRef ref) {
+RenderableObject* RenderSubSystem::getRenderable(GenericRenderableRef ref) {
   DEBUG_ASSERT(
       ref.id < renderables_.size() && renderables_[ref.id].has_value());
   return &*renderables_[ref.id];
@@ -336,7 +336,7 @@ void RenderSubSystem::drawWindow(
 
   for (const auto& curGroup : objGroups) {
     // All commands in the group have the same renderable object,
-    RenderableQuad& renderable = *renderables_[curGroup[0].obj_.id];
+    RenderableObject& renderable = *renderables_[curGroup[0].obj_.id];
 
     ForwardAllocateMappedBuffer::Allocation instanceAlloc =
         instanceDataAllocator.alloc(

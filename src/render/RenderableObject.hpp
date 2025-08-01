@@ -20,9 +20,9 @@ struct UniformData {
   math::Vec<float, 2> pos1;
 };
 
-class RenderableQuad {
+class RenderableObject {
  public:
-  RenderableQuad(
+  RenderableObject(
       const std::filesystem::path& texturePath,
       VulkanGraphicsDevice& device,
       ShaderProgramManager& programManager,

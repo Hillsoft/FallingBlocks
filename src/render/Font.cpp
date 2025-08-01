@@ -11,7 +11,7 @@
 #include "loader/font/Font.hpp"
 #include "math/vec.hpp"
 #include "render/RenderSubSystem.hpp"
-#include "render/RenderableQuad.hpp"
+#include "render/RenderableObject.hpp"
 #include "util/debug.hpp"
 
 namespace blocks::render {

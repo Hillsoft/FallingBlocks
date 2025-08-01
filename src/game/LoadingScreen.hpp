@@ -5,7 +5,7 @@
 #include "engine/Scene.hpp"
 #include "engine/TickRegistry.hpp"
 #include "render/RenderSubSystem.hpp"
-#include "render/RenderableQuad.hpp"
+#include "render/RenderableObject.hpp"
 
 namespace blocks::game {
 

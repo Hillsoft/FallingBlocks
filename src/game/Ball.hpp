@@ -7,7 +7,7 @@
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
 #include "render/RenderSubSystem.hpp"
-#include "render/RenderableQuad.hpp"
+#include "render/RenderableObject.hpp"
 
 namespace blocks::game {
 

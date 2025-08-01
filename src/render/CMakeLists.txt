@@ -8,7 +8,7 @@ target_link_libraries(render.font
 	globalsubsystemstack
 	loader.font.font
 	math.vec
-	render.renderablequad
+	render.renderableobject
 	render.rendersubsystem)
 
 add_library(render.forwardallocatemappedbuffer STATIC "ForwardAllocateMappedBuffer.cpp" "ForwardAllocateMappedBuffer.hpp")
@@ -23,8 +23,8 @@ target_link_libraries(render.quad
 	render.vulkangraphicsdevice
 	render.vulkanshader)
 
-add_library(render.renderablequad "RenderableQuad.cpp" "RenderableQuad.hpp")
-target_link_libraries(render.renderablequad
+add_library(render.renderableobject "RenderableObject.cpp" "RenderableObject.hpp")
+target_link_libraries(render.renderableobject
 	math.vec
 	render.quad
 	render.resource.shaderprogrammanager
@@ -39,7 +39,7 @@ target_link_libraries(render.renderablequad
 add_library(render.rendersubsystem STATIC "RenderSubSystem.cpp" "RenderSubSystem.hpp")
 target_link_libraries(render.rendersubsystem
 	render.forwardallocatemappedbuffer
-	render.renderablequad
+	render.renderableobject
 	render.resource.shaderprogrammanager
 	render.resource.texturemanager
 	render.vulkancommandbuffer

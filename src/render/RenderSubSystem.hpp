@@ -9,7 +9,7 @@
 #include <vector>
 #include <GLFW/glfw3.h>
 #include "render/ForwardAllocateMappedBuffer.hpp"
-#include "render/RenderableQuad.hpp"
+#include "render/RenderableObject.hpp"
 #include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
@@ -86,12 +86,12 @@ struct GenericRenderableRef {
 
   RenderSubSystem* renderSystem() { return renderSystem_; }
 
-  RenderableQuad* get();
-  const RenderableQuad* get() const;
-  RenderableQuad& operator*() { return *get(); }
-  const RenderableQuad& operator*() const { return *get(); }
-  RenderableQuad* operator->() { return get(); }
-  const RenderableQuad* operator->() const { return get(); }
+  RenderableObject* get();
+  const RenderableObject* get() const;
+  RenderableObject& operator*() { return *get(); }
+  const RenderableObject& operator*() const { return *get(); }
+  RenderableObject* operator->() { return get(); }
+  const RenderableObject* operator->() const { return get(); }
 };
 
 template <typename TInstanceData>
@@ -111,12 +111,12 @@ struct RenderableRef {
 
   RenderSubSystem* renderSystem() { return rawRef_.renderSystem(); }
 
-  RenderableQuad* get() { return rawRef_.get(); }
-  const RenderableQuad* get() const { return rawRef_.get(); }
-  RenderableQuad& operator*() { return *get(); }
-  const RenderableQuad& operator*() const { return *get(); }
-  RenderableQuad* operator->() { return get(); }
-  const RenderableQuad* operator->() const { return get(); }
+  RenderableObject* get() { return rawRef_.get(); }
+  const RenderableObject* get() const { return rawRef_.get(); }
+  RenderableObject& operator*() { return *get(); }
+  const RenderableObject& operator*() const { return *get(); }
+  RenderableObject* operator->() { return get(); }
+  const RenderableObject* operator->() const { return get(); }
 };
 
 template <typename TInstanceData>
@@ -177,7 +177,7 @@ class RenderSubSystem {
     destroyRenderable(ref.rawRef_);
   }
 
-  RenderableQuad* getRenderable(GenericRenderableRef ref);
+  RenderableObject* getRenderable(GenericRenderableRef ref);
 
   template <typename TInstanceData>
   void drawObject(
@@ -219,8 +219,8 @@ class RenderSubSystem {
   TextureManager textureManager_;
   std::vector<PipelineSynchronisationSet> synchronisationSets_;
   std::vector<std::unique_ptr<Window>> windows_;
-  std::vector<std::optional<RenderableQuad>> renderables_;
-  std::vector<RenderableQuad> renderablesPendingDestruction_;
+  std::vector<std::optional<RenderableObject>> renderables_;
+  std::vector<RenderableObject> renderablesPendingDestruction_;
   std::vector<ForwardAllocateMappedBuffer> instanceDataBuffers_;
   util::BlockForwardAllocatedArena instanceDataCPUBuffer_;
 

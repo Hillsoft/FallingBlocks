@@ -1,4 +1,4 @@
-#include "render/RenderableQuad.hpp"
+#include "render/RenderableObject.hpp"
 
 #include <cstdint>
 #include <filesystem>
@@ -12,7 +12,7 @@
 
 namespace blocks::render {
 
-RenderableQuad::RenderableQuad(
+RenderableObject::RenderableObject(
     const std::filesystem::path& texturePath,
     VulkanGraphicsDevice& device,
     ShaderProgramManager& programManager,
