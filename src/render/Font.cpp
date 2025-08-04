@@ -27,8 +27,8 @@ constexpr float kFontScale = 1 / 10000.0f;
 
 struct GlyphPoint {
   math::Vec<int32_t, 2> point;
-  bool onCurve;
-  bool contourEnd;
+  uint32_t onCurve;
+  uint32_t contourEnd;
 };
 
 VulkanBuffer makeFontBuffer(
@@ -71,7 +71,8 @@ VulkanBuffer makeFontBuffer(
   return VulkanBuffer{
       device,
       std::span<std::byte>{
-          reinterpret_cast<std::byte*>(pointData.data()), pointData.size()},
+          reinterpret_cast<std::byte*>(pointData.data()),
+          pointData.size() * sizeof(GlyphPoint)},
       VK_BUFFER_USAGE_STORAGE_BUFFER_BIT};
 }
 
