@@ -36,11 +36,16 @@ void main() {
 
   int windingNumber = 0;
 
+  int contourStart = glyphStart;
   for (int glyphIndex = glyphStart; glyphIndex < glyphEnd - 1; glyphIndex++) {
-    windingNumber += intersects(fontData.glyphPoints[glyphIndex], fontData.glyphPoints[glyphIndex + 1]);
+    if (fontData.glyphPoints[glyphIndex].contourEnd) {
+	  windingNumber += intersects(fontData.glyphPoints[glyphIndex], fontData.glyphPoints[contourStart]);
+	  contourStart = glyphIndex + 1;
+	  glyphIndex++;
+	} else {
+	  windingNumber += intersects(fontData.glyphPoints[glyphIndex], fontData.glyphPoints[glyphIndex + 1]);
+	}
   }
-
-  windingNumber += intersects(fontData.glyphPoints[glyphEnd - 1], fontData.glyphPoints[glyphStart]);
 
   if (windingNumber == 0) {
     outColor = vec4(0.5, 0.5, 0.5, 0.5);
