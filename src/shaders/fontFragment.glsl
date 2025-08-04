@@ -41,14 +41,13 @@ void main() {
     if (fontData.glyphPoints[glyphIndex].contourEnd) {
 	  windingNumber += intersects(fontData.glyphPoints[glyphIndex], fontData.glyphPoints[contourStart]);
 	  contourStart = glyphIndex + 1;
-	  glyphIndex++;
 	} else {
 	  windingNumber += intersects(fontData.glyphPoints[glyphIndex], fontData.glyphPoints[glyphIndex + 1]);
 	}
   }
 
   if (windingNumber == 0) {
-    outColor = vec4(0.5, 0.5, 0.5, 0.5);
+    outColor = vec4(0.0, 0.0, 0.0, 0.0);
   }
   else {
     outColor = vec4(1.0, 1.0, 1.0, 1.0);
