@@ -18,16 +18,16 @@ layout(std140, binding = 0) readonly buffer FontData{
 
 layout(location = 0) out vec4 outColor;
 
-bool intersects(GlyphPoint a, GlyphPoint b) {
+int intersects(GlyphPoint a, GlyphPoint b) {
   if ((a.point.y < uv.y && b.point.y > uv.y) || (a.point.y > uv.y && b.point.y < uv.y)) {
 	float dx = (b.point.x - a.point.x) / (b.point.y - a.point.y);
 	float xIntercept = a.point.x + dx * (uv.y - a.point.y);
 	if (xIntercept > uv.x) {
-	  return true;
+	  return b.point.y > a.point.y ? 1 : -1;
 	}
   }
 
-  return false;
+  return 0;
 }
 
 void main() {
@@ -37,16 +37,12 @@ void main() {
   int windingNumber = 0;
 
   for (int glyphIndex = glyphStart; glyphIndex < glyphEnd - 1; glyphIndex++) {
-    if (intersects(fontData.glyphPoints[glyphIndex], fontData.glyphPoints[glyphIndex + 1])) {
-	  windingNumber++;
-	}
+    windingNumber += intersects(fontData.glyphPoints[glyphIndex], fontData.glyphPoints[glyphIndex + 1]);
   }
 
-  if (intersects(fontData.glyphPoints[glyphEnd - 1], fontData.glyphPoints[glyphStart])) {
-    windingNumber++;
-  }
+  windingNumber += intersects(fontData.glyphPoints[glyphEnd - 1], fontData.glyphPoints[glyphStart]);
 
-  if (windingNumber % 2 == 0) {
+  if (windingNumber == 0) {
     outColor = vec4(0.5, 0.5, 0.5, 0.5);
   }
   else {
