@@ -173,4 +173,116 @@ Vec<TNum, size> abs(const Vec<TNum, size>& a)
   return result;
 }
 
+template <typename TNum, size_t sizeWidth, size_t sizeHeight>
+class Matrix {
+ public:
+  Matrix(const Matrix& other) = default;
+  Matrix(Matrix&& other) = default;
+  Matrix& operator=(const Matrix& other) = default;
+  Matrix& operator=(Matrix&& other) = default;
+
+  template <typename... TArgs>
+  Matrix(TArgs&&... args)
+    requires(std::conjunction_v<std::is_convertible<TArgs, TNum>...>)
+      : data_{std::forward<TArgs>(args)...} {}
+
+  template <typename TNum2>
+  Matrix(const Matrix<TNum2, sizeWidth, sizeHeight>& other)
+    requires(std::is_convertible_v<TNum2, TNum>)
+      : data_() {
+    for (int i = 0; i < sizeWidth * sizeHeight; i++) {
+      data_[i] = other.data_[i];
+    }
+  }
+
+  TNum& at(size_t x, size_t y) {
+    DEBUG_ASSERT(x < sizeWidth && y < sizeHeight);
+    return data_[x + y * sizeWidth];
+  }
+  const TNum& at(size_t x, size_t y) const {
+    DEBUG_ASSERT(x < sizeWidth && y < sizeHeight);
+    return data_[x + y * sizeWidth];
+  }
+
+  static Matrix identity()
+    requires(sizeWidth == sizeHeight)
+  {
+    Matrix result{};
+    for (size_t i = 0; i < sizeWidth; i++) {
+      result.at(i, i) = 1.0f;
+    }
+    return result;
+  }
+
+  static Matrix scale(TNum factor)
+    requires(sizeWidth == sizeHeight)
+  {
+    Matrix result = identity();
+    result *= factor;
+    return result;
+  }
+
+  static Matrix scale(const Vec<TNum, sizeWidth>& v)
+    requires(sizeWidth == sizeHeight)
+  {
+    Matrix result = identity();
+    for (size_t i = 0; i < sizeWidth; i++) {
+      result.at(i, i) = v.at(i);
+    }
+    return result;
+  }
+
+  static Matrix scale(const Vec<TNum, sizeWidth - 1>& v)
+    requires(sizeWidth == sizeHeight)
+  {
+    Matrix result = identity();
+    for (size_t i = 0; i < sizeWidth - 1; i++) {
+      result.at(i, i) = v.at(i);
+    }
+    return result;
+  }
+
+  static Matrix translate(const Vec<TNum, sizeHeight - 1>& v) {
+    Matrix result = identity();
+    for (size_t i = 0; i < sizeHeight - 1; i++) {
+      result.at(sizeWidth - 1, i) = v.at(i);
+    }
+    return result;
+  }
+
+ private:
+  std::array<TNum, sizeWidth * sizeHeight> data_;
+};
+
+using Mat2 = Matrix<float, 2, 2>;
+using Mat3 = Matrix<float, 3, 3>;
+
+template <typename TNum, size_t sizeWidth, size_t sizeHeight>
+Matrix<TNum, sizeWidth, sizeHeight> operator*(
+    const Matrix<TNum, sizeWidth, sizeHeight>& a, TNum fac)
+  requires(std::is_arithmetic_v<TNum>)
+{
+  Matrix<TNum, sizeWidth, sizeHeight> result{};
+  for (size_t y = 0; y < sizeHeight; y++) {
+    for (size_t x = 0; x < sizeHeight; x++) {
+      result.at(x, y) = a.at(x, y) * fac;
+    }
+  }
+  return result;
+}
+
+template <typename TNum, size_t sizeA, size_t sizeB, size_t sizeC>
+Matrix<TNum, sizeC, sizeB> operator*(
+    const Matrix<TNum, sizeA, sizeB>& l, const Matrix<TNum, sizeC, sizeA>& r) {
+  Matrix<TNum, sizeC, sizeB> result;
+  for (size_t y = 0; y < sizeB; y++) {
+    for (size_t x = 0; x < sizeC; x++) {
+      for (size_t z = 0; z < sizeA; z++) {
+        result.at(x, y) += l.at(z, y) * r.at(x, z);
+      }
+    }
+  }
+  return result;
+}
+
 } // namespace math
