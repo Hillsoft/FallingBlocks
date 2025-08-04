@@ -166,6 +166,8 @@ class RenderSubSystem {
     vulkan::UniqueHandle<VkFence> inFlightFence;
   };
 
+  VulkanGraphicsDevice& getGraphicsDevice() { return graphics_; }
+
   UniqueWindowHandle createWindow();
   void destroyWindow(WindowRef ref);
 

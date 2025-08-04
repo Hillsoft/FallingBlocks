@@ -10,6 +10,18 @@ target_link_libraries(render.renderables.renderablecolor2d
 	render.vulkangraphicsdevice
 	render.vulkanshaderprogram)
 
+add_library(render.renderables.renderablefont "RenderableFont.hpp" "RenderableFont.cpp")
+target_link_libraries(render.renderables.renderablefont
+	render.renderableobject
+	render.quad
+	render.resource.shaderprogrammanager
+	render.resource.texturemanager
+	render.shaders.fontshader
+	render.vulkanbuffer
+	render.vulkandescriptorpool
+	render.vulkangraphicsdevice
+	render.vulkanshaderprogram)
+
 add_library(render.renderables.renderabletex2d "RenderableTex2D.hpp" "RenderableTex2D.cpp")
 target_link_libraries(render.renderables.renderabletex2d
 	math.vec

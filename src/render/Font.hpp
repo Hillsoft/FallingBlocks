@@ -1,10 +1,14 @@
 #pragma once
 
+#include <cstdint>
 #include <string_view>
+#include <utility>
+#include <vector>
 #include "loader/font/Font.hpp"
 #include "math/vec.hpp"
 #include "render/RenderSubSystem.hpp"
-#include "render/renderables/RenderableColor2D.hpp"
+#include "render/VulkanBuffer.hpp"
+#include "render/renderables/RenderableFont.hpp"
 
 namespace blocks::render {
 
@@ -17,7 +21,9 @@ class Font {
  private:
   RenderSubSystem* render_;
   loader::Font fontData_;
-  UniqueRenderableHandle<render::RenderableColor2D::InstanceData>
+  std::vector<std::pair<int32_t, int32_t>> glyphRanges_;
+  VulkanBuffer fontBuffer_;
+  UniqueRenderableHandle<render::RenderableFont::InstanceData>
       renderableObject_;
 };
 

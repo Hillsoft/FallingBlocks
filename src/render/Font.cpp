@@ -1,17 +1,22 @@
 #include "render/Font.hpp"
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <span>
 #include <string_view>
 #include <utility>
 #include <variant>
 #include <vector>
+#include <GLFW/glfw3.h>
 #include "GlobalSubSystemStack.hpp"
 #include "loader/font/Font.hpp"
 #include "math/vec.hpp"
 #include "render/RenderSubSystem.hpp"
-#include "render/renderables/RenderableColor2D.hpp"
+#include "render/VulkanBuffer.hpp"
+#include "render/VulkanGraphicsDevice.hpp"
+#include "render/renderables/RenderableFont.hpp"
 #include "util/debug.hpp"
 
 namespace blocks::render {
@@ -20,10 +25,61 @@ namespace {
 
 constexpr float kFontScale = 1 / 10000.0f;
 
+struct GlyphPoint {
+  math::Vec<int32_t, 2> point;
+  bool onCurve;
+  bool contourEnd;
+};
+
+VulkanBuffer makeFontBuffer(
+    VulkanGraphicsDevice& device,
+    const loader::Font& font,
+    std::vector<std::pair<int32_t, int32_t>>& glyphRanges) {
+  std::vector<GlyphPoint> pointData;
+  glyphRanges.clear();
+
+  for (const auto& glyph : font.glyphs) {
+    int32_t glyphStart = static_cast<int32_t>(pointData.size());
+
+    if (std::holds_alternative<loader::SimpleGlyphData>(glyph.data)) {
+      const auto& glyphData = std::get<loader::SimpleGlyphData>(glyph.data);
+      DEBUG_ASSERT(
+          glyphData.onCurve.size() == glyphData.xCoords.size() &&
+          glyphData.xCoords.size() == glyphData.yCoords.size());
+
+      for (size_t contourIndex = 0, pointIndex = 0;
+           pointIndex < glyphData.xCoords.size();
+           pointIndex++) {
+        DEBUG_ASSERT(contourIndex < glyphData.endPoints.size());
+        bool contourEnd = pointIndex == glyphData.endPoints[contourIndex];
+
+        pointData.emplace_back(
+            math::Vec<int32_t, 2>{
+                glyphData.xCoords[pointIndex], glyphData.yCoords[pointIndex]},
+            glyphData.onCurve[pointIndex],
+            contourEnd);
+        if (contourEnd) {
+          contourIndex++;
+        }
+      }
+    }
+
+    glyphRanges.emplace_back(
+        glyphStart, static_cast<int32_t>(pointData.size()));
+  }
+
+  return VulkanBuffer{
+      device,
+      std::span<std::byte>{
+          reinterpret_cast<std::byte*>(pointData.data()), pointData.size()},
+      VK_BUFFER_USAGE_STORAGE_BUFFER_BIT};
+}
+
 float drawChar(
     RenderSubSystem& render,
     const loader::Font& fontData,
-    RenderableRef<RenderableColor2D::InstanceData> renderableObject,
+    const std::vector<std::pair<int32_t, int32_t>>& glyphRanges,
+    RenderableRef<RenderableFont::InstanceData> renderableObject,
     WindowRef window,
     uint32_t c,
     math::Vec2 pos) {
@@ -35,17 +91,27 @@ float drawChar(
     render.drawObject(
         window,
         renderableObject,
-        {pos +
-             math::Vec2{
-                 static_cast<float>(metrics.leftSideBearing) * kFontScale +
-                     static_cast<float>(glyph.xMin.rawValue) * kFontScale,
-                 -static_cast<float>(glyph.yMax.rawValue) * kFontScale},
-         pos +
-             math::Vec2{
-                 static_cast<float>(metrics.leftSideBearing) * kFontScale +
-                     static_cast<float>(glyph.xMax.rawValue) * kFontScale,
-                 -static_cast<float>(glyph.yMin.rawValue) * kFontScale},
-         math::Vec4{0.6f, 1.0f, 0.6f, 1.0f}});
+        RenderableFont::InstanceData{
+            pos +
+                math::Vec2{
+                    static_cast<float>(metrics.leftSideBearing) * kFontScale +
+                        static_cast<float>(glyph.xMin.rawValue) * kFontScale,
+                    -static_cast<float>(glyph.yMax.rawValue) * kFontScale},
+            pos +
+                math::Vec2{
+                    static_cast<float>(metrics.leftSideBearing) * kFontScale +
+                        static_cast<float>(glyph.xMax.rawValue) * kFontScale,
+                    -static_cast<float>(glyph.yMin.rawValue) * kFontScale},
+            glyphRanges[glyphIndex].first,
+            glyphRanges[glyphIndex].second,
+            math::Mat3::translate(math::Vec2{
+                static_cast<float>(glyph.xMin.rawValue),
+                static_cast<float>(glyph.yMin.rawValue)}) *
+                math::Mat3::scale(math::Vec2{
+                    static_cast<float>(
+                        glyph.xMax.rawValue - glyph.xMin.rawValue),
+                    static_cast<float>(
+                        glyph.yMax.rawValue - glyph.yMin.rawValue)})});
   } else if (std::holds_alternative<std::vector<loader::CompoundGlyphData>>(
                  glyph.data)) {
     for (const auto& subGlyphDetails :
@@ -83,17 +149,31 @@ float drawChar(
       render.drawObject(
           window,
           renderableObject,
-          {pos +
-               transformPos(math::Vec2{
-                   static_cast<float>(metrics.leftSideBearing) * kFontScale +
-                       static_cast<float>(subGlyph.xMin.rawValue) * kFontScale,
-                   -static_cast<float>(subGlyph.yMax.rawValue) * kFontScale}),
-           pos +
-               transformPos(math::Vec2{
-                   static_cast<float>(metrics.leftSideBearing) * kFontScale +
-                       static_cast<float>(subGlyph.xMax.rawValue) * kFontScale,
-                   -static_cast<float>(subGlyph.yMin.rawValue) * kFontScale}),
-           math::Vec4{0.6f, 0.6f, 1.0f, 1.0f}});
+          RenderableFont::InstanceData{
+              pos +
+                  transformPos(math::Vec2{
+                      static_cast<float>(metrics.leftSideBearing) * kFontScale +
+                          static_cast<float>(subGlyph.xMin.rawValue) *
+                              kFontScale,
+                      -static_cast<float>(subGlyph.yMax.rawValue) *
+                          kFontScale}),
+              pos +
+                  transformPos(math::Vec2{
+                      static_cast<float>(metrics.leftSideBearing) * kFontScale +
+                          static_cast<float>(subGlyph.xMax.rawValue) *
+                              kFontScale,
+                      -static_cast<float>(subGlyph.yMin.rawValue) *
+                          kFontScale}),
+              glyphRanges[glyphIndex].first,
+              glyphRanges[glyphIndex].second,
+              math::Mat3::translate(math::Vec2{
+                  static_cast<float>(glyph.xMin.rawValue),
+                  static_cast<float>(glyph.yMin.rawValue)}) *
+                  math::Mat3::scale(math::Vec2{
+                      static_cast<float>(
+                          glyph.xMax.rawValue - glyph.xMin.rawValue),
+                      static_cast<float>(
+                          glyph.yMax.rawValue - glyph.yMin.rawValue)})});
     }
   }
 
@@ -105,13 +185,17 @@ float drawChar(
 Font::Font(RenderSubSystem& renderSystem, loader::Font font)
     : render_(&renderSystem),
       fontData_(std::move(font)),
-      renderableObject_(renderSystem.createRenderable<RenderableColor2D>()) {}
+      glyphRanges_(),
+      fontBuffer_(makeFontBuffer(
+          renderSystem.getGraphicsDevice(), fontData_, glyphRanges_)),
+      renderableObject_(
+          renderSystem.createRenderable<RenderableFont>(fontBuffer_)) {}
 
 void Font::drawStringASCII(std::string_view str, math::Vec2 pos) {
   auto window = GlobalSubSystemStack::get().window();
   for (unsigned char c : str) {
-    float advance =
-        drawChar(*render_, fontData_, *renderableObject_, window, c, pos);
+    float advance = drawChar(
+        *render_, fontData_, glyphRanges_, *renderableObject_, window, c, pos);
 
     pos.x() += advance;
   }

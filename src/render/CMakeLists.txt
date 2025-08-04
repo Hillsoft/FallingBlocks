@@ -9,8 +9,10 @@ target_link_libraries(render.font
 	globalsubsystemstack
 	loader.font.font
 	math.vec
-	render.renderables.renderablecolor2d
+	render.renderables.renderablefont
 	render.rendersubsystem
+	render.vulkangraphicsdevice
+	render.vulkanbuffer
 	util.debug)
 
 add_library(render.forwardallocatemappedbuffer STATIC "ForwardAllocateMappedBuffer.cpp" "ForwardAllocateMappedBuffer.hpp")
