@@ -84,7 +84,7 @@ void main() {
 	  int nextNextIndex = nextIndex + 1;
 	  if (fontData.glyphPoints[nextIndex].contourEnd) {
 	    nextNextIndex = contourStart;
-		contourStart = glyphIndex + 1;
+		contourStart = nextIndex + 1;
 	  }
 	  windingNumber += intersectsQuadratic(fontData.glyphPoints[glyphIndex].point, fontData.glyphPoints[nextIndex].point, fontData.glyphPoints[nextNextIndex].point);
 	  glyphIndex++;
