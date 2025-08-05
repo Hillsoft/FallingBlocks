@@ -18,16 +18,20 @@ layout(std140, binding = 0) readonly buffer FontData{
 
 layout(location = 0) out vec4 outColor;
 
-int intersects(GlyphPoint a, GlyphPoint b) {
-  if ((a.point.y < uv.y && b.point.y > uv.y) || (a.point.y > uv.y && b.point.y < uv.y)) {
-	float dx = (b.point.x - a.point.x) / (b.point.y - a.point.y);
-	float xIntercept = a.point.x + dx * (uv.y - a.point.y);
+int intersectsStraight(ivec2 a, ivec2 b) {
+  if ((a.y < uv.y && b.y > uv.y) || (a.y > uv.y && b.y < uv.y)) {
+	float dx = (b.x - a.x) / (b.y - a.y);
+	float xIntercept = a.x + dx * (uv.y - a.y);
 	if (xIntercept > uv.x) {
-	  return b.point.y > a.point.y ? 1 : -1;
+	  return b.y > a.y ? 1 : -1;
 	}
   }
 
   return 0;
+}
+
+int intersectsQuadratic(ivec2 a, ivec2 handle, ivec2 b) {
+  return intersectsStraight(a, b);
 }
 
 void main() {
@@ -38,11 +42,23 @@ void main() {
 
   int contourStart = glyphStart;
   for (int glyphIndex = glyphStart; glyphIndex < glyphEnd - 1; glyphIndex++) {
-    if (fontData.glyphPoints[glyphIndex].contourEnd) {
-	  windingNumber += intersects(fontData.glyphPoints[glyphIndex], fontData.glyphPoints[contourStart]);
+	int nextIndex = glyphIndex + 1;
+	if (fontData.glyphPoints[glyphIndex].contourEnd) {
+	  nextIndex = contourStart;
 	  contourStart = glyphIndex + 1;
-	} else {
-	  windingNumber += intersects(fontData.glyphPoints[glyphIndex], fontData.glyphPoints[glyphIndex + 1]);
+	}
+
+	if (fontData.glyphPoints[nextIndex].onCurve) {
+	  windingNumber += intersectsStraight(fontData.glyphPoints[glyphIndex].point, fontData.glyphPoints[nextIndex].point);
+	}
+	else {
+	  int nextNextIndex = nextIndex + 1;
+	  if (fontData.glyphPoints[nextIndex].contourEnd) {
+	    nextNextIndex = contourStart;
+		contourStart = glyphIndex + 1;
+	  }
+	  windingNumber += intersectsQuadratic(fontData.glyphPoints[glyphIndex].point, fontData.glyphPoints[nextIndex].point, fontData.glyphPoints[nextNextIndex].point);
+	  glyphIndex++;
 	}
   }
 
