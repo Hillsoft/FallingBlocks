@@ -20,8 +20,7 @@ layout(location = 0) out vec4 outColor;
 
 int intersectsStraight(ivec2 a, ivec2 b) {
   if ((a.y < uv.y && b.y > uv.y) || (a.y > uv.y && b.y < uv.y)) {
-	float dx = (b.x - a.x) / (b.y - a.y);
-	float xIntercept = a.x + dx * (uv.y - a.y);
+	float xIntercept = a.x + (uv.y - a.y) * (b.x - a.x) / (b.y - a.y);
 	if (xIntercept > uv.x) {
 	  return b.y > a.y ? 1 : -1;
 	}
