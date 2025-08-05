@@ -221,13 +221,13 @@ float drawChar(
               glyphRanges[subGlyphDetails.glpyhIndex].first,
               glyphRanges[subGlyphDetails.glpyhIndex].second,
               math::Mat3::translate(math::Vec2{
-                  static_cast<float>(glyph.xMin.rawValue),
-                  static_cast<float>(glyph.yMin.rawValue)}) *
+                  static_cast<float>(subGlyph.xMin.rawValue),
+                  static_cast<float>(subGlyph.yMin.rawValue)}) *
                   math::Mat3::scale(math::Vec2{
                       static_cast<float>(
-                          glyph.xMax.rawValue - glyph.xMin.rawValue),
+                          subGlyph.xMax.rawValue - subGlyph.xMin.rawValue),
                       static_cast<float>(
-                          glyph.yMax.rawValue - glyph.yMin.rawValue)})});
+                          subGlyph.yMax.rawValue - subGlyph.yMin.rawValue)})});
     }
   }
 
