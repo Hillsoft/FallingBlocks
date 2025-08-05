@@ -111,6 +111,8 @@ VulkanBuffer makeFontBuffer(
                   glyphData.xCoords[pointIndex], glyphData.yCoords[pointIndex]},
               glyphData.onCurve[pointIndex],
               pointIndex == contourEnd);
+
+          lastOnCurve = glyphData.onCurve[pointIndex];
         }
       }
     }
