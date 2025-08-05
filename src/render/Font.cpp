@@ -17,6 +17,7 @@
 #include "render/VulkanBuffer.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/renderables/RenderableFont.hpp"
+#include "util/Generator.hpp"
 #include "util/debug.hpp"
 
 namespace blocks::render {
@@ -30,6 +31,14 @@ struct GlyphPoint {
   uint32_t onCurve;
   uint32_t contourEnd;
 };
+
+util::Generator<std::pair<size_t, size_t>> contourRanges(
+    std::span<const uint16_t> endPoints) {
+  co_yield std::pair<size_t, size_t>{0, endPoints[0]};
+  for (size_t i = 1; i < endPoints.size(); i++) {
+    co_yield std::pair<size_t, size_t>{endPoints[i - 1] + 1, endPoints[i]};
+  }
+}
 
 VulkanBuffer makeFontBuffer(
     VulkanGraphicsDevice& device,
@@ -47,19 +56,61 @@ VulkanBuffer makeFontBuffer(
           glyphData.onCurve.size() == glyphData.xCoords.size() &&
           glyphData.xCoords.size() == glyphData.yCoords.size());
 
-      for (size_t contourIndex = 0, pointIndex = 0;
-           pointIndex < glyphData.xCoords.size();
-           pointIndex++) {
-        DEBUG_ASSERT(contourIndex < glyphData.endPoints.size());
-        bool contourEnd = pointIndex == glyphData.endPoints[contourIndex];
+      if (glyphData.endPoints.size() == 0) {
+        continue;
+      }
 
-        pointData.emplace_back(
-            math::Vec<int32_t, 2>{
-                glyphData.xCoords[pointIndex], glyphData.yCoords[pointIndex]},
-            glyphData.onCurve[pointIndex],
-            contourEnd);
-        if (contourEnd) {
-          contourIndex++;
+      for (auto [contourStart, contourEnd] :
+           contourRanges(glyphData.endPoints)) {
+        // Ensure the first point is on curve
+        if (!glyphData.onCurve[contourStart]) {
+          if (!glyphData.onCurve[contourEnd]) {
+            // Insert virtual point
+            pointData.emplace_back(
+                math::Vec<int32_t, 2>{
+                    (glyphData.xCoords[contourStart] +
+                     glyphData.xCoords[contourEnd]) /
+                        2,
+                    (glyphData.yCoords[contourStart] +
+                     glyphData.yCoords[contourEnd]) /
+                        2},
+                true,
+                false);
+          } else {
+            // Make the last point the first
+            contourEnd--;
+
+            pointData.emplace_back(
+                math::Vec<int32_t, 2>{
+                    glyphData.xCoords[contourEnd],
+                    glyphData.yCoords[contourEnd]},
+                true,
+                false);
+          }
+        }
+
+        bool lastOnCurve = true;
+        for (size_t pointIndex = contourStart; pointIndex <= contourEnd;
+             pointIndex++) {
+          if (!lastOnCurve && !glyphData.onCurve[pointIndex]) {
+            // Make virtual point explicit
+            pointData.emplace_back(
+                math::Vec<int32_t, 2>{
+                    (glyphData.xCoords[pointIndex - 1] +
+                     glyphData.xCoords[pointIndex]) /
+                        2,
+                    (glyphData.yCoords[pointIndex - 1] +
+                     glyphData.yCoords[pointIndex]) /
+                        2},
+                true,
+                false);
+          }
+
+          pointData.emplace_back(
+              math::Vec<int32_t, 2>{
+                  glyphData.xCoords[pointIndex], glyphData.yCoords[pointIndex]},
+              glyphData.onCurve[pointIndex],
+              pointIndex == contourEnd);
         }
       }
     }
