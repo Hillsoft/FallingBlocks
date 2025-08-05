@@ -197,11 +197,11 @@ class Matrix {
 
   TNum& at(size_t x, size_t y) {
     DEBUG_ASSERT(x < sizeWidth && y < sizeHeight);
-    return data_[x + y * sizeWidth];
+    return data_[x * sizeHeight + y];
   }
   const TNum& at(size_t x, size_t y) const {
     DEBUG_ASSERT(x < sizeWidth && y < sizeHeight);
-    return data_[x + y * sizeWidth];
+    return data_[x * sizeHeight + y];
   }
 
   static Matrix identity()
