@@ -165,8 +165,8 @@ float drawChar(
                               kFontScale,
                       -static_cast<float>(subGlyph.yMin.rawValue) *
                           kFontScale}),
-              glyphRanges[glyphIndex].first,
-              glyphRanges[glyphIndex].second,
+              glyphRanges[subGlyphDetails.glpyhIndex].first,
+              glyphRanges[subGlyphDetails.glpyhIndex].second,
               math::Mat3::translate(math::Vec2{
                   static_cast<float>(glyph.xMin.rawValue),
                   static_cast<float>(glyph.yMin.rawValue)}) *
