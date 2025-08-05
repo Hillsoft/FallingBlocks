@@ -70,7 +70,7 @@ void main() {
   int windingNumber = 0;
 
   int contourStart = glyphStart;
-  for (int glyphIndex = glyphStart; glyphIndex < glyphEnd - 1; glyphIndex++) {
+  for (int glyphIndex = glyphStart; glyphIndex < glyphEnd; glyphIndex++) {
 	int nextIndex = glyphIndex + 1;
 	if (fontData.glyphPoints[glyphIndex].contourEnd) {
 	  nextIndex = contourStart;
