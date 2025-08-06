@@ -18,7 +18,7 @@ constexpr unsigned char kFourByteHeaderMask = 0b00000111;
 
 } // namespace
 
-Generator<uint32_t> util::unicodeDecode(std::string_view str) {
+Generator<uint32_t> unicodeDecode(std::string_view str) {
   std::span<const unsigned char> strBytes{
       reinterpret_cast<const unsigned char*>(str.data()), str.size()};
 
@@ -58,7 +58,7 @@ Generator<uint32_t> util::unicodeDecode(std::string_view str) {
           throw std::runtime_error{"Invalid UTF-8 sequence"};
         }
         co_yield (
-            static_cast<uint32_t>(strBytes[0] & kThreeByteHeaderMask) << 18) |
+            static_cast<uint32_t>(strBytes[0] & kFourByteHeaderMask) << 18) |
             (static_cast<uint32_t>(strBytes[1] & kContinuationByteMask) << 12) |
             (static_cast<uint32_t>(strBytes[2] & kContinuationByteMask) << 6) |
             static_cast<uint32_t>(strBytes[3] & kContinuationByteMask);
