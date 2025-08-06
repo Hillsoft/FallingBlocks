@@ -13,7 +13,9 @@ target_link_libraries(render.font
 	render.rendersubsystem
 	render.vulkangraphicsdevice
 	render.vulkanbuffer
-	util.debug)
+	util.debug
+	util.generator
+	util.unicode)
 
 add_library(render.forwardallocatemappedbuffer STATIC "ForwardAllocateMappedBuffer.cpp" "ForwardAllocateMappedBuffer.hpp")
 target_link_libraries(render.forwardallocatemappedbuffer

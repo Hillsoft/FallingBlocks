@@ -17,6 +17,7 @@ class Font {
   Font(RenderSubSystem& renderSystem, loader::Font font);
 
   void drawStringASCII(std::string_view str, math::Vec2 pos);
+  void drawStringUTF8(std::string_view str, math::Vec2 pos);
 
  private:
   RenderSubSystem* render_;

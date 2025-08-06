@@ -19,6 +19,7 @@
 #include "render/renderables/RenderableFont.hpp"
 #include "util/Generator.hpp"
 #include "util/debug.hpp"
+#include "util/unicode.hpp"
 
 namespace blocks::render {
 
@@ -248,6 +249,16 @@ Font::Font(RenderSubSystem& renderSystem, loader::Font font)
 void Font::drawStringASCII(std::string_view str, math::Vec2 pos) {
   auto window = GlobalSubSystemStack::get().window();
   for (unsigned char c : str) {
+    float advance = drawChar(
+        *render_, fontData_, glyphRanges_, *renderableObject_, window, c, pos);
+
+    pos.x() += advance;
+  }
+}
+
+void Font::drawStringUTF8(std::string_view str, math::Vec2 pos) {
+  auto window = GlobalSubSystemStack::get().window();
+  for (uint32_t c : util::unicodeDecode(str)) {
     float advance = drawChar(
         *render_, fontData_, glyphRanges_, *renderableObject_, window, c, pos);
 

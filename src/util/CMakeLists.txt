@@ -39,6 +39,10 @@ add_library(util.string INTERFACE "string.hpp")
 
 add_library(util.synchronized INTERFACE "Synchronized.hpp")
 
+add_library(util.unicode STATIC "unicode.hpp" "unicode.cpp")
+target_link_libraries(util.unicode
+	util.generator)
+
 add_library(util.vec_generators INTERFACE "vec_generators.hpp")
 target_link_libraries(util.vec_generators INTERFACE
 	util.generator)
