@@ -34,6 +34,18 @@ int intersectsQuadratic(ivec2 a, ivec2 handle, ivec2 b) {
   float qb = 2 * handle.y - 2 * a.y;
   float qc = a.y - uv.y;
 
+  if (qa == 0) {
+	float t = float(uv.y - a.y) / float(b.y - a.y);
+	if (0 < t && t < 1) { 
+      float x = (1.0 - t) * (1.0 - t) * a.x + 2 * t * (1.0 - t) * handle.x + t * t * b.x;
+	  if (x > uv.x) {
+	    float dy = 2 * b.y * t - 2 * handle.y * t + 2 * handle.y * (1.0 - t) - 2 * a.y * (1.0 - t);
+	    return dy > 0 ? 1 : -1;
+	  }
+	}
+	return 0;
+  }
+
   float discriminant = qb*qb - 4 * qa * qc;
 
   if (discriminant < 0) {

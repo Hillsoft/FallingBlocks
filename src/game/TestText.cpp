@@ -17,7 +17,7 @@ TestText::TestText(Scene& scene)
           loader::loadFont(RESOURCE_DIR "/times.ttf")) {}
 
 void TestText::draw() {
-  font_.drawStringASCII("Hello, world! iii\xc0", math::Vec2{-1.0f, 0.0f});
+  font_.drawStringASCII("Hello, world! iii£$\xc0", math::Vec2{-1.0f, 0.0f});
 }
 
 } // namespace blocks::game
