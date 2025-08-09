@@ -13,8 +13,7 @@ class FontShader {
   FontShader() = delete;
 
   struct InstanceData {
-    math::Vec2 pos0;
-    math::Vec2 pos1;
+    math::Mat3 modelMatrix;
     int32_t glyphStart;
     int32_t glyphEnd;
     math::Mat3 uvToGlyphSpace;

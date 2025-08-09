@@ -22,42 +22,50 @@ void appendInstanceInputVertexAttributeDescriptors(
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset,
       .binding = binding,
-      .format = VK_FORMAT_R32G32_SFLOAT,
-      .offset = offsetof(FontShader::InstanceData, pos0)});
+      .format = VK_FORMAT_R32G32B32_SFLOAT,
+      .offset = offsetof(FontShader::InstanceData, modelMatrix)});
 
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset + 1,
       .binding = binding,
-      .format = VK_FORMAT_R32G32_SFLOAT,
-      .offset = offsetof(FontShader::InstanceData, pos1)});
+      .format = VK_FORMAT_R32G32B32_SFLOAT,
+      .offset =
+          offsetof(FontShader::InstanceData, modelMatrix) + sizeof(float) * 3});
 
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset + 2,
       .binding = binding,
-      .format = VK_FORMAT_R32_SINT,
-      .offset = offsetof(FontShader::InstanceData, glyphStart)});
+      .format = VK_FORMAT_R32G32B32_SFLOAT,
+      .offset =
+          offsetof(FontShader::InstanceData, modelMatrix) + sizeof(float) * 6});
 
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset + 3,
       .binding = binding,
       .format = VK_FORMAT_R32_SINT,
-      .offset = offsetof(FontShader::InstanceData, glyphEnd)});
+      .offset = offsetof(FontShader::InstanceData, glyphStart)});
 
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset + 4,
+      .binding = binding,
+      .format = VK_FORMAT_R32_SINT,
+      .offset = offsetof(FontShader::InstanceData, glyphEnd)});
+
+  descriptor.emplace_back(VkVertexInputAttributeDescription{
+      .location = locationOffset + 5,
       .binding = binding,
       .format = VK_FORMAT_R32G32B32_SFLOAT,
       .offset = offsetof(FontShader::InstanceData, uvToGlyphSpace)});
 
   descriptor.emplace_back(VkVertexInputAttributeDescription{
-      .location = locationOffset + 5,
+      .location = locationOffset + 6,
       .binding = binding,
       .format = VK_FORMAT_R32G32B32_SFLOAT,
       .offset = offsetof(FontShader::InstanceData, uvToGlyphSpace) +
           sizeof(float) * 3});
 
   descriptor.emplace_back(VkVertexInputAttributeDescription{
-      .location = locationOffset + 6,
+      .location = locationOffset + 7,
       .binding = binding,
       .format = VK_FORMAT_R32G32B32_SFLOAT,
       .offset = offsetof(FontShader::InstanceData, uvToGlyphSpace) +

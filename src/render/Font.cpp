@@ -147,16 +147,19 @@ float drawChar(
         window,
         renderableObject,
         RenderableFont::InstanceData{
-            pos +
+            math::Mat3::translate(
+                pos +
                 math::Vec2{
                     static_cast<float>(metrics.leftSideBearing) * kFontScale +
                         static_cast<float>(glyph.xMin.rawValue) * kFontScale,
-                    -static_cast<float>(glyph.yMax.rawValue) * kFontScale},
-            pos +
-                math::Vec2{
-                    static_cast<float>(metrics.leftSideBearing) * kFontScale +
-                        static_cast<float>(glyph.xMax.rawValue) * kFontScale,
-                    -static_cast<float>(glyph.yMin.rawValue) * kFontScale},
+                    -static_cast<float>(glyph.yMax.rawValue) * kFontScale}) *
+                math::Mat3::scale(math::Vec2{
+                    static_cast<float>(
+                        glyph.xMax.rawValue - glyph.xMin.rawValue) *
+                        kFontScale,
+                    static_cast<float>(
+                        glyph.yMax.rawValue - glyph.yMin.rawValue) *
+                        kFontScale}),
             glyphRanges[glyphIndex].first,
             glyphRanges[glyphIndex].second,
             math::Mat3::translate(math::Vec2{
@@ -205,19 +208,20 @@ float drawChar(
           window,
           renderableObject,
           RenderableFont::InstanceData{
-              pos +
+              math::Mat3::translate(
+                  pos +
                   transformPos(math::Vec2{
                       static_cast<float>(metrics.leftSideBearing) * kFontScale +
                           static_cast<float>(subGlyph.xMin.rawValue) *
                               kFontScale,
                       -static_cast<float>(subGlyph.yMax.rawValue) *
-                          kFontScale}),
-              pos +
-                  transformPos(math::Vec2{
-                      static_cast<float>(metrics.leftSideBearing) * kFontScale +
-                          static_cast<float>(subGlyph.xMax.rawValue) *
-                              kFontScale,
-                      -static_cast<float>(subGlyph.yMin.rawValue) *
+                          kFontScale})) *
+                  math::Mat3::scale(math::Vec2{
+                      static_cast<float>(
+                          subGlyph.xMax.rawValue - subGlyph.xMin.rawValue) *
+                          kFontScale,
+                      static_cast<float>(
+                          subGlyph.yMax.rawValue - subGlyph.yMin.rawValue) *
                           kFontScale}),
               glyphRanges[subGlyphDetails.glpyhIndex].first,
               glyphRanges[subGlyphDetails.glpyhIndex].second,
