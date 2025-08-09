@@ -24,18 +24,18 @@ constexpr size_t alignmentForVec(size_t size) {
 template <typename TNum, size_t size>
 class Vec {
  public:
-  Vec(const Vec& other) = default;
-  Vec(Vec&& other) = default;
-  Vec& operator=(const Vec& other) = default;
-  Vec& operator=(Vec&& other) = default;
+  constexpr Vec(const Vec& other) = default;
+  constexpr Vec(Vec&& other) = default;
+  constexpr Vec& operator=(const Vec& other) = default;
+  constexpr Vec& operator=(Vec&& other) = default;
 
   template <typename... TArgs>
-  Vec(TArgs&&... args)
+  constexpr Vec(TArgs&&... args)
     requires(std::conjunction_v<std::is_convertible<TArgs, TNum>...>)
       : data_{std::forward<TArgs>(args)...} {}
 
   template <typename TNum2>
-  Vec(const Vec<TNum2, size>& other)
+  constexpr Vec(const Vec<TNum2, size>& other)
     requires(std::is_convertible_v<TNum2, TNum>)
       : data_() {
     for (int i = 0; i < size; i++) {
@@ -43,47 +43,47 @@ class Vec {
     }
   }
 
-  TNum& at(size_t index) {
+  constexpr TNum& at(size_t index) {
     DEBUG_ASSERT(index < size);
     return data_[index];
   }
 
-  const TNum& at(size_t index) const {
+  constexpr const TNum& at(size_t index) const {
     DEBUG_ASSERT(index < size);
     return data_[index];
   }
 
-  TNum& x()
+  constexpr TNum& x()
     requires(size >= 1)
   {
     return at(0);
   }
 
-  const TNum& x() const
+  constexpr const TNum& x() const
     requires(size >= 1)
   {
     return at(0);
   }
 
-  TNum& y()
+  constexpr TNum& y()
     requires(size >= 2)
   {
     return at(1);
   }
 
-  const TNum& y() const
+  constexpr const TNum& y() const
     requires(size >= 2)
   {
     return at(1);
   }
 
-  TNum& z()
+  constexpr TNum& z()
     requires(size >= 3)
   {
     return at(2);
   }
 
-  const TNum& z() const
+  constexpr const TNum& z() const
     requires(size >= 3)
   {
     return at(2);
@@ -99,7 +99,8 @@ using Vec3 = Vec<float, 3>;
 using Vec4 = Vec<float, 4>;
 
 template <typename TNum, size_t size>
-Vec<TNum, size> operator+(const Vec<TNum, size>& a, const Vec<TNum, size>& b)
+constexpr Vec<TNum, size> operator+(
+    const Vec<TNum, size>& a, const Vec<TNum, size>& b)
   requires(std::is_arithmetic_v<TNum>)
 {
   Vec<TNum, size> result;
@@ -110,7 +111,8 @@ Vec<TNum, size> operator+(const Vec<TNum, size>& a, const Vec<TNum, size>& b)
 }
 
 template <typename TNum, size_t size>
-Vec<TNum, size> operator+=(Vec<TNum, size>& a, const Vec<TNum, size>& b)
+constexpr Vec<TNum, size> operator+=(
+    Vec<TNum, size>& a, const Vec<TNum, size>& b)
   requires(std::is_arithmetic_v<TNum>)
 {
   for (size_t i = 0; i < size; i++) {
@@ -120,7 +122,8 @@ Vec<TNum, size> operator+=(Vec<TNum, size>& a, const Vec<TNum, size>& b)
 }
 
 template <typename TNum, size_t size>
-Vec<TNum, size> operator-(const Vec<TNum, size>& a, const Vec<TNum, size>& b)
+constexpr Vec<TNum, size> operator-(
+    const Vec<TNum, size>& a, const Vec<TNum, size>& b)
   requires(std::is_arithmetic_v<TNum>)
 {
   Vec<TNum, size> result;
@@ -131,7 +134,7 @@ Vec<TNum, size> operator-(const Vec<TNum, size>& a, const Vec<TNum, size>& b)
 }
 
 template <typename TNum, size_t size>
-Vec<TNum, size> operator*(TNum fac, const Vec<TNum, size>& a)
+constexpr Vec<TNum, size> operator*(TNum fac, const Vec<TNum, size>& a)
   requires(std::is_arithmetic_v<TNum>)
 {
   Vec<TNum, size> result;
@@ -142,7 +145,7 @@ Vec<TNum, size> operator*(TNum fac, const Vec<TNum, size>& a)
 }
 
 template <typename TNum, size_t size>
-Vec<TNum, size>& operator*=(Vec<TNum, size>& a, TNum fac)
+constexpr Vec<TNum, size>& operator*=(Vec<TNum, size>& a, TNum fac)
   requires(std::is_arithmetic_v<TNum>)
 {
   for (size_t i = 0; i < size; i++) {
@@ -152,7 +155,7 @@ Vec<TNum, size>& operator*=(Vec<TNum, size>& a, TNum fac)
 }
 
 template <typename TNum, size_t size>
-Vec<TNum, size> operator/(const Vec<TNum, size>& a, TNum d)
+constexpr Vec<TNum, size> operator/(const Vec<TNum, size>& a, TNum d)
   requires(std::is_arithmetic_v<TNum>)
 {
   Vec<TNum, size> result;
@@ -163,7 +166,7 @@ Vec<TNum, size> operator/(const Vec<TNum, size>& a, TNum d)
 }
 
 template <typename TNum, size_t size>
-Vec<TNum, size> abs(const Vec<TNum, size>& a)
+constexpr Vec<TNum, size> abs(const Vec<TNum, size>& a)
   requires(std::is_arithmetic_v<TNum>)
 {
   Vec<TNum, size> result;
@@ -176,18 +179,18 @@ Vec<TNum, size> abs(const Vec<TNum, size>& a)
 template <typename TNum, size_t sizeWidth, size_t sizeHeight>
 class Matrix {
  public:
-  Matrix(const Matrix& other) = default;
-  Matrix(Matrix&& other) = default;
-  Matrix& operator=(const Matrix& other) = default;
-  Matrix& operator=(Matrix&& other) = default;
+  constexpr Matrix(const Matrix& other) = default;
+  constexpr Matrix(Matrix&& other) = default;
+  constexpr Matrix& operator=(const Matrix& other) = default;
+  constexpr Matrix& operator=(Matrix&& other) = default;
 
   template <typename... TArgs>
-  Matrix(TArgs&&... args)
+  constexpr Matrix(TArgs&&... args)
     requires(std::conjunction_v<std::is_convertible<TArgs, TNum>...>)
       : data_{std::forward<TArgs>(args)...} {}
 
   template <typename TNum2>
-  Matrix(const Matrix<TNum2, sizeWidth, sizeHeight>& other)
+  constexpr Matrix(const Matrix<TNum2, sizeWidth, sizeHeight>& other)
     requires(std::is_convertible_v<TNum2, TNum>)
       : data_() {
     for (int i = 0; i < sizeWidth * sizeHeight; i++) {
@@ -195,16 +198,16 @@ class Matrix {
     }
   }
 
-  TNum& at(size_t x, size_t y) {
+  constexpr TNum& at(size_t x, size_t y) {
     DEBUG_ASSERT(x < sizeWidth && y < sizeHeight);
     return data_[x * sizeHeight + y];
   }
-  const TNum& at(size_t x, size_t y) const {
+  constexpr const TNum& at(size_t x, size_t y) const {
     DEBUG_ASSERT(x < sizeWidth && y < sizeHeight);
     return data_[x * sizeHeight + y];
   }
 
-  static Matrix identity()
+  constexpr static Matrix identity()
     requires(sizeWidth == sizeHeight)
   {
     Matrix result{};
@@ -214,7 +217,7 @@ class Matrix {
     return result;
   }
 
-  static Matrix scale(TNum factor)
+  constexpr static Matrix scale(TNum factor)
     requires(sizeWidth == sizeHeight)
   {
     Matrix result = identity();
@@ -222,7 +225,7 @@ class Matrix {
     return result;
   }
 
-  static Matrix scale(const Vec<TNum, sizeWidth>& v)
+  constexpr static Matrix scale(const Vec<TNum, sizeWidth>& v)
     requires(sizeWidth == sizeHeight)
   {
     Matrix result = identity();
@@ -232,7 +235,7 @@ class Matrix {
     return result;
   }
 
-  static Matrix scale(const Vec<TNum, sizeWidth - 1>& v)
+  constexpr static Matrix scale(const Vec<TNum, sizeWidth - 1>& v)
     requires(sizeWidth == sizeHeight)
   {
     Matrix result = identity();
@@ -242,7 +245,7 @@ class Matrix {
     return result;
   }
 
-  static Matrix translate(const Vec<TNum, sizeHeight - 1>& v) {
+  constexpr static Matrix translate(const Vec<TNum, sizeHeight - 1>& v) {
     Matrix result = identity();
     for (size_t i = 0; i < sizeHeight - 1; i++) {
       result.at(sizeWidth - 1, i) = v.at(i);
@@ -258,7 +261,7 @@ using Mat2 = Matrix<float, 2, 2>;
 using Mat3 = Matrix<float, 3, 3>;
 
 template <typename TNum, size_t sizeWidth, size_t sizeHeight>
-Matrix<TNum, sizeWidth, sizeHeight> operator*(
+constexpr Matrix<TNum, sizeWidth, sizeHeight> operator*(
     const Matrix<TNum, sizeWidth, sizeHeight>& a, TNum fac)
   requires(std::is_arithmetic_v<TNum>)
 {
@@ -272,7 +275,7 @@ Matrix<TNum, sizeWidth, sizeHeight> operator*(
 }
 
 template <typename TNum, size_t sizeA, size_t sizeB, size_t sizeC>
-Matrix<TNum, sizeC, sizeB> operator*(
+constexpr Matrix<TNum, sizeC, sizeB> operator*(
     const Matrix<TNum, sizeA, sizeB>& l, const Matrix<TNum, sizeC, sizeA>& r) {
   Matrix<TNum, sizeC, sizeB> result;
   for (size_t y = 0; y < sizeB; y++) {
@@ -286,7 +289,8 @@ Matrix<TNum, sizeC, sizeB> operator*(
 }
 
 template <typename TNum = float>
-Matrix<TNum, 3, 3> modelMatrixFromBounds(math::Vec2 p0, math::Vec2 p1) {
+constexpr Matrix<TNum, 3, 3> modelMatrixFromBounds(
+    math::Vec2 p0, math::Vec2 p1) {
   return Matrix<TNum, 3, 3>::translate(p0) * Matrix<TNum, 3, 3>::scale(p1 - p0);
 }
 
