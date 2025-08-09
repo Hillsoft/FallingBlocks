@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 #include "render/ForwardAllocateMappedBuffer.hpp"
 #include "render/RenderableObject.hpp"
+#include "render/Simple2DCamera.hpp"
 #include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
@@ -153,6 +154,7 @@ class RenderSubSystem {
   struct DrawCommand {
     WindowRef target_;
     GenericRenderableRef obj_;
+    Simple2DCamera* camera_;
 
     void* instanceData_;
   };
@@ -202,6 +204,19 @@ class RenderSubSystem {
       const TInstanceData& instanceData) {
     drawObjectRaw(
         target,
+        nullptr,
+        ref.rawRef_,
+        instanceDataCPUBuffer_.allocate<TInstanceData>(instanceData));
+  }
+  template <typename TInstanceData>
+  void drawObject(
+      WindowRef target,
+      Simple2DCamera* camera,
+      RenderableRef<TInstanceData> ref,
+      const TInstanceData& instanceData) {
+    drawObjectRaw(
+        target,
+        camera,
         ref.rawRef_,
         instanceDataCPUBuffer_.allocate<TInstanceData>(instanceData));
   }
@@ -212,7 +227,10 @@ class RenderSubSystem {
 
  private:
   void drawObjectRaw(
-      WindowRef target, GenericRenderableRef ref, void* instanceData);
+      WindowRef target,
+      Simple2DCamera* camera,
+      GenericRenderableRef ref,
+      void* instanceData);
 
   void drawWindow(size_t windowId, std::span<DrawCommand> windowCommands);
 
@@ -239,6 +257,7 @@ class RenderSubSystem {
   std::vector<RenderableObject> renderablesPendingDestruction_;
   std::vector<ForwardAllocateMappedBuffer> instanceDataBuffers_;
   util::BlockForwardAllocatedArena instanceDataCPUBuffer_;
+  Simple2DCamera defaultCamera_;
 
   std::vector<DrawCommand> commands_;
 

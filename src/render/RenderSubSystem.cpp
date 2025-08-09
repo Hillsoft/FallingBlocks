@@ -11,8 +11,10 @@
 #include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
+#include "math/vec.hpp"
 #include "render/ForwardAllocateMappedBuffer.hpp"
 #include "render/RenderableObject.hpp"
+#include "render/Simple2DCamera.hpp"
 #include "render/VulkanCommandBuffer.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanPresentStack.hpp"
@@ -112,7 +114,11 @@ RenderSubSystem::RenderSubSystem()
           result.emplace_back(graphics_, VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
         }
         return result;
-      }()) {
+      }()),
+      defaultCamera_(
+          math::Vec2{-1.0f, -1.0f},
+          math::Vec2{1.0f, 1.0f},
+          Simple2DCamera::AspectRatioHandling::FIT) {
 }
 
 RenderSubSystem::GLFWLifetimeScope::GLFWLifetimeScope() {
@@ -170,8 +176,11 @@ void RenderSubSystem::destroyRenderable(GenericRenderableRef ref) {
 }
 
 void RenderSubSystem::drawObjectRaw(
-    WindowRef target, GenericRenderableRef ref, void* instanceData) {
-  commands_.emplace_back(target, ref, instanceData);
+    WindowRef target,
+    Simple2DCamera* camera,
+    GenericRenderableRef ref,
+    void* instanceData) {
+  commands_.emplace_back(target, ref, camera, instanceData);
 }
 
 void RenderSubSystem::commitFrame() {
@@ -321,6 +330,11 @@ void RenderSubSystem::drawWindow(
   for (const auto& curGroup : objGroups) {
     // All commands in the group have the same renderable object,
     RenderableObject& renderable = *renderables_[curGroup[0].obj_.id];
+    Simple2DCamera& camera =
+        curGroup[0].camera_ == nullptr ? defaultCamera_ : *curGroup[0].camera_;
+
+    math::Mat3 viewMatrix =
+        camera.getViewMatrix(window.getCurrentWindowExtent());
 
     ForwardAllocateMappedBuffer::Allocation instanceAlloc =
         instanceDataAllocator.alloc(
@@ -338,6 +352,14 @@ void RenderSubSystem::drawWindow(
         commandBuffer,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
         renderable.shaderProgram_->pipeline_.getRawPipeline());
+
+    vkCmdPushConstants(
+        commandBuffer,
+        renderable.shaderProgram_->pipeline_.getPipelineLayout().getRawLayout(),
+        VK_SHADER_STAGE_VERTEX_BIT,
+        0,
+        sizeof(math::Mat3),
+        &viewMatrix);
 
     vkCmdBindDescriptorSets(
         commandBuffer,

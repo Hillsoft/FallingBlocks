@@ -36,10 +36,12 @@ target_link_libraries(render.renderableobject
 
 add_library(render.rendersubsystem STATIC "RenderSubSystem.cpp" "RenderSubSystem.hpp")
 target_link_libraries(render.rendersubsystem
+	math.vec
 	render.forwardallocatemappedbuffer
 	render.renderableobject
 	render.resource.shaderprogrammanager
 	render.resource.texturemanager
+	render.simple2dcamera
 	render.vulkancommandbuffer
 	render.vulkancommandpool
 	render.vulkandebugmessenger
@@ -131,6 +133,7 @@ target_link_libraries(render.vulkanmappedbuffer
 
 add_library(render.vulkanpipelinelayout STATIC "VulkanPipelineLayout.cpp" "VulkanPipelineLayout.hpp")
 target_link_libraries(render.vulkanpipelinelayout
+	math.vec
 	render.vulkangraphicsdevice
 	render.vulkan.uniquehandle)
 

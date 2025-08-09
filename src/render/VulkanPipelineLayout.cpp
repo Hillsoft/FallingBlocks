@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <GLFW/glfw3.h>
+#include "math/vec.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 
@@ -11,11 +12,18 @@ VulkanPipelineLayout::VulkanPipelineLayout(
     VulkanGraphicsDevice& device, VkDescriptorSetLayout descriptorLayout)
     : layout_(nullptr, nullptr) {
   VkDescriptorSetLayout rawDescriptorLayout = descriptorLayout;
+
+  VkPushConstantRange pushConstantRange{};
+  pushConstantRange.offset = 0;
+  pushConstantRange.size = sizeof(math::Mat3);
+  pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
   VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
   pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
   pipelineLayoutInfo.setLayoutCount = 1;
   pipelineLayoutInfo.pSetLayouts = &rawDescriptorLayout;
-  pipelineLayoutInfo.pushConstantRangeCount = 0;
+  pipelineLayoutInfo.pushConstantRangeCount = 1;
+  pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
   VkPipelineLayout layout;
   VkResult result = vkCreatePipelineLayout(
