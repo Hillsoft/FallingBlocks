@@ -75,7 +75,8 @@ void Ball::draw() {
   auto& render = GlobalSubSystemStack::get().renderSystem();
   auto window = GlobalSubSystemStack::get().window();
 
-  render.drawObject(window, *sprite_, {getP0(), getP1()});
+  render.drawObject(
+      window, *sprite_, {math::modelMatrixFromBounds(getP0(), getP1())});
 }
 
 void Ball::handleCollision(physics::RectCollider& other) {

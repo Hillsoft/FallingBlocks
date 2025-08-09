@@ -54,12 +54,14 @@ void Paddle::draw() {
   auto& render = GlobalSubSystemStack::get().renderSystem();
   auto window = GlobalSubSystemStack::get().window();
 
-  render.drawObject(window, *sprite_, {getP0(), getP1()});
+  render.drawObject(
+      window, *sprite_, {math::modelMatrixFromBounds(getP0(), getP1())});
   render.drawObject(
       window,
       *sprite_,
-      {getP0() + math::Vec2(0.0f, kPaddleHeight),
-       getP1() + math::Vec2(0.0f, kPaddleHeight)});
+      {math::modelMatrixFromBounds(
+          getP0() + math::Vec2(0.0f, kPaddleHeight),
+          getP1() + math::Vec2(0.0f, kPaddleHeight))});
 }
 
 void Paddle::onKeyPress(int key) {

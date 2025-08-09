@@ -14,8 +14,7 @@ class RenderableTex2D {
   RenderableTex2D() = delete;
 
   struct InstanceData {
-    math::Vec<float, 2> pos0;
-    math::Vec<float, 2> pos1;
+    math::Mat3 modelMatrix;
   };
 
   static RenderableObject create(

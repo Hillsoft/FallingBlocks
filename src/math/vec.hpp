@@ -285,4 +285,9 @@ Matrix<TNum, sizeC, sizeB> operator*(
   return result;
 }
 
+template <typename TNum = float>
+Matrix<TNum, 3, 3> modelMatrixFromBounds(math::Vec2 p0, math::Vec2 p1) {
+  return Matrix<TNum, 3, 3>::translate(p0) * Matrix<TNum, 3, 3>::scale(p1 - p0);
+}
+
 } // namespace math
