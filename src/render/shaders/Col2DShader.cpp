@@ -22,17 +22,25 @@ void appendInstanceInputVertexAttributeDescriptors(
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset,
       .binding = binding,
-      .format = VK_FORMAT_R32G32_SFLOAT,
-      .offset = offsetof(Col2DShader::InstanceData, pos0)});
+      .format = VK_FORMAT_R32G32B32_SFLOAT,
+      .offset = offsetof(Col2DShader::InstanceData, modelMatrix)});
 
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset + 1,
       .binding = binding,
-      .format = VK_FORMAT_R32G32_SFLOAT,
-      .offset = offsetof(Col2DShader::InstanceData, pos1)});
+      .format = VK_FORMAT_R32G32B32_SFLOAT,
+      .offset = offsetof(Col2DShader::InstanceData, modelMatrix) +
+          sizeof(float) * 3});
 
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset + 2,
+      .binding = binding,
+      .format = VK_FORMAT_R32G32B32_SFLOAT,
+      .offset = offsetof(Col2DShader::InstanceData, modelMatrix) +
+          sizeof(float) * 6});
+
+  descriptor.emplace_back(VkVertexInputAttributeDescription{
+      .location = locationOffset + 3,
       .binding = binding,
       .format = VK_FORMAT_R32G32B32A32_SFLOAT,
       .offset = offsetof(Col2DShader::InstanceData, color)});

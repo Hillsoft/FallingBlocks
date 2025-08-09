@@ -13,8 +13,7 @@ class Col2DShader {
   Col2DShader() = delete;
 
   struct InstanceData {
-    math::Vec2 pos0;
-    math::Vec2 pos1;
+    math::Mat3 modelMatrix;
     math::Vec4 color;
   };
 
