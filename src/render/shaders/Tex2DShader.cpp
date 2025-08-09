@@ -21,22 +21,22 @@ void appendInstanceInputVertexAttributeDescriptors(
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset,
       .binding = binding,
-      .format = VK_FORMAT_R32G32B32_SFLOAT,
+      .format = VK_FORMAT_R32G32B32A32_SFLOAT,
       .offset = offsetof(Tex2DShader::InstanceData, modelMatrix)});
 
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset + 1,
       .binding = binding,
-      .format = VK_FORMAT_R32G32B32_SFLOAT,
+      .format = VK_FORMAT_R32G32B32A32_SFLOAT,
       .offset = offsetof(Tex2DShader::InstanceData, modelMatrix) +
-          sizeof(float) * 3});
+          sizeof(float) * 4});
 
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset + 2,
       .binding = binding,
-      .format = VK_FORMAT_R32G32B32_SFLOAT,
+      .format = VK_FORMAT_R32G32B32A32_SFLOAT,
       .offset = offsetof(Tex2DShader::InstanceData, modelMatrix) +
-          sizeof(float) * 6});
+          sizeof(float) * 8});
 }
 
 VulkanVertexShader getVertexShader(VulkanGraphicsDevice& device) {

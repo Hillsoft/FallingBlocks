@@ -200,11 +200,11 @@ class Matrix {
 
   constexpr TNum& at(size_t x, size_t y) {
     DEBUG_ASSERT(x < sizeWidth && y < sizeHeight);
-    return data_[x * sizeHeight + y];
+    return data_[x].at(y);
   }
   constexpr const TNum& at(size_t x, size_t y) const {
     DEBUG_ASSERT(x < sizeWidth && y < sizeHeight);
-    return data_[x * sizeHeight + y];
+    return data_[x].at(y);
   }
 
   constexpr static Matrix identity()
@@ -254,7 +254,7 @@ class Matrix {
   }
 
  private:
-  std::array<TNum, sizeWidth * sizeHeight> data_;
+  std::array<Vec<TNum, sizeHeight>, sizeWidth> data_;
 };
 
 using Mat2 = Matrix<float, 2, 2>;

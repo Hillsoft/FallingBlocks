@@ -22,22 +22,22 @@ void appendInstanceInputVertexAttributeDescriptors(
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset,
       .binding = binding,
-      .format = VK_FORMAT_R32G32B32_SFLOAT,
+      .format = VK_FORMAT_R32G32B32A32_SFLOAT,
       .offset = offsetof(FontShader::InstanceData, modelMatrix)});
 
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset + 1,
       .binding = binding,
-      .format = VK_FORMAT_R32G32B32_SFLOAT,
+      .format = VK_FORMAT_R32G32B32A32_SFLOAT,
       .offset =
-          offsetof(FontShader::InstanceData, modelMatrix) + sizeof(float) * 3});
+          offsetof(FontShader::InstanceData, modelMatrix) + sizeof(float) * 4});
 
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset + 2,
       .binding = binding,
-      .format = VK_FORMAT_R32G32B32_SFLOAT,
+      .format = VK_FORMAT_R32G32B32A32_SFLOAT,
       .offset =
-          offsetof(FontShader::InstanceData, modelMatrix) + sizeof(float) * 6});
+          offsetof(FontShader::InstanceData, modelMatrix) + sizeof(float) * 8});
 
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset + 3,
@@ -54,22 +54,22 @@ void appendInstanceInputVertexAttributeDescriptors(
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset + 5,
       .binding = binding,
-      .format = VK_FORMAT_R32G32B32_SFLOAT,
+      .format = VK_FORMAT_R32G32B32A32_SFLOAT,
       .offset = offsetof(FontShader::InstanceData, uvToGlyphSpace)});
 
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset + 6,
       .binding = binding,
-      .format = VK_FORMAT_R32G32B32_SFLOAT,
+      .format = VK_FORMAT_R32G32B32A32_SFLOAT,
       .offset = offsetof(FontShader::InstanceData, uvToGlyphSpace) +
-          sizeof(float) * 3});
+          sizeof(float) * 4});
 
   descriptor.emplace_back(VkVertexInputAttributeDescription{
       .location = locationOffset + 7,
       .binding = binding,
-      .format = VK_FORMAT_R32G32B32_SFLOAT,
+      .format = VK_FORMAT_R32G32B32A32_SFLOAT,
       .offset = offsetof(FontShader::InstanceData, uvToGlyphSpace) +
-          sizeof(float) * 6});
+          sizeof(float) * 8});
 }
 
 VulkanVertexShader getVertexShader(VulkanGraphicsDevice& device) {
