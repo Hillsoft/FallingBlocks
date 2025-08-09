@@ -310,6 +310,8 @@ void RenderSubSystem::drawWindow(
   scissor.extent = extent;
   vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+  Simple2DCamera* lastCamera = nullptr;
+
   for ([[maybe_unused]] const auto& command : windowCommands) {
     DEBUG_ASSERT(
         command.target_.id == windowId &&
@@ -320,63 +322,101 @@ void RenderSubSystem::drawWindow(
   std::sort(
       windowCommands.begin(),
       windowCommands.end(),
-      [](const auto& a, const auto& b) { return a.obj_.id < b.obj_.id; });
-
-  util::Generator<std::span<DrawCommand>> objGroups = util::vec::genGroups(
-      windowCommands, [](const DrawCommand& a, const DrawCommand& b) {
-        return a.obj_.id == b.obj_.id;
+      [this](const auto& a, const auto& b) {
+        const auto* aShader = renderables_[a.obj_.id]->shaderProgram_;
+        const auto* bShader = renderables_[b.obj_.id]->shaderProgram_;
+        if (aShader != bShader) {
+          return aShader < bShader;
+        }
+        return a.obj_.id < b.obj_.id;
       });
 
-  for (const auto& curGroup : objGroups) {
-    // All commands in the group have the same renderable object,
-    RenderableObject& renderable = *renderables_[curGroup[0].obj_.id];
-    Simple2DCamera& camera =
-        curGroup[0].camera_ == nullptr ? defaultCamera_ : *curGroup[0].camera_;
+  util::Generator<std::span<DrawCommand>> shaderGroups = util::vec::genGroups(
+      windowCommands, [this](const DrawCommand& a, const DrawCommand& b) {
+        return renderables_[a.obj_.id]->shaderProgram_ ==
+            renderables_[b.obj_.id]->shaderProgram_;
+      });
 
-    math::Mat3 viewMatrix =
-        camera.getViewMatrix(window.getCurrentWindowExtent());
+  for (const auto& shaderGroup : shaderGroups) {
+    util::Generator<std::span<DrawCommand>> objGroups = util::vec::genGroups(
+        shaderGroup, [](const DrawCommand& a, const DrawCommand& b) {
+          return a.obj_.id == b.obj_.id;
+        });
 
-    ForwardAllocateMappedBuffer::Allocation instanceAlloc =
-        instanceDataAllocator.alloc(
-            renderable.instanceDataSize_ * curGroup.size());
-    for (size_t i = 0; i < curGroup.size(); i++) {
-      std::memcpy(
-          reinterpret_cast<void*>(
-              reinterpret_cast<size_t>(instanceAlloc.ptr) +
-              i * renderable.instanceDataSize_),
-          curGroup[i].instanceData_,
-          renderable.instanceDataSize_);
-    }
-
+    // All commands have the same shader, so we can pick the first
     vkCmdBindPipeline(
         commandBuffer,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
-        renderable.shaderProgram_->pipeline_.getRawPipeline());
+        renderables_[shaderGroup[0].obj_.id]
+            ->shaderProgram_->pipeline_.getRawPipeline());
 
-    vkCmdPushConstants(
-        commandBuffer,
-        renderable.shaderProgram_->pipeline_.getPipelineLayout().getRawLayout(),
-        VK_SHADER_STAGE_VERTEX_BIT,
-        0,
-        sizeof(math::Mat3),
-        &viewMatrix);
+    for (const auto& curGroup : objGroups) {
+      // All commands in the group have the same renderable object,
+      RenderableObject& renderable = *renderables_[curGroup[0].obj_.id];
 
-    vkCmdBindDescriptorSets(
-        commandBuffer,
-        VK_PIPELINE_BIND_POINT_GRAPHICS,
-        renderable.shaderProgram_->pipeline_.getPipelineLayout().getRawLayout(),
-        0,
-        1,
-        &renderable.descriptorPool_.getDescriptorSets()[currentFrame_],
-        0,
-        nullptr);
+      vkCmdBindDescriptorSets(
+          commandBuffer,
+          VK_PIPELINE_BIND_POINT_GRAPHICS,
+          renderable.shaderProgram_->pipeline_.getPipelineLayout()
+              .getRawLayout(),
+          0,
+          1,
+          &renderable.descriptorPool_.getDescriptorSets()[currentFrame_],
+          0,
+          nullptr);
 
-    VkBuffer vertexBuffer = renderable.vertexAttributes_.getRawBuffer();
-    std::array<VkBuffer, 2> vertexBuffers{vertexBuffer, instanceAlloc.buffer};
-    std::array<VkDeviceSize, 2> offsets{0, instanceAlloc.bufferOffset};
-    vkCmdBindVertexBuffers(
-        commandBuffer, 0, 2, vertexBuffers.data(), offsets.data());
-    vkCmdDraw(commandBuffer, 6, static_cast<uint32_t>(curGroup.size()), 0, 0);
+      std::sort(
+          curGroup.begin(), curGroup.end(), [](const auto& a, const auto& b) {
+            return a.camera_ < b.camera_;
+          });
+      util::Generator<std::span<DrawCommand>> cameraGroups =
+          util::vec::genGroups(
+              curGroup, [](const DrawCommand& a, const DrawCommand& b) {
+                return a.camera_ == b.camera_;
+              });
+
+      for (const auto& cameraGroup : cameraGroups) {
+        Simple2DCamera& camera = cameraGroup[0].camera_ == nullptr
+            ? defaultCamera_
+            : *cameraGroup[0].camera_;
+
+        if (&camera != lastCamera) {
+          lastCamera = &camera;
+          math::Mat3 viewMatrix =
+              camera.getViewMatrix(window.getCurrentWindowExtent());
+
+          vkCmdPushConstants(
+              commandBuffer,
+              renderable.shaderProgram_->pipeline_.getPipelineLayout()
+                  .getRawLayout(),
+              VK_SHADER_STAGE_VERTEX_BIT,
+              0,
+              sizeof(math::Mat3),
+              &viewMatrix);
+        }
+
+        ForwardAllocateMappedBuffer::Allocation instanceAlloc =
+            instanceDataAllocator.alloc(
+                renderable.instanceDataSize_ * cameraGroup.size());
+        for (size_t i = 0; i < cameraGroup.size(); i++) {
+          std::memcpy(
+              reinterpret_cast<void*>(
+                  reinterpret_cast<size_t>(instanceAlloc.ptr) +
+                  i * renderable.instanceDataSize_),
+              cameraGroup[i].instanceData_,
+              renderable.instanceDataSize_);
+        }
+
+        VkBuffer vertexBuffer = renderable.vertexAttributes_.getRawBuffer();
+        std::array<VkBuffer, 2> vertexBuffers{
+            vertexBuffer, instanceAlloc.buffer};
+        std::array<VkDeviceSize, 2> offsets{0, instanceAlloc.bufferOffset};
+        vkCmdBindVertexBuffers(
+            commandBuffer, 0, 2, vertexBuffers.data(), offsets.data());
+        vkCmdDraw(
+            commandBuffer, 6, static_cast<uint32_t>(cameraGroup.size()), 0, 0);
+      }
+    }
   }
 
   vkCmdEndRenderPass(commandBuffer);
