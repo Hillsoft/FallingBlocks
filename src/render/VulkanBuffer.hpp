@@ -13,7 +13,7 @@ class VulkanBuffer {
  public:
   VulkanBuffer(
       VulkanGraphicsDevice& device,
-      std::span<std::byte> data,
+      std::span<const std::byte> data,
       VkBufferUsageFlags usageFlags);
 
   VkBuffer getRawBuffer() { return rawBuffer_.getRawBuffer(); }

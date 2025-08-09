@@ -10,7 +10,7 @@ namespace blocks::render {
 
 VulkanBuffer::VulkanBuffer(
     VulkanGraphicsDevice& device,
-    std::span<std::byte> data,
+    std::span<const std::byte> data,
     VkBufferUsageFlags usageFlags)
     : rawBuffer_(device, data.size(), usageFlags),
       memory_(device, rawBuffer_),
