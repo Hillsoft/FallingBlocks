@@ -24,10 +24,9 @@ target_link_libraries(render.forwardallocatemappedbuffer
 
 add_library(render.quad STATIC "Quad.cpp" "Quad.hpp")
 target_link_libraries(render.quad
-	math.vec
+	render.shaders.uvvertex
 	render.vulkanbuffer
-	render.vulkangraphicsdevice
-	render.vulkanshader)
+	render.vulkangraphicsdevice)
 
 add_library(render.renderableobject "RenderableObject.cpp" "RenderableObject.hpp")
 target_link_libraries(render.renderableobject

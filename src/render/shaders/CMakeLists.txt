@@ -18,7 +18,8 @@ target_link_libraries(render.shaders.fontshader
 
 add_library(render.shaders.tex2dshader "Tex2DShader.hpp" "Tex2DShader.cpp")
 target_link_libraries(render.shaders.tex2dshader
-	render.quad
+	math.vec
+	render.shaders.uvvertex
 	render.vulkangraphicsdevice
 	render.vulkanshader
 	render.vulkanshaderprogram

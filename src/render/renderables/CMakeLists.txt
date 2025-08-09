@@ -24,7 +24,6 @@ target_link_libraries(render.renderables.renderablefont
 
 add_library(render.renderables.renderabletex2d "RenderableTex2D.hpp" "RenderableTex2D.cpp")
 target_link_libraries(render.renderables.renderabletex2d
-	math.vec
 	render.renderableobject
 	render.quad
 	render.resource.shaderprogrammanager
