@@ -24,9 +24,10 @@ Generator<uint32_t> unicodeDecode(std::string_view str) {
 
   while (strBytes.size() > 0) {
     auto leadingOnes = std::countl_one(strBytes[0]);
+    uint32_t curByte;
     switch (leadingOnes) {
       case 0:
-        co_yield strBytes[0];
+        curByte = strBytes[0];
         strBytes = strBytes.subspan(1);
         break;
 
@@ -34,8 +35,8 @@ Generator<uint32_t> unicodeDecode(std::string_view str) {
         if (strBytes.size() < 2 || (strBytes[1] >> 6) != 0b10) {
           throw std::runtime_error{"Invalid UTF-8 sequence"};
         }
-        co_yield (
-            static_cast<uint32_t>(strBytes[0] & kTwoByteHeaderMask) << 6) |
+        curByte =
+            (static_cast<uint32_t>(strBytes[0] & kTwoByteHeaderMask) << 6) |
             static_cast<uint32_t>(strBytes[1] & kContinuationByteMask);
         strBytes = strBytes.subspan(2);
         break;
@@ -45,8 +46,8 @@ Generator<uint32_t> unicodeDecode(std::string_view str) {
             (strBytes[2] >> 6) != 0b10) {
           throw std::runtime_error{"Invalid UTF-8 sequence"};
         }
-        co_yield (
-            static_cast<uint32_t>(strBytes[0] & kThreeByteHeaderMask) << 12) |
+        curByte =
+            (static_cast<uint32_t>(strBytes[0] & kThreeByteHeaderMask) << 12) |
             (static_cast<uint32_t>(strBytes[1] & kContinuationByteMask) << 6) |
             static_cast<uint32_t>(strBytes[2] & kContinuationByteMask);
         strBytes = strBytes.subspan(3);
@@ -57,8 +58,8 @@ Generator<uint32_t> unicodeDecode(std::string_view str) {
             (strBytes[2] >> 6) != 0b10 || (strBytes[3] >> 6) != 0b10) {
           throw std::runtime_error{"Invalid UTF-8 sequence"};
         }
-        co_yield (
-            static_cast<uint32_t>(strBytes[0] & kFourByteHeaderMask) << 18) |
+        curByte =
+            (static_cast<uint32_t>(strBytes[0] & kFourByteHeaderMask) << 18) |
             (static_cast<uint32_t>(strBytes[1] & kContinuationByteMask) << 12) |
             (static_cast<uint32_t>(strBytes[2] & kContinuationByteMask) << 6) |
             static_cast<uint32_t>(strBytes[3] & kContinuationByteMask);
@@ -68,6 +69,8 @@ Generator<uint32_t> unicodeDecode(std::string_view str) {
       default:
         throw std::runtime_error{"Invalid UTF-8 sequence"};
     }
+
+    co_yield curByte;
   }
   co_return;
 }
