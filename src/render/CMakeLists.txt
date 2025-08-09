@@ -58,6 +58,10 @@ target_link_libraries(render.rendersubsystem
 	util.raii_helpers
 	util.vec_generators)
 
+add_library(render.simple2dcamera STATIC "Simple2DCamera.cpp" "Simple2DCamera.hpp")
+target_link_libraries(render.simple2dcamera
+	math.vec)
+
 add_library(render.validationlayers INTERFACE "validationLayers.hpp")
 
 add_library(render.vulkanbuffer STATIC "VulkanBuffer.cpp" "VulkanBuffer.hpp")
