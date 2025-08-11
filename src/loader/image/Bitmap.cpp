@@ -125,7 +125,8 @@ Image loadBitmap(const std::vector<std::byte>& data) {
       outPixel[0] = r;
       outPixel[1] = g;
       outPixel[2] = b;
-      outPixel[3] = static_cast<std::byte>(std::numeric_limits<char>::max());
+      outPixel[3] =
+          static_cast<std::byte>(std::numeric_limits<unsigned char>::max());
     }
   }
 

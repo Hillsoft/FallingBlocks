@@ -246,7 +246,7 @@ Image loadPng(std::span<const std::byte> data) {
     outData.emplace_back(static_cast<std::byte>(col.at(1)));
     outData.emplace_back(static_cast<std::byte>(col.at(2)));
     outData.emplace_back(
-        static_cast<std::byte>(std::numeric_limits<char>::max()));
+        static_cast<std::byte>(std::numeric_limits<unsigned char>::max()));
   };
 
   for (size_t y = 0; y < header.height; y++) {
