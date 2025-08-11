@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bit>
 #include <cstring>
 #include <numeric>
 #include <string>
@@ -67,6 +68,43 @@ struct StringConverter<TArg, TArgs...> : public StringConverter<TArgs...> {
 
   void append(std::string& output, std::string_view c, TArgs&&... rest) {
     output.append(c);
+    StringConverter<TArgs...>::append(output, std::forward<TArgs>(rest)...);
+  }
+
+  const size_t estimatedSizeCache_;
+};
+
+template <typename TArg>
+  requires std::is_integral_v<TArg>
+static size_t intStringSizeEstimate(TArg a) {
+  size_t estimate = 1;
+  size_t absA;
+  if (a < 0) {
+    estimate++;
+
+    absA = -a;
+  } else {
+    absA = a;
+  }
+
+  size_t bits = 8 * sizeof(size_t) - std::countl_zero(absA);
+  estimate += bits / 3;
+  return estimate;
+}
+
+template <typename TArg, typename... TArgs>
+  requires std::is_integral_v<std::remove_cvref_t<TArg>>
+struct StringConverter<TArg, TArgs...> : public StringConverter<TArgs...> {
+  StringConverter(const TArg& a, TArgs&&... rest)
+      : StringConverter<TArgs...>(std::forward<TArgs>(rest)...),
+        estimatedSizeCache_(intStringSizeEstimate(a)) {}
+
+  size_t estimateSize() const {
+    return estimatedSizeCache_ + StringConverter<TArgs...>::estimateSize();
+  }
+
+  void append(std::string& output, const TArg& a, TArgs&&... rest) {
+    output.append(std::to_string(a));
     StringConverter<TArgs...>::append(output, std::forward<TArgs>(rest)...);
   }
 
