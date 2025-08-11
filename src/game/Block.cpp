@@ -4,6 +4,7 @@
 #include "engine/Actor.hpp"
 #include "engine/DrawableRegistry.hpp"
 #include "engine/Scene.hpp"
+#include "game/BlocksScene.hpp"
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
 #include "render/renderables/RenderableTex2D.hpp"
@@ -25,6 +26,11 @@ void Block::draw() {
 
   render.drawObject(
       window, *sprite_, {math::modelMatrixFromBounds(getP0(), getP1())});
+}
+
+void Block::onDestroy() {
+  BlocksScene* scene = dynamic_cast<BlocksScene*>(getScene());
+  scene->onBlockDestroyed();
 }
 
 } // namespace blocks::game

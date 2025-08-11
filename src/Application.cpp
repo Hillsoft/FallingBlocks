@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <iostream>
+#include <memory>
 #include <thread>
 #include <utility>
 #include <GLFW/glfw3.h>
@@ -9,32 +10,37 @@
 #include "engine/Scene.hpp"
 #include "game/Ball.hpp"
 #include "game/Block.hpp"
+#include "game/BlocksScene.hpp"
 #include "game/LoadingScreen.hpp"
 #include "game/Paddle.hpp"
 #include "game/TestText.hpp"
 #include "input/InputHandler.hpp"
 #include "math/vec.hpp"
+#include "util/debug.hpp"
 
 namespace blocks {
 
 namespace {
 
-void populateMainScene(Scene& scene) {
+void populateMainScene(std::unique_ptr<Scene>& scene) {
+  DEBUG_ASSERT(scene == nullptr);
   auto start = std::chrono::high_resolution_clock::now();
 
-  scene.createActor<game::Paddle>();
-  scene.createActor<game::Ball>();
+  scene = std::make_unique<game::BlocksScene>();
+
+  scene->createActor<game::Paddle>();
+  scene->createActor<game::Ball>();
 
   for (int i = 0; i < 10; i++) {
     float x = (2.f * static_cast<float>(i) / 10.f) - 1.f;
     for (int j = 0; j < 4; j++) {
       float y = static_cast<float>(j) * 0.1f - 1.f;
-      scene.createActor<game::Block>(
+      scene->createActor<game::Block>(
           math::Vec2{x, y}, math::Vec2{x + 0.2f, y + 0.1f});
     }
   }
 
-  scene.createActor<game::TestText>();
+  scene->createActor<game::TestText>();
 
   auto end = std::chrono::high_resolution_clock::now();
   std::cout
@@ -54,7 +60,7 @@ Application::Application()
 }
 
 void Application::run() {
-  if (currentScene_ != &mainScene_) {
+  if (currentScene_ != mainScene_.get()) {
     loadThread_ = std::jthread{[&]() {
       populateMainScene(mainScene_);
       loadComplete_.store(true, std::memory_order_release);
@@ -84,9 +90,9 @@ void Application::run() {
               .count() /
           1000000.0f;
 
-      if (currentScene_ != &mainScene_ &&
+      if (currentScene_ != mainScene_.get() &&
           loadComplete_.load(std::memory_order_acquire)) {
-        currentScene_ = &mainScene_;
+        currentScene_ = mainScene_.get();
       }
     }
 

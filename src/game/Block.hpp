@@ -16,6 +16,8 @@ class Block : public Actor, public physics::RectCollider, public Drawable {
 
   void draw() final;
 
+  void onDestroy() final;
+
  private:
   render::UniqueRenderableHandle<render::RenderableTex2D::InstanceData> sprite_;
 };

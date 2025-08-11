@@ -17,11 +17,16 @@ target_link_libraries(game.block
 	engine.actor
 	engine.drawableregistry
 	engine.scene
+	game.blocksscene
 	globalsubsystemstack
 	math.vec
 	physics.physicsscene
 	render.renderables.renderabletex2d
 	render.rendersubsystem)
+
+add_library(game.blocksscene "BlocksScene.hpp" "BlocksScene.cpp")
+target_link_libraries(game.blocksscene
+	engine.scene)
 
 add_library(game.loadingscreen "LoadingScreen.hpp" "LoadingScreen.cpp")
 target_link_libraries(game.loadingscreen

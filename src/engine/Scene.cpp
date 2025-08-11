@@ -2,14 +2,18 @@
 
 #include <utility>
 #include "engine/Actor.hpp"
+#include "util/debug.hpp"
 
 namespace blocks {
 
 void Scene::destroyActor(Actor* actor) {
+  actor->onDestroy();
+
   auto it = std::find_if(
       actors_.begin(), actors_.end(), [actor](const auto& uniq_ptr) {
         return actor == uniq_ptr.get();
       });
+  DEBUG_ASSERT(it != actors_.end());
   if (it != actors_.end()) {
     std::shared_ptr<Actor> deleted{std::move(*it)};
     actors_.erase(it);

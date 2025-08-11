@@ -13,6 +13,8 @@ class Scene {
  public:
   Scene() {}
 
+  virtual ~Scene() {}
+
   template <typename TActor, typename... TArgs>
   std::weak_ptr<TActor> createActor(TArgs... args) {
     auto actor = std::make_shared<TActor>(*this, std::forward<TArgs>(args)...);

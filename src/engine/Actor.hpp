@@ -20,6 +20,8 @@ class Actor : public std::enable_shared_from_this<Actor> {
 
   Scene* getScene() const { return scene_; }
 
+  virtual void onDestroy() {}
+
  private:
   Scene* scene_;
 };
