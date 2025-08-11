@@ -13,7 +13,7 @@
 #include "game/BlocksScene.hpp"
 #include "game/LoadingScreen.hpp"
 #include "game/Paddle.hpp"
-#include "game/TestText.hpp"
+#include "game/ScoreUI.hpp"
 #include "input/InputHandler.hpp"
 #include "math/vec.hpp"
 #include "util/debug.hpp"
@@ -40,7 +40,7 @@ void populateMainScene(std::unique_ptr<Scene>& scene) {
     }
   }
 
-  scene->createActor<game::TestText>();
+  scene->createActor<game::ScoreUI>();
 
   auto end = std::chrono::high_resolution_clock::now();
   std::cout

@@ -12,12 +12,14 @@ target_link_libraries(application
 	engine.scene
 	game.ball
 	game.block
+	game.blocksscene
 	game.loadingscreen
 	game.paddle
-	game.testtext
+	game.scoreui
 	globalsubsystemstack
 	input.inputsubsystem
-	math.vec)
+	math.vec
+	util.debug)
 
 add_library(globalsubsystemstack STATIC "GlobalSubSystemStack.cpp" "GlobalSubSystemStack.hpp")
 target_link_libraries(globalsubsystemstack

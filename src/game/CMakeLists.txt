@@ -52,6 +52,18 @@ target_link_libraries(game.paddle
 	render.renderables.renderabletex2d
 	render.rendersubsystem)
 
+add_library(game.scoreui "ScoreUI.hpp" "ScoreUI.cpp")
+target_link_libraries(game.scoreui
+	engine.actor
+	engine.drawableregistry
+	engine.scene
+	game.blocksscene
+	globalsubsystemstack
+	loader.font.font
+	render.font
+	util.debug
+	util.string)
+
 add_library(game.testtext "TestText.hpp" "TestText.cpp")
 target_link_libraries(game.testtext
 	engine.actor
