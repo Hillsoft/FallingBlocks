@@ -22,8 +22,6 @@ static_assert(std::endian::native == std::endian::little);
 
 namespace blocks::loader {
 
-using Color = math::Vec<unsigned short, 3>;
-
 namespace {
 
 constexpr unsigned short sZero = static_cast<unsigned short>(0);
@@ -170,74 +168,33 @@ enum FilterMode {
   PAETH = 4,
 };
 
-} // namespace
-
-Image loadPng(const std::filesystem::path& path) {
-  return loadPng(util::readFileBytes(path));
-}
-
-Image loadPng(std::span<const std::byte> data) {
-  if (!checkSignature(data)) {
-    throw std::runtime_error{"Corrupt PNG"};
-  }
-
-  Chunk headerChunk = readChunk(data);
-  PngHeader header = readPngHeader(headerChunk.data);
-
-  if (header.bitDepth != 8 ||
-      (header.colorType != 2 && header.colorType != 6) ||
-      header.compression != 0) {
-    throw std::runtime_error{"Unsupported PNG format"};
-  }
-
-  bool hasAlpha = header.colorType == 6;
-  if (hasAlpha) {
-    std::cout
-        << "Warning: transparent PNGs not supported, alpha bit will be discarded"
-        << std::endl;
-  }
-
-  std::vector<std::byte> imgData;
-
-  while (data.size() > 0) {
-    Chunk chunk = readChunk(data);
-    if (chunk.type ==
-        std::array<std::byte, 4>{
-            std::byte{'I'}, std::byte{'D'}, std::byte{'A'}, std::byte{'T'}}) {
-      for (auto c : chunk.data) {
-        imgData.push_back(c);
-      }
-    }
-  }
-
-  std::vector<std::byte> decompressedData =
-      util::zlibDecompress(std::span(imgData.begin(), imgData.end()));
-
-  size_t pixelSizeBytes = hasAlpha ? 4 : 3;
-
-  size_t rowSize = pixelSizeBytes * header.width + 1;
-  if (decompressedData.size() != rowSize * header.height) {
-    throw std::runtime_error{"Corrupt PNG"};
-  }
+template <size_t pixelSizeBytes>
+std::vector<std::byte> defilter(
+    const PngHeader& header, std::span<const std::byte> decompressedData)
+  requires(pixelSizeBytes == 3 || pixelSizeBytes == 4)
+{
+  using Color = math::Vec<unsigned short, pixelSizeBytes>;
 
   size_t outRowSize = 4 * header.width;
+  size_t rowSize = pixelSizeBytes * header.width + 1;
   std::vector<std::byte> outData;
   outData.reserve(header.width * header.height * 4);
 
   auto readDecompressed = [&](size_t x, size_t y) {
     size_t pixelOffset = 1 + pixelSizeBytes * x + rowSize * y;
-    math::Vec<unsigned short, 3> out{
-        static_cast<unsigned short>(decompressedData[pixelOffset]),
-        static_cast<unsigned short>(decompressedData[pixelOffset + 1]),
-        static_cast<unsigned short>(decompressedData[pixelOffset + 2])};
+    Color out;
+    for (int i = 0; i < pixelSizeBytes; i++) {
+      out.at(i) =
+          static_cast<unsigned short>(decompressedData[pixelOffset + i]);
+    }
     return out;
   };
   auto readOut = [&](size_t x, size_t y) {
     size_t pixelOffset = 4 * x + y * outRowSize;
-    math::Vec<unsigned short, 3> out{
-        static_cast<unsigned short>(outData[pixelOffset]),
-        static_cast<unsigned short>(outData[pixelOffset + 1]),
-        static_cast<unsigned short>(outData[pixelOffset + 2])};
+    Color out;
+    for (int i = 0; i < pixelSizeBytes; i++) {
+      out.at(i) = static_cast<unsigned short>(outData[pixelOffset + i]);
+    }
     return out;
   };
 
@@ -245,8 +202,12 @@ Image loadPng(std::span<const std::byte> data) {
     outData.emplace_back(static_cast<std::byte>(col.at(0)));
     outData.emplace_back(static_cast<std::byte>(col.at(1)));
     outData.emplace_back(static_cast<std::byte>(col.at(2)));
-    outData.emplace_back(
-        static_cast<std::byte>(std::numeric_limits<unsigned char>::max()));
+    if constexpr (pixelSizeBytes == 4) {
+      outData.emplace_back(static_cast<std::byte>(col.at(3)));
+    } else {
+      outData.emplace_back(
+          static_cast<std::byte>(std::numeric_limits<unsigned char>::max()));
+    }
   };
 
   for (size_t y = 0; y < header.height; y++) {
@@ -283,7 +244,7 @@ Image loadPng(std::span<const std::byte> data) {
         Color raw = readDecompressed(x, y);
         Color predictor;
 
-        for (size_t i = 0; i < 3; i++) {
+        for (size_t i = 0; i < pixelSizeBytes; i++) {
           int a = prevX.at(i);
           int b = prevY.at(i);
           int c = prevXY.at(i);
@@ -304,6 +265,59 @@ Image loadPng(std::span<const std::byte> data) {
       }
     }
   }
+
+  return outData;
+}
+
+} // namespace
+
+Image loadPng(const std::filesystem::path& path) {
+  return loadPng(util::readFileBytes(path));
+}
+
+Image loadPng(std::span<const std::byte> data) {
+  if (!checkSignature(data)) {
+    throw std::runtime_error{"Corrupt PNG"};
+  }
+
+  Chunk headerChunk = readChunk(data);
+  PngHeader header = readPngHeader(headerChunk.data);
+
+  if (header.bitDepth != 8 ||
+      (header.colorType != 2 && header.colorType != 6) ||
+      header.compression != 0) {
+    throw std::runtime_error{"Unsupported PNG format"};
+  }
+
+  bool hasAlpha = header.colorType == 6;
+
+  std::vector<std::byte> imgData;
+
+  while (data.size() > 0) {
+    Chunk chunk = readChunk(data);
+    if (chunk.type ==
+        std::array<std::byte, 4>{
+            std::byte{'I'}, std::byte{'D'}, std::byte{'A'}, std::byte{'T'}}) {
+      for (auto c : chunk.data) {
+        imgData.push_back(c);
+      }
+    }
+  }
+
+  std::vector<std::byte> decompressedData =
+      util::zlibDecompress(std::span(imgData.begin(), imgData.end()));
+
+  size_t pixelSizeBytes = hasAlpha ? 4 : 3;
+
+  size_t rowSize = pixelSizeBytes * header.width + 1;
+  if (decompressedData.size() != rowSize * header.height) {
+    throw std::runtime_error{"Corrupt PNG"};
+  }
+
+  size_t outRowSize = 4 * header.width;
+  std::vector<std::byte> outData = hasAlpha
+      ? defilter<4>(header, decompressedData)
+      : defilter<3>(header, decompressedData);
 
   // Adjust to the expected BGR format
   for (size_t y = 0; y < header.height; y++) {
