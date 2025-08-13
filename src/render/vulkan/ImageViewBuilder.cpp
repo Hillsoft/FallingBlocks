@@ -1,5 +1,6 @@
 #include "render/vulkan/ImageViewBuilder.hpp"
 
+#include <cstdint>
 #include <stdexcept>
 #include <GLFW/glfw3.h>
 #include "render/vulkan/UniqueHandle.hpp"
@@ -21,6 +22,11 @@ ImageViewBuilder::ImageViewBuilder(VkImage image, VkFormat imageFormat)
   createInfo_.subresourceRange.levelCount = 1;
   createInfo_.subresourceRange.baseArrayLayer = 0;
   createInfo_.subresourceRange.layerCount = 1;
+}
+
+ImageViewBuilder& ImageViewBuilder::setMipLevels(uint32_t mipLevels) {
+  createInfo_.subresourceRange.levelCount = mipLevels;
+  return *this;
 }
 
 UniqueHandle<VkImageView> ImageViewBuilder::build(VkDevice device) {
