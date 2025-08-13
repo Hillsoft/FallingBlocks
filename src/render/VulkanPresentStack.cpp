@@ -8,7 +8,6 @@
 #include <vector>
 #include <GLFW/glfw3.h>
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanImageView.hpp"
 #include "render/glfw_wrapper/Window.hpp"
 #include "render/vulkan/FrameBufferBuilder.hpp"
 #include "render/vulkan/SurfaceBuilder.hpp"
@@ -22,16 +21,15 @@ namespace {
 std::vector<vulkan::UniqueHandle<VkFramebuffer>> makeFrameBuffers(
     VulkanGraphicsDevice& device,
     VkRenderPass renderPass,
-    std::vector<VulkanImageView>& imageViews,
+    std::vector<vulkan::UniqueHandle<VkImageView>>& imageViews,
     VkExtent2D extent) {
   std::vector<vulkan::UniqueHandle<VkFramebuffer>> result;
   result.reserve(imageViews.size());
 
   for (auto& v : imageViews) {
-    VkImageView rawView = v.getRawImageView();
     result.emplace_back(
         vulkan::FrameBufferBuilder(
-            renderPass, std::span{&rawView, 1}, extent, 1)
+            renderPass, std::span{&v.get(), 1}, extent, 1)
             .build(device.getRawDevice()));
   }
 

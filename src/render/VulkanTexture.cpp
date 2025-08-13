@@ -12,6 +12,7 @@
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/vulkan/CommandBufferBuilder.hpp"
 #include "render/vulkan/FenceBuilder.hpp"
+#include "render/vulkan/ImageViewBuilder.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
@@ -81,6 +82,7 @@ VulkanTexture::VulkanTexture(
     : deviceMemory_(nullptr, nullptr),
       buffer_(nullptr, nullptr),
       image_(nullptr, nullptr),
+      imageView_(nullptr, nullptr),
       sampler_(nullptr, nullptr) {
   loader::Image tex = loader::loadImage(source);
 
@@ -199,7 +201,9 @@ VulkanTexture::VulkanTexture(
   vulkan::endSingleTimeCommandBuffer(
       commandBuffer.get(), commandPool.getQueue(), {}, {}, fence.get());
   vkWaitForFences(device.getRawDevice(), 1, &fence.get(), true, UINT32_MAX);
-  imageView_.emplace(device, textureImage, VK_FORMAT_B8G8R8A8_SRGB);
+  imageView_ =
+      vulkan::ImageViewBuilder(textureImage, VK_FORMAT_B8G8R8A8_SRGB)
+          .build(device.getRawDevice());
 
   VkSamplerCreateInfo samplerInfo{};
   samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;

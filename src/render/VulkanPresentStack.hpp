@@ -4,7 +4,6 @@
 #include <vector>
 #include <GLFW/glfw3.h>
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanImageView.hpp"
 #include "render/VulkanSwapChain.hpp"
 #include "render/glfw_wrapper/Window.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
@@ -78,7 +77,7 @@ class VulkanPresentStack {
         VkRenderPass renderPass);
 
     VulkanSwapChain swapChain;
-    std::vector<VulkanImageView> imageViews;
+    std::vector<vulkan::UniqueHandle<VkImageView>> imageViews;
     std::vector<vulkan::UniqueHandle<VkFramebuffer>> frameBuffer;
   };
 

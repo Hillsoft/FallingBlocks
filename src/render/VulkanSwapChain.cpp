@@ -8,9 +8,8 @@
 #include <stdexcept>
 #include <vector>
 #include <GLFW/glfw3.h>
-
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanImageView.hpp"
+#include "render/vulkan/ImageViewBuilder.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 #include "util/debug.hpp"
 
@@ -189,12 +188,15 @@ VulkanSwapChain::VulkanSwapChain(
       swapChainImages_.data());
 }
 
-std::vector<VulkanImageView> VulkanSwapChain::getImageViews() const {
-  std::vector<VulkanImageView> result;
+std::vector<vulkan::UniqueHandle<VkImageView>> VulkanSwapChain::getImageViews()
+    const {
+  std::vector<vulkan::UniqueHandle<VkImageView>> result;
   result.reserve(swapChainImages_.size());
 
   for (const auto& swapImage : swapChainImages_) {
-    result.emplace_back(*graphicsDevice_, swapImage, format_);
+    result.emplace_back(
+        vulkan::ImageViewBuilder(swapImage, format_)
+            .build(graphicsDevice_->getRawDevice()));
   }
 
   return result;

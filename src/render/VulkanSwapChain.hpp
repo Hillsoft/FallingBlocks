@@ -6,7 +6,6 @@
 #include <GLFW/glfw3.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
-#include "render/VulkanImageView.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render {
@@ -17,7 +16,7 @@ class VulkanSwapChain {
       VkSurfaceKHR surface,
       VulkanGraphicsDevice& graphicsDevice);
 
-  std::vector<VulkanImageView> getImageViews() const;
+  std::vector<vulkan::UniqueHandle<VkImageView>> getImageViews() const;
 
   // nullopt indicates out of date swapchain, recreation required
   std::optional<uint32_t> getNextImageIndex(

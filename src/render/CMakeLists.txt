@@ -115,11 +115,6 @@ target_link_libraries(render.vulkangraphicspipeline
 	render.vulkanshader
 	render.vulkan.uniquehandle)
 
-add_library(render.vulkanimageview STATIC "VulkanImageView.cpp" "VulkanImageView.hpp")
-target_link_libraries(render.vulkanimageview
-	render.vulkangraphicsdevice
-	render.vulkan.uniquehandle)
-
 add_library(render.vulkaninstance STATIC "VulkanInstance.cpp" "VulkanInstance.hpp")
 target_link_libraries(render.vulkaninstance INTERFACE
 	render.validationlayers
@@ -141,7 +136,6 @@ add_library(render.vulkanpresentstack STATIC "VulkanPresentStack.cpp" "VulkanPre
 target_link_libraries(render.vulkanpresentstack
 	render.glfw_wrapper.window
 	render.vulkangraphicsdevice
-	render.vulkanimageview
 	render.vulkanswapchain
 	render.vulkan.framebufferbuilder
 	render.vulkan.surfacebuilder
@@ -170,7 +164,7 @@ target_link_libraries(render.vulkanshaderprogram
 add_library(render.vulkanswapchain STATIC "VulkanSwapChain.cpp" "VulkanSwapChain.hpp")
 target_link_libraries(render.vulkanswapchain
 	render.vulkangraphicsdevice
-	render.vulkanimageview
+	render.vulkan.imageviewbuilder
 	render.vulkan.uniquehandle
 	util.debug)
 
@@ -182,8 +176,8 @@ target_link_libraries(render.vulkantexture
 	render.vulkancommandpool
 	render.vulkandevicememory
 	render.vulkangraphicsdevice
-	render.vulkanimageview
 	render.vulkan.commandbufferbuilder
+	render.vulkan.imageviewbuilder
 	render.vulkan.fencebuilder
 	render.vulkan.uniquehandle)
 

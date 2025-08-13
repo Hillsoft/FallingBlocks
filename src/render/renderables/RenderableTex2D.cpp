@@ -37,7 +37,7 @@ RenderableObject RenderableTex2D::create(
 
   VkDescriptorImageInfo imageInfo{};
   imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-  imageInfo.imageView = texture->getImageView().getRawImageView();
+  imageInfo.imageView = texture->getImageView();
   imageInfo.sampler = texture->getSampler();
 
   for (const auto& set : descriptorSets) {

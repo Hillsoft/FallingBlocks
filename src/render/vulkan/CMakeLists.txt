@@ -14,6 +14,10 @@ add_library(render.vulkan.framebufferbuilder "FrameBufferBuilder.hpp" "FrameBuff
 target_link_libraries(render.vulkan.framebufferbuilder
 	render.vulkan.uniquehandle)
 
+add_library(render.vulkan.imageviewbuilder "ImageViewBuilder.hpp" "ImageViewBuilder.cpp")
+target_link_libraries(render.vulkan.imageviewbuilder
+	render.vulkan.uniquehandle)
+
 add_library(render.vulkan.renderpassbuilder "RenderPassBuilder.hpp" "RenderPassBuilder.cpp")
 target_link_libraries(render.vulkan.renderpassbuilder
 	render.vulkan.uniquehandle)
