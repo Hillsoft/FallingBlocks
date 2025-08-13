@@ -1,36 +1,31 @@
-#include "game/Block.hpp"
+#include "game/Background.hpp"
 
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Actor.hpp"
 #include "engine/DrawableRegistry.hpp"
 #include "engine/Scene.hpp"
-#include "game/BlocksScene.hpp"
 #include "math/vec.hpp"
-#include "physics/RectCollider.hpp"
 #include "render/renderables/RenderableTex2D.hpp"
 
 namespace blocks::game {
 
-Block::Block(Scene& scene, math::Vec2 p0, math::Vec2 p1)
+Background::Background(Scene& scene)
     : Actor(scene),
-      physics::RectCollider(scene.getPhysicsScene(), p0, p1, 0b10, 0),
       Drawable(scene.getDrawableScene()),
       sprite_(GlobalSubSystemStack::get()
                   .renderSystem()
                   .createRenderable<render::RenderableTex2D>(
-                      RESOURCE_DIR "/block.png")) {}
+                      RESOURCE_DIR "/background.png")) {}
 
-void Block::draw() {
+void Background::draw() {
   auto& render = GlobalSubSystemStack::get().renderSystem();
   auto window = GlobalSubSystemStack::get().window();
 
   render.drawObject(
-      window, *sprite_, {math::modelMatrixFromBounds(getP0(), getP1())});
-}
-
-void Block::onDestroy() {
-  BlocksScene* scene = dynamic_cast<BlocksScene*>(getScene());
-  scene->onBlockDestroyed();
+      window,
+      *sprite_,
+      {math::modelMatrixFromBounds(
+          math::Vec2{-1.0f, -1.0f}, math::Vec2{1.0f, 1.0f})});
 }
 
 } // namespace blocks::game

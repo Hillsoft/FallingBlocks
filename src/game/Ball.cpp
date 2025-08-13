@@ -42,7 +42,7 @@ Ball::Ball(Scene& scene)
       sprite_(GlobalSubSystemStack::get()
                   .renderSystem()
                   .createRenderable<render::RenderableTex2D>(
-                      RESOURCE_DIR "/test_image.bmp")) {}
+                      RESOURCE_DIR "/ball.png")) {}
 
 void Ball::update(float deltaTimeSeconds) {
   math::Vec2 objSize(kBallSize, kBallSize);

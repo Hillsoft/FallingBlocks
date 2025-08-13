@@ -37,7 +37,7 @@ Paddle::Paddle(Scene& scene)
       sprite_(GlobalSubSystemStack::get()
                   .renderSystem()
                   .createRenderable<render::RenderableTex2D>(
-                      RESOURCE_DIR "/mandelbrot set.png")) {}
+                      RESOURCE_DIR "/paddle.png")) {}
 
 void Paddle::update(float deltaTimeSeconds) {
   math::Vec2 pos = getP0();
@@ -56,12 +56,6 @@ void Paddle::draw() {
 
   render.drawObject(
       window, *sprite_, {math::modelMatrixFromBounds(getP0(), getP1())});
-  render.drawObject(
-      window,
-      *sprite_,
-      {math::modelMatrixFromBounds(
-          getP0() + math::Vec2(0.0f, kPaddleHeight),
-          getP1() + math::Vec2(0.0f, kPaddleHeight))});
 }
 
 void Paddle::onKeyPress(int key) {

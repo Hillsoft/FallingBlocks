@@ -8,6 +8,7 @@
 #include <GLFW/glfw3.h>
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Scene.hpp"
+#include "game/Background.hpp"
 #include "game/Ball.hpp"
 #include "game/Block.hpp"
 #include "game/BlocksScene.hpp"
@@ -28,6 +29,7 @@ void populateMainScene(std::unique_ptr<Scene>& scene) {
 
   scene = std::make_unique<game::BlocksScene>();
 
+  scene->createActor<game::Background>();
   scene->createActor<game::Paddle>();
   scene->createActor<game::Ball>();
 

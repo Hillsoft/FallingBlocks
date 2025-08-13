@@ -10,6 +10,7 @@ add_subdirectory(util)
 add_library(application STATIC "Application.cpp" "Application.hpp")
 target_link_libraries(application
 	engine.scene
+	game.background
 	game.ball
 	game.block
 	game.blocksscene

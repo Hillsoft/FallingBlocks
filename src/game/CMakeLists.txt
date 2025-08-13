@@ -1,3 +1,13 @@
+add_library(game.background "Background.hpp" "Background.cpp")
+target_link_libraries(game.background
+	engine.actor
+	engine.drawableregistry
+	engine.scene
+	globalsubsystemstack
+	math.vec
+	render.renderables.renderabletex2d
+	render.rendersubsystem)
+
 add_library(game.ball "Ball.hpp" "Ball.cpp")
 target_link_libraries(game.ball
 	engine.actor
