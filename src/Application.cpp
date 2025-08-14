@@ -1,5 +1,6 @@
 #include "Application.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <memory>
@@ -73,6 +74,7 @@ void Application::run() {
   float prevFrameTimeSecs = 0;
   while (!subsystems.window()->shouldClose()) {
     std::chrono::microseconds maxFrameTime{0};
+    std::chrono::microseconds minFrameTime{9999999};
     std::chrono::microseconds totalFrameTime{0};
 
     for (int i = 0; i < 1000 && !subsystems.window()->shouldClose(); i++) {
@@ -86,6 +88,7 @@ void Application::run() {
           std::chrono::duration_cast<std::chrono::microseconds>(end - start);
       totalFrameTime += curFrameTime;
       maxFrameTime = std::max(maxFrameTime, curFrameTime);
+      minFrameTime = std::min(minFrameTime, curFrameTime);
 
       prevFrameTimeSecs =
           std::chrono::duration_cast<std::chrono::microseconds>(curFrameTime)
@@ -100,7 +103,8 @@ void Application::run() {
 
     std::cout << "FPS: " << 1000000.0f / (totalFrameTime / 1000).count()
               << "\nAverage frame time: " << totalFrameTime / 1000
-              << "\nMax frame time: " << maxFrameTime << "\n";
+              << "\nMax frame time: " << maxFrameTime
+              << "\nMin frame time: " << minFrameTime << "\n";
   }
 
   subsystems.renderSystem().waitIdle();
