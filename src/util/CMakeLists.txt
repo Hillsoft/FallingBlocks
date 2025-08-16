@@ -22,6 +22,10 @@ target_link_libraries(util.generator INTERFACE
 	util.debug
 	util.raii_helpers)
 
+add_library(util.indexedresourcestorage INTERFACE "IndexedResourceStorage.hpp")
+target_link_libraries(util.indexedresourcestorage INTERFACE
+	util.atomiccircularbufferqueue)
+
 add_library(util.portability INTERFACE "portability.hpp")
 
 add_library(util.raii_helpers INTERFACE "raii_helpers.hpp")

@@ -6,6 +6,7 @@
 #include <cstring>
 #include <iostream>
 #include <memory>
+#include <optional>
 #include <span>
 #include <stdexcept>
 #include <utility>
@@ -163,16 +164,21 @@ Window* RenderSubSystem::getWindow(WindowRef ref) {
 }
 
 RenderableObject* RenderSubSystem::getRenderable(GenericRenderableRef ref) {
+  std::vector<std::optional<RenderableObject>>& renderablesVec =
+      renderables_.get();
   DEBUG_ASSERT(
-      ref.id < renderables_.size() && renderables_[ref.id].has_value());
-  return &*renderables_[ref.id];
+      ref.id < renderablesVec.size() && renderablesVec[ref.id].has_value());
+  return &*renderablesVec[ref.id];
 }
 
 void RenderSubSystem::destroyRenderable(GenericRenderableRef ref) {
+  std::vector<std::optional<RenderableObject>>& renderablesVec =
+      renderables_.get();
   DEBUG_ASSERT(
-      ref.id < renderables_.size() && renderables_[ref.id].has_value());
-  renderablesPendingDestruction_.emplace_back(std::move(*renderables_[ref.id]));
-  renderables_[ref.id].reset();
+      ref.id < renderablesVec.size() && renderablesVec[ref.id].has_value());
+  renderablesPendingDestruction_.emplace_back(
+      std::move(*renderablesVec[ref.id]));
+  renderablesVec[ref.id].reset();
 }
 
 void RenderSubSystem::drawObjectRaw(
@@ -201,6 +207,9 @@ void RenderSubSystem::commitFrame() {
 
   instanceDataBuffers_[currentFrame_].reset();
 
+  std::vector<std::optional<RenderableObject>>& renderablesVec =
+      renderables_.get();
+
   // Pre-sort commands by window
   if (windows_.size() > 1) {
     std::sort(
@@ -227,7 +236,7 @@ void RenderSubSystem::commitFrame() {
       if (curGroup[0].target_.id != i) {
         curGroup = {};
       }
-      drawWindow(i, curGroup);
+      drawWindow(i, curGroup, renderablesVec);
     }
   }
 
@@ -238,7 +247,9 @@ void RenderSubSystem::commitFrame() {
 }
 
 void RenderSubSystem::drawWindow(
-    size_t windowId, std::span<DrawCommand> windowCommands) {
+    size_t windowId,
+    std::span<DrawCommand> windowCommands,
+    std::vector<std::optional<RenderableObject>>& renderablesVec) {
   DEBUG_ASSERT(windowId < windows_.size() && windows_[windowId] != nullptr);
   Window& window = *windows_[windowId];
   PipelineSynchronisationSet& synchronisationSet =
@@ -315,16 +326,16 @@ void RenderSubSystem::drawWindow(
   for ([[maybe_unused]] const auto& command : windowCommands) {
     DEBUG_ASSERT(
         command.target_.id == windowId &&
-        command.obj_.id < renderables_.size() &&
-        renderables_[command.obj_.id].has_value());
+        command.obj_.id < renderablesVec.size() &&
+        renderablesVec[command.obj_.id].has_value());
   }
 
   std::sort(
       windowCommands.begin(),
       windowCommands.end(),
-      [this](const auto& a, const auto& b) {
-        const auto* aShader = renderables_[a.obj_.id]->shaderProgram_;
-        const auto* bShader = renderables_[b.obj_.id]->shaderProgram_;
+      [&renderablesVec](const auto& a, const auto& b) {
+        const auto* aShader = renderablesVec[a.obj_.id]->shaderProgram_;
+        const auto* bShader = renderablesVec[b.obj_.id]->shaderProgram_;
         if (aShader != bShader) {
           return aShader < bShader;
         }
@@ -332,9 +343,10 @@ void RenderSubSystem::drawWindow(
       });
 
   util::Generator<std::span<DrawCommand>> shaderGroups = util::vec::genGroups(
-      windowCommands, [this](const DrawCommand& a, const DrawCommand& b) {
-        return renderables_[a.obj_.id]->shaderProgram_ ==
-            renderables_[b.obj_.id]->shaderProgram_;
+      windowCommands,
+      [&renderablesVec](const DrawCommand& a, const DrawCommand& b) {
+        return renderablesVec[a.obj_.id]->shaderProgram_ ==
+            renderablesVec[b.obj_.id]->shaderProgram_;
       });
 
   for (const auto& shaderGroup : shaderGroups) {
@@ -347,12 +359,12 @@ void RenderSubSystem::drawWindow(
     vkCmdBindPipeline(
         commandBuffer,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
-        renderables_[shaderGroup[0].obj_.id]
+        renderablesVec[shaderGroup[0].obj_.id]
             ->shaderProgram_->pipeline_.getRawPipeline());
 
     for (const auto& curGroup : objGroups) {
       // All commands in the group have the same renderable object,
-      RenderableObject& renderable = *renderables_[curGroup[0].obj_.id];
+      RenderableObject& renderable = *renderablesVec[curGroup[0].obj_.id];
 
       vkCmdBindDescriptorSets(
           commandBuffer,

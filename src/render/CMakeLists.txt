@@ -56,6 +56,7 @@ target_link_libraries(render.rendersubsystem
 	util.blockforwardallocatedarena
 	util.debug
 	util.generator
+	util.indexedresourcestorage
 	util.portability
 	util.raii_helpers
 	util.vec_generators)

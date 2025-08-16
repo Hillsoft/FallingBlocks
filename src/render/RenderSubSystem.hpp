@@ -19,6 +19,7 @@
 #include "render/resource/TextureManager.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 #include "util/BlockForwardAllocatedArena.hpp"
+#include "util/IndexedResourceStorage.hpp"
 #include "util/debug.hpp"
 #include "util/portability.hpp"
 #include "util/raii_helpers.hpp"
@@ -103,7 +104,8 @@ struct RenderableRef {
   explicit RenderableRef() : rawRef_() {}
   explicit RenderableRef(size_t id, RenderSubSystem& renderSystem)
       : rawRef_(id, renderSystem) {
-    DEBUG_ASSERT(sizeof(TInstanceData) == get()->getInstanceDataSize());
+    // Temporarily removed as it's only safe to call get() on the render thread
+    // DEBUG_ASSERT(sizeof(TInstanceData) == get()->getInstanceDataSize());
   }
 
  private:
@@ -178,8 +180,7 @@ class RenderSubSystem {
   template <typename TConcreteRenderable, typename... TArgs>
   UniqueRenderableHandle<typename TConcreteRenderable::InstanceData>
   createRenderable(TArgs&&... args) {
-    size_t id = renderables_.size();
-    renderables_.emplace_back(TConcreteRenderable::create(
+    size_t id = renderables_.pushBackBlocking(TConcreteRenderable::create(
         std::forward<TArgs>(args)...,
         graphics_,
         shaderProgramManager_,
@@ -232,7 +233,10 @@ class RenderSubSystem {
       GenericRenderableRef ref,
       void* instanceData);
 
-  void drawWindow(size_t windowId, std::span<DrawCommand> windowCommands);
+  void drawWindow(
+      size_t windowId,
+      std::span<DrawCommand> windowCommands,
+      std::vector<std::optional<RenderableObject>>& renderablesVec);
 
   struct GLFWLifetimeScope {
     GLFWLifetimeScope();
@@ -253,7 +257,7 @@ class RenderSubSystem {
   TextureManager textureManager_;
   std::vector<PipelineSynchronisationSet> synchronisationSets_;
   std::vector<std::unique_ptr<Window>> windows_;
-  std::vector<std::optional<RenderableObject>> renderables_;
+  util::IndexedResourceStorage<RenderableObject> renderables_;
   std::vector<RenderableObject> renderablesPendingDestruction_;
   std::vector<ForwardAllocateMappedBuffer> instanceDataBuffers_;
   util::BlockForwardAllocatedArena instanceDataCPUBuffer_;
