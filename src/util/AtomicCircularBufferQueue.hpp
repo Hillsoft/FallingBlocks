@@ -3,6 +3,7 @@
 #include <array>
 #include <atomic>
 #include <optional>
+#include <thread>
 
 #include "util/raii_helpers.hpp"
 #include "util/storage.hpp"
@@ -28,7 +29,9 @@ class AtomicCircularBufferQueue : util::no_copy_move {
   }
 
   void pushBack(T&& val) {
-    pushBackFn<false>([&](uint32_t target) { data_[target].emplace(val); });
+    pushBackFn<false>([&](uint32_t target) {
+      data_[target].emplace(std::move(val));
+    });
   }
 
   void pushBack(const T& val) {
@@ -36,7 +39,9 @@ class AtomicCircularBufferQueue : util::no_copy_move {
   }
 
   void pushBackBlocking(T&& val) {
-    pushBackFn<true>([&](uint32_t target) { data_[target].emplace(val); });
+    pushBackFn<true>([&](uint32_t target) {
+      data_[target].emplace(std::move(val));
+    });
   }
 
   void pushBackBlocking(const T& val) {
