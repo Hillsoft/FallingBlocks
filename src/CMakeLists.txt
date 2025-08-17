@@ -12,6 +12,7 @@ target_link_libraries(application
 	engine.scene
 	game.background
 	game.ball
+	game.ballspawnblock
 	game.block
 	game.blocksscene
 	game.loadingscreen

@@ -11,6 +11,7 @@
 #include "engine/Scene.hpp"
 #include "game/Background.hpp"
 #include "game/Ball.hpp"
+#include "game/BallSpawnBlock.hpp"
 #include "game/Block.hpp"
 #include "game/BlocksScene.hpp"
 #include "game/LoadingScreen.hpp"
@@ -38,8 +39,13 @@ void populateMainScene(std::unique_ptr<Scene>& scene) {
     float x = (2.f * static_cast<float>(i) / 10.f) - 1.f;
     for (int j = 0; j < 4; j++) {
       float y = static_cast<float>(j) * 0.1f - 1.f;
-      scene->createActor<game::Block>(
-          math::Vec2{x, y}, math::Vec2{x + 0.2f, y + 0.1f});
+      if ((i + j) % 4 == 0) {
+        scene->createActor<game::BallSpawnBlock>(
+            math::Vec2{x, y}, math::Vec2{x + 0.2f, y + 0.1f});
+      } else {
+        scene->createActor<game::Block>(
+            math::Vec2{x, y}, math::Vec2{x + 0.2f, y + 0.1f});
+      }
     }
   }
 

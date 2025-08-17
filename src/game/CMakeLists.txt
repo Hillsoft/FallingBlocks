@@ -22,6 +22,15 @@ target_link_libraries(game.ball
 	render.renderables.renderabletex2d
 	render.rendersubsystem)
 
+add_library(game.ballspawnblock "BallSpawnBlock.hpp" "BallSpawnBlock.cpp")
+target_link_libraries(game.ballspawnblock
+	engine.scene
+	game.ball
+	game.block
+	globalsubsystemstack
+	math.vec
+	render.renderables.renderabletex2d)
+
 add_library(game.block "Block.hpp" "Block.cpp")
 target_link_libraries(game.block
 	engine.actor

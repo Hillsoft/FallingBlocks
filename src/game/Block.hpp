@@ -12,11 +12,17 @@ namespace blocks::game {
 
 class Block : public Actor, public physics::RectCollider, public Drawable {
  public:
+  Block(
+      Scene& scene,
+      math::Vec2 p0,
+      math::Vec2 p1,
+      render::UniqueRenderableHandle<render::RenderableTex2D::InstanceData>
+          sprite);
   Block(Scene& scene, math::Vec2 p0, math::Vec2 p1);
 
   void draw() final;
 
-  void onDestroy() final;
+  void onDestroy() override;
 
  private:
   render::UniqueRenderableHandle<render::RenderableTex2D::InstanceData> sprite_;
