@@ -26,6 +26,7 @@ void* BlockForwardAllocatedArena::allocateRaw(size_t count, size_t align) {
   while (result = allocateInCurrentBlock(count, align), result == nullptr) {
     if (kBlockSize - blockOffset_ < count) {
       curBlock_++;
+      blockOffset_ = 0;
 
       if (curBlock_ == data_.size()) {
         data_.emplace_back(std::make_unique<char[]>(kBlockSize));
