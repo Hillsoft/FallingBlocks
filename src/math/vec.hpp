@@ -89,6 +89,16 @@ class Vec {
     return at(2);
   }
 
+  constexpr TNum mag2() const {
+    TNum mag2 = 0.0f;
+    for (int i = 0; i < size; i++) {
+      mag2 += data_[i] * data_[i];
+    }
+    return mag2;
+  }
+
+  constexpr TNum mag() const { return sqrt(mag2()); }
+
  private:
   alignas(detail::alignmentForVec<TNum>(size)) std::array<TNum, size> data_;
 };
