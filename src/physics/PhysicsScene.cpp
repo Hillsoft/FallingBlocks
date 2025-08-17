@@ -7,7 +7,7 @@ namespace blocks::physics {
 PhysicsScene::PhysicsScene() {}
 
 void PhysicsScene::run() {
-  auto collidersLock = getRegisteredItemsWrite();
+  auto collidersLock = getRegisteredItems();
   const auto& colliders = *collidersLock;
   for (size_t i = 0; i < colliders.size(); i++) {
     for (size_t j = i + 1; j < colliders.size(); j++) {

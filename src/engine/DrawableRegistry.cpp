@@ -3,7 +3,7 @@
 namespace blocks {
 
 void DrawableRegistry::drawAll() {
-  for (auto& item : *getRegisteredItemsWrite()) {
+  for (auto& item : *getRegisteredItems()) {
     item->draw();
   }
 }

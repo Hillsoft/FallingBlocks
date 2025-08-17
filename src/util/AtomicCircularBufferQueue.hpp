@@ -5,6 +5,7 @@
 #include <optional>
 #include <thread>
 
+#include <stdexcept>
 #include "util/raii_helpers.hpp"
 #include "util/storage.hpp"
 

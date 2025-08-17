@@ -3,7 +3,7 @@
 namespace blocks {
 
 void TickRegistry::update(float deltaTimeSeconds) {
-  for (auto& item : *getRegisteredItemsWrite()) {
+  for (auto& item : *getRegisteredItems()) {
     item->update(deltaTimeSeconds);
   }
 }

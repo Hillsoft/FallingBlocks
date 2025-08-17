@@ -32,6 +32,7 @@ add_library(util.raii_helpers INTERFACE "raii_helpers.hpp")
 
 add_library(util.registry INTERFACE "Registry.hpp")
 target_link_libraries(util.registry INTERFACE
+	util.atomiccircularbufferqueue
 	util.debug
 	util.raii_helpers
 	util.synchronized)
