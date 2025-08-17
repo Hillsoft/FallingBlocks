@@ -23,7 +23,7 @@ class Ball
   void update(float deltaTimeSeconds) final;
   void draw() final;
 
-  void handleCollision(physics::RectCollider& other) final;
+  void handleCollision(physics::RectCollider& other, math::Vec2 normal) final;
 
  private:
   math::Vec2 vel_;

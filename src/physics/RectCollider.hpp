@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 #include "math/vec.hpp"
 #include "physics/PhysicsScene.hpp"
 #include "util/Registry.hpp"
@@ -17,9 +18,9 @@ class RectCollider : public util::RegistryItem<PhysicsScene, RectCollider> {
       uint64_t receiveEventLayers = ~0ull);
   virtual ~RectCollider() {}
 
-  bool testCollision(const RectCollider& other) const;
+  std::optional<math::Vec2> testCollision(const RectCollider& other) const;
 
-  virtual void handleCollision(RectCollider& other) {}
+  virtual void handleCollision(RectCollider& other, math::Vec2 normal) {}
 
   math::Vec2 getP0() const { return p0_; }
   void setP0(math::Vec2 newP0) { p0_ = newP0; }

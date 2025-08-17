@@ -31,6 +31,10 @@ math::Vec2 normalizeBallSpeed(const math::Vec2& speed) {
   return (kBallSpeed / speed.mag()) * speed;
 }
 
+math::Vec2 reflect(math::Vec2 vel, math::Vec2 normal) {
+  return vel - 2.f * (vel.dot(normal)) * normal;
+}
+
 } // namespace
 
 Ball::Ball(Scene& scene, math::Vec2 pos, math::Vec2 vel)
@@ -89,10 +93,14 @@ void Ball::draw() {
       window, *sprite_, {math::modelMatrixFromBounds(getP0(), getP1())});
 }
 
-void Ball::handleCollision(physics::RectCollider& other) {
-  if (auto paddle = dynamic_cast<Paddle*>(&other); paddle != nullptr) {
-    vel_.y() = -std::abs(vel_.y());
+void Ball::handleCollision(physics::RectCollider& other, math::Vec2 normal) {
+  if (vel_.dot(normal) > 0) {
+    return;
+  }
 
+  vel_ = reflect(vel_, normal);
+
+  if (auto paddle = dynamic_cast<Paddle*>(&other); paddle != nullptr) {
     math::Vec2 ballCenter = (getP0() + getP1()) / 2.f;
     math::Vec2 paddleCenter = (paddle->getP0() + paddle->getP1()) / 2.f;
 
@@ -103,7 +111,6 @@ void Ball::handleCollision(physics::RectCollider& other) {
 
     vel_ = normalizeBallSpeed(vel_);
   } else if (auto block = dynamic_cast<Block*>(&other); block != nullptr) {
-    vel_.y() = std::abs(vel_.y());
     getScene()->destroyActor(block);
   }
 }
