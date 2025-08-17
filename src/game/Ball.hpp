@@ -17,6 +17,7 @@ class Ball
       public TickHandler,
       public Drawable {
  public:
+  Ball(Scene& scene, math::Vec2 pos, math::Vec2 vel);
   Ball(Scene& scene);
 
   void update(float deltaTimeSeconds) final;

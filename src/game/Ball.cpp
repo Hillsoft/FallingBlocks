@@ -33,21 +33,27 @@ math::Vec2 normalizeBallSpeed(const math::Vec2& speed) {
 
 } // namespace
 
-Ball::Ball(Scene& scene)
+Ball::Ball(Scene& scene, math::Vec2 pos, math::Vec2 vel)
     : Actor(scene),
       physics::RectCollider(
           scene.getPhysicsScene(),
-          math::Vec2{-kBallSize / 2.f, -kBallSize / 2.f},
-          math::Vec2{kBallSize / 2.f, kBallSize / 2.f},
+          pos - math::Vec2{-kBallSize, -kBallSize} / 2.f,
+          pos + math::Vec2{-kBallSize, -kBallSize} / 2.f,
           0,
           0b11),
       TickHandler(scene.getTickRegistry()),
       Drawable(scene.getDrawableScene()),
-      vel_(normalizeBallSpeed(math::Vec2{randFloat(-0.25f, 0.25f), -1.0f})),
+      vel_(normalizeBallSpeed(vel)),
       sprite_(GlobalSubSystemStack::get()
                   .renderSystem()
                   .createRenderable<render::RenderableTex2D>(
                       RESOURCE_DIR "/ball.png")) {}
+
+Ball::Ball(Scene& scene)
+    : Ball(
+          scene,
+          math::Vec2{0.0f},
+          math::Vec2{randFloat(-0.25f, 0.25f), -1.0f}) {}
 
 void Ball::update(float deltaTimeSeconds) {
   math::Vec2 objSize(kBallSize, kBallSize);

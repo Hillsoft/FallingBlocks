@@ -21,7 +21,8 @@ BallSpawnBlock::BallSpawnBlock(Scene& scene, math::Vec2 p0, math::Vec2 p1)
 
 void BallSpawnBlock::onDestroy() {
   Block::onDestroy();
-  getScene()->createActor<Ball>();
+  getScene()->createActor<Ball>(
+      (getP0() + getP1()) / 2.0f, math::Vec2{0.0f, 1.0f});
 }
 
 } // namespace blocks::game
