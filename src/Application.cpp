@@ -25,6 +25,11 @@ namespace blocks {
 
 namespace {
 
+constexpr int kBlockXCount = 15;
+constexpr float kBlockWidth = 2.f / kBlockXCount;
+constexpr int kBlockYCount = 7;
+constexpr float kBlockHeight = kBlockWidth / 2.f;
+
 void populateMainScene(std::unique_ptr<Scene>& scene) {
   DEBUG_ASSERT(scene == nullptr);
   auto start = std::chrono::high_resolution_clock::now();
@@ -35,16 +40,16 @@ void populateMainScene(std::unique_ptr<Scene>& scene) {
   scene->createActor<game::Paddle>();
   scene->createActor<game::Ball>();
 
-  for (int i = 0; i < 10; i++) {
-    float x = (2.f * static_cast<float>(i) / 10.f) - 1.f;
-    for (int j = 0; j < 4; j++) {
-      float y = static_cast<float>(j) * 0.1f - 1.f;
+  for (int i = 0; i < kBlockXCount; i++) {
+    float x = kBlockWidth * static_cast<float>(i) - 1.f;
+    for (int j = 0; j < kBlockYCount; j++) {
+      float y = static_cast<float>(j) * kBlockHeight - 1.f;
       if ((i + j) % 4 == 0) {
         scene->createActor<game::BallSpawnBlock>(
-            math::Vec2{x, y}, math::Vec2{x + 0.2f, y + 0.1f});
+            math::Vec2{x, y}, math::Vec2{x + kBlockWidth, y + kBlockHeight});
       } else {
         scene->createActor<game::Block>(
-            math::Vec2{x, y}, math::Vec2{x + 0.2f, y + 0.1f});
+            math::Vec2{x, y}, math::Vec2{x + kBlockWidth, y + kBlockHeight});
       }
     }
   }
