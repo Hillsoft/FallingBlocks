@@ -20,10 +20,12 @@ class Actor : public std::enable_shared_from_this<Actor> {
 
   Scene* getScene() const { return scene_; }
 
-  virtual void onDestroy() {}
+  bool isAlive() const { return alive_; }
+  virtual void onDestroy() { alive_ = false; }
 
  private:
   Scene* scene_;
+  bool alive_ = true;
 };
 
 } // namespace blocks

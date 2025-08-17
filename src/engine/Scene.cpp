@@ -7,6 +7,9 @@
 namespace blocks {
 
 void Scene::destroyActor(Actor* actor) {
+  if (!actor->isAlive()) {
+    return;
+  }
   actor->onDestroy();
 
   auto it = std::find_if(
