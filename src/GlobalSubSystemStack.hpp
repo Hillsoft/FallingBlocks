@@ -1,5 +1,6 @@
 #pragma once
 
+#include "engine/ResourceSentinelManager.hpp"
 #include "input/InputSubSystem.hpp"
 #include "render/RenderSubSystem.hpp"
 #include "util/raii_helpers.hpp"
@@ -22,11 +23,13 @@ class GlobalSubSystemStack : private util::no_copy_move {
   render::RenderSubSystem& renderSystem();
   render::WindowRef window();
   input::InputSubSystem& inputSystem();
+  ResourceSentinelManager& sentinelManager();
 
  private:
   render::RenderSubSystem render_;
   render::UniqueWindowHandle window_;
   input::InputSubSystem input_;
+  ResourceSentinelManager sentinelManager_;
 };
 
 } // namespace blocks

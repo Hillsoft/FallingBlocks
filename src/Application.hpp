@@ -11,7 +11,6 @@ namespace blocks {
 class Application : public input::InputHandler {
  public:
   Application();
-  ~Application() = default;
 
   void run();
 

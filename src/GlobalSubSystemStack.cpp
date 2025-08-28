@@ -1,5 +1,6 @@
 #include "GlobalSubSystemStack.hpp"
 
+#include "engine/ResourceSentinelManager.hpp"
 #include "input/InputSubSystem.hpp"
 #include "render/RenderSubSystem.hpp"
 #include "util/debug.hpp"
@@ -40,6 +41,10 @@ render::WindowRef GlobalSubSystemStack::window() {
 
 input::InputSubSystem& GlobalSubSystemStack::inputSystem() {
   return input_;
+}
+
+ResourceSentinelManager& GlobalSubSystemStack::sentinelManager() {
+  return sentinelManager_;
 }
 
 } // namespace blocks

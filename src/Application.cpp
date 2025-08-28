@@ -34,9 +34,19 @@ void populateMainScene(std::unique_ptr<Scene>& scene) {
   DEBUG_ASSERT(scene == nullptr);
   auto start = std::chrono::high_resolution_clock::now();
 
+  GlobalSubSystemStack::get()
+      .sentinelManager()
+      .transitionToSentinelSet<
+          game::BackgroundResourceSentinel,
+          game::BallResourceSentinel,
+          game::BlockResourceSentinel,
+          game::BallSpawnBlockResourceSentinel,
+          game::PaddleResourceSentinel>();
+
   scene = std::make_unique<game::BlocksScene>();
 
   scene->createActor<game::Background>();
+
   scene->createActor<game::Paddle>();
   scene->createActor<game::Ball>();
 

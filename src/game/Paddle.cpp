@@ -1,6 +1,7 @@
 #include "game/Paddle.hpp"
 
 #include <algorithm>
+#include <optional>
 #include <GLFW/glfw3.h>
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Actor.hpp"
@@ -10,7 +11,9 @@
 #include "input/InputHandler.hpp"
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
+#include "render/RenderSubSystem.hpp"
 #include "render/renderables/RenderableTex2D.hpp"
+#include "util/debug.hpp"
 
 namespace blocks::game {
 
@@ -21,7 +24,34 @@ constexpr float kPaddleHeight = 0.1f;
 
 constexpr float kPaddleSpeed = 1.0f;
 
+class PaddleResourceSentinelData {
+ public:
+  PaddleResourceSentinelData()
+      : sprite_(GlobalSubSystemStack::get()
+                    .renderSystem()
+                    .createRenderable<render::RenderableTex2D>(
+                        RESOURCE_DIR "/paddle.png")) {}
+
+  render::RenderableRef<render::RenderableTex2D::InstanceData> getSprite() {
+    return sprite_.get();
+  }
+
+ private:
+  render::UniqueRenderableHandle<render::RenderableTex2D::InstanceData> sprite_;
+};
+
+constinit std::optional<PaddleResourceSentinelData> resourceSentinel;
+
 } // namespace
+
+void PaddleResourceSentinel::load() {
+  DEBUG_ASSERT(!resourceSentinel.has_value());
+  resourceSentinel.emplace();
+}
+
+void PaddleResourceSentinel::unload() {
+  resourceSentinel.reset();
+}
 
 Paddle::Paddle(Scene& scene)
     : Actor(scene),
@@ -33,11 +63,7 @@ Paddle::Paddle(Scene& scene)
           0b1,
           0),
       TickHandler(scene.getTickRegistry()),
-      Drawable(scene.getDrawableScene()),
-      sprite_(GlobalSubSystemStack::get()
-                  .renderSystem()
-                  .createRenderable<render::RenderableTex2D>(
-                      RESOURCE_DIR "/paddle.png")) {}
+      Drawable(scene.getDrawableScene()) {}
 
 void Paddle::update(float deltaTimeSeconds) {
   math::Vec2 pos = getP0();
@@ -55,7 +81,9 @@ void Paddle::draw() {
   auto window = GlobalSubSystemStack::get().window();
 
   render.drawObject(
-      window, *sprite_, {math::modelMatrixFromBounds(getP0(), getP1())});
+      window,
+      resourceSentinel->getSprite(),
+      {math::modelMatrixFromBounds(getP0(), getP1())});
 }
 
 void Paddle::onKeyPress(int key) {

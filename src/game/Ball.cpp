@@ -1,6 +1,7 @@
 #include "game/Ball.hpp"
 
 #include <cstdlib>
+#include <optional>
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Actor.hpp"
 #include "engine/DrawableRegistry.hpp"
@@ -10,7 +11,9 @@
 #include "game/Paddle.hpp"
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
+#include "render/RenderSubSystem.hpp"
 #include "render/renderables/RenderableTex2D.hpp"
+#include "util/debug.hpp"
 
 namespace blocks::game {
 
@@ -35,7 +38,34 @@ math::Vec2 reflect(math::Vec2 vel, math::Vec2 normal) {
   return vel - 2.f * (vel.dot(normal)) * normal;
 }
 
+class BallResourceSentinelData {
+ public:
+  BallResourceSentinelData()
+      : sprite_(GlobalSubSystemStack::get()
+                    .renderSystem()
+                    .createRenderable<render::RenderableTex2D>(
+                        RESOURCE_DIR "/ball.png")) {}
+
+  render::RenderableRef<render::RenderableTex2D::InstanceData> getSprite() {
+    return sprite_.get();
+  }
+
+ private:
+  render::UniqueRenderableHandle<render::RenderableTex2D::InstanceData> sprite_;
+};
+
+constinit std::optional<BallResourceSentinelData> resourceSentinel;
+
 } // namespace
+
+void BallResourceSentinel::load() {
+  DEBUG_ASSERT(!resourceSentinel.has_value());
+  resourceSentinel.emplace();
+}
+
+void BallResourceSentinel::unload() {
+  resourceSentinel.reset();
+}
 
 Ball::Ball(Scene& scene, math::Vec2 pos, math::Vec2 vel)
     : Actor(scene),
@@ -47,11 +77,7 @@ Ball::Ball(Scene& scene, math::Vec2 pos, math::Vec2 vel)
           0b11),
       TickHandler(scene.getTickRegistry()),
       Drawable(scene.getDrawableScene()),
-      vel_(normalizeBallSpeed(vel)),
-      sprite_(GlobalSubSystemStack::get()
-                  .renderSystem()
-                  .createRenderable<render::RenderableTex2D>(
-                      RESOURCE_DIR "/ball.png")) {}
+      vel_(normalizeBallSpeed(vel)) {}
 
 Ball::Ball(Scene& scene)
     : Ball(
@@ -90,7 +116,9 @@ void Ball::draw() {
   auto window = GlobalSubSystemStack::get().window();
 
   render.drawObject(
-      window, *sprite_, {math::modelMatrixFromBounds(getP0(), getP1())});
+      window,
+      resourceSentinel->getSprite(),
+      {math::modelMatrixFromBounds(getP0(), getP1())});
 }
 
 void Ball::handleCollision(physics::RectCollider& other, math::Vec2 normal) {

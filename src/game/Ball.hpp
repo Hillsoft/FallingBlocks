@@ -6,10 +6,14 @@
 #include "engine/TickRegistry.hpp"
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
-#include "render/RenderSubSystem.hpp"
-#include "render/renderables/RenderableTex2D.hpp"
 
 namespace blocks::game {
+
+class BallResourceSentinel {
+ public:
+  static void load();
+  static void unload();
+};
 
 class Ball
     : public Actor,
@@ -27,7 +31,6 @@ class Ball
 
  private:
   math::Vec2 vel_;
-  render::UniqueRenderableHandle<render::RenderableTex2D::InstanceData> sprite_;
 };
 
 } // namespace blocks::game

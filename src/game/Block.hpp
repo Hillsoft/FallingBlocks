@@ -10,14 +10,19 @@
 
 namespace blocks::game {
 
+class BlockResourceSentinel {
+ public:
+  static void load();
+  static void unload();
+};
+
 class Block : public Actor, public physics::RectCollider, public Drawable {
  public:
   Block(
       Scene& scene,
       math::Vec2 p0,
       math::Vec2 p1,
-      render::UniqueRenderableHandle<render::RenderableTex2D::InstanceData>
-          sprite);
+      render::RenderableRef<render::RenderableTex2D::InstanceData> sprite);
   Block(Scene& scene, math::Vec2 p0, math::Vec2 p1);
 
   void draw() final;
@@ -25,7 +30,7 @@ class Block : public Actor, public physics::RectCollider, public Drawable {
   void onDestroy() override;
 
  private:
-  render::UniqueRenderableHandle<render::RenderableTex2D::InstanceData> sprite_;
+  render::RenderableRef<render::RenderableTex2D::InstanceData> sprite_;
 };
 
 } // namespace blocks::game

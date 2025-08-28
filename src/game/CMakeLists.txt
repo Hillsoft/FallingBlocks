@@ -6,7 +6,8 @@ target_link_libraries(game.background
 	globalsubsystemstack
 	math.vec
 	render.renderables.renderabletex2d
-	render.rendersubsystem)
+	render.rendersubsystem
+	util.debug)
 
 add_library(game.ball "Ball.hpp" "Ball.cpp")
 target_link_libraries(game.ball
@@ -20,7 +21,8 @@ target_link_libraries(game.ball
 	math.vec
 	physics.physicsscene
 	render.renderables.renderabletex2d
-	render.rendersubsystem)
+	render.rendersubsystem
+	util.debug)
 
 add_library(game.ballspawnblock "BallSpawnBlock.hpp" "BallSpawnBlock.cpp")
 target_link_libraries(game.ballspawnblock
@@ -29,7 +31,9 @@ target_link_libraries(game.ballspawnblock
 	game.block
 	globalsubsystemstack
 	math.vec
-	render.renderables.renderabletex2d)
+	render.renderables.renderabletex2d
+	render.rendersubsystem
+	util.debug)
 
 add_library(game.block "Block.hpp" "Block.cpp")
 target_link_libraries(game.block
@@ -41,7 +45,8 @@ target_link_libraries(game.block
 	math.vec
 	physics.physicsscene
 	render.renderables.renderabletex2d
-	render.rendersubsystem)
+	render.rendersubsystem
+	util.debug)
 
 add_library(game.blocksscene "BlocksScene.hpp" "BlocksScene.cpp")
 target_link_libraries(game.blocksscene
@@ -69,7 +74,8 @@ target_link_libraries(game.paddle
 	math.vec
 	physics.physicsscene
 	render.renderables.renderabletex2d
-	render.rendersubsystem)
+	render.rendersubsystem
+	util.debug)
 
 add_library(game.scoreui "ScoreUI.hpp" "ScoreUI.cpp")
 target_link_libraries(game.scoreui

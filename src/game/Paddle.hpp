@@ -12,6 +12,12 @@
 
 namespace blocks::game {
 
+class PaddleResourceSentinel {
+ public:
+  static void load();
+  static void unload();
+};
+
 class Paddle
     : public Actor,
       public input::InputHandler,
@@ -29,7 +35,6 @@ class Paddle
 
  private:
   math::Vec2 vel_;
-  render::UniqueRenderableHandle<render::RenderableTex2D::InstanceData> sprite_;
 };
 
 } // namespace blocks::game
