@@ -1,3 +1,5 @@
+add_subdirectory(scenes)
+
 add_library(game.background "Background.hpp" "Background.cpp")
 target_link_libraries(game.background
 	engine.actor

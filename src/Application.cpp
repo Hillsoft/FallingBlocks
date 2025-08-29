@@ -9,72 +9,13 @@
 #include <GLFW/glfw3.h>
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Scene.hpp"
-#include "game/Background.hpp"
+#include "engine/SceneLoader.hpp"
 #include "game/Ball.hpp"
-#include "game/BallSpawnBlock.hpp"
-#include "game/Block.hpp"
-#include "game/BlocksScene.hpp"
 #include "game/LoadingScreen.hpp"
-#include "game/Paddle.hpp"
-#include "game/ScoreUI.hpp"
+#include "game/scenes/Level1.hpp"
 #include "input/InputHandler.hpp"
-#include "math/vec.hpp"
-#include "util/debug.hpp"
 
 namespace blocks {
-
-namespace {
-
-constexpr int kBlockXCount = 15;
-constexpr float kBlockWidth = 2.f / kBlockXCount;
-constexpr int kBlockYCount = 7;
-constexpr float kBlockHeight = kBlockWidth / 2.f;
-
-void populateMainScene(std::unique_ptr<Scene>& scene) {
-  DEBUG_ASSERT(scene == nullptr);
-  auto start = std::chrono::high_resolution_clock::now();
-
-  GlobalSubSystemStack::get()
-      .sentinelManager()
-      .transitionToSentinelSet<
-          game::BackgroundResourceSentinel,
-          game::BallResourceSentinel,
-          game::BlockResourceSentinel,
-          game::BallSpawnBlockResourceSentinel,
-          game::PaddleResourceSentinel>();
-
-  scene = std::make_unique<game::BlocksScene>();
-
-  scene->createActor<game::Background>();
-
-  scene->createActor<game::Paddle>();
-  scene->createActor<game::Ball>();
-
-  for (int i = 0; i < kBlockXCount; i++) {
-    float x = kBlockWidth * static_cast<float>(i) - 1.f;
-    for (int j = 0; j < kBlockYCount; j++) {
-      float y = static_cast<float>(j) * kBlockHeight - 1.f;
-      if ((i + j) % 4 == 0) {
-        scene->createActor<game::BallSpawnBlock>(
-            math::Vec2{x, y}, math::Vec2{x + kBlockWidth, y + kBlockHeight});
-      } else {
-        scene->createActor<game::Block>(
-            math::Vec2{x, y}, math::Vec2{x + kBlockWidth, y + kBlockHeight});
-      }
-    }
-  }
-
-  scene->createActor<game::ScoreUI>();
-
-  auto end = std::chrono::high_resolution_clock::now();
-  std::cout
-      << "Loaded scene in "
-      << std::chrono::duration_cast<std::chrono::milliseconds>(end - start)
-             .count()
-      << "ms" << std::endl;
-}
-
-} // namespace
 
 Application::Application()
     : input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
@@ -85,10 +26,7 @@ Application::Application()
 
 void Application::run() {
   if (currentScene_ != mainScene_.get()) {
-    loadThread_ = std::jthread{[&]() {
-      populateMainScene(mainScene_);
-      loadComplete_.store(true, std::memory_order_release);
-    }};
+    transitionToScene(std::make_unique<game::Level1>());
   }
 
   auto& subsystems = GlobalSubSystemStack::get();
@@ -116,9 +54,9 @@ void Application::run() {
               .count() /
           1000000.0f;
 
-      if (currentScene_ != mainScene_.get() &&
-          loadComplete_.load(std::memory_order_acquire)) {
-        currentScene_ = mainScene_.get();
+      if (hasPendingScene_.load(std::memory_order_acquire)) {
+        currentScene_ = pendingScene_;
+        hasPendingScene_.store(false, std::memory_order_relaxed);
       }
     }
 
@@ -129,6 +67,38 @@ void Application::run() {
   }
 
   subsystems.renderSystem().waitIdle();
+}
+
+void Application::transitionToScene(std::unique_ptr<SceneLoader> sceneLoader) {
+  loadThread_ = std::jthread{[this, sceneLoader = std::move(sceneLoader)]() {
+    // Ensure we are in the main scene
+    while (hasPendingScene_.load(std::memory_order_relaxed)) {
+    }
+
+    // Switch to transition scene
+    pendingScene_ = &loadingScene_;
+    hasPendingScene_.store(true, std::memory_order_release);
+
+    while (hasPendingScene_.load(std::memory_order_relaxed)) {
+    }
+
+    mainScene_.reset();
+
+    auto loadStart = std::chrono::high_resolution_clock::now();
+
+    mainScene_ = sceneLoader->loadScene();
+
+    auto loadEnd = std::chrono::high_resolution_clock::now();
+    std::cout
+        << "Loaded scene in "
+        << std::chrono::duration_cast<std::chrono::milliseconds>(
+               loadEnd - loadStart)
+               .count()
+        << "ms" << std::endl;
+
+    pendingScene_ = mainScene_.get();
+    hasPendingScene_.store(true, std::memory_order_release);
+  }};
 }
 
 void Application::update(float deltaTimeSeconds) {

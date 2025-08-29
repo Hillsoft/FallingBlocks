@@ -17,6 +17,10 @@ target_link_libraries(engine.scene
 	physics.physicsscene
 	util.debug)
 
+add_library(engine.sceneloader INTERFACE "SceneLoader.hpp")
+target_link_libraries(engine.sceneloader INTERFACE
+	engine.scene)
+
 add_library(engine.tickregistry STATIC "TickRegistry.hpp" "TickRegistry.cpp")
 target_link_libraries(engine.tickregistry
 	util.registry)

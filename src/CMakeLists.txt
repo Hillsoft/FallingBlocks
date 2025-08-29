@@ -10,18 +10,12 @@ add_subdirectory(util)
 add_library(application STATIC "Application.cpp" "Application.hpp")
 target_link_libraries(application
 	engine.scene
-	game.background
+	engine.sceneloader
 	game.ball
-	game.ballspawnblock
-	game.block
-	game.blocksscene
 	game.loadingscreen
-	game.paddle
-	game.scoreui
+	game.scenes.level1
 	globalsubsystemstack
-	input.inputsubsystem
-	math.vec
-	util.debug)
+	input.inputsubsystem)
 
 add_library(globalsubsystemstack STATIC "GlobalSubSystemStack.cpp" "GlobalSubSystemStack.hpp")
 target_link_libraries(globalsubsystemstack

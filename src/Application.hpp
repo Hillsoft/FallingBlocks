@@ -4,6 +4,7 @@
 #include <memory>
 #include <thread>
 #include "engine/Scene.hpp"
+#include "engine/SceneLoader.hpp"
 #include "input/InputHandler.hpp"
 
 namespace blocks {
@@ -14,6 +15,8 @@ class Application : public input::InputHandler {
 
   void run();
 
+  void transitionToScene(std::unique_ptr<SceneLoader> sceneLoader);
+
   void onKeyPress(int key) final;
 
  private:
@@ -23,8 +26,9 @@ class Application : public input::InputHandler {
   Scene loadingScene_;
   std::unique_ptr<Scene> mainScene_;
   Scene* currentScene_;
+  Scene* pendingScene_ = nullptr;
+  std::atomic<bool> hasPendingScene_ = false;
   std::jthread loadThread_;
-  std::atomic<bool> loadComplete_ = false;
 };
 
 } // namespace blocks
