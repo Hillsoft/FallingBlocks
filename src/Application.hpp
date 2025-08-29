@@ -12,6 +12,9 @@ namespace blocks {
 class Application : public input::InputHandler {
  public:
   Application();
+  ~Application();
+
+  static Application& getApplication();
 
   void run();
 

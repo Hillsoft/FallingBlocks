@@ -15,7 +15,8 @@ target_link_libraries(application
 	game.loadingscreen
 	game.scenes.level1
 	globalsubsystemstack
-	input.inputsubsystem)
+	input.inputsubsystem
+	util.debug)
 
 add_library(globalsubsystemstack STATIC "GlobalSubSystemStack.cpp" "GlobalSubSystemStack.hpp")
 target_link_libraries(globalsubsystemstack

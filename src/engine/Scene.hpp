@@ -35,6 +35,10 @@ class Scene {
   DrawableRegistry& getDrawableScene() { return drawableScene_; }
   const DrawableRegistry& getDrawableScene() const { return drawableScene_; }
 
+  const std::vector<std::shared_ptr<Actor>> getActors() const {
+    return actors_;
+  }
+
  private:
   void cleanupPendingDestruction();
 

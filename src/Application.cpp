@@ -14,14 +14,34 @@
 #include "game/LoadingScreen.hpp"
 #include "game/scenes/Level1.hpp"
 #include "input/InputHandler.hpp"
+#include "util/debug.hpp"
 
 namespace blocks {
+
+namespace {
+
+constexpr std::chrono::milliseconds kMinLoadTime{500};
+
+Application* currentApplication = nullptr;
+
+} // namespace
 
 Application::Application()
     : input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
       currentScene_(&loadingScene_),
       loadThread_() {
+  DEBUG_ASSERT(currentApplication == nullptr);
+  currentApplication = this;
   loadingScene_.createActor<game::LoadingScreen>();
+}
+
+Application::~Application() {
+  currentApplication = nullptr;
+}
+
+Application& Application::getApplication() {
+  DEBUG_ASSERT(currentApplication != nullptr);
+  return *currentApplication;
 }
 
 void Application::run() {
@@ -89,12 +109,13 @@ void Application::transitionToScene(std::unique_ptr<SceneLoader> sceneLoader) {
     mainScene_ = sceneLoader->loadScene();
 
     auto loadEnd = std::chrono::high_resolution_clock::now();
-    std::cout
-        << "Loaded scene in "
-        << std::chrono::duration_cast<std::chrono::milliseconds>(
-               loadEnd - loadStart)
-               .count()
-        << "ms" << std::endl;
+    auto loadTime = std::chrono::duration_cast<std::chrono::milliseconds>(
+        loadEnd - loadStart);
+    std::cout << "Loaded scene in " << loadTime.count() << "ms" << std::endl;
+
+    if (loadTime < kMinLoadTime) {
+      std::this_thread::sleep_for(kMinLoadTime - loadTime);
+    }
 
     pendingScene_ = mainScene_.get();
     hasPendingScene_.store(true, std::memory_order_release);

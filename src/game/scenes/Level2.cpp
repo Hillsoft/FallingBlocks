@@ -1,27 +1,28 @@
-#include "game/scenes/Level1.hpp"
+#include "game/scenes/Level2.hpp"
 
 #include <memory>
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Scene.hpp"
 #include "game/Background.hpp"
 #include "game/Ball.hpp"
+#include "game/BallSpawnBlock.hpp"
 #include "game/Block.hpp"
 #include "game/BlocksScene.hpp"
 #include "game/Paddle.hpp"
 #include "game/ScoreUI.hpp"
-#include "game/scenes/Level2.hpp"
 #include "game/scenes/LevelConsts.hpp"
 #include "math/vec.hpp"
 
 namespace blocks::game {
 
-std::unique_ptr<Scene> Level1::loadScene() const {
+std::unique_ptr<Scene> Level2::loadScene() const {
   GlobalSubSystemStack::get()
       .sentinelManager()
       .transitionToSentinelSet<
           game::BackgroundResourceSentinel,
           game::BallResourceSentinel,
           game::BlockResourceSentinel,
+          game::BallSpawnBlockResourceSentinel,
           game::PaddleResourceSentinel>();
 
   std::unique_ptr<BlocksScene> scene = std::make_unique<game::BlocksScene>();
@@ -35,9 +36,13 @@ std::unique_ptr<Scene> Level1::loadScene() const {
     float x = kBlockWidth * static_cast<float>(i) - 1.f;
     for (int j = 0; j < kBlockYCount; j++) {
       float y = static_cast<float>(j) * kBlockHeight - 1.f;
-
-      scene->createActor<game::Block>(
-          math::Vec2{x, y}, math::Vec2{x + kBlockWidth, y + kBlockHeight});
+      if ((i + j) % 4 == 0) {
+        scene->createActor<game::BallSpawnBlock>(
+            math::Vec2{x, y}, math::Vec2{x + kBlockWidth, y + kBlockHeight});
+      } else {
+        scene->createActor<game::Block>(
+            math::Vec2{x, y}, math::Vec2{x + kBlockWidth, y + kBlockHeight});
+      }
     }
   }
 

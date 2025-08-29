@@ -52,7 +52,10 @@ target_link_libraries(game.block
 
 add_library(game.blocksscene "BlocksScene.hpp" "BlocksScene.cpp")
 target_link_libraries(game.blocksscene
-	engine.scene)
+	application
+	engine.scene
+	engine.sceneloader
+	game.block)
 
 add_library(game.loadingscreen "LoadingScreen.hpp" "LoadingScreen.cpp")
 target_link_libraries(game.loadingscreen
