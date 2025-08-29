@@ -16,7 +16,7 @@ class RenderableFont {
   using InstanceData = FontShader::InstanceData;
 
   static RenderableObject create(
-      VulkanBuffer& fontBuffer,
+      VulkanBuffer fontBuffer,
       VulkanGraphicsDevice& device,
       ShaderProgramManager& programManager,
       TextureManager& textureManager,

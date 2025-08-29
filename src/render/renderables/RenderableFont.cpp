@@ -1,6 +1,7 @@
 #include "render/renderables/RenderableFont.hpp"
 
 #include <cstdint>
+#include <memory>
 #include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
@@ -16,8 +17,21 @@
 
 namespace blocks::render {
 
+namespace {
+
+class ExtraFontResources : public RenderableObject::ResourceHolder {
+ public:
+  ExtraFontResources(VulkanBuffer fontBuffer)
+      : fontBuffer_(std::move(fontBuffer)) {}
+
+ private:
+  VulkanBuffer fontBuffer_;
+};
+
+} // namespace
+
 RenderableObject RenderableFont::create(
-    VulkanBuffer& fontBuffer,
+    VulkanBuffer fontBuffer,
     VulkanGraphicsDevice& device,
     ShaderProgramManager& programManager,
     TextureManager& textureManager,
@@ -60,7 +74,8 @@ RenderableObject RenderableFont::create(
       shaderProgram,
       std::move(descriptorPool),
       std::move(vertexAttributes),
-      sizeof(InstanceData)};
+      sizeof(InstanceData),
+      std::make_unique<ExtraFontResources>(std::move(fontBuffer))};
 }
 
 } // namespace blocks::render

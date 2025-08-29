@@ -245,10 +245,9 @@ Font::Font(RenderSubSystem& renderSystem, loader::Font font)
     : render_(&renderSystem),
       fontData_(std::move(font)),
       glyphRanges_(),
-      fontBuffer_(makeFontBuffer(
-          renderSystem.getGraphicsDevice(), fontData_, glyphRanges_)),
       renderableObject_(
-          renderSystem.createRenderable<RenderableFont>(fontBuffer_)) {}
+          renderSystem.createRenderable<RenderableFont>(makeFontBuffer(
+              renderSystem.getGraphicsDevice(), fontData_, glyphRanges_))) {}
 
 void Font::drawStringASCII(std::string_view str, math::Vec2 pos) {
   auto window = GlobalSubSystemStack::get().window();
