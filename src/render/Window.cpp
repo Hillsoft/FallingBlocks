@@ -57,6 +57,39 @@ VkExtent2D Window::getCurrentWindowExtent() const {
   return presentStack_.extent();
 }
 
+void Window::toggleFullScreen() {
+  GLFWwindow* rawWindow = presentStack_.getWindow().getRawWindow();
+
+  if (lastWindowedExtent_.width == 0) {
+    // change to fullscreen
+    lastWindowedExtent_ = getCurrentWindowExtent();
+    glfwGetWindowPos(
+        rawWindow, &lastWindowedXPosition_, &lastWindowedYPosition_);
+
+    GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* vidmode = glfwGetVideoMode(monitor);
+    glfwSetWindowMonitor(
+        rawWindow,
+        monitor,
+        0,
+        0,
+        vidmode->width,
+        vidmode->height,
+        GLFW_DONT_CARE);
+  } else {
+    glfwSetWindowMonitor(
+        rawWindow,
+        nullptr,
+        lastWindowedXPosition_,
+        lastWindowedYPosition_,
+        lastWindowedExtent_.width,
+        lastWindowedExtent_.height,
+        GLFW_DONT_CARE);
+
+    lastWindowedExtent_ = {0, 0};
+  }
+}
+
 void Window::resetSwapChain() {
   std::pair<int, int> windowSize = getCurrentWindowSize();
   if (!(windowSize.first == 0 || windowSize.second == 0)) {

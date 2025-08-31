@@ -30,6 +30,8 @@ class Window {
   std::pair<int, int> getCurrentWindowSize() const;
   VkExtent2D getCurrentWindowExtent() const;
 
+  void toggleFullScreen();
+
   void resetSwapChain();
 
   VulkanPresentStack& getPresentStack() { return presentStack_; }
@@ -42,6 +44,9 @@ class Window {
 
   VulkanPresentStack presentStack_;
   bool requiresReset_;
+  VkExtent2D lastWindowedExtent_{0, 0};
+  int lastWindowedXPosition_{0};
+  int lastWindowedYPosition_{0};
 };
 
 } // namespace blocks::render

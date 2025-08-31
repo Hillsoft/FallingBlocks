@@ -140,6 +140,9 @@ void Application::onKeyPress(int key) {
   if (key == GLFW_KEY_ESCAPE) {
     GlobalSubSystemStack::get().window()->close();
   }
+  if (key == GLFW_KEY_F) {
+    GlobalSubSystemStack::get().window()->toggleFullScreen();
+  }
 }
 
 } // namespace blocks
