@@ -1,0 +1,22 @@
+#pragma once
+
+#include <string>
+#include "engine/Actor.hpp"
+#include "engine/DrawableRegistry.hpp"
+#include "engine/Scene.hpp"
+#include "math/vec.hpp"
+
+namespace blocks::game {
+
+class StaticText : public Actor, public Drawable {
+ public:
+  StaticText(Scene& scene, math::Vec2 pos, std::string text);
+
+  void draw() final;
+
+ private:
+  math::Vec2 pos_;
+  std::string text_;
+};
+
+} // namespace blocks::game

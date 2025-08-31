@@ -26,6 +26,7 @@ class Ball
 
   void update(float deltaTimeSeconds) final;
   void draw() final;
+  void onDestroy() final;
 
   void handleCollision(physics::RectCollider& other, math::Vec2 normal) final;
 

@@ -8,6 +8,7 @@
 #include "engine/Scene.hpp"
 #include "engine/TickRegistry.hpp"
 #include "game/Block.hpp"
+#include "game/BlocksScene.hpp"
 #include "game/Paddle.hpp"
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
@@ -141,6 +142,11 @@ void Ball::handleCollision(physics::RectCollider& other, math::Vec2 normal) {
   } else if (auto block = dynamic_cast<Block*>(&other); block != nullptr) {
     getScene()->destroyActor(block);
   }
+}
+
+void Ball::onDestroy() {
+  BlocksScene* scene = dynamic_cast<BlocksScene*>(getScene());
+  scene->onBallDestroyed(*this);
 }
 
 } // namespace blocks::game

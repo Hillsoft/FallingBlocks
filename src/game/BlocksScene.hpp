@@ -4,6 +4,7 @@
 #include <utility>
 #include "engine/Scene.hpp"
 #include "engine/SceneLoader.hpp"
+#include "game/Ball.hpp"
 #include "game/Block.hpp"
 
 namespace blocks::game {
@@ -13,6 +14,7 @@ class BlocksScene : public Scene {
   BlocksScene() = default;
 
   void onBlockDestroyed(Block& block);
+  void onBallDestroyed(Ball& ball);
 
   int getScore() const { return score_; }
   void setNextScene(std::unique_ptr<SceneLoader> next) {

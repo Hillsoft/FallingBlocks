@@ -19,6 +19,7 @@ target_link_libraries(game.ball
 	engine.scene
 	engine.tickregistry
 	game.block
+	game.blocksscene
 	game.paddle
 	globalsubsystemstack
 	math.vec
@@ -56,7 +57,9 @@ target_link_libraries(game.blocksscene
 	application
 	engine.scene
 	engine.sceneloader
-	game.block)
+	game.ball
+	game.block
+	game.scenes.gameover)
 
 add_library(game.loadingscreen "LoadingScreen.hpp" "LoadingScreen.cpp")
 target_link_libraries(game.loadingscreen
@@ -92,6 +95,14 @@ target_link_libraries(game.scoreui
 	game.resource.defaultfont
 	util.debug
 	util.string)
+
+add_library(game.statictext "StaticText.hpp" "StaticText.cpp")
+target_link_libraries(game.statictext
+	engine.actor
+	engine.drawableregistry
+	engine.scene
+	game.resource.defaultfont
+	math.vec)
 
 add_library(game.testtext "TestText.hpp" "TestText.cpp")
 target_link_libraries(game.testtext
