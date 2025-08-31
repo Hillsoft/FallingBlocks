@@ -17,7 +17,8 @@ StaticText::StaticText(Scene& scene, math::Vec2 pos, std::string text)
       text_(std::move(text)) {}
 
 void StaticText::draw() {
-  DefaultFontResourceSentinel::get().drawStringUTF8(text_, pos_);
+  DefaultFontResourceSentinel::get().drawStringUTF8(
+      text_, pos_, render::Font::Align::CENTER);
 }
 
 } // namespace blocks::game

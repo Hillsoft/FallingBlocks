@@ -249,7 +249,18 @@ Font::Font(RenderSubSystem& renderSystem, loader::Font font)
           renderSystem.createRenderable<RenderableFont>(makeFontBuffer(
               renderSystem.getGraphicsDevice(), fontData_, glyphRanges_))) {}
 
-void Font::drawStringASCII(std::string_view str, math::Vec2 pos) {
+void Font::drawStringASCII(std::string_view str, math::Vec2 pos, Align align) {
+  switch (align) {
+    case Align::LEFT:
+      break;
+    case Align::CENTER:
+      pos.x() -= stringWidth(Encoding::ASCII, str) / 2;
+      break;
+    case Align::RIGHT:
+      pos.x() -= stringWidth(Encoding::ASCII, str);
+      break;
+  }
+
   auto window = GlobalSubSystemStack::get().window();
   for (unsigned char c : str) {
     float advance = drawChar(
@@ -259,7 +270,18 @@ void Font::drawStringASCII(std::string_view str, math::Vec2 pos) {
   }
 }
 
-void Font::drawStringUTF8(std::string_view str, math::Vec2 pos) {
+void Font::drawStringUTF8(std::string_view str, math::Vec2 pos, Align align) {
+  switch (align) {
+    case Align::LEFT:
+      break;
+    case Align::CENTER:
+      pos.x() -= stringWidth(Encoding::UTF8, str) / 2;
+      break;
+    case Align::RIGHT:
+      pos.x() -= stringWidth(Encoding::UTF8, str);
+      break;
+  }
+
   auto window = GlobalSubSystemStack::get().window();
   for (uint32_t c : util::unicodeDecode(str)) {
     float advance = drawChar(
@@ -267,6 +289,31 @@ void Font::drawStringUTF8(std::string_view str, math::Vec2 pos) {
 
     pos.x() += advance;
   }
+}
+
+float Font::stringWidth(Encoding encoding, std::string_view str) const {
+  float width = 0.0f;
+
+  auto processChar = [&](uint32_t c) {
+    auto glyphIndex = fontData_.charMap->mapChar(c);
+    const auto& metrics = fontData_.horizontalMetrics.data[glyphIndex];
+
+    width += static_cast<float>(metrics.advanceWidth) * kFontScale;
+  };
+
+  if (encoding == ASCII) {
+    for (unsigned char c : str) {
+      processChar(c);
+    }
+  } else if (encoding == UTF8) {
+    for (uint32_t c : util::unicodeDecode(str)) {
+      processChar(c);
+    }
+  } else {
+    DEBUG_ASSERT(false);
+  }
+
+  return width;
 }
 
 } // namespace blocks::render

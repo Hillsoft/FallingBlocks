@@ -13,10 +13,17 @@ namespace blocks::render {
 
 class Font {
  public:
+  enum Encoding { ASCII, UTF8 };
+  enum Align { LEFT, CENTER, RIGHT };
+
   Font(RenderSubSystem& renderSystem, loader::Font font);
 
-  void drawStringASCII(std::string_view str, math::Vec2 pos);
-  void drawStringUTF8(std::string_view str, math::Vec2 pos);
+  void drawStringASCII(
+      std::string_view str, math::Vec2 pos, Align align = Align::LEFT);
+  void drawStringUTF8(
+      std::string_view str, math::Vec2 pos, Align align = Align::LEFT);
+
+  float stringWidth(Encoding encoding, std::string_view str) const;
 
  private:
   RenderSubSystem* render_;
