@@ -9,6 +9,7 @@ target_link_libraries(game.scenes.level1
 	game.block
 	game.blocksscene
 	game.paddle
+	game.resource.defaultfont
 	game.scoreui
 	game.scenes.levelconsts
 	game.scenes.level2
@@ -25,6 +26,7 @@ target_link_libraries(game.scenes.level2
 	game.block
 	game.blocksscene
 	game.paddle
+	game.resource.defaultfont
 	game.scoreui
 	game.scenes.levelconsts
 	globalsubsystemstack

@@ -1,23 +1,18 @@
 #include "game/ScoreUI.hpp"
 
 #include <string>
-#include "GlobalSubSystemStack.hpp"
 #include "engine/Actor.hpp"
 #include "engine/DrawableRegistry.hpp"
 #include "engine/Scene.hpp"
 #include "game/BlocksScene.hpp"
-#include "loader/font/Font.hpp"
+#include "game/resource/DefaultFont.hpp"
 #include "util/debug.hpp"
 #include "util/string.hpp"
 
 namespace blocks::game {
 
 ScoreUI::ScoreUI(Scene& scene)
-    : Actor(scene),
-      Drawable(scene.getDrawableScene()),
-      font_(
-          GlobalSubSystemStack::get().renderSystem(),
-          loader::loadFont(RESOURCE_DIR "/times.ttf")) {}
+    : Actor(scene), Drawable(scene.getDrawableScene()) {}
 
 void ScoreUI::draw() {
   BlocksScene* scene = dynamic_cast<BlocksScene*>(getScene());
@@ -25,7 +20,8 @@ void ScoreUI::draw() {
 
   std::string scoreString = util::toString("Score: ", scene->getScore());
 
-  font_.drawStringUTF8(scoreString, {-1.0f, -0.8f});
+  DefaultFontResourceSentinel::get().drawStringUTF8(
+      scoreString, {-1.0f, -0.8f});
 }
 
 } // namespace blocks::game

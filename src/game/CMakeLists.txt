@@ -1,3 +1,4 @@
+add_subdirectory(resource)
 add_subdirectory(scenes)
 
 add_library(game.background "Background.hpp" "Background.cpp")
@@ -88,9 +89,7 @@ target_link_libraries(game.scoreui
 	engine.drawableregistry
 	engine.scene
 	game.blocksscene
-	globalsubsystemstack
-	loader.font.font
-	render.font
+	game.resource.defaultfont
 	util.debug
 	util.string)
 

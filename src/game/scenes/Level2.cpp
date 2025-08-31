@@ -10,6 +10,7 @@
 #include "game/BlocksScene.hpp"
 #include "game/Paddle.hpp"
 #include "game/ScoreUI.hpp"
+#include "game/resource/DefaultFont.hpp"
 #include "game/scenes/LevelConsts.hpp"
 #include "math/vec.hpp"
 
@@ -23,7 +24,8 @@ std::unique_ptr<Scene> Level2::loadScene() const {
           game::BallResourceSentinel,
           game::BlockResourceSentinel,
           game::BallSpawnBlockResourceSentinel,
-          game::PaddleResourceSentinel>();
+          game::PaddleResourceSentinel,
+          game::DefaultFontResourceSentinel>();
 
   std::unique_ptr<BlocksScene> scene = std::make_unique<game::BlocksScene>();
 
