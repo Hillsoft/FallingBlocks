@@ -55,18 +55,18 @@ int intersectsQuadratic(ivec2 a, ivec2 handle, ivec2 b) {
   int windingNumber = 0;
 
   float t0 = (-qb + sqrt(discriminant)) / (2 * qa);
-  if (0 < t0 && t0 < 1) {
+  if (0 <= t0 && t0 < 1) {
     float x0 = (1.0 - t0) * (1.0 - t0) * a.x + 2 * t0 * (1.0 - t0) * handle.x + t0 * t0 * b.x;
-	if (x0 > uv.x) {
+	if (x0 >= uv.x) {
 	  float dy = 2 * b.y * t0 - 2 * handle.y * t0 + 2 * handle.y * (1.0 - t0) - 2 * a.y * (1.0 - t0);
 	  windingNumber += dy > 0 ? 1 : -1;
 	}
   }
 
   float t1 = (-qb - sqrt(discriminant)) / (2 * qa);
-  if (0 < t1 && t1 < 1) {
+  if (0 <= t1 && t1 < 1) {
     float x1 = (1.0 - t1) * (1.0 - t1) * a.x + 2 * t1 * (1.0 - t1) * handle.x + t1 * t1 * b.x;
-	if (x1 > uv.x) {
+	if (x1 >= uv.x) {
 	  float dy = 2 * b.y * t1 - 2 * handle.y * t1 + 2 * handle.y * (1.0 - t1) - 2 * a.y * (1.0 - t1);
 	  windingNumber += dy > 0 ? 1 : -1;
 	}
