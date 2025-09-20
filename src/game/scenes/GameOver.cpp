@@ -1,14 +1,37 @@
 #include "game/scenes/GameOver.hpp"
 
 #include <memory>
+#include <GLFW/glfw3.h>
+#include "Application.hpp"
 #include "GlobalSubSystemStack.hpp"
+#include "engine/Actor.hpp"
 #include "engine/Scene.hpp"
 #include "game/Background.hpp"
 #include "game/StaticText.hpp"
 #include "game/resource/DefaultFont.hpp"
+#include "game/scenes/Level1.hpp"
+#include "input/InputHandler.hpp"
 #include "math/vec.hpp"
 
 namespace blocks::game {
+
+namespace {
+
+class GameRestarter : public Actor, public input::InputHandler {
+ public:
+  GameRestarter(Scene& scene)
+      : Actor(scene),
+        input::InputHandler(GlobalSubSystemStack::get().inputSystem()) {}
+
+  void onKeyRelease(int keyCode) final {
+    if (keyCode == GLFW_KEY_SPACE) {
+      Application::getApplication().transitionToScene(
+          std::make_unique<Level1>());
+    }
+  }
+};
+
+} // namespace
 
 std::unique_ptr<Scene> GameOver::loadScene() const {
   GlobalSubSystemStack::get()
@@ -23,6 +46,10 @@ std::unique_ptr<Scene> GameOver::loadScene() const {
 
   scene->createActor<game::StaticText>(
       math::Vec2{0.0f, 0.15f}, 0.3f, "Game Over");
+  scene->createActor<game::StaticText>(
+      math::Vec2{0.0f, 0.25f}, 0.1f, "Press space to play again");
+
+  scene->createActor<GameRestarter>();
 
   return scene;
 }

@@ -1,11 +1,15 @@
 add_library(game.scenes.gameover STATIC "GameOver.hpp" "GameOver.cpp")
 target_link_libraries(game.scenes.gameover
+	application	
+	engine.actor
 	engine.scene
 	engine.sceneloader
 	globalsubsystemstack
 	game.background
+	game.scenes.level1
 	game.statictext
 	game.resource.defaultfont
+	input.inputsubsystem
 	math.vec)
 
 add_library(game.scenes.levelconsts INTERFACE "LevelConsts.hpp")
