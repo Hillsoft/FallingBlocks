@@ -1,9 +1,13 @@
+#define GLFW_EXPOSE_NATIVE_WIN32
 #include "render/Window.hpp"
 
+#include <Windows.h>
+#include <libloaderapi.h>
 #include <functional>
 #include <type_traits>
 #include <utility>
 #include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanInstance.hpp"
 #include "render/glfw_wrapper/Window.hpp"
@@ -21,6 +25,11 @@ glfw::Window makeWindow(
 
   glfw::Window window{width, height, title};
   window.setResizeHandler(std::move(resizeHandler));
+
+  HICON icon = LoadIconW(GetModuleHandle(nullptr), MAKEINTRESOURCEW(103));
+  HWND hWnd = glfwGetWin32Window(window.getRawWindow());
+  SendMessage(hWnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(icon));
+  SendMessage(hWnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(icon));
 
   return window;
 }

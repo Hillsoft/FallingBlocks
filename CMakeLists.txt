@@ -59,7 +59,7 @@ include_directories(src)
 # Add source to this project's executable.
 add_subdirectory(src)
 
-add_executable(FallingBlocks "src/main.cpp")
+add_executable(FallingBlocks "src/main.cpp" "app.rc")
 target_link_libraries(FallingBlocks
 	application
 	globalsubsystemstack)
