@@ -25,8 +25,6 @@ namespace blocks::render {
 
 namespace {
 
-constexpr float kFontScale = 1 / 10000.0f;
-
 struct GlyphPoint {
   math::Vec<int32_t, 2> point;
   uint32_t onCurve;
@@ -137,10 +135,12 @@ float drawChar(
     RenderableRef<RenderableFont::InstanceData> renderableObject,
     WindowRef window,
     uint32_t c,
-    math::Vec2 pos) {
+    math::Vec2 pos,
+    float lineHeight) {
   auto glyphIndex = fontData.charMap->mapChar(c);
   const auto& glyph = fontData.glyphs[glyphIndex];
   const auto& metrics = fontData.horizontalMetrics.data[glyphIndex];
+  float fontScale = lineHeight / static_cast<float>(fontData.unitsPerEm);
 
   if (std::holds_alternative<loader::SimpleGlyphData>(glyph.data)) {
     render.drawObject(
@@ -150,16 +150,16 @@ float drawChar(
             math::Mat3::translate(
                 pos +
                 math::Vec2{
-                    static_cast<float>(metrics.leftSideBearing) * kFontScale +
-                        static_cast<float>(glyph.xMin.rawValue) * kFontScale,
-                    -static_cast<float>(glyph.yMax.rawValue) * kFontScale}) *
+                    static_cast<float>(metrics.leftSideBearing) * fontScale +
+                        static_cast<float>(glyph.xMin.rawValue) * fontScale,
+                    -static_cast<float>(glyph.yMax.rawValue) * fontScale}) *
                 math::Mat3::scale(math::Vec2{
                     static_cast<float>(
                         glyph.xMax.rawValue - glyph.xMin.rawValue) *
-                        kFontScale,
+                        fontScale,
                     static_cast<float>(
                         glyph.yMax.rawValue - glyph.yMin.rawValue) *
-                        kFontScale}),
+                        fontScale}),
             glyphRanges[glyphIndex].first,
             glyphRanges[glyphIndex].second,
             math::Mat3::translate(math::Vec2{
@@ -198,10 +198,10 @@ float drawChar(
         return math::Vec2{
             (subGlyphDetails.a / m) * pos.x() +
                 (subGlyphDetails.c / m) * pos.y() +
-                static_cast<float>(subGlyphDetails.e) * kFontScale,
+                static_cast<float>(subGlyphDetails.e) * fontScale,
             (subGlyphDetails.b / n) * pos.x() +
                 (subGlyphDetails.d / n) * pos.y() -
-                static_cast<float>(subGlyphDetails.f) * kFontScale};
+                static_cast<float>(subGlyphDetails.f) * fontScale};
       };
 
       render.drawObject(
@@ -211,18 +211,18 @@ float drawChar(
               math::Mat3::translate(
                   pos +
                   transformPos(math::Vec2{
-                      static_cast<float>(metrics.leftSideBearing) * kFontScale +
+                      static_cast<float>(metrics.leftSideBearing) * fontScale +
                           static_cast<float>(subGlyph.xMin.rawValue) *
-                              kFontScale,
+                              fontScale,
                       -static_cast<float>(subGlyph.yMax.rawValue) *
-                          kFontScale})) *
+                          fontScale})) *
                   math::Mat3::scale(math::Vec2{
                       static_cast<float>(
                           subGlyph.xMax.rawValue - subGlyph.xMin.rawValue) *
-                          kFontScale,
+                          fontScale,
                       static_cast<float>(
                           subGlyph.yMax.rawValue - subGlyph.yMin.rawValue) *
-                          kFontScale}),
+                          fontScale}),
               glyphRanges[subGlyphDetails.glpyhIndex].first,
               glyphRanges[subGlyphDetails.glpyhIndex].second,
               math::Mat3::translate(math::Vec2{
@@ -236,7 +236,7 @@ float drawChar(
     }
   }
 
-  return static_cast<float>(metrics.advanceWidth) * kFontScale;
+  return static_cast<float>(metrics.advanceWidth) * fontScale;
 }
 
 } // namespace
@@ -249,56 +249,74 @@ Font::Font(RenderSubSystem& renderSystem, loader::Font font)
           renderSystem.createRenderable<RenderableFont>(makeFontBuffer(
               renderSystem.getGraphicsDevice(), fontData_, glyphRanges_))) {}
 
-void Font::drawStringASCII(std::string_view str, math::Vec2 pos, Align align) {
+void Font::drawStringASCII(
+    std::string_view str, math::Vec2 pos, float lineHeight, Align align) {
   switch (align) {
     case Align::LEFT:
       break;
     case Align::CENTER:
-      pos.x() -= stringWidth(Encoding::ASCII, str) / 2;
+      pos.x() -= stringWidth(Encoding::ASCII, str, lineHeight) / 2;
       break;
     case Align::RIGHT:
-      pos.x() -= stringWidth(Encoding::ASCII, str);
+      pos.x() -= stringWidth(Encoding::ASCII, str, lineHeight);
       break;
   }
 
   auto window = GlobalSubSystemStack::get().window();
   for (unsigned char c : str) {
     float advance = drawChar(
-        *render_, fontData_, glyphRanges_, *renderableObject_, window, c, pos);
+        *render_,
+        fontData_,
+        glyphRanges_,
+        *renderableObject_,
+        window,
+        c,
+        pos,
+        lineHeight);
 
     pos.x() += advance;
   }
 }
 
-void Font::drawStringUTF8(std::string_view str, math::Vec2 pos, Align align) {
+void Font::drawStringUTF8(
+    std::string_view str, math::Vec2 pos, float lineHeight, Align align) {
   switch (align) {
     case Align::LEFT:
       break;
     case Align::CENTER:
-      pos.x() -= stringWidth(Encoding::UTF8, str) / 2;
+      pos.x() -= stringWidth(Encoding::UTF8, str, lineHeight) / 2;
       break;
     case Align::RIGHT:
-      pos.x() -= stringWidth(Encoding::UTF8, str);
+      pos.x() -= stringWidth(Encoding::UTF8, str, lineHeight);
       break;
   }
 
   auto window = GlobalSubSystemStack::get().window();
   for (uint32_t c : util::unicodeDecode(str)) {
     float advance = drawChar(
-        *render_, fontData_, glyphRanges_, *renderableObject_, window, c, pos);
+        *render_,
+        fontData_,
+        glyphRanges_,
+        *renderableObject_,
+        window,
+        c,
+        pos,
+        lineHeight);
 
     pos.x() += advance;
   }
 }
 
-float Font::stringWidth(Encoding encoding, std::string_view str) const {
+float Font::stringWidth(
+    Encoding encoding, std::string_view str, float lineHeight) const {
+  float fontScale = lineHeight / static_cast<float>(fontData_.unitsPerEm);
   float width = 0.0f;
 
   auto processChar = [&](uint32_t c) {
     auto glyphIndex = fontData_.charMap->mapChar(c);
     const auto& metrics = fontData_.horizontalMetrics.data[glyphIndex];
 
-    width += static_cast<float>(metrics.advanceWidth) * kFontScale;
+    width += static_cast<float>(metrics.advanceWidth) * fontScale;
   };
 
   if (encoding == ASCII) {

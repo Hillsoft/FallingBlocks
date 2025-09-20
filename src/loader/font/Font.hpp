@@ -61,6 +61,7 @@ struct Font {
   std::unique_ptr<CharToGlyphMap> charMap;
   std::vector<GlyphData> glyphs;
   HorizontalMetrics horizontalMetrics;
+  uint16_t unitsPerEm;
 };
 
 Font loadFont(const std::filesystem::path& path);

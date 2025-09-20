@@ -10,15 +10,17 @@
 
 namespace blocks::game {
 
-StaticText::StaticText(Scene& scene, math::Vec2 pos, std::string text)
+StaticText::StaticText(
+    Scene& scene, math::Vec2 pos, float lineHeight, std::string text)
     : Actor(scene),
       Drawable(scene.getDrawableScene()),
       pos_(pos),
+      lineHeight_(lineHeight),
       text_(std::move(text)) {}
 
 void StaticText::draw() {
   DefaultFontResourceSentinel::get().drawStringUTF8(
-      text_, pos_, render::Font::Align::CENTER);
+      text_, pos_, lineHeight_, render::Font::Align::CENTER);
 }
 
 } // namespace blocks::game

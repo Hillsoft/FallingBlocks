@@ -970,7 +970,8 @@ Font loadFont(const std::span<const std::byte> data) {
   return Font{
       .charMap = std::move(charMap),
       .glyphs = std::move(glyphs),
-      .horizontalMetrics = std::move(horizontalMetrics)};
+      .horizontalMetrics = std::move(horizontalMetrics),
+      .unitsPerEm = headEntry.unitsPerEm};
 }
 
 } // namespace blocks::loader

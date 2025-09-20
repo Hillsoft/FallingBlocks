@@ -21,7 +21,8 @@ std::unique_ptr<Scene> GameOver::loadScene() const {
 
   scene->createActor<game::Background>();
 
-  scene->createActor<game::StaticText>(math::Vec2{0.0f, 0.0f}, "Game Over");
+  scene->createActor<game::StaticText>(
+      math::Vec2{0.0f, 0.15f}, 0.3f, "Game Over");
 
   return scene;
 }

@@ -10,12 +10,13 @@ namespace blocks::game {
 
 class StaticText : public Actor, public Drawable {
  public:
-  StaticText(Scene& scene, math::Vec2 pos, std::string text);
+  StaticText(Scene& scene, math::Vec2 pos, float lineHeight, std::string text);
 
   void draw() final;
 
  private:
   math::Vec2 pos_;
+  float lineHeight_;
   std::string text_;
 };
 

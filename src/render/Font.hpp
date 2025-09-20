@@ -19,11 +19,18 @@ class Font {
   Font(RenderSubSystem& renderSystem, loader::Font font);
 
   void drawStringASCII(
-      std::string_view str, math::Vec2 pos, Align align = Align::LEFT);
+      std::string_view str,
+      math::Vec2 pos,
+      float lineHeight,
+      Align align = Align::LEFT);
   void drawStringUTF8(
-      std::string_view str, math::Vec2 pos, Align align = Align::LEFT);
+      std::string_view str,
+      math::Vec2 pos,
+      float lineHeight,
+      Align align = Align::LEFT);
 
-  float stringWidth(Encoding encoding, std::string_view str) const;
+  float stringWidth(
+      Encoding encoding, std::string_view str, float lineHeight) const;
 
  private:
   RenderSubSystem* render_;

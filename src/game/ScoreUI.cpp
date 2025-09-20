@@ -21,7 +21,7 @@ void ScoreUI::draw() {
   std::string scoreString = util::toString("Score: ", scene->getScore());
 
   DefaultFontResourceSentinel::get().drawStringUTF8(
-      scoreString, {-1.0f, -0.8f});
+      scoreString, {-1.0f, -0.8f}, 0.2f);
 }
 
 } // namespace blocks::game
