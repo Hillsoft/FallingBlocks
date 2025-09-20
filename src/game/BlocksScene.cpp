@@ -23,14 +23,12 @@ void BlocksScene::onBlockDestroyed(Block& block) {
   Application::getApplication().transitionToScene(std::move(nextScene_));
 }
 
-void BlocksScene::onBallDestroyed(Ball& block) {
-  score_++;
-
+void BlocksScene::onBallDestroyed(Ball& ball) {
   // check if there are remaining balls
   const auto& actors = getActors();
   for (const auto& actor : actors) {
     if (dynamic_cast<const Ball*>(actor.get()) != nullptr &&
-        actor.get() != &block) {
+        actor.get() != &ball) {
       return;
     }
   }
