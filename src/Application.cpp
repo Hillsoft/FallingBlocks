@@ -10,7 +10,6 @@
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Scene.hpp"
 #include "engine/SceneLoader.hpp"
-#include "game/Ball.hpp"
 #include "game/LoadingScreen.hpp"
 #include "game/scenes/Level1.hpp"
 #include "input/InputHandler.hpp"
@@ -133,10 +132,6 @@ void Application::drawFrame() {
 }
 
 void Application::onKeyPress(int key) {
-  if (key == GLFW_KEY_SPACE) {
-    for (int i = 0; i < 100; i++)
-      currentScene_->createActor<game::Ball>();
-  }
   if (key == GLFW_KEY_ESCAPE) {
     GlobalSubSystemStack::get().window()->close();
   }

@@ -11,7 +11,6 @@ add_library(application STATIC "Application.cpp" "Application.hpp")
 target_link_libraries(application
 	engine.scene
 	engine.sceneloader
-	game.ball
 	game.loadingscreen
 	game.scenes.level1
 	globalsubsystemstack
