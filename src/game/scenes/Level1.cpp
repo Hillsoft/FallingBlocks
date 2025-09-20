@@ -36,7 +36,7 @@ std::unique_ptr<Scene> Level1::loadScene() const {
   for (int i = 0; i < kBlockXCount; i++) {
     float x = kBlockWidth * static_cast<float>(i) - 1.f;
     for (int j = 0; j < kBlockYCount; j++) {
-      float y = static_cast<float>(j) * kBlockHeight - 1.f;
+      float y = (4 + static_cast<float>(j)) * kBlockHeight - 1.f;
 
       scene->createActor<game::Block>(
           math::Vec2{x, y}, math::Vec2{x + kBlockWidth, y + kBlockHeight});
