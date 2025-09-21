@@ -21,6 +21,8 @@ Window::Window(int width, int height, const char* title)
   glfwSetWindowUserPointer(window_, this);
   glfwSetFramebufferSizeCallback(window_, frameBufferResizeCallback);
   glfwSetKeyCallback(window_, keyCallback);
+  glfwSetMouseButtonCallback(window_, mouseButtonCallback);
+  glfwSetCursorPosCallback(window_, cursorPosCallback);
 }
 
 Window::~Window() {
@@ -30,7 +32,11 @@ Window::~Window() {
 }
 
 Window::Window(Window&& other) noexcept
-    : window_(other.window_), resizeHandler_(std::move(other.resizeHandler_)) {
+    : window_(other.window_),
+      resizeHandler_(std::move(other.resizeHandler_)),
+      keyEventHandler_(std::move(other.keyEventHandler_)),
+      mouseButtonHandler_(std::move(other.mouseButtonHandler_)),
+      cursorPosHandler_(std::move(other.cursorPosHandler_)) {
   other.window_ = nullptr;
 
   glfwSetWindowUserPointer(window_, this);
@@ -39,6 +45,9 @@ Window::Window(Window&& other) noexcept
 Window& Window::operator=(Window&& other) noexcept {
   std::swap(window_, other.window_);
   std::swap(resizeHandler_, other.resizeHandler_);
+  std::swap(keyEventHandler_, other.keyEventHandler_);
+  std::swap(mouseButtonHandler_, other.mouseButtonHandler_);
+  std::swap(cursorPosHandler_, other.cursorPosHandler_);
 
   glfwSetWindowUserPointer(window_, this);
   glfwSetWindowUserPointer(other.window_, &other);
@@ -67,6 +76,21 @@ void Window::keyCallback(
   auto appWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
   if (appWindow->keyEventHandler_) {
     appWindow->keyEventHandler_(key, scancode, action, mods);
+  }
+}
+
+void Window::mouseButtonCallback(
+    GLFWwindow* window, int button, int action, int mods) {
+  auto appWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+  if (appWindow->mouseButtonHandler_) {
+    appWindow->mouseButtonHandler_(button, action, mods);
+  }
+}
+
+void Window::cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
+  auto appWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+  if (appWindow->cursorPosHandler_) {
+    appWindow->cursorPosHandler_(xpos, ypos);
   }
 }
 

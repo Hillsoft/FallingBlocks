@@ -1,8 +1,10 @@
 #include "input/InputSubSystem.hpp"
 
 #include <string_view>
+#include <utility>
 #include <GLFW/glfw3.h>
 #include "input/InputHandler.hpp"
+#include "math/vec.hpp"
 #include "render/glfw_wrapper/Window.hpp"
 
 namespace blocks::input {
@@ -265,6 +267,12 @@ InputSubSystem::InputSubSystem(render::glfw::Window& window)
   window.setKeyEventHandler([&](int key, int scancode, int action, int mods) {
     this->handleKeyEvent(key, scancode, action, mods);
   });
+  window.setCursorPosHandler([&](double xpos, double ypos) {
+    this->handleCursorPos(xpos, ypos);
+  });
+  window.setMouseButtonHandler([&](int button, int action, int mods) {
+    this->handleMouseEvent(button, action, mods);
+  });
 }
 
 InputSubSystem::~InputSubSystem() {
@@ -279,6 +287,31 @@ void InputSubSystem::handleKeyEvent(
       h->onKeyPress(key);
     } else if (action == GLFW_RELEASE) {
       h->onKeyRelease(key);
+    }
+  }
+}
+
+void InputSubSystem::handleCursorPos(double xpos, double ypos) {
+  std::pair<int, int> windowSize = window_->getCurrentWindowSize();
+  mousePos_ = math::Vec2{
+      (2.f * static_cast<float>(xpos) / static_cast<float>(windowSize.first)) -
+          1.f,
+      (2.f * static_cast<float>(ypos) / static_cast<float>(windowSize.second)) -
+          1.f};
+  for (auto& h : *getRegisteredItems()) {
+    h->onMouseMove(mousePos_);
+  }
+}
+
+void InputSubSystem::handleMouseEvent(int button, int action, int mods) {
+  if (button != GLFW_MOUSE_BUTTON_1) {
+    return;
+  }
+  for (auto& h : *getRegisteredItems()) {
+    if (action == GLFW_PRESS) {
+      h->onMouseDown(mousePos_);
+    } else if (action == GLFW_RELEASE) {
+      h->onMouseUp(mousePos_);
     }
   }
 }
