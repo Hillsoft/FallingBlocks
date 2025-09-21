@@ -155,6 +155,7 @@ class RenderSubSystem {
  private:
   struct DrawCommand {
     WindowRef target_;
+    long z_;
     GenericRenderableRef obj_;
     Simple2DCamera* camera_;
 
@@ -201,11 +202,13 @@ class RenderSubSystem {
   template <typename TInstanceData>
   void drawObject(
       WindowRef target,
+      long z,
       RenderableRef<TInstanceData> ref,
       const TInstanceData& instanceData) {
     drawObjectRaw(
         target,
         nullptr,
+        z,
         ref.rawRef_,
         instanceDataCPUBuffer_.allocate<TInstanceData>(instanceData));
   }
@@ -213,11 +216,13 @@ class RenderSubSystem {
   void drawObject(
       WindowRef target,
       Simple2DCamera* camera,
+      long z,
       RenderableRef<TInstanceData> ref,
       const TInstanceData& instanceData) {
     drawObjectRaw(
         target,
         camera,
+        z,
         ref.rawRef_,
         instanceDataCPUBuffer_.allocate<TInstanceData>(instanceData));
   }
@@ -230,6 +235,7 @@ class RenderSubSystem {
   void drawObjectRaw(
       WindowRef target,
       Simple2DCamera* camera,
+      long z,
       GenericRenderableRef ref,
       void* instanceData);
 

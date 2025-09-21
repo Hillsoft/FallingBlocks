@@ -145,6 +145,7 @@ float drawChar(
   if (std::holds_alternative<loader::SimpleGlyphData>(glyph.data)) {
     render.drawObject(
         window,
+        10,
         renderableObject,
         RenderableFont::InstanceData{
             math::Mat3::translate(
@@ -206,6 +207,7 @@ float drawChar(
 
       render.drawObject(
           window,
+          10,
           renderableObject,
           RenderableFont::InstanceData{
               math::Mat3::translate(

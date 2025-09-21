@@ -52,6 +52,7 @@ void Background::draw() {
 
   render.drawObject(
       window,
+      -100,
       resourceSentinel->getSprite(),
       {math::modelMatrixFromBounds(
           math::Vec2{-1.0f, -1.0f}, math::Vec2{1.0f, 1.0f})});

@@ -42,12 +42,14 @@ void LoadingScreen::draw() {
   if (firstActive_) {
     GlobalSubSystemStack::get().renderSystem().drawObject(
         window,
+        0,
         *image1_,
         {math::modelMatrixFromBounds(
             math::Vec2{-1.f, -1.f}, math::Vec2{1.f, 1.f})});
   } else {
     GlobalSubSystemStack::get().renderSystem().drawObject(
         window,
+        0,
         *image2_,
         {math::modelMatrixFromBounds(
             math::Vec2{-1.f, -1.f}, math::Vec2{1.f, 1.f})});

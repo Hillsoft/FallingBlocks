@@ -184,9 +184,10 @@ void RenderSubSystem::destroyRenderable(GenericRenderableRef ref) {
 void RenderSubSystem::drawObjectRaw(
     WindowRef target,
     Simple2DCamera* camera,
+    long z,
     GenericRenderableRef ref,
     void* instanceData) {
-  commands_.emplace_back(target, ref, camera, instanceData);
+  commands_.emplace_back(target, z, ref, camera, instanceData);
 }
 
 void RenderSubSystem::commitFrame() {
@@ -334,6 +335,9 @@ void RenderSubSystem::drawWindow(
       windowCommands.begin(),
       windowCommands.end(),
       [&renderablesVec](const auto& a, const auto& b) {
+        if (a.z_ != b.z_) {
+          return a.z_ < b.z_;
+        }
         const auto* aShader = renderablesVec[a.obj_.id]->shaderProgram_;
         const auto* bShader = renderablesVec[b.obj_.id]->shaderProgram_;
         if (aShader != bShader) {

@@ -64,7 +64,7 @@ void Block::draw() {
   auto window = GlobalSubSystemStack::get().window();
 
   render.drawObject(
-      window, sprite_, {math::modelMatrixFromBounds(getP0(), getP1())});
+      window, 0, sprite_, {math::modelMatrixFromBounds(getP0(), getP1())});
 }
 
 void Block::onDestroy() {

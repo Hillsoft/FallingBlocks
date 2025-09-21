@@ -118,6 +118,7 @@ void Ball::draw() {
 
   render.drawObject(
       window,
+      0,
       resourceSentinel->getSprite(),
       {math::modelMatrixFromBounds(getP0(), getP1())});
 }
