@@ -225,6 +225,88 @@ class Matrix {
     return data_[x].at(y);
   }
 
+  constexpr TNum determinant() const
+    requires(sizeWidth == sizeHeight)
+  {
+    if constexpr (sizeWidth == 1) {
+      return at(0, 0);
+    } else {
+      TNum accum = 0;
+      for (size_t i = 0; i < sizeWidth; i++) {
+        Matrix<TNum, sizeWidth - 1, sizeHeight - 1> minor;
+        size_t minI = 0;
+        for (size_t i2 = 0; i2 < sizeWidth; i2++) {
+          if (i2 != i) {
+            for (size_t j = 0; j < sizeHeight - 1; j++) {
+              minor.at(minI, j) = at(i2, j + 1);
+            }
+            minI++;
+          }
+        }
+
+        TNum sign = i % 2 == 0 ? static_cast<TNum>(1) : static_cast<TNum>(-1);
+        accum += sign * at(i, 0) * minor.determinant();
+      }
+
+      return accum;
+    }
+  }
+
+  constexpr Matrix invert() const
+    requires(sizeWidth == sizeHeight)
+  {
+    Matrix result{};
+
+    if constexpr (sizeWidth == 1) {
+      result.at(0, 0) = static_cast<TNum>(1) / at(0, 0);
+      return result;
+    } else {
+      // matrix of minors
+      for (size_t i = 0; i < sizeWidth; i++) {
+        for (size_t j = 0; j < sizeHeight; j++) {
+          Matrix<TNum, sizeWidth - 1, sizeHeight - 1> minor;
+          size_t minI = 0;
+          for (size_t i2 = 0; i2 < sizeWidth; i2++) {
+            if (i2 == i) {
+              continue;
+            }
+            size_t minJ = 0;
+            for (size_t j2 = 0; j2 < sizeHeight; j2++) {
+              if (j2 == j) {
+                continue;
+              }
+              minor.at(minI, minJ) = at(i2, j2);
+              minJ++;
+            }
+            minI++;
+          }
+
+          result.at(i, j) = minor.determinant();
+        }
+      }
+
+      // cofactors
+      for (size_t i = 0; i < sizeWidth; i++) {
+        for (size_t j = 0; j < sizeHeight; j++) {
+          if ((i + j) % 2 != 0) {
+            result.at(i, j) *= -1;
+          }
+        }
+      }
+
+      // adjugate
+      for (size_t i = 0; i < sizeWidth; i++) {
+        for (size_t j = 0; j < i; j++) {
+          std::swap(result.at(i, j), result.at(j, i));
+        }
+      }
+
+      result *= 1 / determinant();
+
+      return result;
+    }
+  }
+
   constexpr static Matrix identity()
     requires(sizeWidth == sizeHeight)
   {
@@ -292,15 +374,44 @@ constexpr Matrix<TNum, sizeWidth, sizeHeight> operator*(
   return result;
 }
 
+template <typename TNum, size_t sizeWidth, size_t sizeHeight>
+constexpr Matrix<TNum, sizeWidth, sizeHeight>& operator*=(
+    Matrix<TNum, sizeWidth, sizeHeight>& mat, TNum fac)
+  requires(std::is_arithmetic_v<TNum>)
+{
+  for (size_t y = 0; y < sizeHeight; y++) {
+    for (size_t x = 0; x < sizeHeight; x++) {
+      mat.at(x, y) *= fac;
+    }
+  }
+  return mat;
+}
+
 template <typename TNum, size_t sizeA, size_t sizeB, size_t sizeC>
 constexpr Matrix<TNum, sizeC, sizeB> operator*(
-    const Matrix<TNum, sizeA, sizeB>& l, const Matrix<TNum, sizeC, sizeA>& r) {
+    const Matrix<TNum, sizeA, sizeB>& l, const Matrix<TNum, sizeC, sizeA>& r)
+  requires(std::is_arithmetic_v<TNum>)
+{
   Matrix<TNum, sizeC, sizeB> result;
   for (size_t y = 0; y < sizeB; y++) {
     for (size_t x = 0; x < sizeC; x++) {
       for (size_t z = 0; z < sizeA; z++) {
         result.at(x, y) += l.at(z, y) * r.at(x, z);
       }
+    }
+  }
+  return result;
+}
+
+template <typename TNum, size_t sizeA, size_t sizeB>
+constexpr Vec<TNum, sizeB> operator*(
+    const Matrix<TNum, sizeA, sizeB>& l, const Vec<TNum, sizeA>& r)
+  requires(std::is_arithmetic_v<TNum>)
+{
+  Vec<TNum, sizeB> result;
+  for (size_t y = 0; y < sizeB; y++) {
+    for (size_t z = 0; z < sizeA; z++) {
+      result.at(y) += l.at(z, y) * r.at(z);
     }
   }
   return result;
