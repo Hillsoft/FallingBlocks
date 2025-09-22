@@ -172,6 +172,7 @@ class RenderSubSystem {
   };
 
   VulkanGraphicsDevice& getGraphicsDevice() { return graphics_; }
+  Simple2DCamera& getDefaultCamera() { return defaultCamera_; }
 
   UniqueWindowHandle createWindow();
   void destroyWindow(WindowRef ref);

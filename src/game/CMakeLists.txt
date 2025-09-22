@@ -61,6 +61,20 @@ target_link_libraries(game.blocksscene
 	game.block
 	game.scenes.gameover)
 
+add_library(game.button "Button.hpp" "Button.cpp")
+target_link_libraries(game.button
+	engine.actor
+	engine.drawableregistry
+	engine.scene
+	globalsubsystemstack
+	input.inputsubsystem
+	math.vec
+	render.font
+	render.renderables.renderablecolor2d
+	render.rendersubsystem
+	game.resource.defaultfont
+	util.debug)
+
 add_library(game.loadingscreen "LoadingScreen.hpp" "LoadingScreen.cpp")
 target_link_libraries(game.loadingscreen
 	engine.actor
