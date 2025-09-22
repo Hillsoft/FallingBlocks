@@ -11,7 +11,7 @@
 #include "engine/Scene.hpp"
 #include "engine/SceneLoader.hpp"
 #include "game/LoadingScreen.hpp"
-#include "game/scenes/Level1.hpp"
+#include "game/scenes/MainMenu.hpp"
 #include "input/InputHandler.hpp"
 #include "util/debug.hpp"
 
@@ -45,7 +45,7 @@ Application& Application::getApplication() {
 
 void Application::run() {
   if (currentScene_ != mainScene_.get()) {
-    transitionToScene(std::make_unique<game::Level1>());
+    transitionToScene(std::make_unique<game::MainMenu>());
   }
 
   auto& subsystems = GlobalSubSystemStack::get();
@@ -133,11 +133,15 @@ void Application::drawFrame() {
 
 void Application::onKeyPress(int key) {
   if (key == GLFW_KEY_ESCAPE) {
-    GlobalSubSystemStack::get().window()->close();
+    close();
   }
   if (key == GLFW_KEY_F) {
     GlobalSubSystemStack::get().window()->toggleFullScreen();
   }
+}
+
+void Application::close() {
+  GlobalSubSystemStack::get().window()->close();
 }
 
 } // namespace blocks

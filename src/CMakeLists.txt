@@ -12,7 +12,7 @@ target_link_libraries(application
 	engine.scene
 	engine.sceneloader
 	game.loadingscreen
-	game.scenes.level1
+	game.scenes.mainmenu
 	globalsubsystemstack
 	input.inputsubsystem
 	util.debug)

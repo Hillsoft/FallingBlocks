@@ -45,3 +45,16 @@ target_link_libraries(game.scenes.level2
 	game.scenes.levelconsts
 	globalsubsystemstack
 	math.vec)
+
+add_library(game.scenes.mainmenu STATIC "MainMenu.hpp" "MainMenu.cpp")
+target_link_libraries(game.scenes.mainmenu
+	application
+	engine.scene
+	engine.sceneloader
+	game.background
+	game.button
+	game.scenes.level1
+	game.statictext
+	game.resource.defaultfont
+	globalsubsystemstack
+	math.vec)

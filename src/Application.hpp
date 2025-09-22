@@ -22,6 +22,8 @@ class Application : public input::InputHandler {
 
   void onKeyPress(int key) final;
 
+  void close();
+
  private:
   void update(float deltaTimeSeconds);
   void drawFrame();
