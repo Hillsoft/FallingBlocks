@@ -1,6 +1,7 @@
 #include "game/ScoreUI.hpp"
 
 #include <string>
+#include "GlobalSubSystemStack.hpp"
 #include "engine/Actor.hpp"
 #include "engine/DrawableRegistry.hpp"
 #include "engine/Scene.hpp"
@@ -18,7 +19,10 @@ void ScoreUI::draw() {
   BlocksScene* scene = dynamic_cast<BlocksScene*>(getScene());
   DEBUG_ASSERT(scene != nullptr);
 
-  std::string scoreString = util::toString("Score: ", scene->getScore());
+  std::string scoreString = util::toString(
+      GlobalSubSystemStack::get().localisationManager().getLocalisedString(
+          "GAME_POINTS"),
+      scene->getScore());
 
   DefaultFontResourceSentinel::get().drawStringUTF8(
       scoreString, {-1.0f, -0.8f}, 0.2f);

@@ -19,6 +19,7 @@ target_link_libraries(application
 
 add_library(globalsubsystemstack STATIC "GlobalSubSystemStack.cpp" "GlobalSubSystemStack.hpp")
 target_link_libraries(globalsubsystemstack
+	engine.localisation
 	engine.resourcesentinelmanager
 	input.inputsubsystem
 	render.rendersubsystem

@@ -1,5 +1,6 @@
 #include "GlobalSubSystemStack.hpp"
 
+#include "engine/Localisation.hpp"
 #include "engine/ResourceSentinelManager.hpp"
 #include "input/InputSubSystem.hpp"
 #include "render/RenderSubSystem.hpp"
@@ -16,7 +17,8 @@ GlobalSubSystemStack* globalStack = nullptr;
 GlobalSubSystemStack::GlobalSubSystemStack()
     : render_(),
       window_(render_.createWindow()),
-      input_(window_->getPresentStack().getWindow()) {
+      input_(window_->getPresentStack().getWindow()),
+      localisation_("en_GB") {
   DEBUG_ASSERT(globalStack == nullptr);
   globalStack = this;
 }
@@ -45,6 +47,10 @@ input::InputSubSystem& GlobalSubSystemStack::inputSystem() {
 
 ResourceSentinelManager& GlobalSubSystemStack::sentinelManager() {
   return sentinelManager_;
+}
+
+Localisation& GlobalSubSystemStack::localisationManager() {
+  return localisation_;
 }
 
 } // namespace blocks

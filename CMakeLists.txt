@@ -73,7 +73,7 @@ add_shader("fontFragment.glsl" "fontFragment.spv")
 add_custom_target(shader_bytecode DEPENDS ${SHADER_OUTPUT})
 
 set_target_properties("${CMAKE_PROJECT_NAME}" PROPERTIES ADDITIONAL_CLEAN_FILES "${CMAKE_CURRENT_BINARY_DIR}/res")
-add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/res/" COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/res/" "${CMAKE_CURRENT_BINARY_DIR}/res" DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/res")
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/res/" COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/res/" "${CMAKE_CURRENT_BINARY_DIR}/res" DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/res/" "${CMAKE_CURRENT_SOURCE_DIR}/res/localisation/")
 add_custom_target(resources DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/res/")
 
 add_dependencies(FallingBlocks shader_bytecode resources)

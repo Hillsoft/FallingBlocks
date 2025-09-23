@@ -1,5 +1,6 @@
 #pragma once
 
+#include "engine/Localisation.hpp"
 #include "engine/ResourceSentinelManager.hpp"
 #include "input/InputSubSystem.hpp"
 #include "render/RenderSubSystem.hpp"
@@ -24,12 +25,14 @@ class GlobalSubSystemStack : private util::no_copy_move {
   render::WindowRef window();
   input::InputSubSystem& inputSystem();
   ResourceSentinelManager& sentinelManager();
+  Localisation& localisationManager();
 
  private:
   render::RenderSubSystem render_;
   render::UniqueWindowHandle window_;
   input::InputSubSystem input_;
   ResourceSentinelManager sentinelManager_;
+  Localisation localisation_;
 };
 
 } // namespace blocks

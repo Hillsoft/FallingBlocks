@@ -15,3 +15,7 @@ target_link_libraries(loader.loadimage
 	loader.image.bitmap
 	loader.image.png
 	util.string)
+
+add_library(loader.locale STATIC "Locale.hpp" "Locale.cpp")
+target_link_libraries(loader.locale
+	util.file)

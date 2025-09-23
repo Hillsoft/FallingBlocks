@@ -14,6 +14,7 @@
 namespace blocks::game {
 
 std::unique_ptr<Scene> MainMenu::loadScene() const {
+  auto& localisation = GlobalSubSystemStack::get().localisationManager();
   GlobalSubSystemStack::get()
       .sentinelManager()
       .transitionToSentinelSet<
@@ -25,16 +26,23 @@ std::unique_ptr<Scene> MainMenu::loadScene() const {
 
   scene->createActor<game::Background>();
 
-  scene->createActor<game::StaticText>(math::Vec2{0.0f, -0.4f}, 0.4f, "Blocks");
+  scene->createActor<game::StaticText>(
+      math::Vec2{0.0f, -0.4f},
+      0.4f,
+      localisation.getLocalisedString("BLOCKS_TITLE"));
   scene->createActor<game::Button>(
-      math::Vec2{-0.3f, -0.2f}, math::Vec2{0.3f, -0.05f}, "Play", []() {
+      math::Vec2{-0.3f, -0.2f},
+      math::Vec2{0.3f, -0.05f},
+      localisation.getLocalisedString("START_GAME_BUTTON"),
+      []() {
         Application::getApplication().transitionToScene(
             std::make_unique<Level1>());
       });
   scene->createActor<game::Button>(
-      math::Vec2{-0.3f, 0.0f}, math::Vec2{0.3f, 0.15f}, "Quit", []() {
-        Application::getApplication().close();
-      });
+      math::Vec2{-0.3f, 0.0f},
+      math::Vec2{0.3f, 0.15f},
+      localisation.getLocalisedString("QUIT_GAME_BUTTON"),
+      []() { Application::getApplication().close(); });
 
   return scene;
 }

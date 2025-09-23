@@ -34,6 +34,7 @@ class GameRestarter : public Actor, public input::InputHandler {
 } // namespace
 
 std::unique_ptr<Scene> GameOver::loadScene() const {
+  auto& localisation = GlobalSubSystemStack::get().localisationManager();
   GlobalSubSystemStack::get()
       .sentinelManager()
       .transitionToSentinelSet<
@@ -45,9 +46,13 @@ std::unique_ptr<Scene> GameOver::loadScene() const {
   scene->createActor<game::Background>();
 
   scene->createActor<game::StaticText>(
-      math::Vec2{0.0f, 0.15f}, 0.3f, "Game Over");
+      math::Vec2{0.0f, 0.15f},
+      0.3f,
+      localisation.getLocalisedString("GAME_OVER"));
   scene->createActor<game::StaticText>(
-      math::Vec2{0.0f, 0.25f}, 0.1f, "Press space to play again");
+      math::Vec2{0.0f, 0.25f},
+      0.1f,
+      localisation.getLocalisedString("PLAY_AGAIN"));
 
   scene->createActor<GameRestarter>();
 

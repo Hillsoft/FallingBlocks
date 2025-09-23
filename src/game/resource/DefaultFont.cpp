@@ -15,7 +15,7 @@ class DefaultFontResourceSentinelData {
   DefaultFontResourceSentinelData()
       : font_(
             GlobalSubSystemStack::get().renderSystem(),
-            loader::loadFont(RESOURCE_DIR "/times.ttf")) {}
+            loader::loadFont(RESOURCE_DIR "/Deng.ttf")) {}
 
   render::Font& getFont() { return font_; }
 

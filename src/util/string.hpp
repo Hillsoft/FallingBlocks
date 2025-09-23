@@ -74,6 +74,25 @@ struct StringConverter<TArg, TArgs...> : public StringConverter<TArgs...> {
   const size_t estimatedSizeCache_;
 };
 
+template <typename TArg, typename... TArgs>
+  requires std::is_same_v<std::remove_cvref_t<TArg>, std::string>
+struct StringConverter<TArg, TArgs...> : public StringConverter<TArgs...> {
+  StringConverter(const std::string& c, TArgs&&... rest)
+      : StringConverter<TArgs...>(std::forward<TArgs>(rest)...),
+        estimatedSizeCache_(c.size()) {}
+
+  size_t estimateSize() const {
+    return estimatedSizeCache_ + StringConverter<TArgs...>::estimateSize();
+  }
+
+  void append(std::string& output, const std::string& c, TArgs&&... rest) {
+    output.append(c);
+    StringConverter<TArgs...>::append(output, std::forward<TArgs>(rest)...);
+  }
+
+  const size_t estimatedSizeCache_;
+};
+
 template <typename TArg>
   requires std::is_integral_v<TArg>
 static size_t intStringSizeEstimate(TArg a) {
