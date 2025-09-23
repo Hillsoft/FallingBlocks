@@ -1,6 +1,9 @@
 #include "game/scenes/MainMenu.hpp"
 
+#include <algorithm>
 #include <memory>
+#include <string>
+#include <vector>
 #include "Application.hpp"
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Scene.hpp"
@@ -41,6 +44,28 @@ std::unique_ptr<Scene> MainMenu::loadScene() const {
   scene->createActor<game::Button>(
       math::Vec2{-0.3f, 0.0f},
       math::Vec2{0.3f, 0.15f},
+      std::string{localisation.getLocaleName()},
+      []() {
+        auto& localisation = GlobalSubSystemStack::get().localisationManager();
+        std::vector<std::string> availableLocales =
+            localisation.getAvailableLocales();
+        auto currentLocaleIt = std::find(
+            availableLocales.begin(),
+            availableLocales.end(),
+            localisation.getLocaleCode());
+        if (currentLocaleIt != availableLocales.end()) {
+          currentLocaleIt++;
+        }
+        if (currentLocaleIt == availableLocales.end()) {
+          currentLocaleIt = availableLocales.begin();
+        }
+        localisation.setLocale(*currentLocaleIt);
+        Application::getApplication().transitionToScene(
+            std::make_unique<MainMenu>());
+      });
+  scene->createActor<game::Button>(
+      math::Vec2{-0.3f, 0.2f},
+      math::Vec2{0.3f, 0.35f},
       localisation.getLocalisedString("QUIT_GAME_BUTTON"),
       []() { Application::getApplication().close(); });
 
