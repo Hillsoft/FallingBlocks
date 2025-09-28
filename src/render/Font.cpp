@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#include <optional>
 #include <span>
 #include <string_view>
 #include <utility>
@@ -136,11 +137,18 @@ float drawChar(
     WindowRef window,
     uint32_t c,
     math::Vec2 pos,
-    float lineHeight) {
+    float lineHeight,
+    std::optional<uint16_t>& previousGlyph) {
   auto glyphIndex = fontData.charMap->mapChar(c);
   const auto& glyph = fontData.glyphs[glyphIndex];
   const auto& metrics = fontData.horizontalMetrics.data[glyphIndex];
   float fontScale = lineHeight / static_cast<float>(fontData.unitsPerEm);
+
+  int16_t kerning = 0;
+  if (previousGlyph.has_value()) {
+    kerning = fontData.kerning.apply(*previousGlyph, glyphIndex).rawValue;
+  }
+  previousGlyph = glyphIndex;
 
   if (std::holds_alternative<loader::SimpleGlyphData>(glyph.data)) {
     render.drawObject(
@@ -152,7 +160,7 @@ float drawChar(
                 pos +
                 math::Vec2{
                     static_cast<float>(metrics.leftSideBearing) * fontScale +
-                        static_cast<float>(glyph.xMin.rawValue) * fontScale,
+                        static_cast<float>(kerning) * fontScale,
                     -static_cast<float>(glyph.yMax.rawValue) * fontScale}) *
                 math::Mat3::scale(math::Vec2{
                     static_cast<float>(
@@ -214,8 +222,7 @@ float drawChar(
                   pos +
                   transformPos(math::Vec2{
                       static_cast<float>(metrics.leftSideBearing) * fontScale +
-                          static_cast<float>(subGlyph.xMin.rawValue) *
-                              fontScale,
+                          static_cast<float>(kerning) * fontScale,
                       -static_cast<float>(subGlyph.yMax.rawValue) *
                           fontScale})) *
                   math::Mat3::scale(math::Vec2{
@@ -238,7 +245,8 @@ float drawChar(
     }
   }
 
-  return static_cast<float>(metrics.advanceWidth) * fontScale;
+  return static_cast<float>(kerning) * fontScale +
+      static_cast<float>(metrics.advanceWidth) * fontScale;
 }
 
 } // namespace
@@ -265,6 +273,7 @@ void Font::drawStringASCII(
   }
 
   auto window = GlobalSubSystemStack::get().window();
+  std::optional<uint16_t> previousGlyph;
   for (unsigned char c : str) {
     float advance = drawChar(
         *render_,
@@ -274,7 +283,8 @@ void Font::drawStringASCII(
         window,
         c,
         pos,
-        lineHeight);
+        lineHeight,
+        previousGlyph);
 
     pos.x() += advance;
   }
@@ -294,6 +304,7 @@ void Font::drawStringUTF8(
   }
 
   auto window = GlobalSubSystemStack::get().window();
+  std::optional<uint16_t> previousGlyph;
   for (uint32_t c : util::unicodeDecode(str)) {
     float advance = drawChar(
         *render_,
@@ -303,7 +314,8 @@ void Font::drawStringUTF8(
         window,
         c,
         pos,
-        lineHeight);
+        lineHeight,
+        previousGlyph);
 
     pos.x() += advance;
   }
@@ -314,10 +326,19 @@ float Font::stringWidth(
   float fontScale = lineHeight / static_cast<float>(fontData_.unitsPerEm);
   float width = 0.0f;
 
+  std::optional<uint16_t> previousGlyph;
+
   auto processChar = [&](uint32_t c) {
     auto glyphIndex = fontData_.charMap->mapChar(c);
     const auto& metrics = fontData_.horizontalMetrics.data[glyphIndex];
 
+    int16_t kerning = 0;
+    if (previousGlyph.has_value()) {
+      kerning = fontData_.kerning.apply(*previousGlyph, glyphIndex).rawValue;
+    }
+    previousGlyph = glyphIndex;
+
+    width += static_cast<float>(kerning) * fontScale;
     width += static_cast<float>(metrics.advanceWidth) * fontScale;
   };
 
