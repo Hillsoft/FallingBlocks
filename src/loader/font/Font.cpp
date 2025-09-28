@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <string_view>
 #include <type_traits>
+#include <unordered_map>
 #include <vector>
 #include "util/debug.hpp"
 #include "util/file.hpp"
@@ -35,6 +36,7 @@ constexpr uint32_t kTagGlyf = 0x676C7966;
 constexpr uint32_t kTagHead = 0x68656164;
 constexpr uint32_t kTagHhea = 0x68686561;
 constexpr uint32_t kTagHmtx = 0x686D7478;
+constexpr uint32_t kTagKern = 0x6B65726E;
 constexpr uint32_t kTagLoca = 0x6C6F6361;
 constexpr uint32_t kTagMaxp = 0x6D617870;
 constexpr uint32_t kTagName = 0x6E616D65;
@@ -815,6 +817,79 @@ HorizontalMetrics readHorizontalMetrics(
   return metrics;
 }
 
+uint32_t kerningMapKey(uint16_t left, uint16_t right) {
+  return (static_cast<uint32_t>(left) << 16) + right;
+}
+
+void readKerningSubtable(
+    std::span<const std::byte>& data,
+    std::unordered_map<uint32_t, FWord>& kernValues) {
+  if (data.size() < 6) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+
+  uint16_t version = readBigEndian<uint16_t>(data);
+  if (version != 0) {
+    throw std::runtime_error{"Unsupported font file"};
+  }
+
+  readBigEndian<uint16_t>(data); // length
+  uint8_t format = readBigEndian<uint8_t>(data);
+  readBigEndian<uint8_t>(data); // flags
+
+  if (format != 0) {
+    throw std::runtime_error{"Unsupported font file"};
+  }
+
+  // Format 0 header
+  if (data.size() < 8) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+
+  uint16_t numPairs = readBigEndian<uint16_t>(data);
+  readBigEndian<uint16_t>(data); // search range
+  readBigEndian<uint16_t>(data); // entry selector
+  readBigEndian<uint16_t>(data); // range shift
+
+  if (data.size() < 6 * static_cast<size_t>(numPairs)) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+
+  kernValues.reserve(kernValues.size() + numPairs);
+  for (int i = 0; i < numPairs; i++) {
+    uint16_t left = readBigEndian<uint16_t>(data);
+    uint16_t right = readBigEndian<uint16_t>(data);
+    FWord value{readBigEndian<int16_t>(data)};
+
+    uint32_t mapKey = kerningMapKey(left, right);
+
+    if (auto it = kernValues.find(mapKey); it != kernValues.end()) {
+      it->second += value;
+    } else {
+      kernValues.emplace(mapKey, value);
+    }
+  }
+}
+
+KerningTable readKerningTable(std::span<const std::byte> data) {
+  if (data.size() < 4) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+
+  uint16_t version = readBigEndian<uint16_t>(data);
+  if (version != 0) {
+    throw std::runtime_error{"Unsupported font file"};
+  }
+  uint16_t numTables = readBigEndian<uint16_t>(data);
+
+  std::unordered_map<uint32_t, FWord> kernValues;
+  for (int i = 0; i < numTables; i++) {
+    readKerningSubtable(data, kernValues);
+  }
+
+  return KerningTable{std::move(kernValues)};
+}
+
 std::span<const std::byte> getTableContents(
     std::span<const std::byte> data,
     const TableDirectoryEntry& tableDescriptor) {
@@ -856,6 +931,20 @@ const TableDirectoryEntry* lookupTable(
 }
 
 } // namespace
+
+KerningTable::KerningTable() {}
+
+KerningTable::KerningTable(std::unordered_map<uint32_t, FWord> data)
+    : data_(std::move(data)) {}
+
+FWord KerningTable::apply(uint16_t leftGlyph, uint16_t rightGlyph) const {
+  if (auto it = data_.find(kerningMapKey(leftGlyph, rightGlyph));
+      it != data_.end()) {
+    return it->second;
+  } else {
+    return FWord{0};
+  }
+}
 
 Font loadFont(const std::filesystem::path& path) {
   return loadFont(util::readFileBytes(path));
@@ -967,11 +1056,20 @@ Font loadFont(const std::span<const std::byte> data) {
         maxProfile, horizontalHeader, getTableContents(data, *entryPtr));
   }();
 
+  KerningTable kerning = [&]() {
+    const auto entryPtr = lookupTable(tableDirectory, kTagKern);
+    if (entryPtr == nullptr) {
+      return KerningTable{};
+    }
+    return readKerningTable(getTableContents(data, *entryPtr));
+  }();
+
   return Font{
       .charMap = std::move(charMap),
       .glyphs = std::move(glyphs),
       .horizontalMetrics = std::move(horizontalMetrics),
-      .unitsPerEm = headEntry.unitsPerEm};
+      .unitsPerEm = headEntry.unitsPerEm,
+      .kerning = std::move(kerning)};
 }
 
 } // namespace blocks::loader

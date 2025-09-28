@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <memory>
 #include <span>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 
@@ -12,6 +13,11 @@ namespace blocks::loader {
 
 struct FWord {
   int16_t rawValue;
+
+  FWord& operator+=(const FWord& other) {
+    rawValue += other.rawValue;
+    return *this;
+  }
 };
 
 class CharToGlyphMap {
@@ -57,11 +63,23 @@ struct HorizontalMetrics {
   std::vector<Entry> data;
 };
 
+class KerningTable {
+ public:
+  KerningTable();
+  explicit KerningTable(std::unordered_map<uint32_t, FWord> data);
+
+  FWord apply(uint16_t leftGlyph, uint16_t rightGlyph) const;
+
+ private:
+  std::unordered_map<uint32_t, FWord> data_;
+};
+
 struct Font {
   std::unique_ptr<CharToGlyphMap> charMap;
   std::vector<GlyphData> glyphs;
   HorizontalMetrics horizontalMetrics;
   uint16_t unitsPerEm;
+  KerningTable kerning;
 };
 
 Font loadFont(const std::filesystem::path& path);
