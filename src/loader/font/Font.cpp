@@ -40,6 +40,7 @@ constexpr uint32_t kTagKern = 0x6B65726E;
 constexpr uint32_t kTagLoca = 0x6C6F6361;
 constexpr uint32_t kTagMaxp = 0x6D617870;
 constexpr uint32_t kTagName = 0x6E616D65;
+constexpr uint32_t kTagOS2 = 0x4F532F32;
 
 template <typename TVal>
   requires std::is_integral_v<TVal>
@@ -890,6 +891,74 @@ KerningTable readKerningTable(std::span<const std::byte> data) {
   return KerningTable{std::move(kernValues)};
 }
 
+struct OS2TableData {
+  FWord ascender;
+  FWord descender;
+  FWord lineGap;
+};
+
+OS2TableData readOS2TableVersion4(std::span<const std::byte> data) {
+  if (data.size() != 94) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+
+  readBigEndian<uint16_t>(data); // xAvgCharWidth
+  readBigEndian<int16_t>(data); // usWeightClass
+  readBigEndian<uint16_t>(data); // usWidthClass
+  readBigEndian<uint16_t>(data); // fsType
+  readBigEndian<int16_t>(data); // subscriptXSize
+  readBigEndian<int16_t>(data); // subscriptYSize
+  readBigEndian<int16_t>(data); // subscriptXOffset
+  readBigEndian<int16_t>(data); // subscriptYOffset
+  readBigEndian<int16_t>(data); // superscriptXSize
+  readBigEndian<int16_t>(data); // superscriptYSize
+  readBigEndian<int16_t>(data); // superscriptXOffset
+  readBigEndian<int16_t>(data); // superscriptYOffset
+  readBigEndian<int16_t>(data); // strikeoutSize
+  readBigEndian<int16_t>(data); // strikeoutPosition
+  readBigEndian<int16_t>(data); // familyclass
+  data = data.subspan(10); // panose
+  readBigEndian<uint32_t>(data); // unicodeRange1
+  readBigEndian<uint32_t>(data); // unicodeRange2
+  readBigEndian<uint32_t>(data); // unicodeRange3
+  readBigEndian<uint32_t>(data); // unicodeRange4
+  readBigEndian<uint32_t>(data); // vendorId
+  readBigEndian<uint16_t>(data); // fsSelection
+  readBigEndian<uint16_t>(data); // firstCharIndex
+  readBigEndian<uint16_t>(data); // lastCharIndex
+  FWord ascender{readBigEndian<int16_t>(data)};
+  FWord descender{readBigEndian<int16_t>(data)};
+  FWord lineGap{readBigEndian<int16_t>(data)};
+  readBigEndian<uint16_t>(data); // ascent padding
+  readBigEndian<uint16_t>(data); // descent padding
+  readBigEndian<uint32_t>(data); // codePageRange1
+  readBigEndian<uint32_t>(data); // codePageRange2
+  readBigEndian<int16_t>(data); // sxHeight
+  readBigEndian<int16_t>(data); // sCapHeight
+  readBigEndian<uint16_t>(data); // defaultChar
+  readBigEndian<uint16_t>(data); // breakChar
+  readBigEndian<uint16_t>(data); // maxContext
+
+  DEBUG_ASSERT(data.size() == 0);
+
+  return OS2TableData{
+      .ascender = ascender, .descender = descender, .lineGap = lineGap};
+}
+
+OS2TableData readOS2Table(std::span<const std::byte> data) {
+  if (data.size() < 2) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+
+  uint16_t version = readBigEndian<uint16_t>(data);
+
+  if (version >= 2 && version <= 4) {
+    return readOS2TableVersion4(data);
+  } else {
+    throw std::runtime_error{"Unsupported font file"};
+  }
+}
+
 std::span<const std::byte> getTableContents(
     std::span<const std::byte> data,
     const TableDirectoryEntry& tableDescriptor) {
@@ -1064,12 +1133,26 @@ Font loadFont(const std::span<const std::byte> data) {
     return readKerningTable(getTableContents(data, *entryPtr));
   }();
 
+  std::optional<OS2TableData> os2Data = [&]() -> std::optional<OS2TableData> {
+    const auto entryPtr = lookupTable(tableDirectory, kTagOS2);
+    if (entryPtr == nullptr) {
+      return std::nullopt;
+    }
+    return readOS2Table(getTableContents(data, *entryPtr));
+  }();
+
   return Font{
       .charMap = std::move(charMap),
       .glyphs = std::move(glyphs),
       .horizontalMetrics = std::move(horizontalMetrics),
       .unitsPerEm = headEntry.unitsPerEm,
-      .kerning = std::move(kerning)};
+      .kerning = std::move(kerning),
+      .ascenderHeight =
+          os2Data.has_value() ? os2Data->ascender : horizontalHeader.ascent,
+      .descenderHeight =
+          os2Data.has_value() ? os2Data->descender : horizontalHeader.descent,
+      .lineGap =
+          os2Data.has_value() ? os2Data->lineGap : horizontalHeader.lineGap};
 }
 
 } // namespace blocks::loader

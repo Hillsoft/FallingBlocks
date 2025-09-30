@@ -80,6 +80,9 @@ struct Font {
   HorizontalMetrics horizontalMetrics;
   uint16_t unitsPerEm;
   KerningTable kerning;
+  FWord ascenderHeight;
+  FWord descenderHeight;
+  FWord lineGap;
 };
 
 Font loadFont(const std::filesystem::path& path);
