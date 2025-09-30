@@ -1,6 +1,7 @@
 #include "loader/font/Font.hpp"
 
 #include <array>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
@@ -43,6 +44,12 @@ constexpr uint32_t kTagName = 0x6E616D65;
 constexpr uint32_t kTagOS2 = 0x4F532F32;
 
 template <typename TVal>
+concept RawValueWrapper = requires(TVal x) {
+  std::integral<decltype(TVal::rawValue)>;
+  std::constructible_from<TVal, decltype(TVal::rawValue)>;
+};
+
+template <typename TVal>
   requires std::is_integral_v<TVal>
 TVal readBigEndian(std::span<const std::byte>& data) {
   DEBUG_ASSERT(data.size() >= sizeof(TVal));
@@ -52,6 +59,14 @@ TVal readBigEndian(std::span<const std::byte>& data) {
   }
   data = data.subspan(sizeof(TVal));
   return *reinterpret_cast<TVal*>(&*flippedData.begin());
+}
+
+template <typename TVal>
+  requires RawValueWrapper<TVal>
+TVal readBigEndian(std::span<const std::byte>& data) {
+  using TRawType = decltype(TVal::rawValue);
+  TRawType rawValue = readBigEndian<TRawType>(data);
+  return TVal{rawValue};
 }
 
 struct OffsetSubtable {
@@ -118,18 +133,18 @@ HeadTable readHeadTable(std::span<const std::byte> data) {
   }
 
   return {
-      .version = {readBigEndian<uint32_t>(data)},
-      .fontRevision = {readBigEndian<uint32_t>(data)},
+      .version = readBigEndian<Fixed>(data),
+      .fontRevision = readBigEndian<Fixed>(data),
       .checkSumAdjustment = readBigEndian<uint32_t>(data),
       .magicNumber = readBigEndian<uint32_t>(data),
       .flags = readBigEndian<uint16_t>(data),
       .unitsPerEm = readBigEndian<uint16_t>(data),
       .created = readBigEndian<uint64_t>(data),
       .modified = readBigEndian<uint64_t>(data),
-      .xMin = {readBigEndian<int16_t>(data)},
-      .yMin = {readBigEndian<int16_t>(data)},
-      .xMax = {readBigEndian<int16_t>(data)},
-      .yMax = {readBigEndian<int16_t>(data)},
+      .xMin = readBigEndian<FWord>(data),
+      .yMin = readBigEndian<FWord>(data),
+      .xMax = readBigEndian<FWord>(data),
+      .yMax = readBigEndian<FWord>(data),
       .style = readBigEndian<uint16_t>(data),
       .lowestRecPPEM = readBigEndian<uint16_t>(data),
       .directionHint = readBigEndian<int16_t>(data),
@@ -411,7 +426,7 @@ MaximumProfile readMaximumProfile(std::span<const std::byte> data) {
     throw std::runtime_error{"Corrupt font file"};
   }
   MaximumProfile profile{
-      .version = {readBigEndian<uint32_t>(data)},
+      .version = readBigEndian<Fixed>(data),
       .numGlyphs = readBigEndian<uint16_t>(data),
       .maxPoints = readBigEndian<uint16_t>(data),
       .maxContours = readBigEndian<uint16_t>(data),
@@ -722,10 +737,10 @@ std::vector<GlyphData> readGlyphTable(
     }
     int16_t numContours = readBigEndian<int16_t>(glyphData);
 
-    FWord xMin{readBigEndian<int16_t>(glyphData)};
-    FWord yMin{readBigEndian<int16_t>(glyphData)};
-    FWord xMax{readBigEndian<int16_t>(glyphData)};
-    FWord yMax{readBigEndian<int16_t>(glyphData)};
+    FWord xMin{readBigEndian<FWord>(glyphData)};
+    FWord yMin{readBigEndian<FWord>(glyphData)};
+    FWord xMax{readBigEndian<FWord>(glyphData)};
+    FWord yMax{readBigEndian<FWord>(glyphData)};
 
     if (numContours >= 0) {
       result.emplace_back(GlyphData{
@@ -767,20 +782,20 @@ HorizontalHeader readHorizontalHeader(std::span<const std::byte> data) {
     throw std::runtime_error{"Corrupt font file"};
   }
   HorizontalHeader header{};
-  header.version = {readBigEndian<uint32_t>(data)};
+  header.version = readBigEndian<Fixed>(data);
   if (header.version != Fixed{0x00010000}) {
     throw std::runtime_error{"Unsupported font file"};
   }
-  header.ascent = {readBigEndian<int16_t>(data)};
-  header.descent = {readBigEndian<int16_t>(data)};
-  header.lineGap = {readBigEndian<int16_t>(data)};
-  header.advanceWidthMax = {readBigEndian<uint16_t>(data)};
-  header.minLeftSideBearing = {readBigEndian<int16_t>(data)};
-  header.minRightSideBearing = {readBigEndian<int16_t>(data)};
-  header.xMaxExtent = {readBigEndian<int16_t>(data)};
+  header.ascent = readBigEndian<FWord>(data);
+  header.descent = readBigEndian<FWord>(data);
+  header.lineGap = readBigEndian<FWord>(data);
+  header.advanceWidthMax = readBigEndian<UFWord>(data);
+  header.minLeftSideBearing = readBigEndian<FWord>(data);
+  header.minRightSideBearing = readBigEndian<FWord>(data);
+  header.xMaxExtent = readBigEndian<FWord>(data);
   header.caretSlopeRise = readBigEndian<int16_t>(data);
   header.caretSlopeRun = readBigEndian<int16_t>(data);
-  header.caretOffset = {readBigEndian<int16_t>(data)};
+  header.caretOffset = readBigEndian<FWord>(data);
   data = data.subspan(8);
   header.metricDataFormat = readBigEndian<int16_t>(data);
   header.numOfLongHorMetrics = readBigEndian<uint16_t>(data);
@@ -860,7 +875,7 @@ void readKerningSubtable(
   for (int i = 0; i < numPairs; i++) {
     uint16_t left = readBigEndian<uint16_t>(data);
     uint16_t right = readBigEndian<uint16_t>(data);
-    FWord value{readBigEndian<int16_t>(data)};
+    FWord value = readBigEndian<FWord>(data);
 
     uint32_t mapKey = kerningMapKey(left, right);
 
@@ -926,9 +941,9 @@ OS2TableData readOS2TableVersion4(std::span<const std::byte> data) {
   readBigEndian<uint16_t>(data); // fsSelection
   readBigEndian<uint16_t>(data); // firstCharIndex
   readBigEndian<uint16_t>(data); // lastCharIndex
-  FWord ascender{readBigEndian<int16_t>(data)};
-  FWord descender{readBigEndian<int16_t>(data)};
-  FWord lineGap{readBigEndian<int16_t>(data)};
+  FWord ascender = readBigEndian<FWord>(data);
+  FWord descender = readBigEndian<FWord>(data);
+  FWord lineGap = readBigEndian<FWord>(data);
   readBigEndian<uint16_t>(data); // ascent padding
   readBigEndian<uint16_t>(data); // descent padding
   readBigEndian<uint32_t>(data); // codePageRange1
