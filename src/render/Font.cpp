@@ -50,8 +50,10 @@ VulkanBuffer makeFontBuffer(
   for (const auto& glyph : font.glyphs) {
     int32_t glyphStart = static_cast<int32_t>(pointData.size());
 
-    if (std::holds_alternative<loader::SimpleGlyphData>(glyph.data)) {
-      const auto& glyphData = std::get<loader::SimpleGlyphData>(glyph.data);
+    if (std::holds_alternative<loader::SimpleGlyphData>(
+            glyph.contourData.data)) {
+      const auto& glyphData =
+          std::get<loader::SimpleGlyphData>(glyph.contourData.data);
       DEBUG_ASSERT(
           glyphData.onCurve.size() == glyphData.xCoords.size() &&
           glyphData.xCoords.size() == glyphData.yCoords.size());
@@ -141,7 +143,6 @@ float drawChar(
     std::optional<uint16_t>& previousGlyph) {
   auto glyphIndex = fontData.charMap->mapChar(c);
   const auto& glyph = fontData.glyphs[glyphIndex];
-  const auto& metrics = fontData.horizontalMetrics.data[glyphIndex];
   float fontScale = lineHeight / static_cast<float>(fontData.unitsPerEm);
 
   int16_t kerning = 0;
@@ -150,7 +151,7 @@ float drawChar(
   }
   previousGlyph = glyphIndex;
 
-  if (std::holds_alternative<loader::SimpleGlyphData>(glyph.data)) {
+  if (std::holds_alternative<loader::SimpleGlyphData>(glyph.contourData.data)) {
     render.drawObject(
         window,
         10,
@@ -159,33 +160,41 @@ float drawChar(
             math::Mat3::translate(
                 pos +
                 math::Vec2{
-                    static_cast<float>(metrics.leftSideBearing) * fontScale +
+                    static_cast<float>(
+                        glyph.horizontalMetrics.leftSideBearing.rawValue) *
+                            fontScale +
                         static_cast<float>(kerning) * fontScale,
-                    -static_cast<float>(glyph.yMax.rawValue) * fontScale}) *
+                    -static_cast<float>(glyph.contourData.yMax.rawValue) *
+                        fontScale}) *
                 math::Mat3::scale(math::Vec2{
                     static_cast<float>(
-                        glyph.xMax.rawValue - glyph.xMin.rawValue) *
+                        glyph.contourData.xMax.rawValue -
+                        glyph.contourData.xMin.rawValue) *
                         fontScale,
                     static_cast<float>(
-                        glyph.yMax.rawValue - glyph.yMin.rawValue) *
+                        glyph.contourData.yMax.rawValue -
+                        glyph.contourData.yMin.rawValue) *
                         fontScale}),
             glyphRanges[glyphIndex].first,
             glyphRanges[glyphIndex].second,
             math::Mat3::translate(math::Vec2{
-                static_cast<float>(glyph.xMin.rawValue),
-                static_cast<float>(glyph.yMin.rawValue)}) *
+                static_cast<float>(glyph.contourData.xMin.rawValue),
+                static_cast<float>(glyph.contourData.yMin.rawValue)}) *
                 math::Mat3::scale(math::Vec2{
                     static_cast<float>(
-                        glyph.xMax.rawValue - glyph.xMin.rawValue),
+                        glyph.contourData.xMax.rawValue -
+                        glyph.contourData.xMin.rawValue),
                     static_cast<float>(
-                        glyph.yMax.rawValue - glyph.yMin.rawValue)})});
+                        glyph.contourData.yMax.rawValue -
+                        glyph.contourData.yMin.rawValue)})});
   } else if (std::holds_alternative<std::vector<loader::CompoundGlyphData>>(
-                 glyph.data)) {
+                 glyph.contourData.data)) {
     for (const auto& subGlyphDetails :
-         std::get<std::vector<loader::CompoundGlyphData>>(glyph.data)) {
+         std::get<std::vector<loader::CompoundGlyphData>>(
+             glyph.contourData.data)) {
       const auto& subGlyph = fontData.glyphs[subGlyphDetails.glpyhIndex];
-      DEBUG_ASSERT(
-          std::holds_alternative<loader::SimpleGlyphData>(subGlyph.data));
+      DEBUG_ASSERT(std::holds_alternative<loader::SimpleGlyphData>(
+          subGlyph.contourData.data));
 
       auto transformPos = [&](math::Vec2 pos) {
         float m0 =
@@ -221,32 +230,39 @@ float drawChar(
               math::Mat3::translate(
                   pos +
                   transformPos(math::Vec2{
-                      static_cast<float>(metrics.leftSideBearing) * fontScale +
+                      static_cast<float>(
+                          subGlyph.horizontalMetrics.leftSideBearing.rawValue) *
+                              fontScale +
                           static_cast<float>(kerning) * fontScale,
-                      -static_cast<float>(subGlyph.yMax.rawValue) *
+                      -static_cast<float>(subGlyph.contourData.yMax.rawValue) *
                           fontScale})) *
                   math::Mat3::scale(math::Vec2{
                       static_cast<float>(
-                          subGlyph.xMax.rawValue - subGlyph.xMin.rawValue) *
+                          subGlyph.contourData.xMax.rawValue -
+                          subGlyph.contourData.xMin.rawValue) *
                           fontScale,
                       static_cast<float>(
-                          subGlyph.yMax.rawValue - subGlyph.yMin.rawValue) *
+                          subGlyph.contourData.yMax.rawValue -
+                          subGlyph.contourData.yMin.rawValue) *
                           fontScale}),
               glyphRanges[subGlyphDetails.glpyhIndex].first,
               glyphRanges[subGlyphDetails.glpyhIndex].second,
               math::Mat3::translate(math::Vec2{
-                  static_cast<float>(subGlyph.xMin.rawValue),
-                  static_cast<float>(subGlyph.yMin.rawValue)}) *
+                  static_cast<float>(subGlyph.contourData.xMin.rawValue),
+                  static_cast<float>(subGlyph.contourData.yMin.rawValue)}) *
                   math::Mat3::scale(math::Vec2{
                       static_cast<float>(
-                          subGlyph.xMax.rawValue - subGlyph.xMin.rawValue),
+                          subGlyph.contourData.xMax.rawValue -
+                          subGlyph.contourData.xMin.rawValue),
                       static_cast<float>(
-                          subGlyph.yMax.rawValue - subGlyph.yMin.rawValue)})});
+                          subGlyph.contourData.yMax.rawValue -
+                          subGlyph.contourData.yMin.rawValue)})});
     }
   }
 
   return static_cast<float>(kerning) * fontScale +
-      static_cast<float>(metrics.advanceWidth) * fontScale;
+      static_cast<float>(glyph.horizontalMetrics.advanceWidth.rawValue) *
+      fontScale;
 }
 
 } // namespace
@@ -330,7 +346,6 @@ float Font::stringWidth(
 
   auto processChar = [&](uint32_t c) {
     auto glyphIndex = fontData_.charMap->mapChar(c);
-    const auto& metrics = fontData_.horizontalMetrics.data[glyphIndex];
 
     int16_t kerning = 0;
     if (previousGlyph.has_value()) {
@@ -339,7 +354,9 @@ float Font::stringWidth(
     previousGlyph = glyphIndex;
 
     width += static_cast<float>(kerning) * fontScale;
-    width += static_cast<float>(metrics.advanceWidth) * fontScale;
+    width += static_cast<float>(fontData_.glyphs[glyphIndex]
+                                    .horizontalMetrics.advanceWidth.rawValue) *
+        fontScale;
   };
 
   if (encoding == ASCII) {

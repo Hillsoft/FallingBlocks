@@ -26,10 +26,6 @@ struct Fixed {
   auto operator<=>(const Fixed&) const = default;
 };
 
-struct UFWord {
-  uint16_t rawValue;
-};
-
 constexpr Fixed kExpectedVersion = {0x00010000};
 
 constexpr uint32_t kTagCmap = 0x636D6170;
@@ -711,12 +707,12 @@ std::vector<CompoundGlyphData> readCompoundGlyph(
   return result;
 }
 
-std::vector<GlyphData> readGlyphTable(
+std::vector<GlyphContourData> readGlyphTable(
     const GlyphLocations& glyphLocations, std::span<const std::byte> data) {
-  std::vector<GlyphData> result;
+  std::vector<GlyphContourData> result;
   result.reserve(glyphLocations.offsets.size());
 
-  for (size_t i = 0; i < glyphLocations.offsets.size(); i++) {
+  for (size_t i = 0; i < glyphLocations.offsets.size() - 1; i++) {
     long long curSize =
         static_cast<size_t>(i) + 1 < glyphLocations.offsets.size()
         ? glyphLocations.offsets[i + 1] - glyphLocations.offsets[i]
@@ -725,7 +721,8 @@ std::vector<GlyphData> readGlyphTable(
       throw std::runtime_error{"Corrupt font file"};
     }
     if (curSize == 0) {
-      result.emplace_back(GlyphData{{0}, {0}, {0}, {0}, std::monostate{}});
+      result.emplace_back(
+          GlyphContourData{{0}, {0}, {0}, {0}, std::monostate{}});
       continue;
     }
 
@@ -743,11 +740,11 @@ std::vector<GlyphData> readGlyphTable(
     FWord yMax{readBigEndian<FWord>(glyphData)};
 
     if (numContours >= 0) {
-      result.emplace_back(GlyphData{
+      result.emplace_back(GlyphContourData{
           xMin, yMin, xMax, yMax, {readSimpleGlyph(numContours, glyphData)}});
     } else {
-      result.emplace_back(
-          GlyphData{xMin, yMin, xMax, yMax, {readCompoundGlyph(glyphData)}});
+      result.emplace_back(GlyphContourData{
+          xMin, yMin, xMax, yMax, {readCompoundGlyph(glyphData)}});
     }
     if (glyphData.size() >= 2) {
       throw std::runtime_error{"Corrupt font file"};
@@ -805,6 +802,10 @@ HorizontalHeader readHorizontalHeader(std::span<const std::byte> data) {
   return header;
 }
 
+struct HorizontalMetrics {
+  std::vector<GlyphHorizontalMetrics> data;
+};
+
 HorizontalMetrics readHorizontalMetrics(
     const MaximumProfile& maxProfile,
     const HorizontalHeader& hheader,
@@ -818,16 +819,16 @@ HorizontalMetrics readHorizontalMetrics(
   HorizontalMetrics metrics;
   metrics.data.reserve(maxProfile.numGlyphs);
 
-  uint16_t lastAdvanceWidth = 0;
+  UFWord lastAdvanceWidth{0};
   for (int i = 0; i < hheader.numOfLongHorMetrics; i++) {
-    HorizontalMetrics::Entry cur{
-        readBigEndian<uint16_t>(data), readBigEndian<int16_t>(data)};
+    GlyphHorizontalMetrics cur{
+        readBigEndian<UFWord>(data), readBigEndian<FWord>(data)};
     lastAdvanceWidth = cur.advanceWidth;
     metrics.data.emplace_back(cur);
   }
 
   for (int i = 0; i < maxProfile.numGlyphs - hheader.numOfLongHorMetrics; i++) {
-    metrics.data.emplace_back(lastAdvanceWidth, readBigEndian<int16_t>(data));
+    metrics.data.emplace_back(lastAdvanceWidth, readBigEndian<FWord>(data));
   }
 
   return metrics;
@@ -1115,7 +1116,7 @@ Font loadFont(const std::span<const std::byte> data) {
         headEntry, maxProfile, getTableContents(data, *entryPtr));
   }();
 
-  std::vector<GlyphData> glyphs = [&]() {
+  std::vector<GlyphContourData> glyphs = [&]() {
     const auto entryPtr = lookupTable(tableDirectory, kTagGlyf);
     if (entryPtr == nullptr) {
       throw std::runtime_error{"Corrupt font file"};
@@ -1156,10 +1157,17 @@ Font loadFont(const std::span<const std::byte> data) {
     return readOS2Table(getTableContents(data, *entryPtr));
   }();
 
+  DEBUG_ASSERT(horizontalMetrics.data.size() == glyphs.size());
+  std::vector<GlyphData> joinedGlyphs;
+  joinedGlyphs.reserve(glyphs.size());
+  for (size_t i = 0; i < glyphs.size(); i++) {
+    joinedGlyphs.emplace_back(
+        std::move(glyphs[i]), std::move(horizontalMetrics.data[i]));
+  }
+
   return Font{
       .charMap = std::move(charMap),
-      .glyphs = std::move(glyphs),
-      .horizontalMetrics = std::move(horizontalMetrics),
+      .glyphs = std::move(joinedGlyphs),
       .unitsPerEm = headEntry.unitsPerEm,
       .kerning = std::move(kerning),
       .ascenderHeight =

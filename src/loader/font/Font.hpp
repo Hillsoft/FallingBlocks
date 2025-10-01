@@ -20,6 +20,10 @@ struct FWord {
   }
 };
 
+struct UFWord {
+  uint16_t rawValue;
+};
+
 class CharToGlyphMap {
  public:
   virtual ~CharToGlyphMap() {}
@@ -45,7 +49,7 @@ struct CompoundGlyphData {
   bool areOffsets; // otherwise are points
 };
 
-struct GlyphData {
+struct GlyphContourData {
   FWord xMin;
   FWord yMin;
   FWord xMax;
@@ -54,13 +58,14 @@ struct GlyphData {
       data;
 };
 
-struct HorizontalMetrics {
-  struct Entry {
-    uint16_t advanceWidth;
-    int16_t leftSideBearing;
-  };
+struct GlyphHorizontalMetrics {
+  UFWord advanceWidth;
+  FWord leftSideBearing;
+};
 
-  std::vector<Entry> data;
+struct GlyphData {
+  GlyphContourData contourData;
+  GlyphHorizontalMetrics horizontalMetrics;
 };
 
 class KerningTable {
@@ -77,7 +82,6 @@ class KerningTable {
 struct Font {
   std::unique_ptr<CharToGlyphMap> charMap;
   std::vector<GlyphData> glyphs;
-  HorizontalMetrics horizontalMetrics;
   uint16_t unitsPerEm;
   KerningTable kerning;
   FWord ascenderHeight;
