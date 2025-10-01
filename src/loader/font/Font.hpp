@@ -63,9 +63,15 @@ struct GlyphHorizontalMetrics {
   FWord leftSideBearing;
 };
 
+struct GlyphVerticalMetrics {
+  UFWord advanceHeight;
+  FWord topSideBearing;
+};
+
 struct GlyphData {
   GlyphContourData contourData;
   GlyphHorizontalMetrics horizontalMetrics;
+  GlyphVerticalMetrics verticalMetrics;
 };
 
 class KerningTable {

@@ -37,6 +37,8 @@ constexpr uint32_t kTagKern = 0x6B65726E;
 constexpr uint32_t kTagLoca = 0x6C6F6361;
 constexpr uint32_t kTagMaxp = 0x6D617870;
 constexpr uint32_t kTagName = 0x6E616D65;
+constexpr uint32_t kTagVhea = 0x76686561;
+constexpr uint32_t kTagVmtx = 0x766D7478;
 constexpr uint32_t kTagOS2 = 0x4F532F32;
 
 template <typename TVal>
@@ -834,6 +836,82 @@ HorizontalMetrics readHorizontalMetrics(
   return metrics;
 }
 
+struct VerticalHeader {
+  Fixed version;
+  FWord ascent;
+  FWord descent;
+  FWord lineGap;
+  UFWord advanceHeightMax;
+  FWord minTopSideBearing;
+  FWord minBottomSideBearing;
+  FWord yMaxExtent;
+  int16_t caretSlopeRise;
+  int16_t caretSlopeRun;
+  FWord caretOffset;
+  int16_t metricDataFormat;
+  uint16_t numOfLongVerMetrics;
+};
+
+VerticalHeader readVerticalHeader(std::span<const std::byte> data) {
+  if (data.size() != 36) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+  VerticalHeader header{};
+  header.version = readBigEndian<Fixed>(data);
+  if (header.version != Fixed{0x00010000}) {
+    throw std::runtime_error{"Unsupported font file"};
+  }
+  header.ascent = readBigEndian<FWord>(data);
+  header.descent = readBigEndian<FWord>(data);
+  header.lineGap = readBigEndian<FWord>(data);
+  header.advanceHeightMax = readBigEndian<UFWord>(data);
+  header.minTopSideBearing = readBigEndian<FWord>(data);
+  header.minBottomSideBearing = readBigEndian<FWord>(data);
+  header.yMaxExtent = readBigEndian<FWord>(data);
+  header.caretSlopeRise = readBigEndian<int16_t>(data);
+  header.caretSlopeRun = readBigEndian<int16_t>(data);
+  header.caretOffset = readBigEndian<FWord>(data);
+  data = data.subspan(8);
+  header.metricDataFormat = readBigEndian<int16_t>(data);
+  header.numOfLongVerMetrics = readBigEndian<uint16_t>(data);
+  if (header.numOfLongVerMetrics == 0) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+  return header;
+}
+
+struct VerticalMetrics {
+  std::vector<GlyphVerticalMetrics> data;
+};
+
+VerticalMetrics readVerticalMetrics(
+    const MaximumProfile& maxProfile,
+    const VerticalHeader& hheader,
+    std::span<const std::byte> data) {
+  if (data.size() !=
+      2 * static_cast<size_t>(maxProfile.numGlyphs) +
+          2 * static_cast<size_t>(hheader.numOfLongVerMetrics)) {
+    throw std::runtime_error{"Corrupt font file"};
+  }
+
+  VerticalMetrics metrics;
+  metrics.data.reserve(maxProfile.numGlyphs);
+
+  UFWord lastAdvanceHeight{0};
+  for (int i = 0; i < hheader.numOfLongVerMetrics; i++) {
+    GlyphVerticalMetrics cur{
+        readBigEndian<UFWord>(data), readBigEndian<FWord>(data)};
+    lastAdvanceHeight = cur.advanceHeight;
+    metrics.data.emplace_back(cur);
+  }
+
+  for (int i = 0; i < maxProfile.numGlyphs - hheader.numOfLongVerMetrics; i++) {
+    metrics.data.emplace_back(lastAdvanceHeight, readBigEndian<FWord>(data));
+  }
+
+  return metrics;
+}
+
 uint32_t kerningMapKey(uint16_t left, uint16_t right) {
   return (static_cast<uint32_t>(left) << 16) + right;
 }
@@ -1141,6 +1219,28 @@ Font loadFont(const std::span<const std::byte> data) {
         maxProfile, horizontalHeader, getTableContents(data, *entryPtr));
   }();
 
+  std::optional<VerticalHeader> verticalHeader =
+      [&]() -> std::optional<VerticalHeader> {
+    const auto entryPtr = lookupTable(tableDirectory, kTagVhea);
+    if (entryPtr == nullptr) {
+      return {};
+    }
+    return readVerticalHeader(getTableContents(data, *entryPtr));
+  }();
+
+  std::optional<VerticalMetrics> verticalMetrics =
+      [&]() -> std::optional<VerticalMetrics> {
+    if (!verticalHeader.has_value()) {
+      return {};
+    }
+    const auto entryPtr = lookupTable(tableDirectory, kTagVmtx);
+    if (entryPtr == nullptr) {
+      return {};
+    }
+    return readVerticalMetrics(
+        maxProfile, *verticalHeader, getTableContents(data, *entryPtr));
+  }();
+
   KerningTable kerning = [&]() {
     const auto entryPtr = lookupTable(tableDirectory, kTagKern);
     if (entryPtr == nullptr) {
@@ -1158,11 +1258,18 @@ Font loadFont(const std::span<const std::byte> data) {
   }();
 
   DEBUG_ASSERT(horizontalMetrics.data.size() == glyphs.size());
+  DEBUG_ASSERT(
+      !verticalMetrics.has_value() ||
+      verticalMetrics->data.size() == glyphs.size());
   std::vector<GlyphData> joinedGlyphs;
   joinedGlyphs.reserve(glyphs.size());
   for (size_t i = 0; i < glyphs.size(); i++) {
     joinedGlyphs.emplace_back(
-        std::move(glyphs[i]), std::move(horizontalMetrics.data[i]));
+        std::move(glyphs[i]),
+        std::move(horizontalMetrics.data[i]),
+        verticalMetrics.has_value()
+            ? std::move(verticalMetrics->data[i])
+            : GlyphVerticalMetrics{{0}, glyphs[i].yMax});
   }
 
   return Font{
