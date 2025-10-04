@@ -264,6 +264,20 @@ float drawChar(
       fontScale;
 }
 
+loader::FWord getBaselineOffset(
+    loader::FWord ascender, loader::FWord descender, Font::VAlign align) {
+  switch (align) {
+    case Font::VAlign::BASELINE:
+      return loader::FWord{0};
+    case Font::VAlign::BOTTOM:
+      return descender;
+    case Font::VAlign::TOP:
+      return ascender;
+    case Font::VAlign::CENTER:
+      return ((ascender - descender) / 2) - descender;
+  }
+}
+
 } // namespace
 
 float Font::Size::Em::getEmHeight(const Font& /* font */) const {
@@ -287,7 +301,11 @@ Font::Font(RenderSubSystem& renderSystem, loader::Font font)
               renderSystem.getGraphicsDevice(), fontData_, glyphRanges_))) {}
 
 void Font::drawStringASCII(
-    std::string_view str, math::Vec2 pos, Size fontSize, Align align) {
+    std::string_view str,
+    math::Vec2 pos,
+    Size fontSize,
+    Align align,
+    VAlign valign) {
   switch (align) {
     case Align::LEFT:
       break;
@@ -298,6 +316,14 @@ void Font::drawStringASCII(
       pos.x() -= stringWidth(Encoding::ASCII, str, fontSize);
       break;
   }
+
+  float fontScale = getSizeScale(fontSize);
+  pos.y() +=
+      fontScale *
+      static_cast<float>(
+          getBaselineOffset(
+              fontData_.ascenderHeight, fontData_.descenderHeight, valign)
+              .rawValue);
 
   auto window = GlobalSubSystemStack::get().window();
   std::optional<uint16_t> previousGlyph;
@@ -310,7 +336,7 @@ void Font::drawStringASCII(
         window,
         c,
         pos,
-        getSizeScale(fontSize),
+        fontScale,
         previousGlyph);
 
     pos.x() += advance;
@@ -318,7 +344,11 @@ void Font::drawStringASCII(
 }
 
 void Font::drawStringUTF8(
-    std::string_view str, math::Vec2 pos, Size fontSize, Align align) {
+    std::string_view str,
+    math::Vec2 pos,
+    Size fontSize,
+    Align align,
+    VAlign valign) {
   switch (align) {
     case Align::LEFT:
       break;
@@ -329,6 +359,14 @@ void Font::drawStringUTF8(
       pos.x() -= stringWidth(Encoding::UTF8, str, fontSize);
       break;
   }
+
+  float fontScale = getSizeScale(fontSize);
+  pos.y() +=
+      fontScale *
+      static_cast<float>(
+          getBaselineOffset(
+              fontData_.ascenderHeight, fontData_.descenderHeight, valign)
+              .rawValue);
 
   auto window = GlobalSubSystemStack::get().window();
   std::optional<uint16_t> previousGlyph;
@@ -341,7 +379,7 @@ void Font::drawStringUTF8(
         window,
         c,
         pos,
-        getSizeScale(fontSize),
+        fontScale,
         previousGlyph);
 
     pos.x() += advance;
@@ -370,11 +408,11 @@ float Font::stringWidth(
         fontScale;
   };
 
-  if (encoding == ASCII) {
+  if (encoding == Encoding::ASCII) {
     for (unsigned char c : str) {
       processChar(c);
     }
-  } else if (encoding == UTF8) {
+  } else if (encoding == Encoding::UTF8) {
     for (uint32_t c : util::unicodeDecode(str)) {
       processChar(c);
     }

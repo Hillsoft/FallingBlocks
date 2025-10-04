@@ -90,12 +90,15 @@ void Button::draw() {
       resourceSentinel->getSprite(),
       {math::modelMatrixFromBounds(pos0_, pos1_), color});
 
-  float padding = 0.25f * (pos1_.y() - pos0_.y());
+  float padding = 0.1f;
   DefaultFontResourceSentinel::get().drawStringUTF8(
       label_,
-      math::Vec2{(pos0_.x() + pos1_.x()) / 2.f, pos1_.y() - padding},
-      render::Font::Size::Line{pos1_.y() - pos0_.y() - 0.75f * padding},
-      render::Font::Align::CENTER);
+      math::Vec2{
+          (pos0_.x() + pos1_.x()) / 2.f,
+          pos1_.y() - (pos1_.y() - pos0_.y()) * 0.5f * padding},
+      render::Font::Size::Line{(pos1_.y() - pos0_.y()) * (1.0f - padding)},
+      render::Font::Align::CENTER,
+      render::Font::VAlign::BOTTOM);
 }
 
 void Button::onMouseMove(math::Vec2 mousePos) {

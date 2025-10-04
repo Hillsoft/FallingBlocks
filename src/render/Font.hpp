@@ -44,8 +44,9 @@ class Font {
     std::variant<Em, Line> sizeData_;
   };
 
-  enum Encoding { ASCII, UTF8 };
-  enum Align { LEFT, CENTER, RIGHT };
+  enum class Encoding { ASCII, UTF8 };
+  enum class Align { LEFT, CENTER, RIGHT };
+  enum class VAlign { BASELINE, BOTTOM, CENTER, TOP };
 
   Font(RenderSubSystem& renderSystem, loader::Font font);
 
@@ -53,12 +54,14 @@ class Font {
       std::string_view str,
       math::Vec2 pos,
       Size fontSize,
-      Align align = Align::LEFT);
+      Align align = Align::LEFT,
+      VAlign valign = VAlign::BASELINE);
   void drawStringUTF8(
       std::string_view str,
       math::Vec2 pos,
       Size fontSize,
-      Align align = Align::LEFT);
+      Align align = Align::LEFT,
+      VAlign valign = VAlign::BASELINE);
 
   float stringWidth(
       Encoding encoding, std::string_view str, Size fontSize) const;

@@ -18,6 +18,16 @@ struct FWord {
     rawValue += other.rawValue;
     return *this;
   }
+
+  FWord operator-() const { return FWord{static_cast<int16_t>(-rawValue)}; }
+
+  FWord operator-(const FWord& other) const {
+    return FWord{static_cast<int16_t>(rawValue - other.rawValue)};
+  }
+
+  FWord operator/(int16_t divisor) const {
+    return FWord{static_cast<int16_t>(rawValue / divisor)};
+  }
 };
 
 struct UFWord {
