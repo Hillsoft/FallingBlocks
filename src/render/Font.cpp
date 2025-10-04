@@ -139,11 +139,10 @@ float drawChar(
     WindowRef window,
     uint32_t c,
     math::Vec2 pos,
-    float lineHeight,
+    float fontScale,
     std::optional<uint16_t>& previousGlyph) {
   auto glyphIndex = fontData.charMap->mapChar(c);
   const auto& glyph = fontData.glyphs[glyphIndex];
-  float fontScale = lineHeight / static_cast<float>(fontData.unitsPerEm);
 
   int16_t kerning = 0;
   if (previousGlyph.has_value()) {
@@ -267,6 +266,18 @@ float drawChar(
 
 } // namespace
 
+float Font::Size::Em::getEmHeight(const Font& /* font */) const {
+  return emHeight_;
+}
+
+float Font::Size::Line::getEmHeight(const Font& font) const {
+  float unitsPerEm = font.fontData_.unitsPerEm;
+  float unitsPerLine = static_cast<float>(
+      font.fontData_.ascenderHeight.rawValue -
+      font.fontData_.descenderHeight.rawValue);
+  return lineHeight_ * unitsPerEm / unitsPerLine;
+}
+
 Font::Font(RenderSubSystem& renderSystem, loader::Font font)
     : render_(&renderSystem),
       fontData_(std::move(font)),
@@ -276,15 +287,15 @@ Font::Font(RenderSubSystem& renderSystem, loader::Font font)
               renderSystem.getGraphicsDevice(), fontData_, glyphRanges_))) {}
 
 void Font::drawStringASCII(
-    std::string_view str, math::Vec2 pos, float lineHeight, Align align) {
+    std::string_view str, math::Vec2 pos, Size fontSize, Align align) {
   switch (align) {
     case Align::LEFT:
       break;
     case Align::CENTER:
-      pos.x() -= stringWidth(Encoding::ASCII, str, lineHeight) / 2;
+      pos.x() -= stringWidth(Encoding::ASCII, str, fontSize) / 2;
       break;
     case Align::RIGHT:
-      pos.x() -= stringWidth(Encoding::ASCII, str, lineHeight);
+      pos.x() -= stringWidth(Encoding::ASCII, str, fontSize);
       break;
   }
 
@@ -299,7 +310,7 @@ void Font::drawStringASCII(
         window,
         c,
         pos,
-        lineHeight,
+        getSizeScale(fontSize),
         previousGlyph);
 
     pos.x() += advance;
@@ -307,15 +318,15 @@ void Font::drawStringASCII(
 }
 
 void Font::drawStringUTF8(
-    std::string_view str, math::Vec2 pos, float lineHeight, Align align) {
+    std::string_view str, math::Vec2 pos, Size fontSize, Align align) {
   switch (align) {
     case Align::LEFT:
       break;
     case Align::CENTER:
-      pos.x() -= stringWidth(Encoding::UTF8, str, lineHeight) / 2;
+      pos.x() -= stringWidth(Encoding::UTF8, str, fontSize) / 2;
       break;
     case Align::RIGHT:
-      pos.x() -= stringWidth(Encoding::UTF8, str, lineHeight);
+      pos.x() -= stringWidth(Encoding::UTF8, str, fontSize);
       break;
   }
 
@@ -330,7 +341,7 @@ void Font::drawStringUTF8(
         window,
         c,
         pos,
-        lineHeight,
+        getSizeScale(fontSize),
         previousGlyph);
 
     pos.x() += advance;
@@ -338,8 +349,8 @@ void Font::drawStringUTF8(
 }
 
 float Font::stringWidth(
-    Encoding encoding, std::string_view str, float lineHeight) const {
-  float fontScale = lineHeight / static_cast<float>(fontData_.unitsPerEm);
+    Encoding encoding, std::string_view str, Size fontSize) const {
+  float fontScale = getSizeScale(fontSize);
   float width = 0.0f;
 
   std::optional<uint16_t> previousGlyph;
@@ -372,6 +383,10 @@ float Font::stringWidth(
   }
 
   return width;
+}
+
+float Font::getSizeScale(const Font::Size& size) const {
+  return size.getEmHeight(*this) / static_cast<float>(fontData_.unitsPerEm);
 }
 
 } // namespace blocks::render

@@ -94,7 +94,7 @@ void Button::draw() {
   DefaultFontResourceSentinel::get().drawStringUTF8(
       label_,
       math::Vec2{(pos0_.x() + pos1_.x()) / 2.f, pos1_.y() - padding},
-      pos1_.y() - pos0_.y() - 0.75f * padding,
+      render::Font::Size::Line{pos1_.y() - pos0_.y() - 0.75f * padding},
       render::Font::Align::CENTER);
 }
 

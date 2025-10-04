@@ -7,6 +7,7 @@
 #include "engine/Scene.hpp"
 #include "game/BlocksScene.hpp"
 #include "game/resource/DefaultFont.hpp"
+#include "render/Font.hpp"
 #include "util/debug.hpp"
 #include "util/string.hpp"
 
@@ -25,7 +26,7 @@ void ScoreUI::draw() {
       scene->getScore());
 
   DefaultFontResourceSentinel::get().drawStringUTF8(
-      scoreString, {-1.0f, -0.8f}, 0.2f);
+      scoreString, {-1.0f, -0.8f}, render::Font::Size::Em{0.2f});
 }
 
 } // namespace blocks::game

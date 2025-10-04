@@ -7,6 +7,7 @@
 #include "engine/Scene.hpp"
 #include "game/resource/DefaultFont.hpp"
 #include "math/vec.hpp"
+#include "render/Font.hpp"
 
 namespace blocks::game {
 
@@ -20,7 +21,10 @@ StaticText::StaticText(
 
 void StaticText::draw() {
   DefaultFontResourceSentinel::get().drawStringUTF8(
-      text_, pos_, lineHeight_, render::Font::Align::CENTER);
+      text_,
+      pos_,
+      render::Font::Size::Em{lineHeight_},
+      render::Font::Align::CENTER);
 }
 
 } // namespace blocks::game

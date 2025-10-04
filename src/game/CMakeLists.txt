@@ -107,6 +107,8 @@ target_link_libraries(game.scoreui
 	engine.scene
 	game.blocksscene
 	game.resource.defaultfont
+	globalsubsystemstack
+	render.font
 	util.debug
 	util.string)
 
@@ -116,7 +118,8 @@ target_link_libraries(game.statictext
 	engine.drawableregistry
 	engine.scene
 	game.resource.defaultfont
-	math.vec)
+	math.vec
+	render.font)
 
 add_library(game.testtext "TestText.hpp" "TestText.cpp")
 target_link_libraries(game.testtext
