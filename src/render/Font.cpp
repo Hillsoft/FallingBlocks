@@ -275,6 +275,9 @@ loader::FWord getBaselineOffset(
       return ascender;
     case Font::VAlign::CENTER:
       return ((ascender - descender) / 2) - descender;
+    default:
+      DEBUG_ASSERT(false);
+      return loader::FWord{0};
   }
 }
 

@@ -1,3 +1,4 @@
+add_subdirectory(audio)
 add_subdirectory(engine)
 add_subdirectory(game)
 add_subdirectory(input)
@@ -19,6 +20,7 @@ target_link_libraries(application
 
 add_library(globalsubsystemstack STATIC "GlobalSubSystemStack.cpp" "GlobalSubSystemStack.hpp")
 target_link_libraries(globalsubsystemstack
+	audio.audiosubsystem
 	engine.localisation
 	engine.resourcesentinelmanager
 	input.inputsubsystem

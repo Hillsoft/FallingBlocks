@@ -21,6 +21,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /OPT:REF /OPT:ICF")
 
 add_definitions(-DGLFW_INCLUDE_VULKAN)
 add_definitions("-DRESOURCE_DIR=\"res\"")
+add_definitions(-DNOMINMAX)
 
 project ("FallingBlocks" CXX)
 

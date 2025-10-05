@@ -1,5 +1,6 @@
 #pragma once
 
+#include "audio/AudioSubSystem.hpp"
 #include "engine/Localisation.hpp"
 #include "engine/ResourceSentinelManager.hpp"
 #include "input/InputSubSystem.hpp"
@@ -31,6 +32,7 @@ class GlobalSubSystemStack : private util::no_copy_move {
   render::RenderSubSystem render_;
   render::UniqueWindowHandle window_;
   input::InputSubSystem input_;
+  audio::AudioSubSystem audio_;
   ResourceSentinelManager sentinelManager_;
   Localisation localisation_;
 };
