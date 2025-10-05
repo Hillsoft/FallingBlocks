@@ -86,7 +86,7 @@ class AudioClient {
   WinSafeRelease<IAudioClient> winClient_;
   WinSafeRelease<IAudioRenderClient> renderClient_;
   uint32_t bufferSize_ = 0;
-  std::chrono::milliseconds bufferDuration_;
+  std::chrono::nanoseconds bufferDuration_;
   uint32_t numChannels_ = 0;
   uint32_t samplesPerSecond_ = 0;
 #ifndef NDEBUG

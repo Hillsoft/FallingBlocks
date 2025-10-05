@@ -1,5 +1,6 @@
 #include "GlobalSubSystemStack.hpp"
 
+#include "audio/AudioSubSystem.hpp"
 #include "engine/Localisation.hpp"
 #include "engine/ResourceSentinelManager.hpp"
 #include "input/InputSubSystem.hpp"
@@ -43,6 +44,10 @@ render::WindowRef GlobalSubSystemStack::window() {
 
 input::InputSubSystem& GlobalSubSystemStack::inputSystem() {
   return input_;
+}
+
+audio::AudioSubSystem& GlobalSubSystemStack::audioSystem() {
+  return audio_;
 }
 
 ResourceSentinelManager& GlobalSubSystemStack::sentinelManager() {

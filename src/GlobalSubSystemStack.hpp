@@ -25,6 +25,7 @@ class GlobalSubSystemStack : private util::no_copy_move {
   render::RenderSubSystem& renderSystem();
   render::WindowRef window();
   input::InputSubSystem& inputSystem();
+  audio::AudioSubSystem& audioSystem();
   ResourceSentinelManager& sentinelManager();
   Localisation& localisationManager();
 

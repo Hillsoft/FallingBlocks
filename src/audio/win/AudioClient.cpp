@@ -17,6 +17,8 @@ namespace blocks::audio {
 
 namespace {
 
+constexpr std::chrono::milliseconds kDesiredBufferDuration{10};
+
 void fillBuffer(uint32_t frameCount, uint32_t channelCount, BYTE* data) {
   float* frameData = reinterpret_cast<float*>(data);
   for (uint32_t i = 0; i < frameCount * channelCount; i++) {
@@ -75,7 +77,15 @@ AudioClient::AudioClient() {
   }
 
   HRESULT result = winClient_->Initialize(
-      AUDCLNT_SHAREMODE_SHARED, 0, 10000000, 0, wavFormat.get(), nullptr);
+      AUDCLNT_SHAREMODE_SHARED,
+      0,
+      std::chrono::duration_cast<std::chrono::nanoseconds>(
+          kDesiredBufferDuration)
+              .count() /
+          10,
+      0,
+      wavFormat.get(),
+      nullptr);
 
   if (result != S_OK) {
     throw std::runtime_error{"Failed to initialise audio client"};
@@ -100,7 +110,7 @@ AudioClient::AudioClient() {
   renderClient_->ReleaseBuffer(bufferSize_, 0);
 
   bufferDuration_ =
-      std::chrono::milliseconds{1000 * bufferSize_ / wavFormat->nSamplesPerSec};
+      std::chrono::nanoseconds{bufferSize_ / wavFormat->nSamplesPerSec};
 
   winClient_->Start();
 }

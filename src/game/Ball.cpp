@@ -1,8 +1,10 @@
 #include "game/Ball.hpp"
 
+#include <chrono>
 #include <cstdlib>
 #include <optional>
 #include "GlobalSubSystemStack.hpp"
+#include "audio/AudioSubSystem.hpp"
 #include "engine/Actor.hpp"
 #include "engine/DrawableRegistry.hpp"
 #include "engine/Scene.hpp"
@@ -127,6 +129,11 @@ void Ball::handleCollision(physics::RectCollider& other, math::Vec2 normal) {
   if (vel_.dot(normal) > 0) {
     return;
   }
+
+  GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
+      .frequency = 500,
+      .volume = 0.5f,
+      .duration = std::chrono::milliseconds{20}});
 
   vel_ = reflect(vel_, normal);
 

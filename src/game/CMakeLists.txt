@@ -14,6 +14,7 @@ target_link_libraries(game.background
 
 add_library(game.ball "Ball.hpp" "Ball.cpp")
 target_link_libraries(game.ball
+	audio.audiosubsystem
 	engine.actor
 	engine.drawableregistry
 	engine.scene
