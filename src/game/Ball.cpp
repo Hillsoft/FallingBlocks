@@ -1,6 +1,7 @@
 #include "game/Ball.hpp"
 
 #include <chrono>
+#include <cstdint>
 #include <cstdlib>
 #include <optional>
 #include "GlobalSubSystemStack.hpp"
@@ -25,6 +26,11 @@ namespace {
 constexpr float kBallSize = 0.05f;
 constexpr float kBounceDirectionalStrength = 15.f;
 constexpr float kBallSpeed = 1.5f;
+
+constexpr uint32_t kWallHitFrequency = 262;
+constexpr uint32_t kBlockHitFrequency = 330;
+constexpr uint32_t kPaddleHitFrequency = 392;
+constexpr std::chrono::milliseconds kSoundDuration{20};
 
 float randFloat(float lo, float hi) {
   float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
@@ -96,10 +102,18 @@ void Ball::update(float deltaTimeSeconds) {
   if (newPos2.x() > 1.0f) {
     vel_.x() *= -1.0f;
     newPos.x() = 1.0f - objSize.x();
+    GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
+        .frequency = kWallHitFrequency,
+        .volume = 0.5f,
+        .duration = kSoundDuration});
   }
   if (newPos.x() < -1.0f) {
     vel_.x() *= -1.0f;
     newPos.x() = -1.0f;
+    GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
+        .frequency = kWallHitFrequency,
+        .volume = 0.5f,
+        .duration = kSoundDuration});
   }
 
   if (newPos.y() > 1.0f) {
@@ -108,6 +122,10 @@ void Ball::update(float deltaTimeSeconds) {
   if (newPos.y() < -1.0f) {
     vel_.y() *= -1.0f;
     newPos.y() = -1.0f;
+    GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
+        .frequency = kWallHitFrequency,
+        .volume = 0.5f,
+        .duration = kSoundDuration});
   }
 
   setP0(newPos);
@@ -130,11 +148,6 @@ void Ball::handleCollision(physics::RectCollider& other, math::Vec2 normal) {
     return;
   }
 
-  GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
-      .frequency = 500,
-      .volume = 0.5f,
-      .duration = std::chrono::milliseconds{20}});
-
   vel_ = reflect(vel_, normal);
 
   if (auto paddle = dynamic_cast<Paddle*>(&other); paddle != nullptr) {
@@ -147,8 +160,18 @@ void Ball::handleCollision(physics::RectCollider& other, math::Vec2 normal) {
     vel_.x() = kBounceDirectionalStrength * (ballCenter.x() - paddleCenter.x());
 
     vel_ = normalizeBallSpeed(vel_);
+
+    GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
+        .frequency = kPaddleHitFrequency,
+        .volume = 0.5f,
+        .duration = kSoundDuration});
   } else if (auto block = dynamic_cast<Block*>(&other); block != nullptr) {
     getScene()->destroyActor(block);
+
+    GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
+        .frequency = kBlockHitFrequency,
+        .volume = 0.5f,
+        .duration = kSoundDuration});
   }
 }
 
