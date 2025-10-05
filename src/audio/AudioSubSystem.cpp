@@ -24,7 +24,7 @@ void fillBuffer(
     void* data,
     uint32_t numChannels,
     uint32_t samplesPerSecond) {
-  int samplesPerCycle = samplesPerSecond / waveData.frequency;
+  size_t samplesPerCycle = samplesPerSecond / waveData.frequency;
 
   float* frameData = reinterpret_cast<float*>(data);
   for (uint32_t i = 0; i < frameCount; i++) {
@@ -55,9 +55,16 @@ void AudioSubSystem::playSineWave(SineWave wave) {
   for (size_t i = 0; i < commands_.size(); i++) {
     if (!commands_[i].active.load(std::memory_order_relaxed)) {
       size_t currentFrameCount = frameCount_.load(std::memory_order_relaxed);
-      commands_[i].data = wave;
-      commands_[i].endFrameCount = currentFrameCount +
+      size_t frameDuration =
           (wave.duration.count() * audioClient_.getSamplesPerSecond() / 1000);
+      size_t samplesPerCycle =
+          audioClient_.getSamplesPerSecond() / wave.frequency;
+      frameDuration =
+          ((frameDuration + samplesPerCycle - 1) / samplesPerCycle) *
+          samplesPerCycle;
+      commands_[i].data = wave;
+      commands_[i].startFrameCount = currentFrameCount;
+      commands_[i].endFrameCount = currentFrameCount + frameDuration;
       commands_[i].active.store(true, std::memory_order_release);
       return;
     }
@@ -76,14 +83,15 @@ void AudioSubSystem::run() {
     frameCount_.store(frameCount + samplesToWrite, std::memory_order_relaxed);
 
     for (size_t i = 0; i < commands_.size(); i++) {
-      if (commands_[i].active.load(std::memory_order_acquire)) {
+      if (commands_[i].active.load(std::memory_order_acquire) &&
+          commands_[i].startFrameCount <= frameCount_) {
         fillBuffer(
             commands_[i].data,
             static_cast<uint32_t>(std::min(
                 static_cast<long long>(samplesToWrite),
                 static_cast<long long>(commands_[i].endFrameCount) -
                     static_cast<long long>(frameCount))),
-            frameCount,
+            frameCount - commands_[i].startFrameCount,
             dataBuffer,
             audioClient_.getNumChannels(),
             audioClient_.getSamplesPerSecond());

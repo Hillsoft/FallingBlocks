@@ -26,6 +26,7 @@ class AudioSubSystem {
 
   struct SineWaveCommand {
     std::atomic<bool> active = false;
+    size_t startFrameCount = 0;
     size_t endFrameCount = 0;
     SineWave data;
   };
