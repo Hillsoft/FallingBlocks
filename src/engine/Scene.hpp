@@ -1,10 +1,12 @@
 #pragma once
 
+#include <chrono>
 #include <memory>
 #include <vector>
 #include "engine/Actor.hpp"
 #include "engine/DrawableRegistry.hpp"
 #include "engine/TickRegistry.hpp"
+#include "engine/Timer.hpp"
 #include "physics/PhysicsScene.hpp"
 
 namespace blocks {
@@ -25,7 +27,7 @@ class Scene {
 
   void destroyActor(Actor* actor);
 
-  void stepSimulation(float deltaTimeSeconds);
+  void stepSimulation(std::chrono::microseconds deltaTime);
   void drawAll();
 
   physics::PhysicsScene& getPhysicsScene() { return physics_; }
@@ -34,6 +36,8 @@ class Scene {
   const TickRegistry& getTickRegistry() const { return tick_; }
   DrawableRegistry& getDrawableScene() { return drawableScene_; }
   const DrawableRegistry& getDrawableScene() const { return drawableScene_; }
+  Timer& getTimer() { return timer_; }
+  const Timer& getTimer() const { return timer_; }
 
   const std::vector<std::shared_ptr<Actor>> getActors() const {
     return actors_;
@@ -45,6 +49,7 @@ class Scene {
   physics::PhysicsScene physics_;
   TickRegistry tick_;
   DrawableRegistry drawableScene_;
+  Timer timer_;
 
   std::vector<std::shared_ptr<Actor>> actors_;
   std::vector<std::shared_ptr<Actor>> pendingDestruction_;

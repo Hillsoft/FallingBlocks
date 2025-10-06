@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <chrono>
 #include <memory>
 #include <thread>
 #include "engine/Scene.hpp"
@@ -25,7 +26,7 @@ class Application : public input::InputHandler {
   void close();
 
  private:
-  void update(float deltaTimeSeconds);
+  void update(std::chrono::microseconds deltaTimeSeconds);
   void drawFrame();
 
   Scene loadingScene_;

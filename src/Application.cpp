@@ -49,7 +49,7 @@ void Application::run() {
   }
 
   auto& subsystems = GlobalSubSystemStack::get();
-  float prevFrameTimeSecs = 0;
+  std::chrono::microseconds prevFrameTime{0};
   while (!subsystems.window()->shouldClose()) {
     std::chrono::microseconds maxFrameTime{0};
     std::chrono::microseconds minFrameTime{9999999};
@@ -58,7 +58,7 @@ void Application::run() {
     for (int i = 0; i < 1000 && !subsystems.window()->shouldClose(); i++) {
       auto start = std::chrono::high_resolution_clock::now();
       glfwPollEvents();
-      update(prevFrameTimeSecs);
+      update(prevFrameTime);
       drawFrame();
       auto end = std::chrono::high_resolution_clock::now();
 
@@ -68,10 +68,7 @@ void Application::run() {
       maxFrameTime = std::max(maxFrameTime, curFrameTime);
       minFrameTime = std::min(minFrameTime, curFrameTime);
 
-      prevFrameTimeSecs =
-          std::chrono::duration_cast<std::chrono::microseconds>(curFrameTime)
-              .count() /
-          1000000.0f;
+      prevFrameTime = curFrameTime;
 
       if (hasPendingScene_.load(std::memory_order_acquire)) {
         currentScene_ = pendingScene_;
@@ -121,8 +118,8 @@ void Application::transitionToScene(std::unique_ptr<SceneLoader> sceneLoader) {
   }};
 }
 
-void Application::update(float deltaTimeSeconds) {
-  currentScene_->stepSimulation(deltaTimeSeconds);
+void Application::update(std::chrono::microseconds deltaTime) {
+  currentScene_->stepSimulation(deltaTime);
 }
 
 void Application::drawFrame() {

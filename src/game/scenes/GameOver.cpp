@@ -1,5 +1,6 @@
 #include "game/scenes/GameOver.hpp"
 
+#include <chrono>
 #include <memory>
 #include <GLFW/glfw3.h>
 #include "Application.hpp"
@@ -31,6 +32,29 @@ class GameRestarter : public Actor, public input::InputHandler {
   }
 };
 
+void playGameOverSound(Scene& scene) {
+  scene.getTimer().schedule(std::chrono::milliseconds{0}, [&scene]() {
+    GlobalSubSystemStack::get().audioSystem().playSineWave(
+        {.frequency = 165,
+         .volume = 1.f,
+         .duration = std::chrono::milliseconds{200}});
+
+    scene.getTimer().schedule(std::chrono::milliseconds{400}, []() {
+      GlobalSubSystemStack::get().audioSystem().playSineWave(
+          {.frequency = 131,
+           .volume = 1.f,
+           .duration = std::chrono::milliseconds{200}});
+    });
+
+    scene.getTimer().schedule(std::chrono::milliseconds{800}, []() {
+      GlobalSubSystemStack::get().audioSystem().playSineWave(
+          {.frequency = 110,
+           .volume = 1.f,
+           .duration = std::chrono::milliseconds{400}});
+    });
+  });
+}
+
 } // namespace
 
 std::unique_ptr<Scene> GameOver::loadScene() const {
@@ -55,6 +79,8 @@ std::unique_ptr<Scene> GameOver::loadScene() const {
       localisation.getLocalisedString("PLAY_AGAIN"));
 
   scene->createActor<GameRestarter>();
+
+  playGameOverSound(*scene);
 
   return scene;
 }

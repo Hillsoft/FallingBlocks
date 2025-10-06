@@ -19,6 +19,7 @@ target_link_libraries(engine.scene
 	engine.actor
 	engine.drawableregistry
 	engine.tickregistry
+	engine.timer
 	physics.physicsscene
 	util.debug)
 
@@ -29,3 +30,5 @@ target_link_libraries(engine.sceneloader INTERFACE
 add_library(engine.tickregistry STATIC "TickRegistry.hpp" "TickRegistry.cpp")
 target_link_libraries(engine.tickregistry
 	util.registry)
+
+add_library(engine.timer STATIC "Timer.hpp" "Timer.cpp")
