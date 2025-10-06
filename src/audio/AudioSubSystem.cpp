@@ -20,7 +20,7 @@ void blankBuffer(uint32_t frameCount, void* data, uint32_t numChannels) {
 void fillBuffer(
     SineWave waveData,
     uint32_t frameCount,
-    uint32_t frameCountOffset,
+    size_t frameCountOffset,
     void* data,
     uint32_t numChannels,
     uint32_t samplesPerSecond) {
