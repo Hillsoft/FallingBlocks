@@ -34,7 +34,7 @@ void fillBuffer(
              static_cast<float>(samplesPerCycle));
 
     for (uint32_t j = 0; j < numChannels; j++) {
-      frameData[i * numChannels + j] = vol;
+      frameData[i * numChannels + j] += vol;
     }
   }
 }
