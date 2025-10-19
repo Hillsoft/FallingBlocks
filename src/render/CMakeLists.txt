@@ -13,6 +13,7 @@ target_link_libraries(render.font
 	render.rendersubsystem
 	render.vulkangraphicsdevice
 	render.vulkanbuffer
+	render.simple2dcamera
 	util.debug
 	util.generator
 	util.unicode)

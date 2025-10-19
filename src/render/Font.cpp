@@ -15,6 +15,7 @@
 #include "loader/font/Font.hpp"
 #include "math/vec.hpp"
 #include "render/RenderSubSystem.hpp"
+#include "render/Simple2DCamera.hpp"
 #include "render/VulkanBuffer.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/renderables/RenderableFont.hpp"
@@ -140,6 +141,8 @@ float drawChar(
     uint32_t c,
     math::Vec2 pos,
     float fontScale,
+    int zDepth,
+    Simple2DCamera* camera,
     std::optional<uint16_t>& previousGlyph) {
   auto glyphIndex = fontData.charMap->mapChar(c);
   const auto& glyph = fontData.glyphs[glyphIndex];
@@ -153,6 +156,7 @@ float drawChar(
   if (std::holds_alternative<loader::SimpleGlyphData>(glyph.contourData.data)) {
     render.drawObject(
         window,
+        camera,
         10,
         renderableObject,
         RenderableFont::InstanceData{
@@ -223,7 +227,8 @@ float drawChar(
 
       render.drawObject(
           window,
-          10,
+          camera,
+          zDepth,
           renderableObject,
           RenderableFont::InstanceData{
               math::Mat3::translate(
@@ -308,7 +313,9 @@ void Font::drawStringASCII(
     math::Vec2 pos,
     Size fontSize,
     Align align,
-    VAlign valign) {
+    VAlign valign,
+    int zDepth,
+    Simple2DCamera* camera) {
   switch (align) {
     case Align::LEFT:
       break;
@@ -340,6 +347,8 @@ void Font::drawStringASCII(
         c,
         pos,
         fontScale,
+        zDepth,
+        camera,
         previousGlyph);
 
     pos.x() += advance;
@@ -351,7 +360,9 @@ void Font::drawStringUTF8(
     math::Vec2 pos,
     Size fontSize,
     Align align,
-    VAlign valign) {
+    VAlign valign,
+    int zDepth,
+    Simple2DCamera* camera) {
   switch (align) {
     case Align::LEFT:
       break;
@@ -383,6 +394,8 @@ void Font::drawStringUTF8(
         c,
         pos,
         fontScale,
+        zDepth,
+        camera,
         previousGlyph);
 
     pos.x() += advance;
@@ -424,6 +437,12 @@ float Font::stringWidth(
   }
 
   return width;
+}
+
+float Font::stringHeight(Size fontSize) const {
+  float unitsPerLine = static_cast<float>(
+      fontData_.ascenderHeight.rawValue - fontData_.descenderHeight.rawValue);
+  return unitsPerLine * fontSize.getEmHeight(*this);
 }
 
 float Font::getSizeScale(const Font::Size& size) const {

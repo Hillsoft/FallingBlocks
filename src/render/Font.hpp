@@ -8,6 +8,7 @@
 #include "loader/font/Font.hpp"
 #include "math/vec.hpp"
 #include "render/RenderSubSystem.hpp"
+#include "render/Simple2DCamera.hpp"
 #include "render/renderables/RenderableFont.hpp"
 
 namespace blocks::render {
@@ -55,16 +56,21 @@ class Font {
       math::Vec2 pos,
       Size fontSize,
       Align align = Align::LEFT,
-      VAlign valign = VAlign::BASELINE);
+      VAlign valign = VAlign::BASELINE,
+      int zDepth = 10,
+      Simple2DCamera* camera = nullptr);
   void drawStringUTF8(
       std::string_view str,
       math::Vec2 pos,
       Size fontSize,
       Align align = Align::LEFT,
-      VAlign valign = VAlign::BASELINE);
+      VAlign valign = VAlign::BASELINE,
+      int zDepth = 10,
+      Simple2DCamera* camera = nullptr);
 
   float stringWidth(
       Encoding encoding, std::string_view str, Size fontSize) const;
+  float stringHeight(Size fontSize) const;
 
  private:
   float getSizeScale(const Size& size) const;
