@@ -5,6 +5,16 @@ target_link_libraries(ui.layout
 	ui.uiobject
 	util.debug)
 
+add_library(ui.uibutton STATIC "UIButton.hpp" "UIButton.cpp")
+target_link_libraries(ui.uibutton
+	globalsubsystemstack
+	input.inputsubsystem
+	math.vec
+	render.rendersubsystem
+	render.renderables.renderablecolor2d
+	render.simple2dcamera
+	ui.uiobject)
+
 add_library(ui.uiobject STATIC "UIObject.hpp" "UIObject.cpp")
 target_link_libraries(ui.uiobject
 	math.vec
