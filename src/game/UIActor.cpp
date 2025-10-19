@@ -53,7 +53,7 @@ void UIActor::draw() {
 
   auto window = GlobalSubSystemStack::get().window();
   std::pair<int, int> windowSizePair = window->getCurrentWindowSize();
-  float scale = getUIScale(windowSizePair.second);
+  float scale = getUIScale(static_cast<float>(windowSizePair.second));
   math::Vec<uint16_t, 2> windowSizeVec{
       static_cast<uint16_t>(static_cast<float>(windowSizePair.first) / scale),
       static_cast<uint16_t>(static_cast<float>(windowSizePair.second) / scale)};
