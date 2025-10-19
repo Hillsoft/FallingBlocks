@@ -1,17 +1,23 @@
 #include "game/MainMenuUI.hpp"
 
+#include <algorithm>
 #include <memory>
 #include <optional>
+#include <string>
+#include <vector>
+#include "Application.hpp"
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Scene.hpp"
 #include "game/UIActor.hpp"
 #include "game/resource/DefaultFont.hpp"
+#include "game/scenes/Level1.hpp"
+#include "game/scenes/MainMenu.hpp"
 #include "math/vec.hpp"
 #include "render/Font.hpp"
 #include "render/RenderSubSystem.hpp"
 #include "render/renderables/RenderableColor2D.hpp"
+#include "ui/UIButton.hpp"
 #include "ui/UIObject.hpp"
-#include "ui/UIRect.hpp"
 #include "ui/UIText.hpp"
 #include "util/NotNull.hpp"
 #include "util/debug.hpp"
@@ -49,22 +55,73 @@ std::unique_ptr<ui::UIObject> makeUI() {
       localisation.getLocalisedString("BLOCKS_TITLE"),
       render::Font::Size::Line{160.f}));
 
-  auto& topChild =
-      uiRoot->children_.emplace_back(util::makeNotNullUnique<ui::UIRect>(
-          math::Vec4(0.0f, 1.0f, 0.0f, 0.5f), resourceSentinel->getColor()));
+  auto& buttonsWrapper =
+      uiRoot->children_.emplace_back(util::makeNotNullUnique<ui::UIObject>());
+  buttonsWrapper->childLayoutDirection_ = ui::LayoutDirection::VERTICAL;
 
-  auto& topLeftChild =
-      topChild->children_.emplace_back(util::makeNotNullUnique<ui::UIRect>(
-          math::Vec4(1.0f, 0.0f, 0.0f, 1.0f), resourceSentinel->getColor()));
-  topLeftChild->maxWidth_ = 100;
+  auto& buttons = buttonsWrapper->children_.emplace_back(
+      util::makeNotNullUnique<ui::UIObject>());
+  buttons->childLayoutDirection_ = ui::LayoutDirection::VERTICAL;
 
-  auto& topRightChild =
-      topChild->children_.emplace_back(util::makeNotNullUnique<ui::UIRect>(
-          math::Vec4(1.0f, 0.0f, 0.0f, 1.0f), resourceSentinel->getColor()));
-  topRightChild->maxHeight_ = 100;
+  auto& startButton =
+      buttons->children_.emplace_back(util::makeNotNullUnique<ui::UIButton>(
+          GlobalSubSystemStack::get().inputSystem(),
+          math::Vec4{0.f, 0.f, 0.f, 1.0f},
+          math::Vec4{0.3f, 0.3f, 0.3f, 1.0f},
+          resourceSentinel->getColor(),
+          []() {
+            Application::getApplication().transitionToScene(
+                std::make_unique<Level1>());
+          }));
+  startButton->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
+      DefaultFontResourceSentinel::get(),
+      localisation.getLocalisedString("START_GAME_BUTTON"),
+      render::Font::Size::Line{70.0f}));
 
-  uiRoot->children_.push_back(util::makeNotNullUnique<ui::UIRect>(
-      math::Vec4(0.0f, 0.0f, 1.0f, 0.5f), resourceSentinel->getColor()));
+  auto& languageButton =
+      buttons->children_.emplace_back(util::makeNotNullUnique<ui::UIButton>(
+          GlobalSubSystemStack::get().inputSystem(),
+          math::Vec4{0.f, 0.f, 0.f, 1.0f},
+          math::Vec4{0.3f, 0.3f, 0.3f, 1.0f},
+          resourceSentinel->getColor(),
+          []() {
+            auto& localisation =
+                GlobalSubSystemStack::get().localisationManager();
+            std::vector<std::string> availableLocales =
+                localisation.getAvailableLocales();
+            auto currentLocaleIt = std::find(
+                availableLocales.begin(),
+                availableLocales.end(),
+                localisation.getLocaleCode());
+            if (currentLocaleIt != availableLocales.end()) {
+              currentLocaleIt++;
+            }
+            if (currentLocaleIt == availableLocales.end()) {
+              currentLocaleIt = availableLocales.begin();
+            }
+            localisation.setLocale(*currentLocaleIt);
+            Application::getApplication().transitionToScene(
+                std::make_unique<MainMenu>());
+          }));
+  languageButton->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
+      DefaultFontResourceSentinel::get(),
+      std::string{localisation.getLocaleName()},
+      render::Font::Size::Line{70.0f}));
+
+  auto& quitButton =
+      buttons->children_.emplace_back(util::makeNotNullUnique<ui::UIButton>(
+          GlobalSubSystemStack::get().inputSystem(),
+          math::Vec4{0.f, 0.f, 0.f, 1.0f},
+          math::Vec4{0.3f, 0.3f, 0.3f, 1.0f},
+          resourceSentinel->getColor(),
+          []() { Application::getApplication().close(); }));
+  quitButton->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
+      DefaultFontResourceSentinel::get(),
+      localisation.getLocalisedString("QUIT_GAME_BUTTON"),
+      render::Font::Size::Line{70.0f}));
+
+  buttonsWrapper->children_.emplace_back(
+      util::makeNotNullUnique<ui::UIObject>());
 
   return uiRoot;
 }

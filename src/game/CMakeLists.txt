@@ -103,16 +103,19 @@ target_link_libraries(game.paddle
 
 add_library(game.mainmenuui "MainMenuUI.hpp" "MainMenuUI.cpp")
 target_link_libraries(game.mainmenuui
+	application
 	engine.scene
 	game.resource.defaultfont
+	game.scenes.level1
+	game.scenes.mainmenu
 	game.uiactor
 	globalsubsystemstack
 	math.vec
 	render.font
 	render.rendersubsystem
 	render.renderables.renderablecolor2d
+	ui.uibutton
 	ui.uiobject
-	ui.uirect
 	ui.uitext
 	util.debug
 	util.notnull)
