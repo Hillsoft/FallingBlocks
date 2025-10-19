@@ -50,10 +50,12 @@ std::unique_ptr<ui::UIObject> makeUI() {
   auto uiRoot = std::make_unique<ui::UIObject>();
   uiRoot->childLayoutDirection_ = ui::LayoutDirection::VERTICAL;
 
-  uiRoot->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
-      DefaultFontResourceSentinel::get(),
-      localisation.getLocalisedString("BLOCKS_TITLE"),
-      render::Font::Size::Line{160.f}));
+  auto& title =
+      uiRoot->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
+          DefaultFontResourceSentinel::get(),
+          localisation.getLocalisedString("BLOCKS_TITLE"),
+          render::Font::Size::Line{160.f}));
+  title->outerPadding_ = 20;
 
   auto& buttonsWrapper =
       uiRoot->children_.emplace_back(util::makeNotNullUnique<ui::UIObject>());
@@ -77,6 +79,7 @@ std::unique_ptr<ui::UIObject> makeUI() {
           }));
   startButton->outerPadding_ = 5;
   startButton->innerPadding_ = 5;
+  startButton->maxHeight_ = 0;
   startButton->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
       DefaultFontResourceSentinel::get(),
       localisation.getLocalisedString("START_GAME_BUTTON"),
@@ -109,6 +112,7 @@ std::unique_ptr<ui::UIObject> makeUI() {
           }));
   languageButton->outerPadding_ = 5;
   languageButton->innerPadding_ = 5;
+  languageButton->maxHeight_ = 0;
   languageButton->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
       DefaultFontResourceSentinel::get(),
       std::string{localisation.getLocaleName()},
@@ -123,6 +127,7 @@ std::unique_ptr<ui::UIObject> makeUI() {
           []() { Application::getApplication().close(); }));
   quitButton->outerPadding_ = 5;
   quitButton->innerPadding_ = 5;
+  quitButton->maxHeight_ = 0;
   quitButton->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
       DefaultFontResourceSentinel::get(),
       localisation.getLocalisedString("QUIT_GAME_BUTTON"),
