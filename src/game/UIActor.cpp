@@ -18,7 +18,18 @@ namespace {
 
 constexpr int kUIBaseZ = 1000000;
 
+float getUIScale(float windowHeight) {
+  if (windowHeight < 720) {
+    return 0.8f;
+  }
+  if (windowHeight > 2160) {
+    return 1.5f;
+  }
+
+  return 1.5f - 0.7f * (2160.f - windowHeight) / (2160.f - 720.f);
 }
+
+} // namespace
 
 UIActor::UIActor(Scene& scene) : UIActor(scene, nullptr) {}
 
@@ -42,9 +53,10 @@ void UIActor::draw() {
 
   auto window = GlobalSubSystemStack::get().window();
   std::pair<int, int> windowSizePair = window->getCurrentWindowSize();
+  float scale = getUIScale(windowSizePair.second);
   math::Vec<uint16_t, 2> windowSizeVec{
-      static_cast<uint16_t>(windowSizePair.first),
-      static_cast<uint16_t>(windowSizePair.second)};
+      static_cast<uint16_t>(static_cast<float>(windowSizePair.first) / scale),
+      static_cast<uint16_t>(static_cast<float>(windowSizePair.second) / scale)};
 
   uiCamera_ = render::Simple2DCamera{
       math::Vec2{0.f, 0.f},
