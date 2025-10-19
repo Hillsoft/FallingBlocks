@@ -104,13 +104,16 @@ target_link_libraries(game.paddle
 add_library(game.mainmenuui "MainMenuUI.hpp" "MainMenuUI.cpp")
 target_link_libraries(game.mainmenuui
 	engine.scene
+	game.resource.defaultfont
 	game.uiactor
 	globalsubsystemstack
 	math.vec
+	render.font
 	render.rendersubsystem
 	render.renderables.renderablecolor2d
 	ui.uiobject
 	ui.uirect
+	ui.uitext
 	util.debug)
 
 add_library(game.scoreui "ScoreUI.hpp" "ScoreUI.cpp")

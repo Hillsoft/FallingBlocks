@@ -55,7 +55,6 @@ target_link_libraries(game.scenes.mainmenu
 	game.button
 	game.mainmenuui
 	game.scenes.level1
-	game.statictext
 	game.resource.defaultfont
 	globalsubsystemstack
 	math.vec)

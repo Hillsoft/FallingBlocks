@@ -18,3 +18,10 @@ target_link_libraries(ui.uirect
 	render.renderables.renderablecolor2d
 	render.simple2dcamera
 	ui.uiobject)
+
+add_library(ui.uitext STATIC "UIText.hpp" "UIText.cpp")
+target_link_libraries(ui.uitext
+	math.vec
+	render.font
+	render.simple2dcamera
+	ui.uiobject)
