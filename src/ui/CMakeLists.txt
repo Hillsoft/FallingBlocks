@@ -25,4 +25,5 @@ target_link_libraries(ui.uitext
 	math.vec
 	render.font
 	render.simple2dcamera
-	ui.uiobject)
+	ui.uiobject
+	util.notnull)
