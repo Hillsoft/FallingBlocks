@@ -16,7 +16,6 @@ void resolveMinimums(UIObject& object) {
   object.resolvedMinWidth_ = 0;
 
   for (auto& child : object.children_) {
-    DEBUG_ASSERT(child != nullptr);
     resolveMinimums(*child);
   }
 

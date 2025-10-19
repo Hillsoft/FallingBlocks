@@ -13,6 +13,7 @@
 #include "ui/UIObject.hpp"
 #include "ui/UIRect.hpp"
 #include "ui/UIText.hpp"
+#include "util/NotNull.hpp"
 #include "util/debug.hpp"
 
 namespace blocks::game {
@@ -43,25 +44,26 @@ std::unique_ptr<ui::UIObject> makeUI() {
   auto uiRoot = std::make_unique<ui::UIObject>();
   uiRoot->childLayoutDirection_ = ui::LayoutDirection::VERTICAL;
 
-  uiRoot->children_.emplace_back(std::make_unique<ui::UIText>(
+  uiRoot->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
       DefaultFontResourceSentinel::get(),
       localisation.getLocalisedString("BLOCKS_TITLE"),
       render::Font::Size::Line{160.f}));
 
-  auto& topChild = uiRoot->children_.emplace_back(std::make_unique<ui::UIRect>(
-      math::Vec4(0.0f, 1.0f, 0.0f, 0.5f), resourceSentinel->getColor()));
+  auto& topChild =
+      uiRoot->children_.emplace_back(util::makeNotNullUnique<ui::UIRect>(
+          math::Vec4(0.0f, 1.0f, 0.0f, 0.5f), resourceSentinel->getColor()));
 
   auto& topLeftChild =
-      topChild->children_.emplace_back(std::make_unique<ui::UIRect>(
+      topChild->children_.emplace_back(util::makeNotNullUnique<ui::UIRect>(
           math::Vec4(1.0f, 0.0f, 0.0f, 1.0f), resourceSentinel->getColor()));
   topLeftChild->maxWidth_ = 100;
 
   auto& topRightChild =
-      topChild->children_.emplace_back(std::make_unique<ui::UIRect>(
+      topChild->children_.emplace_back(util::makeNotNullUnique<ui::UIRect>(
           math::Vec4(1.0f, 0.0f, 0.0f, 1.0f), resourceSentinel->getColor()));
   topRightChild->maxHeight_ = 100;
 
-  uiRoot->children_.push_back(std::make_unique<ui::UIRect>(
+  uiRoot->children_.push_back(util::makeNotNullUnique<ui::UIRect>(
       math::Vec4(0.0f, 0.0f, 1.0f, 0.5f), resourceSentinel->getColor()));
 
   return uiRoot;

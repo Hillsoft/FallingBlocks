@@ -8,7 +8,8 @@ target_link_libraries(ui.layout
 add_library(ui.uiobject STATIC "UIObject.hpp" "UIObject.cpp")
 target_link_libraries(ui.uiobject
 	math.vec
-	render.simple2dcamera)
+	render.simple2dcamera
+	util.notnull)
 
 add_library(ui.uirect STATIC "UIRect.hpp" "UIRect.cpp")
 target_link_libraries(ui.uirect

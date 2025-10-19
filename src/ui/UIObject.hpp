@@ -2,10 +2,10 @@
 
 #include <cstdint>
 #include <limits>
-#include <memory>
 #include <vector>
 #include "math/vec.hpp"
 #include "render/Simple2DCamera.hpp"
+#include "util/NotNull.hpp"
 
 namespace blocks::ui {
 
@@ -31,7 +31,7 @@ class UIObject {
 
   LayoutDirection childLayoutDirection_ = LayoutDirection::HORIZONTAL;
 
-  std::vector<std::unique_ptr<UIObject>> children_;
+  std::vector<util::NotNullUniquePtr<UIObject>> children_;
 
   uint16_t resolvedMinWidth_ = 0;
   uint16_t resolvedMinHeight_ = 0;

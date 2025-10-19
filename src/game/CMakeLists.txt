@@ -114,7 +114,8 @@ target_link_libraries(game.mainmenuui
 	ui.uiobject
 	ui.uirect
 	ui.uitext
-	util.debug)
+	util.debug
+	util.notnull)
 
 add_library(game.scoreui "ScoreUI.hpp" "ScoreUI.cpp")
 target_link_libraries(game.scoreui
