@@ -14,6 +14,7 @@ struct NotNullPointerTraits {
 template <typename T>
 struct NotNullPointerTraits<T*> {
   static constexpr bool isValid = true;
+  static constexpr bool enableImplicitConstructFromReference = true;
 
   using TTarget = T;
 };
@@ -21,6 +22,7 @@ struct NotNullPointerTraits<T*> {
 template <typename T>
 struct NotNullPointerTraits<std::unique_ptr<T>> {
   static constexpr bool isValid = true;
+  static constexpr bool enableImplicitConstructFromReference = false;
 
   using TTarget = T;
 };
@@ -28,6 +30,7 @@ struct NotNullPointerTraits<std::unique_ptr<T>> {
 template <typename T>
 struct NotNullPointerTraits<std::shared_ptr<T>> {
   static constexpr bool isValid = true;
+  static constexpr bool enableImplicitConstructFromReference = false;
 
   using TTarget = T;
 };
@@ -35,6 +38,7 @@ struct NotNullPointerTraits<std::shared_ptr<T>> {
 template <typename T>
 struct NotNullPointerTraits<std::weak_ptr<T>> {
   static constexpr bool isValid = true;
+  static constexpr bool enableImplicitConstructFromReference = false;
 
   using TTarget = T;
 };
@@ -49,6 +53,9 @@ class NotNullBase {
   explicit NotNullBase(TPtr val) : val_(std::move(val)) {
     DEBUG_ASSERT(val_ != nullptr);
   }
+  /* implicit */ NotNullBase(TTarget& val)
+    requires(NotNullPointerTraits<TPtr>::enableImplicitConstructFromReference)
+      : val_(&val) {}
 
   template <typename UPtr>
   operator NotNullBase<UPtr>() && {

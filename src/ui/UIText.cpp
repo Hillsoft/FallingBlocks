@@ -11,7 +11,7 @@ namespace blocks::ui {
 
 UIText::UIText(
     render::Font& font, std::string text, render::Font::Size fontSize)
-    : font_(&font), text_(std::move(text)), fontSize_(fontSize) {
+    : font_(font), text_(std::move(text)), fontSize_(fontSize) {
   minWidth_ = static_cast<uint16_t>(
       font_->stringWidth(render::Font::Encoding::UTF8, text_, fontSize_));
   minHeight_ = static_cast<uint16_t>(font_->stringHeight(fontSize_));

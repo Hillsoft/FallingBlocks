@@ -6,6 +6,7 @@
 #include "render/Font.hpp"
 #include "render/Simple2DCamera.hpp"
 #include "ui/UIObject.hpp"
+#include "util/NotNull.hpp"
 
 namespace blocks::ui {
 
@@ -20,7 +21,7 @@ class UIText : public UIObject {
       int baseZ) final;
 
  private:
-  render::Font* font_;
+  util::NotNullPtr<render::Font> font_;
   std::string text_;
   render::Font::Size fontSize_;
 };
