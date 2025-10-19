@@ -157,7 +157,7 @@ float drawChar(
     render.drawObject(
         window,
         camera,
-        10,
+        zDepth,
         renderableObject,
         RenderableFont::InstanceData{
             math::Mat3::translate(
