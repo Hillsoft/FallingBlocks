@@ -58,6 +58,8 @@ std::unique_ptr<ui::UIObject> makeUI() {
   auto& buttonsWrapper =
       uiRoot->children_.emplace_back(util::makeNotNullUnique<ui::UIObject>());
   buttonsWrapper->childLayoutDirection_ = ui::LayoutDirection::VERTICAL;
+  buttonsWrapper->maxWidth_ = 350;
+  buttonsWrapper->crossLayoutPosition_ = ui::Align::MIDDLE;
 
   auto& buttons = buttonsWrapper->children_.emplace_back(
       util::makeNotNullUnique<ui::UIObject>());

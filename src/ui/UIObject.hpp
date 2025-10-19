@@ -10,6 +10,7 @@
 namespace blocks::ui {
 
 enum class LayoutDirection { HORIZONTAL, VERTICAL };
+enum class Align { LEFT_TOP, MIDDLE, RIGHT_BOTTOM };
 
 class UIObject {
  public:
@@ -30,6 +31,7 @@ class UIObject {
   uint16_t maxHeight_ = std::numeric_limits<uint16_t>::max();
 
   LayoutDirection childLayoutDirection_ = LayoutDirection::HORIZONTAL;
+  Align crossLayoutPosition_ = Align::LEFT_TOP;
 
   std::vector<util::NotNullUniquePtr<UIObject>> children_;
 

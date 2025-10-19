@@ -138,12 +138,52 @@ void drawObjects(
 
   if (object.childLayoutDirection_ == LayoutDirection::HORIZONTAL) {
     for (auto& child : object.children_) {
-      drawObjects(*child, camera, offset, baseZ);
+      uint16_t crossLayoutOffset = [&]() -> uint16_t {
+        switch (child->crossLayoutPosition_) {
+          case Align::LEFT_TOP:
+            return 0;
+          case Align::MIDDLE:
+            return (object.resolvedHeight_ - child->resolvedHeight_) / 2;
+          case Align::RIGHT_BOTTOM:
+            return object.resolvedHeight_ - child->resolvedHeight_;
+          default:
+            DEBUG_ASSERT(false);
+            return 0;
+        }
+      }();
+
+      drawObjects(
+          *child,
+          camera,
+          math::Vec<uint16_t, 2>{
+              offset.x(),
+              static_cast<uint16_t>(offset.y() + crossLayoutOffset)},
+          baseZ);
       offset.x() += child->resolvedWidth_;
     }
   } else if (object.childLayoutDirection_ == LayoutDirection::VERTICAL) {
     for (auto& child : object.children_) {
-      drawObjects(*child, camera, offset, baseZ);
+      uint16_t crossLayoutOffset = [&]() -> uint16_t {
+        switch (child->crossLayoutPosition_) {
+          case Align::LEFT_TOP:
+            return 0;
+          case Align::MIDDLE:
+            return (object.resolvedWidth_ - child->resolvedWidth_) / 2;
+          case Align::RIGHT_BOTTOM:
+            return object.resolvedWidth_ - child->resolvedWidth_;
+          default:
+            DEBUG_ASSERT(false);
+            return 0;
+        }
+      }();
+
+      drawObjects(
+          *child,
+          camera,
+          math::Vec<uint16_t, 2>{
+              static_cast<uint16_t>(offset.x() + crossLayoutOffset),
+              offset.y()},
+          baseZ);
       offset.y() += child->resolvedHeight_;
     }
   }
