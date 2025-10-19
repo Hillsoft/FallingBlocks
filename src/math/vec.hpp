@@ -39,7 +39,7 @@ class Vec {
     requires(std::is_convertible_v<TNum2, TNum>)
       : data_() {
     for (int i = 0; i < size; i++) {
-      data_ = other.at(i);
+      data_.at(i) = static_cast<TNum>(other.at(i));
     }
   }
 
@@ -212,7 +212,7 @@ class Matrix {
     requires(std::is_convertible_v<TNum2, TNum>)
       : data_() {
     for (int i = 0; i < sizeWidth * sizeHeight; i++) {
-      data_[i] = other.data_[i];
+      data_[i] = static_cast<TNum>(other.data_[i]);
     }
   }
 
