@@ -9,6 +9,7 @@
 #include "engine/Scene.hpp"
 #include "game/Background.hpp"
 #include "game/Button.hpp"
+#include "game/MainMenuUI.hpp"
 #include "game/StaticText.hpp"
 #include "game/resource/DefaultFont.hpp"
 #include "game/scenes/Level1.hpp"
@@ -23,7 +24,8 @@ std::unique_ptr<Scene> MainMenu::loadScene() const {
       .transitionToSentinelSet<
           game::BackgroundResourceSentinel,
           game::ButtonResourceSentinel,
-          game::DefaultFontResourceSentinel>();
+          game::DefaultFontResourceSentinel,
+          game::MainMenuUIResourceSentinel>();
 
   std::unique_ptr<Scene> scene = std::make_unique<Scene>();
 
@@ -68,6 +70,8 @@ std::unique_ptr<Scene> MainMenu::loadScene() const {
       math::Vec2{0.3f, 0.35f},
       localisation.getLocalisedString("QUIT_GAME_BUTTON"),
       []() { Application::getApplication().close(); });
+
+  scene->createActor<game::MainMenuUI>();
 
   return scene;
 }

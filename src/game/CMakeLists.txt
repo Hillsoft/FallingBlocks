@@ -101,6 +101,18 @@ target_link_libraries(game.paddle
 	render.rendersubsystem
 	util.debug)
 
+add_library(game.mainmenuui "MainMenuUI.hpp" "MainMenuUI.cpp")
+target_link_libraries(game.mainmenuui
+	engine.scene
+	game.uiactor
+	globalsubsystemstack
+	math.vec
+	render.rendersubsystem
+	render.renderables.renderablecolor2d
+	ui.uiobject
+	ui.uirect
+	util.debug)
+
 add_library(game.scoreui "ScoreUI.hpp" "ScoreUI.cpp")
 target_link_libraries(game.scoreui
 	engine.actor
@@ -131,3 +143,14 @@ target_link_libraries(game.testtext
 	loader.font.font
 	math.vec
 	render.font)
+
+add_library(game.uiactor "UIActor.hpp" "UIActor.cpp")
+target_link_libraries(game.uiactor
+	engine.actor
+	engine.drawableregistry
+	engine.scene
+	globalsubsystemstack
+	math.vec
+	render.simple2dcamera
+	ui.layout
+	ui.uiobject)

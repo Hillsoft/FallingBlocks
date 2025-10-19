@@ -53,6 +53,7 @@ target_link_libraries(game.scenes.mainmenu
 	engine.sceneloader
 	game.background
 	game.button
+	game.mainmenuui
 	game.scenes.level1
 	game.statictext
 	game.resource.defaultfont
