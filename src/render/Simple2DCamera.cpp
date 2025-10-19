@@ -58,9 +58,9 @@ math::Mat3 Simple2DCamera::getViewMatrix(VkExtent2D screenExtent) const {
   math::Vec2 adjustedExtent =
       getAspectScaledWorldExtent(target_.extent, screenExtent, ratioHandling_);
 
-  return math::Mat3::translate(-1.0f * target_.centre) *
-      math::Mat3::scale(math::Vec2{
-          2.0f / adjustedExtent.x(), 2.0f / adjustedExtent.y()});
+  return math::Mat3::scale(
+             math::Vec2{2.0f / adjustedExtent.x(), 2.0f / adjustedExtent.y()}) *
+      math::Mat3::translate(-1.0f * target_.centre);
 }
 
 void Simple2DCamera::setWorldViewRect(math::Vec2 p0, math::Vec2 p1) {
