@@ -6,6 +6,7 @@ add_subdirectory(loader)
 add_subdirectory(math)
 add_subdirectory(physics)
 add_subdirectory(render)
+add_subdirectory(ui)
 add_subdirectory(util)
 
 add_library(application STATIC "Application.cpp" "Application.hpp")
