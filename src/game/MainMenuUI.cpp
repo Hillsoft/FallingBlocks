@@ -75,6 +75,8 @@ std::unique_ptr<ui::UIObject> makeUI() {
             Application::getApplication().transitionToScene(
                 std::make_unique<Level1>());
           }));
+  startButton->outerPadding_ = 5;
+  startButton->innerPadding_ = 5;
   startButton->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
       DefaultFontResourceSentinel::get(),
       localisation.getLocalisedString("START_GAME_BUTTON"),
@@ -105,6 +107,8 @@ std::unique_ptr<ui::UIObject> makeUI() {
             Application::getApplication().transitionToScene(
                 std::make_unique<MainMenu>());
           }));
+  languageButton->outerPadding_ = 5;
+  languageButton->innerPadding_ = 5;
   languageButton->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
       DefaultFontResourceSentinel::get(),
       std::string{localisation.getLocaleName()},
@@ -117,6 +121,8 @@ std::unique_ptr<ui::UIObject> makeUI() {
           math::Vec4{0.3f, 0.3f, 0.3f, 1.0f},
           resourceSentinel->getColor(),
           []() { Application::getApplication().close(); }));
+  quitButton->outerPadding_ = 5;
+  quitButton->innerPadding_ = 5;
   quitButton->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
       DefaultFontResourceSentinel::get(),
       localisation.getLocalisedString("QUIT_GAME_BUTTON"),

@@ -21,19 +21,30 @@ void resolveMinimums(UIObject& object) {
 
   if (object.childLayoutDirection_ == LayoutDirection::HORIZONTAL) {
     for (auto& child : object.children_) {
-      object.resolvedMinHeight_ =
-          std::max(object.resolvedMinHeight_, child->resolvedMinHeight_);
-      object.resolvedMinWidth_ += child->resolvedMinWidth_;
+      object.resolvedMinHeight_ = std::max<uint16_t>(
+          object.resolvedMinHeight_,
+          child->resolvedMinHeight_ + 2 * child->outerPadding_);
+      object.resolvedMinWidth_ +=
+          child->resolvedMinWidth_ + 2 * child->outerPadding_;
     }
   } else if (object.childLayoutDirection_ == LayoutDirection::VERTICAL) {
     for (auto& child : object.children_) {
-      object.resolvedMinWidth_ =
-          std::max(object.resolvedMinWidth_, child->resolvedMinWidth_);
-      object.resolvedMinHeight_ += child->resolvedMinHeight_;
+      object.resolvedMinWidth_ = std::max<uint16_t>(
+          object.resolvedMinWidth_,
+          child->resolvedMinWidth_ + 2 * child->outerPadding_);
+      object.resolvedMinHeight_ +=
+          child->resolvedMinHeight_ + 2 * child->outerPadding_;
     }
   } else {
     DEBUG_ASSERT(false);
   }
+
+  object.resolvedMinHeight_ =
+      std::max<uint16_t>(object.minHeight_, object.resolvedMinHeight_) +
+      2 * object.innerPadding_;
+  object.resolvedMinWidth_ =
+      std::max<uint16_t>(object.minWidth_, object.resolvedMinWidth_) +
+      2 * object.innerPadding_;
 }
 
 void distributeExcess(UIObject& object) {
@@ -48,17 +59,20 @@ void distributeExcess(UIObject& object) {
 
   if (object.childLayoutDirection_ == LayoutDirection::HORIZONTAL) {
     for (auto& child : object.children_) {
-      child->resolvedHeight_ =
-          std::min(object.resolvedHeight_, child->maxHeight_);
+      child->resolvedHeight_ = std::min<uint16_t>(
+          object.resolvedHeight_ - 2 * object.innerPadding_ -
+              2 * child->outerPadding_,
+          child->maxHeight_);
     }
 
+    uint16_t availableWidth = object.resolvedWidth_;
     uint16_t childWidth = object.resolvedMinWidth_;
     size_t childrenWantingMore = object.children_.size();
     do {
-      if (childrenWantingMore == 0 || object.resolvedWidth_ <= childWidth) {
+      if (childrenWantingMore == 0 || availableWidth <= childWidth) {
         break;
       }
-      uint16_t excess = object.resolvedWidth_ - childWidth;
+      uint16_t excess = availableWidth - childWidth;
       uint16_t perChild = static_cast<uint16_t>(excess / childrenWantingMore);
       if (perChild == 0) {
         break;
@@ -84,16 +98,20 @@ void distributeExcess(UIObject& object) {
     } while (true);
   } else if (object.childLayoutDirection_ == LayoutDirection::VERTICAL) {
     for (auto& child : object.children_) {
-      child->resolvedWidth_ = std::min(object.resolvedWidth_, child->maxWidth_);
+      child->resolvedWidth_ = std::min<uint16_t>(
+          object.resolvedWidth_ - 2 * object.innerPadding_ -
+              2 * child->outerPadding_,
+          child->maxWidth_);
     }
 
+    uint16_t availableHeight = object.resolvedHeight_;
     uint16_t childHeight = object.resolvedMinHeight_;
     size_t childrenWantingMore = object.children_.size();
     do {
-      if (childrenWantingMore == 0 || object.resolvedHeight_ <= childHeight) {
+      if (childrenWantingMore == 0 || availableHeight <= childHeight) {
         break;
       }
-      uint16_t excess = object.resolvedHeight_ - childHeight;
+      uint16_t excess = availableHeight - childHeight;
       uint16_t perChild = static_cast<uint16_t>(excess / childrenWantingMore);
       if (perChild == 0) {
         break;
@@ -136,6 +154,8 @@ void drawObjects(
       camera,
       baseZ);
 
+  offset += math::Vec<uint16_t, 2>{object.innerPadding_, object.innerPadding_};
+
   if (object.childLayoutDirection_ == LayoutDirection::HORIZONTAL) {
     for (auto& child : object.children_) {
       uint16_t crossLayoutOffset = [&]() -> uint16_t {
@@ -143,9 +163,12 @@ void drawObjects(
           case Align::LEFT_TOP:
             return 0;
           case Align::MIDDLE:
-            return (object.resolvedHeight_ - child->resolvedHeight_) / 2;
+            return (object.resolvedHeight_ - child->resolvedHeight_ -
+                    2 * child->outerPadding_) /
+                2;
           case Align::RIGHT_BOTTOM:
-            return object.resolvedHeight_ - child->resolvedHeight_;
+            return object.resolvedHeight_ - child->resolvedHeight_ -
+                2 * child->outerPadding_;
           default:
             DEBUG_ASSERT(false);
             return 0;
@@ -156,10 +179,11 @@ void drawObjects(
           *child,
           camera,
           math::Vec<uint16_t, 2>{
-              offset.x(),
-              static_cast<uint16_t>(offset.y() + crossLayoutOffset)},
+              static_cast<uint16_t>(offset.x() + child->outerPadding_),
+              static_cast<uint16_t>(
+                  offset.y() + child->outerPadding_ + crossLayoutOffset)},
           baseZ);
-      offset.x() += child->resolvedWidth_;
+      offset.x() += child->resolvedWidth_ + 2 * child->outerPadding_;
     }
   } else if (object.childLayoutDirection_ == LayoutDirection::VERTICAL) {
     for (auto& child : object.children_) {
@@ -168,9 +192,12 @@ void drawObjects(
           case Align::LEFT_TOP:
             return 0;
           case Align::MIDDLE:
-            return (object.resolvedWidth_ - child->resolvedWidth_) / 2;
+            return (object.resolvedWidth_ - child->resolvedWidth_ -
+                    2 * child->outerPadding_) /
+                2;
           case Align::RIGHT_BOTTOM:
-            return object.resolvedWidth_ - child->resolvedWidth_;
+            return object.resolvedWidth_ - child->resolvedWidth_ -
+                2 * child->outerPadding_;
           default:
             DEBUG_ASSERT(false);
             return 0;
@@ -181,10 +208,11 @@ void drawObjects(
           *child,
           camera,
           math::Vec<uint16_t, 2>{
-              static_cast<uint16_t>(offset.x() + crossLayoutOffset),
-              offset.y()},
+              static_cast<uint16_t>(
+                  offset.x() + child->outerPadding_ + crossLayoutOffset),
+              static_cast<uint16_t>(offset.y() + child->outerPadding_)},
           baseZ);
-      offset.y() += child->resolvedHeight_;
+      offset.y() += child->resolvedHeight_ + 2 * child->outerPadding_;
     }
   }
 }

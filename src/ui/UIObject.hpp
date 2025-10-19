@@ -29,6 +29,8 @@ class UIObject {
   uint16_t maxWidth_ = std::numeric_limits<uint16_t>::max();
   uint16_t minHeight_ = 0;
   uint16_t maxHeight_ = std::numeric_limits<uint16_t>::max();
+  uint16_t outerPadding_ = 0;
+  uint16_t innerPadding_ = 0;
 
   LayoutDirection childLayoutDirection_ = LayoutDirection::HORIZONTAL;
   Align crossLayoutPosition_ = Align::LEFT_TOP;

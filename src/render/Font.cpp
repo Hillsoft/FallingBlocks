@@ -442,7 +442,8 @@ float Font::stringWidth(
 float Font::stringHeight(Size fontSize) const {
   float unitsPerLine = static_cast<float>(
       fontData_.ascenderHeight.rawValue - fontData_.descenderHeight.rawValue);
-  return unitsPerLine * fontSize.getEmHeight(*this);
+  return unitsPerLine * fontSize.getEmHeight(*this) /
+      static_cast<float>(fontData_.unitsPerEm);
 }
 
 float Font::getSizeScale(const Font::Size& size) const {
