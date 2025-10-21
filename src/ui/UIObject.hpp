@@ -36,11 +36,6 @@ class UIObject {
   Align crossLayoutPosition_ = Align::LEFT_TOP;
 
   std::vector<util::NotNullUniquePtr<UIObject>> children_;
-
-  uint16_t resolvedMinWidth_ = 0;
-  uint16_t resolvedMinHeight_ = 0;
-  uint16_t resolvedWidth_ = 0;
-  uint16_t resolvedHeight_ = 0;
 };
 
 } // namespace blocks::ui
