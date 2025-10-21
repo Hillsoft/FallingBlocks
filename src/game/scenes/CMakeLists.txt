@@ -6,11 +6,10 @@ target_link_libraries(game.scenes.gameover
 	engine.sceneloader
 	globalsubsystemstack
 	game.background
+	game.gameoverui
 	game.scenes.level1
-	game.statictext
 	game.resource.defaultfont
-	input.inputsubsystem
-	math.vec)
+	input.inputsubsystem)
 
 add_library(game.scenes.levelconsts INTERFACE "LevelConsts.hpp")
 

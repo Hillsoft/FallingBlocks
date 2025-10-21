@@ -8,11 +8,10 @@
 #include "engine/Actor.hpp"
 #include "engine/Scene.hpp"
 #include "game/Background.hpp"
-#include "game/StaticText.hpp"
+#include "game/GameOverUI.hpp"
 #include "game/resource/DefaultFont.hpp"
 #include "game/scenes/Level1.hpp"
 #include "input/InputHandler.hpp"
-#include "math/vec.hpp"
 
 namespace blocks::game {
 
@@ -58,25 +57,18 @@ void playGameOverSound(Scene& scene) {
 } // namespace
 
 std::unique_ptr<Scene> GameOver::loadScene() const {
-  auto& localisation = GlobalSubSystemStack::get().localisationManager();
   GlobalSubSystemStack::get()
       .sentinelManager()
       .transitionToSentinelSet<
           game::BackgroundResourceSentinel,
+          game::GameOverUIResourceSentinel,
           game::DefaultFontResourceSentinel>();
 
   std::unique_ptr<Scene> scene = std::make_unique<Scene>();
 
   scene->createActor<game::Background>();
 
-  scene->createActor<game::StaticText>(
-      math::Vec2{0.0f, 0.15f},
-      0.3f,
-      localisation.getLocalisedString("GAME_OVER"));
-  scene->createActor<game::StaticText>(
-      math::Vec2{0.0f, 0.25f},
-      0.1f,
-      localisation.getLocalisedString("PLAY_AGAIN"));
+  scene->createActor<game::GameOverUI>();
 
   scene->createActor<GameRestarter>();
 

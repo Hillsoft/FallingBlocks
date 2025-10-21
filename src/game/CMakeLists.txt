@@ -76,6 +76,18 @@ target_link_libraries(game.button
 	game.resource.defaultfont
 	util.debug)
 
+add_library(game.gameoverui "GameOverUI.hpp" "GameOverUI.cpp")
+target_link_libraries(game.gameoverui
+	engine.scene
+	game.uiactor
+	globalsubsystemstack
+	game.resource.defaultfont
+	render.font
+	ui.uiobject
+	ui.uitext
+	util.debug
+	util.notnull)
+
 add_library(game.loadingscreen "LoadingScreen.hpp" "LoadingScreen.cpp")
 target_link_libraries(game.loadingscreen
 	engine.actor
