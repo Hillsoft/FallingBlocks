@@ -11,6 +11,7 @@ namespace blocks::ui {
 
 enum class LayoutDirection { HORIZONTAL, VERTICAL };
 enum class Align { LEFT_TOP, MIDDLE, RIGHT_BOTTOM };
+enum class SizeStrategy { GROW_CHILDREN, SHRINK_PARENT, PAD };
 
 class UIObject {
  public:
@@ -34,51 +35,10 @@ class UIObject {
 
   LayoutDirection childLayoutDirection_ = LayoutDirection::HORIZONTAL;
   Align crossLayoutPosition_ = Align::LEFT_TOP;
+  Align alongLayoutChildPosition_ = Align::LEFT_TOP;
+  SizeStrategy sizeStrategy_ = SizeStrategy::GROW_CHILDREN;
 
   std::vector<util::NotNullUniquePtr<UIObject>> children_;
-
-  uint16_t& minSizeLayoutAxis(LayoutDirection layoutDirection) {
-    return layoutDirection == LayoutDirection::HORIZONTAL
-        ? minWidth_
-        : minHeight_;
-  }
-  const uint16_t& minSizeLayoutAxis(LayoutDirection layoutDirection) const {
-    return layoutDirection == LayoutDirection::HORIZONTAL
-        ? minWidth_
-        : minHeight_;
-  }
-  uint16_t& minSizeCrossLayoutAxis(LayoutDirection layoutDirection) {
-    return layoutDirection == LayoutDirection::HORIZONTAL
-        ? minHeight_
-        : minWidth_;
-  }
-  const uint16_t& minSizeCrossLayoutAxis(
-      LayoutDirection layoutDirection) const {
-    return layoutDirection == LayoutDirection::HORIZONTAL
-        ? minHeight_
-        : minWidth_;
-  }
-  uint16_t& maxSizeLayoutAxis(LayoutDirection layoutDirection) {
-    return layoutDirection == LayoutDirection::HORIZONTAL
-        ? maxWidth_
-        : maxHeight_;
-  }
-  const uint16_t& maxSizeLayoutAxis(LayoutDirection layoutDirection) const {
-    return layoutDirection == LayoutDirection::HORIZONTAL
-        ? maxWidth_
-        : maxHeight_;
-  }
-  uint16_t& maxSizeCrossLayoutAxis(LayoutDirection layoutDirection) {
-    return layoutDirection == LayoutDirection::HORIZONTAL
-        ? maxHeight_
-        : maxWidth_;
-  }
-  const uint16_t& maxSizeCrossLayoutAxis(
-      LayoutDirection layoutDirection) const {
-    return layoutDirection == LayoutDirection::HORIZONTAL
-        ? maxHeight_
-        : maxWidth_;
-  }
 };
 
 } // namespace blocks::ui

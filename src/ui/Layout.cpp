@@ -16,6 +16,8 @@ namespace {
 struct ResolvedLayoutDetails {
   uint16_t resolvedMinWidth = 0;
   uint16_t resolvedMinHeight = 0;
+  uint16_t resolvedMaxWidth = 0;
+  uint16_t resolvedMaxHeight = 0;
   uint16_t resolvedWidth = 0;
   uint16_t resolvedHeight = 0;
   size_t childStartIndex = 0;
@@ -40,6 +42,27 @@ struct ResolvedLayoutDetails {
     return layoutDirection == LayoutDirection::HORIZONTAL
         ? resolvedMinHeight
         : resolvedMinWidth;
+  }
+  uint16_t& resolvedMaxLayoutAxis(LayoutDirection layoutDirection) {
+    return layoutDirection == LayoutDirection::HORIZONTAL
+        ? resolvedMaxWidth
+        : resolvedMaxHeight;
+  }
+  const uint16_t& resolvedMaxLayoutAxis(LayoutDirection layoutDirection) const {
+    return layoutDirection == LayoutDirection::HORIZONTAL
+        ? resolvedMaxWidth
+        : resolvedMaxHeight;
+  }
+  uint16_t& resolvedMaxCrossLayoutAxis(LayoutDirection layoutDirection) {
+    return layoutDirection == LayoutDirection::HORIZONTAL
+        ? resolvedMaxHeight
+        : resolvedMaxWidth;
+  }
+  const uint16_t& resolvedMaxCrossLayoutAxis(
+      LayoutDirection layoutDirection) const {
+    return layoutDirection == LayoutDirection::HORIZONTAL
+        ? resolvedMaxHeight
+        : resolvedMaxWidth;
   }
   uint16_t& resolvedLayoutAxis(LayoutDirection layoutDirection) {
     return layoutDirection == LayoutDirection::HORIZONTAL
@@ -132,6 +155,16 @@ void resolveMinimums(
   curObjectDetails.resolvedMinWidth =
       std::max<uint16_t>(object.minWidth_, curObjectDetails.resolvedMinWidth) +
       2 * object.innerPadding_;
+
+  curObjectDetails.resolvedMaxHeight =
+      std::max(object.maxHeight_, curObjectDetails.resolvedMinHeight);
+  curObjectDetails.resolvedMaxWidth =
+      std::max(object.maxWidth_, curObjectDetails.resolvedMinWidth);
+
+  if (object.sizeStrategy_ == SizeStrategy::SHRINK_PARENT) {
+    curObjectDetails.resolvedMaxHeight = curObjectDetails.resolvedMinHeight;
+    curObjectDetails.resolvedMaxWidth = curObjectDetails.resolvedMinWidth;
+  }
 }
 
 void distributeExcess(
@@ -161,51 +194,90 @@ void distributeExcess(
         std::min<uint16_t>(
             curObjectDetails.resolvedCrossLayoutAxis(layoutDirection) -
                 2 * object.innerPadding_ - 2 * child->outerPadding_,
-            child->maxSizeCrossLayoutAxis(layoutDirection));
+            childObjectDetails.resolvedMaxCrossLayoutAxis(layoutDirection));
   }
 
-  uint16_t availableSize = curObjectDetails.resolvedLayoutAxis(layoutDirection);
-  uint16_t childSize = curObjectDetails.resolvedMinLayoutAxis(layoutDirection);
-  size_t childrenWantingMore = object.children_.size();
-  do {
-    if (childrenWantingMore == 0 || availableSize <= childSize) {
-      break;
-    }
-    uint16_t excess = availableSize - childSize;
-    uint16_t perChild = static_cast<uint16_t>(excess / childrenWantingMore);
-    if (perChild == 0) {
-      break;
-    }
-
-    // update the calculation of this for the next iteration
-    childrenWantingMore = object.children_.size();
-
-    for (size_t i = 0; i < object.children_.size(); i++) {
-      const auto& child = object.children_[i];
-      auto& childObjectDetails =
-          resolvedDetails[curObjectDetails.childStartIndex + i];
-
-      uint16_t toGive = static_cast<uint16_t>(std::max(
-          0,
-          std::min<int>(
-              perChild,
-              static_cast<int>(child->maxSizeLayoutAxis(layoutDirection)) -
-                  static_cast<int>(childObjectDetails.resolvedLayoutAxis(
-                      layoutDirection)))));
-      if (toGive == 0) {
-        childrenWantingMore--;
-      } else {
-        childObjectDetails.resolvedLayoutAxis(layoutDirection) += toGive;
-        childSize += toGive;
+  if (object.sizeStrategy_ == SizeStrategy::GROW_CHILDREN) {
+    uint16_t availableSize =
+        curObjectDetails.resolvedLayoutAxis(layoutDirection);
+    uint16_t childSize =
+        curObjectDetails.resolvedMinLayoutAxis(layoutDirection);
+    size_t childrenWantingMore = object.children_.size();
+    do {
+      if (childrenWantingMore == 0 || availableSize <= childSize) {
+        break;
       }
-    }
-  } while (true);
+      uint16_t excess = availableSize - childSize;
+      uint16_t perChild = static_cast<uint16_t>(excess / childrenWantingMore);
+      if (perChild == 0) {
+        break;
+      }
+
+      // update the calculation of this for the next iteration
+      childrenWantingMore = object.children_.size();
+
+      for (size_t i = 0; i < object.children_.size(); i++) {
+        auto& childObjectDetails =
+            resolvedDetails[curObjectDetails.childStartIndex + i];
+
+        uint16_t toGive = static_cast<uint16_t>(std::max(
+            0,
+            std::min<int>(
+                perChild,
+                static_cast<int>(
+                    childObjectDetails.resolvedMaxLayoutAxis(layoutDirection)) -
+                    static_cast<int>(childObjectDetails.resolvedLayoutAxis(
+                        layoutDirection)))));
+        if (toGive == 0) {
+          childrenWantingMore--;
+        } else {
+          childObjectDetails.resolvedLayoutAxis(layoutDirection) += toGive;
+          childSize += toGive;
+        }
+      }
+    } while (true);
+  }
 
   for (size_t i = 0; i < object.children_.size(); i++) {
     distributeExcess(
         *object.children_[i],
         curObjectDetails.childStartIndex + i,
         resolvedDetails);
+  }
+}
+
+uint16_t getChildSizeTotal(
+    UIObject& object,
+    size_t objectIndex,
+    std::span<ResolvedLayoutDetails> resolvedDetails) {
+  const ResolvedLayoutDetails& curObjectDetails = resolvedDetails[objectIndex];
+  LayoutDirection layoutDirection = object.childLayoutDirection_;
+
+  uint16_t size = 0;
+  for (size_t i = 0; i < object.children_.size(); i++) {
+    const auto& child = object.children_[i];
+    auto& childObjectDetails =
+        resolvedDetails[curObjectDetails.childStartIndex + i];
+
+    size += childObjectDetails.resolvedLayoutAxis(layoutDirection) +
+        2 * child->outerPadding_;
+  }
+
+  return size;
+}
+
+uint16_t getAlignOffset(
+    Align alignment, uint16_t objectSize, uint16_t availableSpace) {
+  switch (alignment) {
+    case Align::LEFT_TOP:
+      return 0;
+    case Align::MIDDLE:
+      return (availableSpace - objectSize) / 2;
+    case Align::RIGHT_BOTTOM:
+      return availableSpace - objectSize;
+    default:
+      DEBUG_ASSERT(false);
+      return 0;
   }
 }
 
@@ -244,29 +316,24 @@ void drawObjects(
 
   offset += object.innerPadding_ * bothDirections;
 
+  offset +=
+      getAlignOffset(
+          object.alongLayoutChildPosition_,
+          getChildSizeTotal(object, objectIndex, resolvedDetails),
+          curObjectDetails.resolvedLayoutAxis(layoutDirection) -
+              2 * object.innerPadding_) *
+      layoutDirectionVec;
+
   for (size_t i = 0; i < object.children_.size(); i++) {
     const auto& child = object.children_[i];
     auto& childObjectDetails =
         resolvedDetails[curObjectDetails.childStartIndex + i];
 
-    uint16_t crossLayoutOffset = [&]() -> uint16_t {
-      switch (child->crossLayoutPosition_) {
-        case Align::LEFT_TOP:
-          return 0;
-        case Align::MIDDLE:
-          return (curObjectDetails.resolvedCrossLayoutAxis(layoutDirection) -
-                  childObjectDetails.resolvedCrossLayoutAxis(layoutDirection) -
-                  2 * child->outerPadding_) /
-              2;
-        case Align::RIGHT_BOTTOM:
-          return curObjectDetails.resolvedCrossLayoutAxis(layoutDirection) -
-              childObjectDetails.resolvedCrossLayoutAxis(layoutDirection) -
-              2 * child->outerPadding_;
-        default:
-          DEBUG_ASSERT(false);
-          return 0;
-      }
-    }();
+    uint16_t crossLayoutOffset = getAlignOffset(
+        child->crossLayoutPosition_,
+        childObjectDetails.resolvedCrossLayoutAxis(layoutDirection) -
+            2 * child->outerPadding_,
+        curObjectDetails.resolvedCrossLayoutAxis(layoutDirection));
 
     drawObjects(
         *child,

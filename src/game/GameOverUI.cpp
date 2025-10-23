@@ -29,6 +29,8 @@ std::unique_ptr<ui::UIObject> makeUI() {
 
   auto uiRoot = std::make_unique<ui::UIObject>();
   uiRoot->childLayoutDirection_ = ui::LayoutDirection::VERTICAL;
+  uiRoot->sizeStrategy_ = ui::SizeStrategy::PAD;
+  uiRoot->alongLayoutChildPosition_ = ui::Align::MIDDLE;
 
   uiRoot->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
       DefaultFontResourceSentinel::get(),
