@@ -135,13 +135,16 @@ target_link_libraries(game.mainmenuui
 add_library(game.scoreui "ScoreUI.hpp" "ScoreUI.cpp")
 target_link_libraries(game.scoreui
 	engine.actor
-	engine.drawableregistry
 	engine.scene
 	game.blocksscene
 	game.resource.defaultfont
+	game.uiactor
 	globalsubsystemstack
 	render.font
+	ui.uiobject
+	ui.uitext
 	util.debug
+	util.notnull
 	util.string)
 
 add_library(game.statictext "StaticText.hpp" "StaticText.cpp")

@@ -20,6 +20,8 @@ class UIText : public UIObject {
       render::Simple2DCamera& camera,
       int baseZ) final;
 
+  void setText(std::string newText);
+
  private:
   util::NotNullPtr<render::Font> font_;
   std::string text_;

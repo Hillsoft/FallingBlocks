@@ -16,7 +16,7 @@ class UIActor : public Actor, public Drawable {
 
   void setUIObject(std::unique_ptr<ui::UIObject> newUI);
 
-  void draw() final;
+  void draw() override;
 
  private:
   render::Simple2DCamera uiCamera_;

@@ -34,4 +34,10 @@ int UIText::draw(
   return 1;
 }
 
+void UIText::setText(std::string newText) {
+  text_ = std::move(newText);
+  minWidth_ = static_cast<uint16_t>(
+      font_->stringWidth(render::Font::Encoding::UTF8, text_, fontSize_));
+}
+
 } // namespace blocks::ui

@@ -67,6 +67,8 @@ class NotNullBase {
     return NotNullBase<UPtr>(val_);
   }
 
+  TTarget* get() const { return &*val_; }
+
   TTarget& operator*() const { return *val_; }
   TTarget* operator->() const { return &*val_; }
 
