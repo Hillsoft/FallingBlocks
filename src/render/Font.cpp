@@ -404,6 +404,10 @@ void Font::drawStringUTF8(
 
 float Font::stringWidth(
     Encoding encoding, std::string_view str, Size fontSize) const {
+  if (str.size() == 0) {
+    return 0.f;
+  }
+
   float fontScale = getSizeScale(fontSize);
   float width = 0.0f;
 
