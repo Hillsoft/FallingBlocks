@@ -98,10 +98,14 @@ template <typename TArg>
 static size_t intStringSizeEstimate(TArg a) {
   size_t estimate = 1;
   size_t absA;
-  if (a < 0) {
-    estimate++;
+  if constexpr (std::is_signed_v<TArg>) {
+    if (a < 0) {
+      estimate++;
 
-    absA = -a;
+      absA = -a;
+    } else {
+      absA = a;
+    }
   } else {
     absA = a;
   }
