@@ -28,6 +28,8 @@ add_library(util.indexedresourcestorage INTERFACE "IndexedResourceStorage.hpp")
 target_link_libraries(util.indexedresourcestorage INTERFACE
 	util.atomiccircularbufferqueue)
 
+add_library(util.meta_utils INTERFACE "meta_utils.hpp")
+
 add_library(util.notnull INTERFACE "NotNull.hpp")
 target_link_libraries(util.notnull INTERFACE
 	util.debug)
