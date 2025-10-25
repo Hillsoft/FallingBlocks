@@ -37,11 +37,11 @@ std::optional<ParseResult> parseNewLine(std::string_view yamlSource) {
 
   if (yamlSource.size() >= 2 && yamlSource[0] == carriageReturn &&
       yamlSource[1] == lineBreak) {
-    return ParseResult{2, YAMLSymbol::NewLine{}};
+    return ParseResult{2, {YAMLSymbol::NewLine{}}};
   }
 
   if (yamlSource[0] == lineBreak || yamlSource[0] == carriageReturn) {
-    return ParseResult{1, YAMLSymbol::NewLine{}};
+    return ParseResult{1, {YAMLSymbol::NewLine{}}};
   }
 
   return std::nullopt;
@@ -62,7 +62,7 @@ std::optional<ParseResult> parseWhiteSpace(std::string_view yamlSource) {
   }
 
   if (i > 0) {
-    return ParseResult{i, YAMLSymbol::WhiteSpace{indentSize}};
+    return ParseResult{i, {YAMLSymbol::WhiteSpace{indentSize}}};
   }
 
   return std::nullopt;
@@ -71,7 +71,7 @@ std::optional<ParseResult> parseWhiteSpace(std::string_view yamlSource) {
 std::optional<ParseResult> parseBlockSequenceIndicator(
     std::string_view yamlSource) {
   if (yamlSource[0] == '-') {
-    return ParseResult{1, YAMLSymbol::BlockSequenceIndicator{}};
+    return ParseResult{1, {YAMLSymbol::BlockSequenceIndicator{}}};
   }
 
   return std::nullopt;
@@ -80,7 +80,7 @@ std::optional<ParseResult> parseBlockSequenceIndicator(
 std::optional<ParseResult> parseMappingKeyIndicator(
     std::string_view yamlSource) {
   if (yamlSource[0] == '?') {
-    return ParseResult{1, YAMLSymbol::MappingKeyIndicator{}};
+    return ParseResult{1, {YAMLSymbol::MappingKeyIndicator{}}};
   }
 
   return std::nullopt;
@@ -89,7 +89,7 @@ std::optional<ParseResult> parseMappingKeyIndicator(
 std::optional<ParseResult> parseMappingValueSeparator(
     std::string_view yamlSource) {
   if (yamlSource[0] == ':') {
-    return ParseResult{1, YAMLSymbol::MappingValueSeparator{}};
+    return ParseResult{1, {YAMLSymbol::MappingValueSeparator{}}};
   }
 
   return std::nullopt;
@@ -121,7 +121,7 @@ std::optional<ParseResult> parsePlainScalar(std::string_view yamlSource) {
   for (; isWhiteSpace(yamlSource[i - 1]); i--) {
   }
 
-  return ParseResult{i, YAMLSymbol::ScalarText{yamlSource.substr(0, i)}};
+  return ParseResult{i, {YAMLSymbol::ScalarText{yamlSource.substr(0, i)}}};
 }
 
 std::optional<ParseResult> parseComment(std::string_view yamlSource) {
@@ -136,7 +136,7 @@ std::optional<ParseResult> parseComment(std::string_view yamlSource) {
     }
   }
 
-  return ParseResult{i, YAMLSymbol::Comment{}};
+  return ParseResult{i, {YAMLSymbol::Comment{}}};
 }
 
 using Parser = std::optional<ParseResult> (*)(std::string_view);

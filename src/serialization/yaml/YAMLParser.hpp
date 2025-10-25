@@ -11,19 +11,19 @@ namespace blocks::serialization::yaml {
 
 struct YAMLDocument {
   struct LeafValue {
-    auto operator<=>(const LeafValue& other) const = default;
+    bool operator==(const LeafValue& other) const;
     std::string value;
   };
   struct Sequence {
-    auto operator<=>(const Sequence& other) const = default;
+    bool operator==(const Sequence& other) const;
     std::vector<YAMLDocument> entries;
   };
   struct Mapping {
-    auto operator<=>(const Mapping& other) const = default;
+    bool operator==(const Mapping& other) const;
     std::vector<std::pair<std::string, YAMLDocument>> entries;
   };
 
-  auto operator<=>(const YAMLDocument& other) const = default;
+  bool operator==(const YAMLDocument& other) const = default;
 
   std::variant<LeafValue, Sequence, Mapping> value_;
 };

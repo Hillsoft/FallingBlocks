@@ -234,4 +234,11 @@ YAMLDocument parseDocument(std::span<const YAMLSymbol> symbols) {
   return parseObject(0, false, symbols);
 }
 
+bool YAMLDocument::LeafValue::operator==(
+    const YAMLDocument::LeafValue& other) const = default;
+bool YAMLDocument::Sequence::operator==(
+    const YAMLDocument::Sequence& other) const = default;
+bool YAMLDocument::Mapping::operator==(
+    const YAMLDocument::Mapping& other) const = default;
+
 } // namespace blocks::serialization::yaml
