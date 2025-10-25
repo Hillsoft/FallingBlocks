@@ -130,6 +130,60 @@ YAMLDocument parseSequence(
   }
 }
 
+YAMLDocument parseMapping(
+    int indentLimit, std::span<const YAMLSymbol>& symbols) {
+  std::vector<std::pair<std::string, YAMLDocument>> elements;
+
+  consumeWhitespace(symbols);
+
+  while (true) {
+    if (symbols.size() == 0) {
+      return YAMLDocument{YAMLDocument::Mapping{std::move(elements)}};
+    }
+
+    if (!std::holds_alternative<YAMLSymbol::ScalarText>(symbols[0].value_)) {
+      throw std::runtime_error{"Expected mapping key"};
+    }
+    std::string key{
+        std::get<YAMLSymbol::ScalarText>(symbols[0].value_).contents};
+
+    symbols = symbols.subspan(1);
+    consumeWhitespace(symbols);
+
+    if (symbols.size() == 0 ||
+        !std::holds_alternative<YAMLSymbol::MappingValueSeparator>(
+            symbols[0].value_)) {
+      throw std::runtime_error{"Expected mapping value"};
+    }
+
+    symbols = symbols.subspan(1);
+    consumeWhitespace(symbols);
+
+    elements.emplace_back(
+        std::move(key), parseObject(indentLimit + 1, true, symbols));
+
+    consumeWhitespace(symbols);
+
+    if (symbols.size() == 0) {
+      return YAMLDocument{YAMLDocument::Mapping{std::move(elements)}};
+    }
+
+    if (!std::holds_alternative<YAMLSymbol::NewLine>(symbols[0].value_)) {
+      throw std::runtime_error{"Improperly formed mapping"};
+    }
+
+    int nextIndent = effectiveCurrentIndentation(symbols.subspan(1));
+    if (nextIndent > indentLimit) {
+      throw std::runtime_error{"Improperly formed mapping"};
+    } else if (nextIndent < indentLimit) {
+      return YAMLDocument{YAMLDocument::Mapping{std::move(elements)}};
+    }
+
+    symbols = symbols.subspan(1);
+    consumeWhitespace(symbols);
+  }
+}
+
 YAMLDocument parseObject(
     int indentLimit, bool isMidLine, std::span<const YAMLSymbol>& symbols) {
   if (isMidLine) {
@@ -161,9 +215,17 @@ YAMLDocument parseObject(
   if (std::holds_alternative<YAMLSymbol::BlockSequenceIndicator>(
           symbols[0].value_)) {
     return parseSequence(indentLimit, symbols);
-  } else {
-    return parseLeafValue(indentLimit, symbols);
   }
+
+  std::span<const YAMLSymbol> advance = symbols.subspan(1);
+  consumeWhitespace(advance);
+  if (advance.size() > 0 &&
+      std::holds_alternative<YAMLSymbol::MappingValueSeparator>(
+          advance[0].value_)) {
+    return parseMapping(indentLimit, symbols);
+  }
+
+  return parseLeafValue(indentLimit, symbols);
 }
 
 } // namespace
