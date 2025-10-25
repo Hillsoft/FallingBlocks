@@ -40,3 +40,36 @@ TEST(YAMLTokenizerTest, Sequence) {
           blocks::serialization::yaml::YAMLSymbol::ScalarText{"Ken Griffey"}),
       result);
 }
+
+TEST(YAMLTokenizerTest, Mapping) {
+  std::string_view inputYAML =
+      "hr:  65    # Home runs\n"
+      "avg: 0.278 # Batting average\n"
+      "rbi: 147   # Runs batted in";
+
+  std::vector<blocks::serialization::yaml::YAMLSymbol> result =
+      blocks::serialization::yaml::tokenizeYAML(inputYAML);
+  EXPECT_EQ(
+      makeSymbolSequence(
+          blocks::serialization::yaml::YAMLSymbol::ScalarText{"hr"},
+          blocks::serialization::yaml::YAMLSymbol::MappingValueSeparator{},
+          blocks::serialization::yaml::YAMLSymbol::WhiteSpace{},
+          blocks::serialization::yaml::YAMLSymbol::ScalarText{"65"},
+          blocks::serialization::yaml::YAMLSymbol::WhiteSpace{},
+          blocks::serialization::yaml::YAMLSymbol::Comment{},
+          blocks::serialization::yaml::YAMLSymbol::NewLine{},
+          blocks::serialization::yaml::YAMLSymbol::ScalarText{"avg"},
+          blocks::serialization::yaml::YAMLSymbol::MappingValueSeparator{},
+          blocks::serialization::yaml::YAMLSymbol::WhiteSpace{},
+          blocks::serialization::yaml::YAMLSymbol::ScalarText{"0.278"},
+          blocks::serialization::yaml::YAMLSymbol::WhiteSpace{},
+          blocks::serialization::yaml::YAMLSymbol::Comment{},
+          blocks::serialization::yaml::YAMLSymbol::NewLine{},
+          blocks::serialization::yaml::YAMLSymbol::ScalarText{"rbi"},
+          blocks::serialization::yaml::YAMLSymbol::MappingValueSeparator{},
+          blocks::serialization::yaml::YAMLSymbol::WhiteSpace{},
+          blocks::serialization::yaml::YAMLSymbol::ScalarText{"147"},
+          blocks::serialization::yaml::YAMLSymbol::WhiteSpace{},
+          blocks::serialization::yaml::YAMLSymbol::Comment{}),
+      result);
+}

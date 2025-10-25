@@ -26,6 +26,9 @@ struct YAMLSymbol {
     std::string_view contents;
     auto operator<=>(const ScalarText& other) const = default;
   };
+  struct Comment {
+    auto operator<=>(const Comment& other) const = default;
+  };
 
   std::variant<
       NewLine,
@@ -33,7 +36,8 @@ struct YAMLSymbol {
       BlockSequenceIndicator,
       MappingKeyIndicator,
       MappingValueSeparator,
-      ScalarText>
+      ScalarText,
+      Comment>
       value_;
 
   auto operator<=>(const YAMLSymbol& other) const = default;

@@ -89,7 +89,8 @@ std::optional<ParseResult> parseMappingValueSeparator(
 std::optional<ParseResult> parsePlainScalar(std::string_view yamlSource) {
   // is first character unsafe
   if (!isPrintable(yamlSource[0]) || isWhiteSpace(yamlSource[0]) ||
-      yamlSource[0] == ':' || yamlSource[0] == '?' || yamlSource[0] == '-') {
+      yamlSource[0] == ':' || yamlSource[0] == '?' || yamlSource[0] == '-' ||
+      yamlSource[0] == '#') {
     return std::nullopt;
   }
 
@@ -114,6 +115,21 @@ std::optional<ParseResult> parsePlainScalar(std::string_view yamlSource) {
   return ParseResult{i, YAMLSymbol::ScalarText{yamlSource.substr(0, i)}};
 }
 
+std::optional<ParseResult> parseComment(std::string_view yamlSource) {
+  if (yamlSource[0] != '#') {
+    return std::nullopt;
+  }
+
+  size_t i = 1;
+  for (; i < yamlSource.size(); i++) {
+    if (yamlSource[i] == '\n' || yamlSource[i] == '\r') {
+      break;
+    }
+  }
+
+  return ParseResult{i, YAMLSymbol::Comment{}};
+}
+
 using Parser = std::optional<ParseResult> (*)(std::string_view);
 
 constexpr auto parserList = util::makeArray<Parser>(
@@ -122,7 +138,8 @@ constexpr auto parserList = util::makeArray<Parser>(
     parseBlockSequenceIndicator,
     parseMappingKeyIndicator,
     parseMappingValueSeparator,
-    parsePlainScalar);
+    parsePlainScalar,
+    parseComment);
 
 } // namespace
 
