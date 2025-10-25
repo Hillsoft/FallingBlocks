@@ -22,6 +22,7 @@ ScoreUI::ScoreUI(Scene& scene) : UIActor(scene), scoreElement_(nullptr) {
   auto uiRoot = std::make_unique<ui::UIObject>();
   uiRoot->childLayoutDirection_ = ui::LayoutDirection::VERTICAL;
   uiRoot->sizeStrategy_ = ui::SizeStrategy::PAD;
+  uiRoot->innerPadding_ = 10;
 
   auto scoreElement = util::makeNotNullUnique<ui::UIText>(
       DefaultFontResourceSentinel::get(), "", render::Font::Size::Line{100.f});
