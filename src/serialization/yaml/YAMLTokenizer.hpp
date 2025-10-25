@@ -11,6 +11,7 @@ struct YAMLSymbol {
     auto operator<=>(const NewLine& other) const = default;
   };
   struct WhiteSpace {
+    int indentSize;
     auto operator<=>(const WhiteSpace& other) const = default;
   };
   struct BlockSequenceIndicator {

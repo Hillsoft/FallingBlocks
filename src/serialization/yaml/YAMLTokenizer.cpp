@@ -48,12 +48,21 @@ std::optional<ParseResult> parseNewLine(std::string_view yamlSource) {
 }
 
 std::optional<ParseResult> parseWhiteSpace(std::string_view yamlSource) {
+  int indentSize = 0;
+
   size_t i = 0;
   for (; i < yamlSource.size() && isWhiteSpace(yamlSource[i]); i++) {
+    if (indentSize != -1) {
+      if (yamlSource[i] == ' ') {
+        indentSize++;
+      } else {
+        indentSize = -1;
+      }
+    }
   }
 
   if (i > 0) {
-    return ParseResult{i, YAMLSymbol::WhiteSpace{}};
+    return ParseResult{i, YAMLSymbol::WhiteSpace{indentSize}};
   }
 
   return std::nullopt;
