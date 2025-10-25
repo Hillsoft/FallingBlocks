@@ -37,7 +37,6 @@ TEST(YAMLTokenizerTest, Sequence) {
           blocks::serialization::yaml::YAMLSymbol::NewLine{},
           blocks::serialization::yaml::YAMLSymbol::BlockSequenceIndicator{},
           blocks::serialization::yaml::YAMLSymbol::WhiteSpace{},
-          blocks::serialization::yaml::YAMLSymbol::ScalarText{"Ken Griffey"},
-          blocks::serialization::yaml::YAMLSymbol::NewLine{}),
+          blocks::serialization::yaml::YAMLSymbol::ScalarText{"Ken Griffey"}),
       result);
 }

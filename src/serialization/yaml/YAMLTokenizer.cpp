@@ -27,6 +27,10 @@ bool isWhiteSpace(char c) {
   return false;
 }
 
+bool isPrintable(char c) {
+  return c >= 32 && c <= 126;
+}
+
 std::optional<ParseResult> parseNewLine(std::string_view yamlSource) {
   constexpr char lineBreak = '\n';
   constexpr char carriageReturn = '\r';
@@ -64,10 +68,61 @@ std::optional<ParseResult> parseBlockSequenceIndicator(
   return std::nullopt;
 }
 
+std::optional<ParseResult> parseMappingKeyIndicator(
+    std::string_view yamlSource) {
+  if (yamlSource[0] == '?') {
+    return ParseResult{1, YAMLSymbol::MappingKeyIndicator{}};
+  }
+
+  return std::nullopt;
+}
+
+std::optional<ParseResult> parseMappingValueSeparator(
+    std::string_view yamlSource) {
+  if (yamlSource[0] == ':') {
+    return ParseResult{1, YAMLSymbol::MappingValueSeparator{}};
+  }
+
+  return std::nullopt;
+}
+
+std::optional<ParseResult> parsePlainScalar(std::string_view yamlSource) {
+  // is first character unsafe
+  if (!isPrintable(yamlSource[0]) || isWhiteSpace(yamlSource[0]) ||
+      yamlSource[0] == ':' || yamlSource[0] == '?' || yamlSource[0] == '-') {
+    return std::nullopt;
+  }
+
+  size_t i = 1;
+  for (; i < yamlSource.size(); i++) {
+    if (yamlSource[i] == '\n' || yamlSource[i] == '\r') {
+      break;
+    }
+    if (yamlSource[i] == '#' && isWhiteSpace(yamlSource[i - 1])) {
+      break;
+    }
+    if (yamlSource[i] == ':' &&
+        (yamlSource.size() > i + 1 || isWhiteSpace(yamlSource[i + 1]))) {
+      break;
+    }
+  }
+
+  // Remove trailing whitespace
+  for (; isWhiteSpace(yamlSource[i - 1]); i--) {
+  }
+
+  return ParseResult{i, YAMLSymbol::ScalarText{yamlSource.substr(0, i)}};
+}
+
 using Parser = std::optional<ParseResult> (*)(std::string_view);
 
 constexpr auto parserList = util::makeArray<Parser>(
-    parseNewLine, parseWhiteSpace, parseBlockSequenceIndicator);
+    parseNewLine,
+    parseWhiteSpace,
+    parseBlockSequenceIndicator,
+    parseMappingKeyIndicator,
+    parseMappingValueSeparator,
+    parsePlainScalar);
 
 } // namespace
 
