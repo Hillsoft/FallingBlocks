@@ -4,6 +4,8 @@ add_library(util.arena STATIC "Arena.hpp" "Arena.cpp")
 target_link_libraries(util.arena
 	util.raii_helpers)
 
+add_library(util.array INTERFACE "array.hpp")
+
 add_library(util.atomiccircularbufferqueue INTERFACE "AtomicCircularBufferQueue.hpp")
 target_link_libraries(util.atomiccircularbufferqueue INTERFACE
 	util.raii_helpers
