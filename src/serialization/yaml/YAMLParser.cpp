@@ -231,7 +231,17 @@ YAMLDocument parseObject(
 } // namespace
 
 YAMLDocument parseDocument(std::span<const YAMLSymbol> symbols) {
-  return parseObject(0, false, symbols);
+  YAMLDocument result = parseObject(0, false, symbols);
+
+  for (const auto& s : symbols) {
+    if (!std::holds_alternative<YAMLSymbol::WhiteSpace>(s.value_) &&
+        !std::holds_alternative<YAMLSymbol::Comment>(s.value_) &&
+        !std::holds_alternative<YAMLSymbol::NewLine>(s.value_)) {
+      throw std::runtime_error{"Expected end of file"};
+    }
+  }
+
+  return result;
 }
 
 bool YAMLDocument::LeafValue::operator==(
