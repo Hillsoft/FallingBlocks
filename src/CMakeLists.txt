@@ -24,6 +24,7 @@ add_library(globalsubsystemstack STATIC "GlobalSubSystemStack.cpp" "GlobalSubSys
 target_link_libraries(globalsubsystemstack
 	audio.audiosubsystem
 	engine.localisation
+	engine.resourcemanager
 	engine.resourcesentinelmanager
 	input.inputsubsystem
 	render.rendersubsystem

@@ -8,6 +8,8 @@
 #include "audio/AudioSubSystem.hpp"
 #include "engine/Actor.hpp"
 #include "engine/DrawableRegistry.hpp"
+#include "engine/ResourceManager.hpp"
+#include "engine/ResourceRef.hpp"
 #include "engine/Scene.hpp"
 #include "engine/TickRegistry.hpp"
 #include "game/Block.hpp"
@@ -50,17 +52,16 @@ math::Vec2 reflect(math::Vec2 vel, math::Vec2 normal) {
 class BallResourceSentinelData {
  public:
   BallResourceSentinelData()
-      : sprite_(GlobalSubSystemStack::get()
-                    .renderSystem()
-                    .createRenderable<render::RenderableTex2D>(
-                        RESOURCE_DIR "/ball.png")) {}
+      : resource_(GlobalSubSystemStack::get()
+                      .resourceManager()
+                      .loadResource<BallPrototype>("Prototype_DefaultBall")) {}
 
   render::RenderableRef<render::RenderableTex2D::InstanceData> getSprite() {
-    return sprite_.get();
+    return resource_->texture->get();
   }
 
  private:
-  render::UniqueRenderableHandle<render::RenderableTex2D::InstanceData> sprite_;
+  engine::ResourceRef<BallPrototype> resource_;
 };
 
 constinit std::optional<BallResourceSentinelData> resourceSentinel;

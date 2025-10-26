@@ -2,10 +2,13 @@
 
 #include "engine/Actor.hpp"
 #include "engine/DrawableRegistry.hpp"
+#include "engine/ResourceRef.hpp"
 #include "engine/Scene.hpp"
+#include "engine/TextureResource.hpp"
 #include "engine/TickRegistry.hpp"
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
+#include "util/meta_utils.hpp"
 
 namespace blocks::game {
 
@@ -13,6 +16,14 @@ class BallResourceSentinel {
  public:
   static void load();
   static void unload();
+};
+
+struct BallPrototype {
+  engine::ResourceRef<engine::TextureResource> texture;
+
+  using Fields = utils::TArray<utils::TPair<
+      utils::TString<"texture">,
+      engine::ResourceRef<engine::TextureResource>>>;
 };
 
 class Ball

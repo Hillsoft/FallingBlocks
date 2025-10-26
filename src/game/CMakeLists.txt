@@ -17,7 +17,10 @@ target_link_libraries(game.ball
 	audio.audiosubsystem
 	engine.actor
 	engine.drawableregistry
+	engine.resourcemanager
+	engine.resourceref
 	engine.scene
+	engine.textureresource
 	engine.tickregistry
 	game.block
 	game.blocksscene
@@ -27,7 +30,8 @@ target_link_libraries(game.ball
 	physics.physicsscene
 	render.renderables.renderabletex2d
 	render.rendersubsystem
-	util.debug)
+	util.debug
+	util.meta_utils)
 
 add_library(game.ballspawnblock "BallSpawnBlock.hpp" "BallSpawnBlock.cpp")
 target_link_libraries(game.ballspawnblock

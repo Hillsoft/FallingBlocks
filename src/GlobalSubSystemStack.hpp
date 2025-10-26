@@ -2,6 +2,7 @@
 
 #include "audio/AudioSubSystem.hpp"
 #include "engine/Localisation.hpp"
+#include "engine/ResourceManager.hpp"
 #include "engine/ResourceSentinelManager.hpp"
 #include "input/InputSubSystem.hpp"
 #include "render/RenderSubSystem.hpp"
@@ -27,6 +28,7 @@ class GlobalSubSystemStack : private util::no_copy_move {
   input::InputSubSystem& inputSystem();
   audio::AudioSubSystem& audioSystem();
   ResourceSentinelManager& sentinelManager();
+  engine::ResourceManager& resourceManager();
   Localisation& localisationManager();
 
  private:
@@ -35,6 +37,7 @@ class GlobalSubSystemStack : private util::no_copy_move {
   input::InputSubSystem input_;
   audio::AudioSubSystem audio_;
   ResourceSentinelManager sentinelManager_;
+  engine::ResourceManager resourceManager_;
   Localisation localisation_;
 };
 
