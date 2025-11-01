@@ -21,8 +21,8 @@ class BallResourceSentinel {
 struct BallPrototype {
   engine::ResourceRef<engine::TextureResource> texture;
 
-  using Fields = utils::TArray<utils::TPair<
-      utils::TString<"texture">,
+  using Fields = util::TArray<util::TPair<
+      util::TString<"texture">,
       engine::ResourceRef<engine::TextureResource>>>;
 };
 

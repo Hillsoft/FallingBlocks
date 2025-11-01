@@ -15,10 +15,10 @@ struct ScoreDetails {
   std::string average;
   std::string runs;
 
-  using Fields = utils::TArray<
-      utils::TPair<utils::TString<"hr">, std::string>,
-      utils::TPair<utils::TString<"avg">, std::string>,
-      utils::TPair<utils::TString<"rbi">, std::string>>;
+  using Fields = util::TArray<
+      util::TPair<util::TString<"hr">, std::string>,
+      util::TPair<util::TString<"avg">, std::string>,
+      util::TPair<util::TString<"rbi">, std::string>>;
 };
 
 struct PlayerDetails {
@@ -28,10 +28,10 @@ struct PlayerDetails {
   std::string homeRuns;
   std::string average;
 
-  using Fields = utils::TArray<
-      utils::TPair<utils::TString<"name">, std::string>,
-      utils::TPair<utils::TString<"hr">, std::string>,
-      utils::TPair<utils::TString<"avg">, std::string>>;
+  using Fields = util::TArray<
+      util::TPair<util::TString<"name">, std::string>,
+      util::TPair<util::TString<"hr">, std::string>,
+      util::TPair<util::TString<"avg">, std::string>>;
 };
 
 TEST(YAMLSerializationTest, Sequence) {

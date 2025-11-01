@@ -9,8 +9,7 @@ namespace blocks::engine {
 
 class TextureResource {
  public:
-  using Fields =
-      utils::TArray<utils::TPair<utils::TString<"path">, std::string>>;
+  using Fields = util::TArray<util::TPair<util::TString<"path">, std::string>>;
 
   TextureResource(const std::string& path);
 

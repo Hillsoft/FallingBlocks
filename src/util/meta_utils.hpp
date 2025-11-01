@@ -1,6 +1,6 @@
 #pragma once
 
-namespace utils {
+namespace util {
 
 template <unsigned N>
 struct FixedString {
@@ -38,4 +38,4 @@ struct TArray {
   }
 };
 
-} // namespace utils
+} // namespace util
