@@ -111,6 +111,14 @@ struct deserializeArbitrary<std::string> {
   }
 };
 
+template <>
+struct deserializeArbitrary<float> {
+  template <typename TCursor>
+  float operator()(TCursor cursor) {
+    return std::stof(std::string{cursor.getStringValue()});
+  }
+};
+
 template <typename T, typename SerializationProvider>
 T deserialize(std::string_view dataStream) {
   SerializationProvider deserializer{dataStream};
