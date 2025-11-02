@@ -1,3 +1,12 @@
+add_library(game.scenes.fromresource STATIC "FromResource.hpp" "FromResource.cpp")
+target_link_libraries(game.scenes.fromresource
+	engine.resourceref
+	engine.scene
+	game.blocksscene
+	globalsubsystemstack
+	resourcetypes
+	util.meta_utils)
+
 add_library(game.scenes.gameover STATIC "GameOver.hpp" "GameOver.cpp")
 target_link_libraries(game.scenes.gameover
 	application	
@@ -24,6 +33,7 @@ target_link_libraries(game.scenes.level1
 	game.paddle
 	game.resource.defaultfont
 	game.scoreui
+	game.scenes.fromresource
 	game.scenes.levelconsts
 	game.scenes.level2
 	globalsubsystemstack

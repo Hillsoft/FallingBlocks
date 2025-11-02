@@ -10,6 +10,7 @@
 #include "game/Paddle.hpp"
 #include "game/ScoreUI.hpp"
 #include "game/resource/DefaultFont.hpp"
+#include "game/scenes/FromResource.hpp"
 #include "game/scenes/Level2.hpp"
 #include "game/scenes/LevelConsts.hpp"
 #include "math/vec.hpp"
@@ -17,6 +18,8 @@
 namespace blocks::game {
 
 std::unique_ptr<Scene> Level1::loadScene() const {
+  return scene::fromResourceName("Scene_Level1");
+
   GlobalSubSystemStack::get()
       .sentinelManager()
       .transitionToSentinelSet<

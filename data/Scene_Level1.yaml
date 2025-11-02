@@ -1,0 +1,16 @@
+objectType: Scene
+data:
+  sceneObject:
+    type: BlocksScene
+  actors:
+  -
+    variantTag: Ball
+    value:
+      prototype: Prototype_DefaultBall
+  -
+    variantTag: Ball
+    value:
+      prototype: Prototype_DefaultBall
+      position:
+        x: 0.5
+        y: 0
