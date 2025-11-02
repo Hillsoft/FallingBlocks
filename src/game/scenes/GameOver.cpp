@@ -7,10 +7,10 @@
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Actor.hpp"
 #include "engine/Scene.hpp"
+#include "engine/SceneLoader.hpp"
 #include "game/Background.hpp"
 #include "game/GameOverUI.hpp"
 #include "game/resource/DefaultFont.hpp"
-#include "game/scenes/Level1.hpp"
 #include "input/InputHandler.hpp"
 
 namespace blocks::game {
@@ -26,7 +26,7 @@ class GameRestarter : public Actor, public input::InputHandler {
   void onKeyRelease(int keyCode) final {
     if (keyCode == GLFW_KEY_SPACE) {
       Application::getApplication().transitionToScene(
-          std::make_unique<Level1>());
+          std::make_unique<SceneLoaderFromResourceFile>("Scene_Level1"));
     }
   }
 };

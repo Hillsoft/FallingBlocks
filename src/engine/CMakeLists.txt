@@ -35,9 +35,14 @@ target_link_libraries(engine.scene
 	physics.physicsscene
 	util.debug)
 
-add_library(engine.sceneloader INTERFACE "SceneLoader.hpp")
-target_link_libraries(engine.sceneloader INTERFACE
-	engine.scene)
+add_library(engine.sceneloader STATIC "SceneLoader.hpp" "SceneLoader.cpp")
+target_link_libraries(engine.sceneloader
+	engine.resourceref
+	engine.scene
+	game.blocksscene
+	globalsubsystemstack
+	resourcetypes
+	util.meta_utils)
 
 add_library(engine.textureresource STATIC "TextureResource.hpp" "TextureResource.cpp")
 target_link_libraries(engine.textureresource

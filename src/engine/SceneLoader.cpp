@@ -1,4 +1,4 @@
-#include "game/scenes/FromResource.hpp"
+#include "engine/SceneLoader.hpp"
 
 #include <memory>
 #include <string>
@@ -11,7 +11,7 @@
 #include "game/BlocksScene.hpp"
 #include "util/meta_utils.hpp"
 
-namespace blocks::game::scene {
+namespace blocks {
 
 struct SceneObjectDefinition {
   std::string type;
@@ -37,12 +37,20 @@ struct SceneDefinitionWrapper {
       util::TPair<util::TString<"data">, SceneDefition>>;
 };
 
-std::unique_ptr<Scene> fromResourceName(std::string sceneName) {
+SceneLoaderFromResourceFile::SceneLoaderFromResourceFile(std::string sceneName)
+    : sceneName_(std::move(sceneName)) {}
+
+std::unique_ptr<Scene> SceneLoaderFromResourceFile::loadScene() const {
   blocks::engine::ResourceRef<SceneDefinitionWrapper> sceneDefinitionRef =
       GlobalSubSystemStack::get()
           .resourceManager()
-          .loadResource<SceneDefinitionWrapper>(std::move(sceneName));
+          .loadResource<SceneDefinitionWrapper>(sceneName_);
 
+  return loadSceneFromDefinition(sceneDefinitionRef);
+}
+
+std::unique_ptr<Scene> loadSceneFromDefinition(
+    engine::ResourceRef<SceneDefinitionWrapper> sceneDefinitionRef) {
   // TODO: use the object type we were actually asked to create
   std::unique_ptr<Scene> scene = std::make_unique<game::BlocksScene>();
 
@@ -56,4 +64,4 @@ std::unique_ptr<Scene> fromResourceName(std::string sceneName) {
   return scene;
 }
 
-} // namespace blocks::game::scene
+} // namespace blocks

@@ -8,9 +8,9 @@
 #include "Application.hpp"
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Scene.hpp"
+#include "engine/SceneLoader.hpp"
 #include "game/UIActor.hpp"
 #include "game/resource/DefaultFont.hpp"
-#include "game/scenes/Level1.hpp"
 #include "game/scenes/MainMenu.hpp"
 #include "math/vec.hpp"
 #include "render/Font.hpp"
@@ -75,7 +75,7 @@ std::unique_ptr<ui::UIObject> makeUI() {
           resourceSentinel->getColor(),
           []() {
             Application::getApplication().transitionToScene(
-                std::make_unique<Level1>());
+                std::make_unique<SceneLoaderFromResourceFile>("Scene_Level1"));
           }));
   startButton->outerPadding_ = 5;
   startButton->innerPadding_ = 5;

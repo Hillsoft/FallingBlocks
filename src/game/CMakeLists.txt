@@ -144,8 +144,8 @@ add_library(game.mainmenuui "MainMenuUI.hpp" "MainMenuUI.cpp")
 target_link_libraries(game.mainmenuui
 	application
 	engine.scene
+	engine.sceneloader
 	game.resource.defaultfont
-	game.scenes.level1
 	game.scenes.mainmenu
 	game.uiactor
 	globalsubsystemstack
