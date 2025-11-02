@@ -47,6 +47,8 @@ struct THolder {
 
 template <typename... TArr>
 struct TArray {
+  constexpr static size_t size = sizeof...(TArr);
+
   template <typename ConstructType, typename ValueFn>
   static auto visitConstruct(ValueFn&& valueFn) {
     return ConstructType{valueFn(THolder<TArr>{})...};

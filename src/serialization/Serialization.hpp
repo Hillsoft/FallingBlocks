@@ -77,6 +77,13 @@ template <typename T>
 struct deserializeArbitrary<T> {
   template <typename TCursor>
   T operator()(TCursor cursor) {
+    if constexpr (T::Fields::size == 0) {
+      if (!cursor.getStringValue().empty()) {
+        throw std::runtime_error{"Unexpected contents in empty struct"};
+      }
+      return {};
+    }
+
     size_t availableFieldCount = cursor.getStructFieldCount();
 
     T result = T::Fields::template visitConstruct<T>([&](auto tholder) {
