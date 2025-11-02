@@ -30,3 +30,8 @@ target_link_libraries(globalsubsystemstack
 	render.rendersubsystem
 	util.debug
 	util.raii_helpers)
+
+add_library(resourcetypes INTERFACE "ResourceTypes.hpp")
+target_link_libraries(resourcetypes INTERFACE
+	game.ball
+	util.taggedvariant)
