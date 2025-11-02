@@ -25,9 +25,9 @@ namespace blocks::game {
 
 namespace {
 
-constexpr float kBallSize = 0.05f;
+constexpr float kBallSize = 15.f * 0.05f;
 constexpr float kBounceDirectionalStrength = 15.f;
-constexpr float kBallSpeed = 1.5f;
+constexpr float kBallSpeed = 15.f * 1.5f;
 
 constexpr uint32_t kWallHitFrequency = 262;
 constexpr uint32_t kBlockHitFrequency = 330;
@@ -83,7 +83,7 @@ Ball::Ball(Scene& scene, const BallDefinition& definition)
     : Ball(
           scene,
           definition.prototype,
-          definition.position.value_or({0.0f, 0.0f}),
+          definition.position.value_or({15.0f, 15.0f}),
           definition.velocity.value_or({randFloat(-0.25f, 0.25f), -1.0f})) {}
 
 Ball::Ball(
@@ -117,29 +117,29 @@ void Ball::update(float deltaTimeSeconds) {
   math::Vec2 newPos = getP0() + deltaTimeSeconds * vel_;
   math::Vec2 newPos2 = newPos + objSize;
 
-  if (newPos2.x() > 1.0f) {
+  if (newPos2.x() > 30.0f) {
     vel_.x() *= -1.0f;
-    newPos.x() = 1.0f - objSize.x();
+    newPos.x() = 30.0f - objSize.x();
     GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
         .frequency = kWallHitFrequency,
         .volume = 0.5f,
         .duration = kSoundDuration});
   }
-  if (newPos.x() < -1.0f) {
+  if (newPos.x() < 0.0f) {
     vel_.x() *= -1.0f;
-    newPos.x() = -1.0f;
+    newPos.x() = 0.0f;
     GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
         .frequency = kWallHitFrequency,
         .volume = 0.5f,
         .duration = kSoundDuration});
   }
 
-  if (newPos.y() > 1.0f) {
+  if (newPos.y() > 30.0f) {
     getScene()->destroyActor(this);
   }
-  if (newPos.y() < -1.0f) {
+  if (newPos.y() < 0.0f) {
     vel_.y() *= -1.0f;
-    newPos.y() = -1.0f;
+    newPos.y() = 0.0f;
     GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
         .frequency = kWallHitFrequency,
         .volume = 0.5f,
