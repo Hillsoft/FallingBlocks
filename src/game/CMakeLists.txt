@@ -119,6 +119,18 @@ target_link_libraries(game.paddle
 	util.debug
 	util.meta_utils)
 
+add_library(game.staticimage "StaticImage.hpp" "StaticImage.cpp")
+target_link_libraries(game.staticimage
+	engine.actor
+	engine.drawableregistry
+	engine.resourceref
+	engine.scene
+	engine.textureresource
+	globalsubsystemstack
+	math.vec
+	render.rendersubsystem
+	util.meta_utils)
+
 add_library(game.mainmenuui "MainMenuUI.hpp" "MainMenuUI.cpp")
 target_link_libraries(game.mainmenuui
 	application

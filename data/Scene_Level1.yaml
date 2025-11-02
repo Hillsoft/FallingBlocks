@@ -11,3 +11,10 @@ data:
     variantTag: Paddle
     value:
       prototype: Prototype_DefaultPaddle
+  -
+    variantTag: StaticImage
+    value:
+      prototype: Prototype_DefaultBackgroundImage
+      position:
+        x: 0
+        y: 0

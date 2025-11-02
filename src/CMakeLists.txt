@@ -35,4 +35,5 @@ add_library(resourcetypes INTERFACE "ResourceTypes.hpp")
 target_link_libraries(resourcetypes INTERFACE
 	game.ball
 	game.paddle
+	game.staticimage
 	util.taggedvariant)

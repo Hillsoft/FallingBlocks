@@ -57,6 +57,14 @@ struct deserializeArbitrary<std::string> {
 };
 
 template <>
+struct deserializeArbitrary<int> {
+  template <typename TCursor>
+  int operator()(TCursor cursor) {
+    return std::stoi(std::string{cursor.getStringValue()});
+  }
+};
+
+template <>
 struct deserializeArbitrary<float> {
   template <typename TCursor>
   float operator()(TCursor cursor) {
