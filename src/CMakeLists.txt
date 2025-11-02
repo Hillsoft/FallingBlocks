@@ -38,5 +38,6 @@ target_link_libraries(resourcetypes INTERFACE
 	game.block
 	game.cameraactor
 	game.paddle
+	game.scoreui
 	game.staticimage
 	util.taggedvariant)

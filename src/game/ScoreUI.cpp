@@ -18,6 +18,9 @@
 
 namespace blocks::game {
 
+ScoreUI::ScoreUI(Scene& scene, const ScoreUIDefinition& definition)
+    : ScoreUI(scene) {}
+
 ScoreUI::ScoreUI(Scene& scene) : UIActor(scene), scoreElement_(nullptr) {
   auto uiRoot = std::make_unique<ui::UIObject>();
   uiRoot->childLayoutDirection_ = ui::LayoutDirection::VERTICAL;

@@ -171,6 +171,7 @@ target_link_libraries(game.scoreui
 	ui.uiobject
 	ui.uitext
 	util.debug
+	util.meta_utils
 	util.notnull
 	util.string)
 

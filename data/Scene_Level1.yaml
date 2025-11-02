@@ -447,3 +447,6 @@ data:
       extent:
         x: 30
         y: 30
+  -
+    variantTag: ScoreUI
+    value:
