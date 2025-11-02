@@ -31,6 +31,10 @@ bool isPrintable(char c) {
   return c >= 32 && c <= 126;
 }
 
+bool isPlainSafe(char c) {
+  return isPrintable(c) && !isWhiteSpace(c) && c != '\r' && c != '\n';
+}
+
 std::optional<ParseResult> parseNewLine(std::string_view yamlSource) {
   constexpr char lineBreak = '\n';
   constexpr char carriageReturn = '\r';
@@ -97,9 +101,13 @@ std::optional<ParseResult> parseMappingValueSeparator(
 
 std::optional<ParseResult> parsePlainScalar(std::string_view yamlSource) {
   // is first character unsafe
+  bool secondCharacterSafe =
+      yamlSource.size() > 1 && isPlainSafe(yamlSource[1]);
+
   if (!isPrintable(yamlSource[0]) || isWhiteSpace(yamlSource[0]) ||
-      yamlSource[0] == ':' || yamlSource[0] == '?' || yamlSource[0] == '-' ||
-      yamlSource[0] == '#') {
+      yamlSource[0] == '#' ||
+      ((yamlSource[0] == ':' || yamlSource[0] == '?' || yamlSource[0] == '-') &&
+       !secondCharacterSafe)) {
     return std::nullopt;
   }
 
