@@ -11,10 +11,21 @@
 namespace blocks::serialization {
 
 template <typename T>
+struct OptionalTraits {
+  static constexpr bool isOptional = false;
+  using UnderlyingType = T;
+};
+template <typename T>
+struct OptionalTraits<std::optional<T>> {
+  static constexpr bool isOptional = true;
+  using UnderlyingType = T;
+};
+
+template <typename T>
 concept SerializableStruct = requires(T obj) { typename T::Fields; };
 
 template <typename T>
-struct deserializeArbitrary {};
+struct deserializeArbitrary;
 
 template <typename TField, typename TCursor>
 TField::Second deserializeField(TCursor cursor, size_t& availableFieldCount) {
@@ -23,11 +34,17 @@ TField::Second deserializeField(TCursor cursor, size_t& availableFieldCount) {
 
   if (subFieldCursor.has_value()) {
     availableFieldCount--;
-    return deserializeArbitrary<typename TField::Second>{}(*subFieldCursor);
+    return deserializeArbitrary<
+        typename OptionalTraits<typename TField::Second>::UnderlyingType>{}(
+        *subFieldCursor);
   } else {
+    if constexpr (OptionalTraits<typename TField::Second>::isOptional) {
+      return std::nullopt;
+    } else {
     throw std::runtime_error{
         util::toString("Field not found: ", TField::First::value)};
   }
+}
 }
 
 template <typename T>
