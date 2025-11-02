@@ -26,7 +26,7 @@ class TaggedVariant {
       if (!result.has_value() &&
           tag == decltype(typeHolder)::Value::First::value) {
         result.emplace(typename decltype(typeHolder)::Value::Second{
-            fn(THolder<decltype(typeHolder)::Value::Second>{})});
+            fn(THolder<typename decltype(typeHolder)::Value::Second>{})});
       }
     });
 

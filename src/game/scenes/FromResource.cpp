@@ -48,7 +48,8 @@ std::unique_ptr<Scene> fromResourceName(std::string sceneName) {
 
   for (auto& actor : sceneDefinitionRef->definition.objects) {
     actor.visit([&](auto actorDefinition) {
-      scene->createActor<decltype(actorDefinition)::ActorType>(actorDefinition);
+      scene->createActor<typename decltype(actorDefinition)::ActorType>(
+          actorDefinition);
     });
   }
 

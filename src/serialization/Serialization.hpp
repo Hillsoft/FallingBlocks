@@ -48,6 +48,22 @@ TField::Second deserializeField(TCursor cursor, size_t& availableFieldCount) {
   }
 }
 
+template <>
+struct deserializeArbitrary<std::string> {
+  template <typename TCursor>
+  std::string operator()(TCursor cursor) {
+    return std::string{cursor.getStringValue()};
+  }
+};
+
+template <>
+struct deserializeArbitrary<float> {
+  template <typename TCursor>
+  float operator()(TCursor cursor) {
+    return std::stof(std::string{cursor.getStringValue()});
+  }
+};
+
 template <typename T>
   requires(SerializableStruct<T>)
 struct deserializeArbitrary<T> {
@@ -126,24 +142,9 @@ struct deserializeArbitrary<util::TaggedVariant<Args...>> {
     }
 
     return util::TaggedVariant<Args...>::visitConstruct(tag, [&](auto tholder) {
-      return deserializeArbitrary<decltype(tholder)::Value>{}(*contentsCursor);
+      return deserializeArbitrary<typename decltype(tholder)::Value>{}(
+          *contentsCursor);
     });
-  }
-};
-
-template <>
-struct deserializeArbitrary<std::string> {
-  template <typename TCursor>
-  std::string operator()(TCursor cursor) {
-    return std::string{cursor.getStringValue()};
-  }
-};
-
-template <>
-struct deserializeArbitrary<float> {
-  template <typename TCursor>
-  float operator()(TCursor cursor) {
-    return std::stof(std::string{cursor.getStringValue()});
   }
 };
 
