@@ -19,10 +19,10 @@ namespace blocks::game {
 
 namespace {
 
-constexpr float kPaddleWidth = 0.3f;
-constexpr float kPaddleHeight = 0.1f;
+constexpr float kPaddleWidth = 15.f * 0.3f;
+constexpr float kPaddleHeight = 15.f * 0.1f;
 
-constexpr float kPaddleSpeed = 1.0f;
+constexpr float kPaddleSpeed = 15.f * 1.0f;
 
 class PaddleResourceSentinelData {
  public:
@@ -56,8 +56,8 @@ Paddle::Paddle(Scene& scene, const PaddleDefinition& definition)
       input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
       physics::RectCollider(
           scene.getPhysicsScene(),
-          math::Vec2{-kPaddleWidth / 2.f, 0.8f},
-          math::Vec2{kPaddleWidth / 2.f, 0.9f},
+          math::Vec2{15.f + -kPaddleWidth / 2.f, 27.f},
+          math::Vec2{15.f + kPaddleWidth / 2.f, 28.5f},
           0b1,
           0),
       TickHandler(scene.getTickRegistry()),
@@ -69,8 +69,8 @@ Paddle::Paddle(Scene& scene)
       input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
       physics::RectCollider(
           scene.getPhysicsScene(),
-          math::Vec2{-kPaddleWidth / 2.f, 0.8f},
-          math::Vec2{kPaddleWidth / 2.f, 0.9f},
+          math::Vec2{15.f + -kPaddleWidth / 2.f, 27.f},
+          math::Vec2{15.f + kPaddleWidth / 2.f, 28.5f},
           0b1,
           0),
       TickHandler(scene.getTickRegistry()),
@@ -81,8 +81,8 @@ void Paddle::update(float deltaTimeSeconds) {
   math::Vec2 pos = getP0();
   pos += deltaTimeSeconds * vel_;
 
-  pos.x() = std::min(1.0f - kPaddleWidth, pos.x());
-  pos.x() = std::max(-1.0f, pos.x());
+  pos.x() = std::min(30.0f - kPaddleWidth, pos.x());
+  pos.x() = std::max(0.0f, pos.x());
 
   setP0(pos);
   setP1(pos + math::Vec2{kPaddleWidth, kPaddleHeight});
