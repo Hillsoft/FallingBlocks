@@ -33,9 +33,11 @@ target_link_libraries(globalsubsystemstack
 
 add_library(resourcetypes INTERFACE "ResourceTypes.hpp")
 target_link_libraries(resourcetypes INTERFACE
+	engine.scene
 	game.ball
 	game.ballspawnblock
 	game.block
+	game.blocksscene
 	game.cameraactor
 	game.paddle
 	game.scoreui

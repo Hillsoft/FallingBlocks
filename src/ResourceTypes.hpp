@@ -1,8 +1,10 @@
 #pragma once
 
+#include "engine/Scene.hpp"
 #include "game/Ball.hpp"
 #include "game/BallSpawnBlock.hpp"
 #include "game/Block.hpp"
+#include "game/BlocksScene.hpp"
 #include "game/CameraActor.hpp"
 #include "game/Paddle.hpp"
 #include "game/ScoreUI.hpp"
@@ -21,4 +23,8 @@ using GameObjects = util::TaggedVariant<
     util::TPair<util::TString<"ScoreUI">, game::ScoreUIDefinition>,
     util::TPair<util::TString<"StaticImage">, game::StaticImageDefinition>>;
 
-}
+using SceneObjects = util::TaggedVariant<
+    util::TPair<util::TString<"BlocksScene">, game::BlocksSceneDefinition>,
+    util::TPair<util::TString<"Scene">, SceneObjectDefinition>>;
+
+} // namespace blocks

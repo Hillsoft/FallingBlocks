@@ -1,7 +1,9 @@
 objectType: Scene
 data:
   sceneObject:
-    type: BlocksScene
+    variantTag: BlocksScene
+    value:
+      nextLevelName: Scene_Level2
   actors:
   -
     variantTag: Ball

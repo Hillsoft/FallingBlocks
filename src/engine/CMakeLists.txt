@@ -33,13 +33,13 @@ target_link_libraries(engine.scene
 	engine.tickregistry
 	engine.timer
 	physics.physicsscene
-	util.debug)
+	util.debug
+	util.meta_utils)
 
 add_library(engine.sceneloader STATIC "SceneLoader.hpp" "SceneLoader.cpp")
 target_link_libraries(engine.sceneloader
 	engine.resourceref
 	engine.scene
-	game.blocksscene
 	globalsubsystemstack
 	resourcetypes
 	util.meta_utils)

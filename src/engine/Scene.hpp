@@ -8,11 +8,20 @@
 #include "engine/TickRegistry.hpp"
 #include "engine/Timer.hpp"
 #include "physics/PhysicsScene.hpp"
+#include "util/meta_utils.hpp"
 
 namespace blocks {
 
+class Scene;
+
+struct SceneObjectDefinition {
+  using Fields = util::TArray<>;
+  using SceneType = Scene;
+};
+
 class Scene {
  public:
+  Scene(const SceneObjectDefinition& definition) {}
   Scene() {}
 
   virtual ~Scene() {}

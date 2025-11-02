@@ -65,7 +65,8 @@ target_link_libraries(game.blocksscene
 	engine.sceneloader
 	game.ball
 	game.block
-	game.scenes.gameover)
+	game.scenes.gameover
+	util.meta_utils)
 
 add_library(game.button "Button.hpp" "Button.cpp")
 target_link_libraries(game.button

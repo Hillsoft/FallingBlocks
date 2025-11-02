@@ -8,23 +8,16 @@
 #include "ResourceTypes.hpp"
 #include "engine/ResourceRef.hpp"
 #include "engine/Scene.hpp"
-#include "game/BlocksScene.hpp"
 #include "util/meta_utils.hpp"
 
 namespace blocks {
 
-struct SceneObjectDefinition {
-  std::string type;
-
-  using Fields = util::TArray<util::TPair<util::TString<"type">, std::string>>;
-};
-
 struct SceneDefition {
-  SceneObjectDefinition sceneObjectDefinition;
+  SceneObjects sceneObject;
   std::vector<GameObjects> objects;
 
   using Fields = util::TArray<
-      util::TPair<util::TString<"sceneObject">, SceneObjectDefinition>,
+      util::TPair<util::TString<"sceneObject">, SceneObjects>,
       util::TPair<util::TString<"actors">, std::vector<GameObjects>>>;
 };
 
@@ -51,8 +44,12 @@ std::unique_ptr<Scene> SceneLoaderFromResourceFile::loadScene() const {
 
 std::unique_ptr<Scene> loadSceneFromDefinition(
     engine::ResourceRef<SceneDefinitionWrapper> sceneDefinitionRef) {
-  // TODO: use the object type we were actually asked to create
-  std::unique_ptr<Scene> scene = std::make_unique<game::BlocksScene>();
+  std::unique_ptr<Scene> scene =
+      sceneDefinitionRef->definition.sceneObject.visit(
+          [&](auto sceneDefinition) -> std::unique_ptr<Scene> {
+            return std::make_unique<
+                typename decltype(sceneDefinition)::SceneType>(sceneDefinition);
+          });
 
   for (auto& actor : sceneDefinitionRef->definition.objects) {
     actor.visit([&](auto actorDefinition) {
