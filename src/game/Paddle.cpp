@@ -6,13 +6,13 @@
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Actor.hpp"
 #include "engine/DrawableRegistry.hpp"
+#include "engine/ResourceRef.hpp"
 #include "engine/Scene.hpp"
 #include "engine/TickRegistry.hpp"
 #include "input/InputHandler.hpp"
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
 #include "render/RenderSubSystem.hpp"
-#include "render/renderables/RenderableTex2D.hpp"
 #include "util/debug.hpp"
 
 namespace blocks::game {
@@ -27,17 +27,15 @@ constexpr float kPaddleSpeed = 1.0f;
 class PaddleResourceSentinelData {
  public:
   PaddleResourceSentinelData()
-      : sprite_(GlobalSubSystemStack::get()
-                    .renderSystem()
-                    .createRenderable<render::RenderableTex2D>(
-                        RESOURCE_DIR "/paddle.png")) {}
+      : prototype(
+            GlobalSubSystemStack::get()
+                .resourceManager()
+                .loadResource<PaddlePrototype>("Prototype_DefaultPaddle")) {}
 
-  render::RenderableRef<render::RenderableTex2D::InstanceData> getSprite() {
-    return sprite_.get();
-  }
+  engine::ResourceRef<PaddlePrototype> getPrototype() { return prototype; }
 
  private:
-  render::UniqueRenderableHandle<render::RenderableTex2D::InstanceData> sprite_;
+  engine::ResourceRef<PaddlePrototype> prototype;
 };
 
 constinit std::optional<PaddleResourceSentinelData> resourceSentinel;
@@ -53,6 +51,19 @@ void PaddleResourceSentinel::unload() {
   resourceSentinel.reset();
 }
 
+Paddle::Paddle(Scene& scene, const PaddleDefinition& definition)
+    : Actor(scene),
+      input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
+      physics::RectCollider(
+          scene.getPhysicsScene(),
+          math::Vec2{-kPaddleWidth / 2.f, 0.8f},
+          math::Vec2{kPaddleWidth / 2.f, 0.9f},
+          0b1,
+          0),
+      TickHandler(scene.getTickRegistry()),
+      Drawable(scene.getDrawableScene()),
+      prototype_(definition.prototype) {}
+
 Paddle::Paddle(Scene& scene)
     : Actor(scene),
       input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
@@ -63,7 +74,8 @@ Paddle::Paddle(Scene& scene)
           0b1,
           0),
       TickHandler(scene.getTickRegistry()),
-      Drawable(scene.getDrawableScene()) {}
+      Drawable(scene.getDrawableScene()),
+      prototype_(resourceSentinel->getPrototype()) {}
 
 void Paddle::update(float deltaTimeSeconds) {
   math::Vec2 pos = getP0();
@@ -83,7 +95,7 @@ void Paddle::draw() {
   render.drawObject(
       window,
       0,
-      resourceSentinel->getSprite(),
+      prototype_->texture->get(),
       {math::modelMatrixFromBounds(getP0(), getP1())});
 }
 

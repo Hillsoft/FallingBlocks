@@ -34,4 +34,5 @@ target_link_libraries(globalsubsystemstack
 add_library(resourcetypes INTERFACE "ResourceTypes.hpp")
 target_link_libraries(resourcetypes INTERFACE
 	game.ball
+	game.paddle
 	util.taggedvariant)

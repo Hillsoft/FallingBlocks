@@ -107,15 +107,17 @@ add_library(game.paddle "Paddle.hpp" "Paddle.cpp")
 target_link_libraries(game.paddle
 	engine.actor
 	engine.drawableregistry
+	engine.resourceref
 	engine.scene
+	engine.textureresource
 	engine.tickregistry
 	globalsubsystemstack
 	input.inputsubsystem
 	math.vec
 	physics.physicsscene
-	render.renderables.renderabletex2d
 	render.rendersubsystem
-	util.debug)
+	util.debug
+	util.meta_utils)
 
 add_library(game.mainmenuui "MainMenuUI.hpp" "MainMenuUI.cpp")
 target_link_libraries(game.mainmenuui
