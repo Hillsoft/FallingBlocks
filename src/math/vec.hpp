@@ -3,6 +3,7 @@
 #include <array>
 #include <type_traits>
 #include "util/debug.hpp"
+#include "util/meta_utils.hpp"
 
 namespace math {
 
@@ -18,6 +19,21 @@ constexpr size_t alignmentForVec(size_t size) {
     return 4 * alignof(TNum);
   }
 }
+
+template <typename TNum, size_t size>
+struct VecFieldNamesImpl {
+  using Fields = void;
+};
+
+template <typename TNum>
+struct VecFieldNamesImpl<TNum, 2> {
+  using Fields = util::TArray<
+      util::TPair<util::TString<"x">, TNum>,
+      util::TPair<util::TString<"y">, TNum>>;
+};
+
+template <typename TNum, size_t size>
+using VecFieldNames = VecFieldNamesImpl<TNum, size>::Fields;
 
 } // namespace detail
 
@@ -106,6 +122,8 @@ class Vec {
     }
     return dotVal;
   }
+
+  using Fields = detail::VecFieldNames<TNum, size>;
 
  private:
   alignas(detail::alignmentForVec<TNum>(size)) std::array<TNum, size> data_;
