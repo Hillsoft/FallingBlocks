@@ -30,8 +30,7 @@ void StaticImage::draw() {
       window,
       -100,
       prototype_->texture->get(),
-      {math::modelMatrixFromBounds(
-          math::Vec2{-1.0f, -1.0f}, math::Vec2{1.0f, 1.0f})});
+      {math::modelMatrixFromBounds(minPos_, maxPos_)});
 }
 
 } // namespace blocks::game
