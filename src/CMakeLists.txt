@@ -15,7 +15,7 @@ target_link_libraries(application
 	engine.scene
 	engine.sceneloader
 	game.loadingscreen
-	game.scenes.mainmenu
+	game.resource.defaultfont
 	globalsubsystemstack
 	input.inputsubsystem
 	util.debug)
@@ -40,6 +40,7 @@ target_link_libraries(resourcetypes INTERFACE
 	game.blocksscene
 	game.cameraactor
 	game.paddle
+	game.mainmenuui
 	game.scoreui
 	game.staticimage
 	util.taggedvariant)

@@ -7,11 +7,11 @@
 #include <vector>
 #include "Application.hpp"
 #include "GlobalSubSystemStack.hpp"
+#include "engine/ResourceRef.hpp"
 #include "engine/Scene.hpp"
 #include "engine/SceneLoader.hpp"
 #include "game/UIActor.hpp"
 #include "game/resource/DefaultFont.hpp"
-#include "game/scenes/MainMenu.hpp"
 #include "math/vec.hpp"
 #include "render/Font.hpp"
 #include "render/RenderSubSystem.hpp"
@@ -29,22 +29,23 @@ namespace {
 class MainMenuUIResourceSentinelData {
  public:
   MainMenuUIResourceSentinelData()
-      : color_(GlobalSubSystemStack::get()
-                   .renderSystem()
-                   .createRenderable<render::RenderableColor2D>()) {}
+      : prototype_(
+            GlobalSubSystemStack::get()
+                .resourceManager()
+                .loadResource<MainMenuUIPrototype>(
+                    "Prototype_DefaultMainMenu")) {}
 
-  render::RenderableRef<render::RenderableColor2D::InstanceData> getColor() {
-    return color_.get();
-  }
+  engine::ResourceRef<MainMenuUIPrototype> getPrototype() { return prototype_; }
 
  private:
-  render::UniqueRenderableHandle<render::RenderableColor2D::InstanceData>
-      color_;
+  engine::ResourceRef<MainMenuUIPrototype> prototype_;
 };
 
 constinit std::optional<MainMenuUIResourceSentinelData> resourceSentinel;
 
-std::unique_ptr<ui::UIObject> makeUI() {
+std::unique_ptr<ui::UIObject> makeUI(
+    render::RenderableRef<render::RenderableColor2D::InstanceData>
+        colorRenderable) {
   auto& localisation = GlobalSubSystemStack::get().localisationManager();
 
   auto uiRoot = std::make_unique<ui::UIObject>();
@@ -72,7 +73,7 @@ std::unique_ptr<ui::UIObject> makeUI() {
           GlobalSubSystemStack::get().inputSystem(),
           math::Vec4{0.f, 0.f, 0.f, 1.0f},
           math::Vec4{0.3f, 0.3f, 0.3f, 1.0f},
-          resourceSentinel->getColor(),
+          colorRenderable,
           []() {
             Application::getApplication().transitionToScene(
                 std::make_unique<SceneLoaderFromResourceFile>("Scene_Level1"));
@@ -90,7 +91,7 @@ std::unique_ptr<ui::UIObject> makeUI() {
           GlobalSubSystemStack::get().inputSystem(),
           math::Vec4{0.f, 0.f, 0.f, 1.0f},
           math::Vec4{0.3f, 0.3f, 0.3f, 1.0f},
-          resourceSentinel->getColor(),
+          colorRenderable,
           []() {
             auto& localisation =
                 GlobalSubSystemStack::get().localisationManager();
@@ -108,7 +109,8 @@ std::unique_ptr<ui::UIObject> makeUI() {
             }
             localisation.setLocale(*currentLocaleIt);
             Application::getApplication().transitionToScene(
-                std::make_unique<MainMenu>());
+                std::make_unique<SceneLoaderFromResourceFile>(
+                    "Scene_MainMenu"));
           }));
   languageButton->outerPadding_ = 5;
   languageButton->innerPadding_ = 5;
@@ -123,7 +125,7 @@ std::unique_ptr<ui::UIObject> makeUI() {
           GlobalSubSystemStack::get().inputSystem(),
           math::Vec4{0.f, 0.f, 0.f, 1.0f},
           math::Vec4{0.3f, 0.3f, 0.3f, 1.0f},
-          resourceSentinel->getColor(),
+          colorRenderable,
           []() { Application::getApplication().close(); }));
   quitButton->outerPadding_ = 5;
   quitButton->innerPadding_ = 5;
@@ -150,6 +152,12 @@ void MainMenuUIResourceSentinel::unload() {
   resourceSentinel.reset();
 }
 
-MainMenuUI::MainMenuUI(Scene& scene) : UIActor(scene, makeUI()) {}
+MainMenuUI::MainMenuUI(Scene& scene, const MainMenuUIDefinition& definition)
+    : UIActor(scene, makeUI(definition.prototype->colorResource->get())) {}
+
+MainMenuUI::MainMenuUI(Scene& scene)
+    : UIActor(
+          scene,
+          makeUI(resourceSentinel->getPrototype()->colorResource->get())) {}
 
 } // namespace blocks::game

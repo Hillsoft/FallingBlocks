@@ -3,6 +3,13 @@ target_link_libraries(engine.actor
 	util.portability
 	util.raii_helpers)
 
+add_library(engine.colorrenderableresource STATIC "ColorRenderableResource.hpp" "ColorRenderableResource.cpp")
+target_link_libraries(engine.colorrenderableresource
+	globalsubsystemstack
+	render.rendersubsystem
+	render.renderables.renderablecolor2d
+	util.meta_utils)
+
 add_library(engine.drawableregistry STATIC "DrawableRegistry.hpp" "DrawableRegistry.cpp")
 target_link_libraries(engine.drawableregistry
 	util.registry)

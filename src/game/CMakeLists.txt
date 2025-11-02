@@ -144,10 +144,11 @@ target_link_libraries(game.staticimage
 add_library(game.mainmenuui "MainMenuUI.hpp" "MainMenuUI.cpp")
 target_link_libraries(game.mainmenuui
 	application
+	engine.colorrenderableresource
+	engine.resourceref
 	engine.scene
 	engine.sceneloader
 	game.resource.defaultfont
-	game.scenes.mainmenu
 	game.uiactor
 	globalsubsystemstack
 	math.vec

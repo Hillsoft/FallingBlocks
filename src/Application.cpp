@@ -11,7 +11,7 @@
 #include "engine/Scene.hpp"
 #include "engine/SceneLoader.hpp"
 #include "game/LoadingScreen.hpp"
-#include "game/scenes/MainMenu.hpp"
+#include "game/resource/DefaultFont.hpp"
 #include "input/InputHandler.hpp"
 #include "util/debug.hpp"
 
@@ -44,8 +44,12 @@ Application& Application::getApplication() {
 }
 
 void Application::run() {
+  // Nasty hack
+  blocks::game::DefaultFontResourceSentinel::load();
+
   if (currentScene_ != mainScene_.get()) {
-    transitionToScene(std::make_unique<game::MainMenu>());
+    transitionToScene(
+        std::make_unique<SceneLoaderFromResourceFile>("Scene_MainMenu"));
   }
 
   auto& subsystems = GlobalSubSystemStack::get();
@@ -81,6 +85,9 @@ void Application::run() {
               << "\nMax frame time: " << maxFrameTime
               << "\nMin frame time: " << minFrameTime << "\n";
   }
+
+  // The other half of the nasty hack
+  blocks::game::DefaultFontResourceSentinel::unload();
 
   subsystems.renderSystem().waitIdle();
 }

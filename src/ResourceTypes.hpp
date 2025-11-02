@@ -6,6 +6,7 @@
 #include "game/Block.hpp"
 #include "game/BlocksScene.hpp"
 #include "game/CameraActor.hpp"
+#include "game/MainMenuUI.hpp"
 #include "game/Paddle.hpp"
 #include "game/ScoreUI.hpp"
 #include "game/StaticImage.hpp"
@@ -19,6 +20,7 @@ using GameObjects = util::TaggedVariant<
         TPair<util::TString<"BallSpawnBlock">, game::BallSpawnBlockDefinition>,
     util::TPair<util::TString<"Block">, game::BlockDefinition>,
     util::TPair<util::TString<"CameraActor">, game::CameraActorDefinition>,
+    util::TPair<util::TString<"MainMenuUI">, game::MainMenuUIDefinition>,
     util::TPair<util::TString<"Paddle">, game::PaddleDefinition>,
     util::TPair<util::TString<"ScoreUI">, game::ScoreUIDefinition>,
     util::TPair<util::TString<"StaticImage">, game::StaticImageDefinition>>;
