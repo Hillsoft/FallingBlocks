@@ -1,16 +1,15 @@
 #include "game/Block.hpp"
 
 #include <optional>
-#include <utility>
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Actor.hpp"
 #include "engine/DrawableRegistry.hpp"
+#include "engine/ResourceRef.hpp"
 #include "engine/Scene.hpp"
 #include "game/BlocksScene.hpp"
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
 #include "render/RenderSubSystem.hpp"
-#include "render/renderables/RenderableTex2D.hpp"
 #include "util/debug.hpp"
 
 namespace blocks::game {
@@ -20,17 +19,15 @@ namespace {
 class BlockResourceSentinelData {
  public:
   BlockResourceSentinelData()
-      : sprite_(GlobalSubSystemStack::get()
-                    .renderSystem()
-                    .createRenderable<render::RenderableTex2D>(
-                        RESOURCE_DIR "/block.png")) {}
+      : prototype_(
+            GlobalSubSystemStack::get()
+                .resourceManager()
+                .loadResource<BlockPrototype>("Prototype_DefaultBlock")) {}
 
-  render::RenderableRef<render::RenderableTex2D::InstanceData> getSprite() {
-    return sprite_.get();
-  }
+  engine::ResourceRef<BlockPrototype> getPrototype() { return prototype_; }
 
  private:
-  render::UniqueRenderableHandle<render::RenderableTex2D::InstanceData> sprite_;
+  engine::ResourceRef<BlockPrototype> prototype_;
 };
 
 constinit std::optional<BlockResourceSentinelData> resourceSentinel;
@@ -46,25 +43,37 @@ void BlockResourceSentinel::unload() {
   resourceSentinel.reset();
 }
 
+Block::Block(Scene& scene, const BlockDefinition& definition)
+    : Block(
+          scene,
+          definition.position -
+              definition.size.value_or(definition.prototype->size) / 2.f,
+          definition.position +
+              definition.size.value_or(definition.prototype->size) / 2.f,
+          definition.prototype) {}
+
 Block::Block(
     Scene& scene,
     math::Vec2 p0,
     math::Vec2 p1,
-    render::RenderableRef<render::RenderableTex2D::InstanceData> sprite)
+    engine::ResourceRef<BlockPrototype> prototype)
     : Actor(scene),
       physics::RectCollider(scene.getPhysicsScene(), p0, p1, 0b10, 0),
       Drawable(scene.getDrawableScene()),
-      sprite_(std::move(sprite)) {}
+      prototype_(prototype) {}
 
 Block::Block(Scene& scene, math::Vec2 p0, math::Vec2 p1)
-    : Block(scene, p0, p1, resourceSentinel->getSprite()) {}
+    : Block(scene, p0, p1, resourceSentinel->getPrototype()) {}
 
 void Block::draw() {
   auto& render = GlobalSubSystemStack::get().renderSystem();
   auto window = GlobalSubSystemStack::get().window();
 
   render.drawObject(
-      window, 0, sprite_, {math::modelMatrixFromBounds(getP0(), getP1())});
+      window,
+      0,
+      prototype_->texture->get(),
+      {math::modelMatrixFromBounds(getP0(), getP1())});
 }
 
 void Block::onDestroy() {

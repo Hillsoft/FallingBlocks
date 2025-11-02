@@ -35,27 +35,28 @@ target_link_libraries(game.ball
 
 add_library(game.ballspawnblock "BallSpawnBlock.hpp" "BallSpawnBlock.cpp")
 target_link_libraries(game.ballspawnblock
+	engine.resourceref
 	engine.scene
 	game.ball
 	game.block
 	globalsubsystemstack
 	math.vec
-	render.renderables.renderabletex2d
-	render.rendersubsystem
 	util.debug)
 
 add_library(game.block "Block.hpp" "Block.cpp")
 target_link_libraries(game.block
 	engine.actor
 	engine.drawableregistry
+	engine.resourceref
 	engine.scene
+	engine.textureresource
 	game.blocksscene
 	globalsubsystemstack
 	math.vec
 	physics.physicsscene
-	render.renderables.renderabletex2d
 	render.rendersubsystem
-	util.debug)
+	util.debug
+	util.meta_utils)
 
 add_library(game.blocksscene "BlocksScene.hpp" "BlocksScene.cpp")
 target_link_libraries(game.blocksscene

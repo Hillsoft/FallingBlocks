@@ -2,12 +2,11 @@
 
 #include <optional>
 #include "GlobalSubSystemStack.hpp"
+#include "engine/ResourceRef.hpp"
 #include "engine/Scene.hpp"
 #include "game/Ball.hpp"
 #include "game/Block.hpp"
 #include "math/vec.hpp"
-#include "render/RenderSubSystem.hpp"
-#include "render/renderables/RenderableTex2D.hpp"
 #include "util/debug.hpp"
 
 namespace blocks::game {
@@ -17,17 +16,16 @@ namespace {
 class BallSpawnBlockResourceSentinelData {
  public:
   BallSpawnBlockResourceSentinelData()
-      : sprite_(GlobalSubSystemStack::get()
-                    .renderSystem()
-                    .createRenderable<render::RenderableTex2D>(
-                        RESOURCE_DIR "/blockBallSpawn.png")) {}
+      : prototype_(
+            GlobalSubSystemStack::get()
+                .resourceManager()
+                .loadResource<BlockPrototype>(
+                    "Prototype_DefaultBallSpawnBlock")) {}
 
-  render::RenderableRef<render::RenderableTex2D::InstanceData> getSprite() {
-    return sprite_.get();
-  }
+  engine::ResourceRef<BlockPrototype> getPrototype() { return prototype_; }
 
  private:
-  render::UniqueRenderableHandle<render::RenderableTex2D::InstanceData> sprite_;
+  engine::ResourceRef<BlockPrototype> prototype_;
 };
 
 constinit std::optional<BallSpawnBlockResourceSentinelData> resourceSentinel;
@@ -43,8 +41,12 @@ void BallSpawnBlockResourceSentinel::unload() {
   resourceSentinel.reset();
 }
 
+BallSpawnBlock::BallSpawnBlock(
+    Scene& scene, const BallSpawnBlockDefinition& definition)
+    : Block(scene, definition) {}
+
 BallSpawnBlock::BallSpawnBlock(Scene& scene, math::Vec2 p0, math::Vec2 p1)
-    : Block(scene, p0, p1, resourceSentinel->getSprite()) {}
+    : Block(scene, p0, p1, resourceSentinel->getPrototype()) {}
 
 void BallSpawnBlock::onDestroy() {
   Block::onDestroy();

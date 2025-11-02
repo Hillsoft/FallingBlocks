@@ -7,8 +7,8 @@ class ResourceRef {
  public:
   explicit ResourceRef(T* ptr) : ref_(ptr) {}
 
-  T& operator*() { return *ref_; }
-  T* operator->() { return ref_; }
+  T& operator*() const { return *ref_; }
+  T* operator->() const { return ref_; }
 
  private:
   T* ref_;
