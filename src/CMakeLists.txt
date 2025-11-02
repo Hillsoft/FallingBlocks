@@ -36,6 +36,7 @@ target_link_libraries(resourcetypes INTERFACE
 	game.ball
 	game.ballspawnblock
 	game.block
+	game.cameraactor
 	game.paddle
 	game.staticimage
 	util.taggedvariant)

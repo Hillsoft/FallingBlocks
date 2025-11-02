@@ -16,12 +16,21 @@ data:
     value:
       prototype: Prototype_DefaultBackgroundImage
       position:
-        x: 0
-        y: 0
+        x: 15
+        y: 15
   -
     variantTag: Block
     value:
       prototype: Prototype_DefaultBlock
       position:
-        x: 0.8
-        y: 0
+        x: 1
+        y: 4
+  -
+    variantTag: CameraActor
+    value:
+      centre:
+        x: 15
+        y: 15
+      extent:
+        x: 30
+        y: 30

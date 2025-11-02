@@ -81,6 +81,14 @@ target_link_libraries(game.button
 	game.resource.defaultfont
 	util.debug)
 
+add_library(game.cameraactor "CameraActor.hpp" "CameraActor.cpp")
+target_link_libraries(game.cameraactor
+	globalsubsystemstack
+	engine.actor
+	math.vec
+	render.simple2dcamera
+	util.meta_utils)
+
 add_library(game.gameoverui "GameOverUI.hpp" "GameOverUI.cpp")
 target_link_libraries(game.gameoverui
 	engine.scene

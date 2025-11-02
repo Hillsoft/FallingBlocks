@@ -1,5 +1,5 @@
 texture: Texture_DefaultBackgroundImage
 size:
-  x: 2
-  y: 2
+  x: 30
+  y: 30
 z: -100
