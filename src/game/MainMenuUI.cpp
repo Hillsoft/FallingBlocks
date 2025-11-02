@@ -11,7 +11,6 @@
 #include "engine/Scene.hpp"
 #include "engine/SceneLoader.hpp"
 #include "game/UIActor.hpp"
-#include "game/resource/DefaultFont.hpp"
 #include "math/vec.hpp"
 #include "render/Font.hpp"
 #include "render/RenderSubSystem.hpp"
@@ -45,7 +44,8 @@ constinit std::optional<MainMenuUIResourceSentinelData> resourceSentinel;
 
 std::unique_ptr<ui::UIObject> makeUI(
     render::RenderableRef<render::RenderableColor2D::InstanceData>
-        colorRenderable) {
+        colorRenderable,
+    const render::Font& font) {
   auto& localisation = GlobalSubSystemStack::get().localisationManager();
 
   auto uiRoot = std::make_unique<ui::UIObject>();
@@ -53,7 +53,7 @@ std::unique_ptr<ui::UIObject> makeUI(
 
   auto& title =
       uiRoot->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
-          DefaultFontResourceSentinel::get(),
+          font,
           localisation.getLocalisedString("BLOCKS_TITLE"),
           render::Font::Size::Line{160.f}));
   title->outerPadding_ = 20;
@@ -82,7 +82,7 @@ std::unique_ptr<ui::UIObject> makeUI(
   startButton->innerPadding_ = 5;
   startButton->maxHeight_ = 0;
   startButton->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
-      DefaultFontResourceSentinel::get(),
+      font,
       localisation.getLocalisedString("START_GAME_BUTTON"),
       render::Font::Size::Line{70.0f}));
 
@@ -116,7 +116,7 @@ std::unique_ptr<ui::UIObject> makeUI(
   languageButton->innerPadding_ = 5;
   languageButton->maxHeight_ = 0;
   languageButton->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
-      DefaultFontResourceSentinel::get(),
+      font,
       std::string{localisation.getLocaleName()},
       render::Font::Size::Line{70.0f}));
 
@@ -131,7 +131,7 @@ std::unique_ptr<ui::UIObject> makeUI(
   quitButton->innerPadding_ = 5;
   quitButton->maxHeight_ = 0;
   quitButton->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
-      DefaultFontResourceSentinel::get(),
+      font,
       localisation.getLocalisedString("QUIT_GAME_BUTTON"),
       render::Font::Size::Line{70.0f}));
 
@@ -153,11 +153,17 @@ void MainMenuUIResourceSentinel::unload() {
 }
 
 MainMenuUI::MainMenuUI(Scene& scene, const MainMenuUIDefinition& definition)
-    : UIActor(scene, makeUI(definition.prototype->colorResource->get())) {}
+    : UIActor(
+          scene,
+          makeUI(
+              definition.prototype->colorResource->get(),
+              definition.prototype->fontResource->get())) {}
 
 MainMenuUI::MainMenuUI(Scene& scene)
     : UIActor(
           scene,
-          makeUI(resourceSentinel->getPrototype()->colorResource->get())) {}
+          makeUI(
+              resourceSentinel->getPrototype()->colorResource->get(),
+              resourceSentinel->getPrototype()->fontResource->get())) {}
 
 } // namespace blocks::game

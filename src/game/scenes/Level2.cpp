@@ -9,7 +9,6 @@
 #include "game/Block.hpp"
 #include "game/BlocksScene.hpp"
 #include "game/Paddle.hpp"
-#include "game/ScoreUI.hpp"
 #include "game/resource/DefaultFont.hpp"
 #include "game/scenes/LevelConsts.hpp"
 #include "math/vec.hpp"
@@ -47,8 +46,6 @@ std::unique_ptr<Scene> Level2::loadScene() const {
       }
     }
   }
-
-  scene->createActor<game::ScoreUI>();
 
   scene->setNextScene(std::make_unique<Level2>());
 

@@ -1,3 +1,4 @@
 objectType: MainMenuUIPrototype
 data:
   colorResource: Renderable_Color
+  fontResource: Font_Default

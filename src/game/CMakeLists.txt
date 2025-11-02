@@ -145,10 +145,10 @@ add_library(game.mainmenuui "MainMenuUI.hpp" "MainMenuUI.cpp")
 target_link_libraries(game.mainmenuui
 	application
 	engine.colorrenderableresource
+	engine.fontresource
 	engine.resourceref
 	engine.scene
 	engine.sceneloader
-	game.resource.defaultfont
 	game.uiactor
 	globalsubsystemstack
 	math.vec
@@ -159,14 +159,16 @@ target_link_libraries(game.mainmenuui
 	ui.uiobject
 	ui.uitext
 	util.debug
+	util.meta_utils
 	util.notnull)
 
 add_library(game.scoreui "ScoreUI.hpp" "ScoreUI.cpp")
 target_link_libraries(game.scoreui
 	engine.actor
+	engine.fontresource
+	engine.resourceref
 	engine.scene
 	game.blocksscene
-	game.resource.defaultfont
 	game.uiactor
 	globalsubsystemstack
 	render.font

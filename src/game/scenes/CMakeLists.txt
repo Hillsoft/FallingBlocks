@@ -23,7 +23,6 @@ target_link_libraries(game.scenes.level2
 	game.blocksscene
 	game.paddle
 	game.resource.defaultfont
-	game.scoreui
 	game.scenes.levelconsts
 	globalsubsystemstack
 	math.vec)

@@ -1,9 +1,11 @@
 #pragma once
 
 #include "engine/ColorRenderableResource.hpp"
+#include "engine/FontResource.hpp"
 #include "engine/ResourceRef.hpp"
 #include "engine/Scene.hpp"
 #include "game/UIActor.hpp"
+#include "util/meta_utils.hpp"
 
 namespace blocks::game {
 
@@ -17,10 +19,15 @@ class MainMenuUIResourceSentinel {
 
 struct MainMenuUIPrototype {
   engine::ResourceRef<ColorRenderableResource> colorResource;
+  engine::ResourceRef<FontResource> fontResource;
 
-  using Fields = util::TArray<util::TPair<
-      util::TString<"colorResource">,
-      engine::ResourceRef<ColorRenderableResource>>>;
+  using Fields = util::TArray<
+      util::TPair<
+          util::TString<"colorResource">,
+          engine::ResourceRef<ColorRenderableResource>>,
+      util::TPair<
+          util::TString<"fontResource">,
+          engine::ResourceRef<FontResource>>>;
 };
 
 struct MainMenuUIDefinition {

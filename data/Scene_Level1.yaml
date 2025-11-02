@@ -452,3 +452,4 @@ data:
   -
     variantTag: ScoreUI
     value:
+      prototype: Prototype_DefaultScoreUI

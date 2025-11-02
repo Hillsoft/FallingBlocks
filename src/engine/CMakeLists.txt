@@ -14,6 +14,14 @@ add_library(engine.drawableregistry STATIC "DrawableRegistry.hpp" "DrawableRegis
 target_link_libraries(engine.drawableregistry
 	util.registry)
 
+add_library(engine.fontresource STATIC "FontResource.hpp" "FontResource.cpp")
+target_link_libraries(engine.fontresource
+	globalsubsystemstack
+	loader.font.font
+	render.font
+	util.meta_utils
+	util.string)
+
 add_library(engine.localisation STATIC "Localisation.hpp" "Localisation.cpp")
 target_link_libraries(engine.localisation
 	loader.locale

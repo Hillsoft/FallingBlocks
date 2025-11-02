@@ -15,7 +15,6 @@ target_link_libraries(application
 	engine.scene
 	engine.sceneloader
 	game.loadingscreen
-	game.resource.defaultfont
 	globalsubsystemstack
 	input.inputsubsystem
 	util.debug)

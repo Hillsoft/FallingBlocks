@@ -12,7 +12,8 @@ namespace blocks::ui {
 
 class UIText : public UIObject {
  public:
-  UIText(render::Font& font, std::string text, render::Font::Size fontSize);
+  UIText(
+      const render::Font& font, std::string text, render::Font::Size fontSize);
 
   int draw(
       math::Vec<uint16_t, 2> minPos,
@@ -23,7 +24,7 @@ class UIText : public UIObject {
   void setText(std::string newText);
 
  private:
-  util::NotNullPtr<render::Font> font_;
+  util::NotNullPtr<const render::Font> font_;
   std::string text_;
   render::Font::Size fontSize_;
 };
