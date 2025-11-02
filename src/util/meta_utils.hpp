@@ -2,6 +2,19 @@
 
 namespace util {
 
+template <size_t i, typename Arg, typename... Args>
+struct ElementAtImpl {
+  using Value = ElementAtImpl<i - 1, Args...>::Value;
+};
+
+template <typename Arg, typename... Args>
+struct ElementAtImpl<0, Arg, Args...> {
+  using Value = Arg;
+};
+
+template <size_t i, typename... Args>
+using ElementAt = ElementAtImpl<i, Args...>::Value;
+
 template <unsigned N>
 struct FixedString {
   char buf[N + 1]{};
@@ -35,6 +48,11 @@ struct TArray {
   template <typename ConstructType, typename ValueFn>
   static auto visitConstruct(ValueFn&& valueFn) {
     return ConstructType{valueFn(THolder<TArr>{})...};
+  }
+
+  template <typename Fn>
+  static void visit(Fn&& fn) {
+    (fn(THolder<TArr>{}), ...);
   }
 };
 

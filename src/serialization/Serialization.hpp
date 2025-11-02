@@ -6,6 +6,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <vector>
+#include "util/TaggedVariant.hpp"
 #include "util/string.hpp"
 
 namespace blocks::serialization {
@@ -41,10 +42,10 @@ TField::Second deserializeField(TCursor cursor, size_t& availableFieldCount) {
     if constexpr (OptionalTraits<typename TField::Second>::isOptional) {
       return std::nullopt;
     } else {
-    throw std::runtime_error{
-        util::toString("Field not found: ", TField::First::value)};
+      throw std::runtime_error{
+          util::toString("Field not found: ", TField::First::value)};
+    }
   }
-}
 }
 
 template <typename T>
@@ -100,6 +101,33 @@ struct deserializeArbitrary<std::vector<T>> {
     }
 
     return result;
+  }
+};
+
+template <typename... Args>
+struct deserializeArbitrary<util::TaggedVariant<Args...>> {
+  template <typename TCursor>
+  util::TaggedVariant<Args...> operator()(TCursor cursor) {
+    size_t fieldCount = cursor.getStructFieldCount();
+    if (fieldCount != 2) {
+      throw std::runtime_error{"Unrecognised fields"};
+    }
+
+    std::optional<TCursor> tagNameCursor =
+        cursor.getSubFieldCursor("variantTag");
+    if (!tagNameCursor.has_value()) {
+      throw std::runtime_error{"Variant missing 'variantTag' field"};
+    }
+    std::string tag = deserializeArbitrary<std::string>{}(*tagNameCursor);
+
+    std::optional<TCursor> contentsCursor = cursor.getSubFieldCursor("value");
+    if (!contentsCursor.has_value()) {
+      throw std::runtime_error{"Variant missing 'value' field"};
+    }
+
+    return util::TaggedVariant<Args...>::visitConstruct(tag, [&](auto tholder) {
+      return deserializeArbitrary<decltype(tholder)::Value>{}(*contentsCursor);
+    });
   }
 };
 

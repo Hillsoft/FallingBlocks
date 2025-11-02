@@ -57,6 +57,10 @@ add_library(util.string INTERFACE "string.hpp")
 
 add_library(util.synchronized INTERFACE "Synchronized.hpp")
 
+add_library(util.taggedvariant INTERFACE "TaggedVariant.hpp")
+target_link_libraries(util.taggedvariant INTERFACE
+	util.meta_utils)
+
 add_library(util.typeeraseduniqueptr INTERFACE "TypeErasedUniquePtr.hpp")
 
 add_library(util.unicode STATIC "unicode.hpp" "unicode.cpp")
