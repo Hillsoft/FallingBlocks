@@ -56,6 +56,8 @@ class BallResourceSentinelData {
                       .resourceManager()
                       .loadResource<BallPrototype>("Prototype_DefaultBall")) {}
 
+  engine::ResourceRef<BallPrototype> getResourceRef() { return resource_; }
+
   render::RenderableRef<render::RenderableTex2D::InstanceData> getSprite() {
     return resource_->texture->get();
   }
@@ -77,7 +79,18 @@ void BallResourceSentinel::unload() {
   resourceSentinel.reset();
 }
 
-Ball::Ball(Scene& scene, math::Vec2 pos, math::Vec2 vel)
+Ball::Ball(Scene& scene, const BallDefinition& definition)
+    : Ball(
+          scene,
+          definition.prototype,
+          definition.position.value_or({0.0f, 0.0f}),
+          definition.velocity.value_or({randFloat(-0.25f, 0.25f), -1.0f})) {}
+
+Ball::Ball(
+    Scene& scene,
+    engine::ResourceRef<BallPrototype> prototype,
+    math::Vec2 pos,
+    math::Vec2 vel)
     : Actor(scene),
       physics::RectCollider(
           scene.getPhysicsScene(),
@@ -87,7 +100,11 @@ Ball::Ball(Scene& scene, math::Vec2 pos, math::Vec2 vel)
           0b11),
       TickHandler(scene.getTickRegistry()),
       Drawable(scene.getDrawableScene()),
+      prototype_(prototype),
       vel_(normalizeBallSpeed(vel)) {}
+
+Ball::Ball(Scene& scene, math::Vec2 pos, math::Vec2 vel)
+    : Ball(scene, resourceSentinel->getResourceRef(), pos, vel) {}
 
 Ball::Ball(Scene& scene)
     : Ball(
@@ -140,7 +157,7 @@ void Ball::draw() {
   render.drawObject(
       window,
       0,
-      resourceSentinel->getSprite(),
+      prototype_->texture->get(),
       {math::modelMatrixFromBounds(getP0(), getP1())});
 }
 
