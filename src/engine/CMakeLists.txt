@@ -20,6 +20,7 @@ target_link_libraries(engine.resourcemanager
 	serialization.yaml.yamlserializationprovider
 	util.typeeraseduniqueptr
 	util.file
+	util.meta_utils
 	util.string)
 
 add_library(engine.resourceref INTERFACE "ResourceRef.hpp")

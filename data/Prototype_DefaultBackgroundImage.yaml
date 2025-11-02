@@ -1,5 +1,7 @@
-texture: Texture_DefaultBackgroundImage
-size:
-  x: 30
-  y: 30
-z: -100
+objectType: StaticImagePrototype
+data:
+  texture: Texture_DefaultBackgroundImage
+  size:
+    x: 30
+    y: 30
+  z: -100

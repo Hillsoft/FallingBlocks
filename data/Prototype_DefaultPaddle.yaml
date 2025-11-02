@@ -1,1 +1,3 @@
-texture: Texture_Paddle
+objectType: PaddlePrototype
+data:
+  texture: Texture_Paddle

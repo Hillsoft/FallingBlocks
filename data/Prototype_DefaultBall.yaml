@@ -1,1 +1,3 @@
-texture: Texture_Ball
+objectType: BallPrototype
+data:
+  texture: Texture_Ball

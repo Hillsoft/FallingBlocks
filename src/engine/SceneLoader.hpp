@@ -7,7 +7,7 @@
 
 namespace blocks {
 
-struct SceneDefinitionWrapper;
+struct SceneDefinition;
 
 class SceneLoader {
  public:
@@ -27,6 +27,6 @@ class SceneLoaderFromResourceFile : public SceneLoader {
 };
 
 std::unique_ptr<Scene> loadSceneFromDefinition(
-    engine::ResourceRef<SceneDefinitionWrapper> sceneDefinitionRef);
+    engine::ResourceRef<SceneDefinition> sceneDefinitionRef);
 
 } // namespace blocks

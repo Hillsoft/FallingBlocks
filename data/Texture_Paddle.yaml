@@ -1,1 +1,3 @@
-path: paddle.png
+objectType: TextureResource
+data:
+  path: paddle.png

@@ -1,1 +1,3 @@
-path: ball.png
+objectType: TextureResource
+data:
+  path: ball.png

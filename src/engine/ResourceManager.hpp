@@ -10,6 +10,7 @@
 #include "serialization/yaml/YAMLSerializationProvider.hpp"
 #include "util/TypeErasedUniquePtr.hpp"
 #include "util/file.hpp"
+#include "util/meta_utils.hpp"
 #include "util/string.hpp"
 
 namespace blocks::engine {
@@ -17,6 +18,16 @@ namespace blocks::engine {
 class ResourceManager {
  public:
   static ResourceManager& get();
+
+  template <typename T>
+  struct ResourceWrapper {
+    std::string objectType;
+    T data;
+
+    using Fields = util::TArray<
+        util::TPair<util::TString<"objectType">, std::string>,
+        util::TPair<util::TString<"data">, T>>;
+  };
 
   template <typename T>
   ResourceRef<T> loadResource(std::string resourceName) {
@@ -33,13 +44,20 @@ class ResourceManager {
     std::vector<char> fileContents = util::readFileChars(
         (std::filesystem::path("data") / resourceName)
             .replace_extension("yaml"));
-    T resource = serialization::
-        deserialize<T, serialization::yaml::YAMLSerializationProvider>(
-            {fileContents.begin(), fileContents.end()});
+    ResourceWrapper<T> resource = serialization::deserialize<
+        ResourceWrapper<T>,
+        serialization::yaml::YAMLSerializationProvider>(
+        {fileContents.begin(), fileContents.end()});
+
+    if (resource.objectType != util::typeName<T>) {
+      throw std::runtime_error{
+          util::toString("Resource has unexpected type: ", resourceName)};
+    }
 
     const auto& inserted = resources_.emplace(
         std::move(resourceName),
-        util::TypeErasedUniquePtr{std::make_unique<T>(std::move(resource))});
+        util::TypeErasedUniquePtr{
+            std::make_unique<T>(std::move(resource.data))});
     return ResourceRef<T>{inserted.first->second.get<T>()};
   }
 

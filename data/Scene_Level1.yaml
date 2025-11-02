@@ -1,4 +1,4 @@
-objectType: Scene
+objectType: SceneDefinition
 data:
   sceneObject:
     variantTag: BlocksScene

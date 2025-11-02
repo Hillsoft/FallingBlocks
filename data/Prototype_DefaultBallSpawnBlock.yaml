@@ -1,1 +1,3 @@
-texture: Texture_BallSpawnBlock
+objectType: BlockPrototype
+data:
+  texture: Texture_BallSpawnBlock

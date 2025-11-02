@@ -1,1 +1,3 @@
-path: background.png
+objectType: TextureResource
+data:
+  path: background.png

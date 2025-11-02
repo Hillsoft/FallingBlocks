@@ -12,7 +12,7 @@
 
 namespace blocks {
 
-struct SceneDefition {
+struct SceneDefinition {
   SceneObjects sceneObject;
   std::vector<GameObjects> objects;
 
@@ -21,37 +21,27 @@ struct SceneDefition {
       util::TPair<util::TString<"actors">, std::vector<GameObjects>>>;
 };
 
-struct SceneDefinitionWrapper {
-  std::string objectType;
-  SceneDefition definition;
-
-  using Fields = util::TArray<
-      util::TPair<util::TString<"objectType">, std::string>,
-      util::TPair<util::TString<"data">, SceneDefition>>;
-};
-
 SceneLoaderFromResourceFile::SceneLoaderFromResourceFile(std::string sceneName)
     : sceneName_(std::move(sceneName)) {}
 
 std::unique_ptr<Scene> SceneLoaderFromResourceFile::loadScene() const {
-  blocks::engine::ResourceRef<SceneDefinitionWrapper> sceneDefinitionRef =
+  blocks::engine::ResourceRef<SceneDefinition> sceneDefinitionRef =
       GlobalSubSystemStack::get()
           .resourceManager()
-          .loadResource<SceneDefinitionWrapper>(sceneName_);
+          .loadResource<SceneDefinition>(sceneName_);
 
   return loadSceneFromDefinition(sceneDefinitionRef);
 }
 
 std::unique_ptr<Scene> loadSceneFromDefinition(
-    engine::ResourceRef<SceneDefinitionWrapper> sceneDefinitionRef) {
-  std::unique_ptr<Scene> scene =
-      sceneDefinitionRef->definition.sceneObject.visit(
-          [&](auto sceneDefinition) -> std::unique_ptr<Scene> {
-            return std::make_unique<
-                typename decltype(sceneDefinition)::SceneType>(sceneDefinition);
-          });
+    engine::ResourceRef<SceneDefinition> sceneDefinitionRef) {
+  std::unique_ptr<Scene> scene = sceneDefinitionRef->sceneObject.visit(
+      [&](auto sceneDefinition) -> std::unique_ptr<Scene> {
+        return std::make_unique<typename decltype(sceneDefinition)::SceneType>(
+            sceneDefinition);
+      });
 
-  for (auto& actor : sceneDefinitionRef->definition.objects) {
+  for (auto& actor : sceneDefinitionRef->objects) {
     actor.visit([&](auto actorDefinition) {
       scene->createActor<typename decltype(actorDefinition)::ActorType>(
           actorDefinition);
