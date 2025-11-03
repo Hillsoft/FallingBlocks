@@ -27,6 +27,8 @@ void Scene::destroyActor(Actor* actor) {
 }
 
 void Scene::stepSimulation(std::chrono::microseconds deltaTime) {
+  DEBUG_ASSERT(isActive_);
+
   float deltaTimeSeconds = static_cast<float>(deltaTime.count()) / 1000000.f;
 
   timer_.tick(deltaTime);
@@ -47,6 +49,16 @@ void Scene::cleanupPendingDestruction() {
     DEBUG_ASSERT(actor.use_count() == 1);
   }
   pendingDestruction_.clear();
+}
+
+void Scene::activate() {
+  DEBUG_ASSERT(!isActive_);
+
+  isActive_ = true;
+
+  for (auto& actor : actors_) {
+    actor->onActivate();
+  }
 }
 
 } // namespace blocks

@@ -16,7 +16,9 @@ CameraActor::CameraActor(Scene& scene, const CameraActorDefinition& definition)
               render::Simple2DCamera::FIT}) {}
 
 CameraActor::CameraActor(Scene& scene, render::Simple2DCamera camera)
-    : Actor(scene), camera_(std::move(camera)) {
+    : Actor(scene), camera_(std::move(camera)) {}
+
+void CameraActor::onActivate() {
   GlobalSubSystemStack::get().renderSystem().getDefaultCamera() = camera_;
 }
 

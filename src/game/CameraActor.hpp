@@ -24,6 +24,8 @@ class CameraActor : public Actor {
   CameraActor(Scene& scene, const CameraActorDefinition& definition);
   CameraActor(Scene& scene, render::Simple2DCamera camera);
 
+  void onActivate() final;
+
  private:
   render::Simple2DCamera camera_;
 };

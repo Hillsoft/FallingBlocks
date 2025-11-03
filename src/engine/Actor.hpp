@@ -21,6 +21,7 @@ class Actor : public std::enable_shared_from_this<Actor> {
   Scene* getScene() const { return scene_; }
 
   bool isAlive() const { return alive_; }
+  virtual void onActivate() {}
   virtual void onDestroy() { alive_ = false; }
 
  private:

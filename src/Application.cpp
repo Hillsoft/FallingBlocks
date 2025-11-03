@@ -63,6 +63,7 @@ void Application::run() {
       if (hasPendingScene_.load(std::memory_order_acquire)) {
         currentScene_ = pendingScene_;
         hasPendingScene_.store(false, std::memory_order_relaxed);
+        currentScene_->activate();
       }
 
       auto start = std::chrono::high_resolution_clock::now();

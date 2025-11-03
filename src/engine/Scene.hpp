@@ -29,6 +29,11 @@ class Scene {
   template <typename TActor, typename... TArgs>
   std::weak_ptr<TActor> createActor(TArgs... args) {
     auto actor = std::make_shared<TActor>(*this, std::forward<TArgs>(args)...);
+
+    if (isActive_) {
+      actor->onActivate();
+    }
+
     std::weak_ptr<TActor> ref = actor;
     actors_.emplace_back(std::move(actor));
     return ref;
@@ -52,6 +57,8 @@ class Scene {
     return actors_;
   }
 
+  void activate();
+
  private:
   void cleanupPendingDestruction();
 
@@ -62,6 +69,8 @@ class Scene {
 
   std::vector<std::shared_ptr<Actor>> actors_;
   std::vector<std::shared_ptr<Actor>> pendingDestruction_;
+
+  bool isActive_ = false;
 };
 
 } // namespace blocks
