@@ -106,12 +106,13 @@ add_library(game.loadingscreen "LoadingScreen.hpp" "LoadingScreen.cpp")
 target_link_libraries(game.loadingscreen
 	engine.actor
 	engine.drawableregistry
+	engine.resourceref
 	engine.scene
+	engine.textureresource
 	engine.tickregistry
 	globalsubsystemstack
 	math.vec
-	render.renderables.renderabletex2d
-	render.rendersubsystem)
+	util.meta_utils)
 
 add_library(game.paddle "Paddle.hpp" "Paddle.cpp")
 target_link_libraries(game.paddle

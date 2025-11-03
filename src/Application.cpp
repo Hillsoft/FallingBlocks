@@ -11,7 +11,6 @@
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Scene.hpp"
 #include "engine/SceneLoader.hpp"
-#include "game/LoadingScreen.hpp"
 #include "input/InputHandler.hpp"
 #include "util/debug.hpp"
 
@@ -27,11 +26,11 @@ Application* currentApplication = nullptr;
 
 Application::Application()
     : input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
-      currentScene_(&loadingScene_),
+      loadingScene_(loadSceneFromName("Scene_Loading")),
+      currentScene_(loadingScene_.get()),
       loadThread_() {
   DEBUG_ASSERT(currentApplication == nullptr);
   currentApplication = this;
-  loadingScene_.createActor<game::LoadingScreen>();
 }
 
 Application::~Application() {
@@ -92,7 +91,7 @@ void Application::transitionToScene(std::string sceneName) {
     }
 
     // Switch to transition scene
-    pendingScene_ = &loadingScene_;
+    pendingScene_ = loadingScene_.get();
     hasPendingScene_.store(true, std::memory_order_release);
 
     while (hasPendingScene_.load(std::memory_order_relaxed)) {

@@ -14,7 +14,6 @@ add_library(application STATIC "Application.cpp" "Application.hpp")
 target_link_libraries(application
 	engine.scene
 	engine.sceneloader
-	game.loadingscreen
 	globalsubsystemstack
 	input.inputsubsystem
 	util.debug)
@@ -40,6 +39,7 @@ target_link_libraries(resourcetypes INTERFACE
 	game.cameraactor
 	game.gameoverui
 	game.paddle
+	game.loadingscreen
 	game.mainmenuui
 	game.scoreui
 	game.staticimage

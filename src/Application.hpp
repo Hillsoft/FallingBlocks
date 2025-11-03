@@ -29,7 +29,7 @@ class Application : public input::InputHandler {
   void update(std::chrono::microseconds deltaTimeSeconds);
   void drawFrame();
 
-  Scene loadingScene_;
+  std::unique_ptr<Scene> loadingScene_;
   std::unique_ptr<Scene> mainScene_;
   Scene* currentScene_;
   Scene* pendingScene_ = nullptr;
