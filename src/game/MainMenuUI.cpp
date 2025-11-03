@@ -9,7 +9,6 @@
 #include "GlobalSubSystemStack.hpp"
 #include "engine/ResourceRef.hpp"
 #include "engine/Scene.hpp"
-#include "engine/SceneLoader.hpp"
 #include "game/UIActor.hpp"
 #include "math/vec.hpp"
 #include "render/Font.hpp"
@@ -75,8 +74,7 @@ std::unique_ptr<ui::UIObject> makeUI(
           math::Vec4{0.3f, 0.3f, 0.3f, 1.0f},
           colorRenderable,
           []() {
-            Application::getApplication().transitionToScene(
-                std::make_unique<SceneLoaderFromResourceFile>("Scene_Level1"));
+            Application::getApplication().transitionToScene("Scene_Level1");
           }));
   startButton->outerPadding_ = 5;
   startButton->innerPadding_ = 5;
@@ -108,9 +106,7 @@ std::unique_ptr<ui::UIObject> makeUI(
               currentLocaleIt = availableLocales.begin();
             }
             localisation.setLocale(*currentLocaleIt);
-            Application::getApplication().transitionToScene(
-                std::make_unique<SceneLoaderFromResourceFile>(
-                    "Scene_MainMenu"));
+            Application::getApplication().transitionToScene("Scene_MainMenu");
           }));
   languageButton->outerPadding_ = 5;
   languageButton->innerPadding_ = 5;

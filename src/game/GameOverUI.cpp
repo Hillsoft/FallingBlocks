@@ -8,7 +8,6 @@
 #include "Application.hpp"
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Scene.hpp"
-#include "engine/SceneLoader.hpp"
 #include "game/UIActor.hpp"
 #include "input/InputHandler.hpp"
 #include "render/Font.hpp"
@@ -90,8 +89,7 @@ GameOverUI::GameOverUI(Scene& scene, const GameOverUIDefinition& definition)
 
 void GameOverUI::onKeyRelease(int keyCode) {
   if (keyCode == GLFW_KEY_SPACE) {
-    Application::getApplication().transitionToScene(
-        std::make_unique<SceneLoaderFromResourceFile>("Scene_Level1"));
+    Application::getApplication().transitionToScene("Scene_Level1");
   }
 }
 

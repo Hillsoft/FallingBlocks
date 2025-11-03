@@ -9,23 +9,7 @@ namespace blocks {
 
 struct SceneDefinition;
 
-class SceneLoader {
- public:
-  virtual ~SceneLoader() = default;
-
-  virtual std::unique_ptr<Scene> loadScene() const = 0;
-};
-
-class SceneLoaderFromResourceFile : public SceneLoader {
- public:
-  SceneLoaderFromResourceFile(std::string sceneName);
-
-  std::unique_ptr<Scene> loadScene() const final;
-
- private:
-  std::string sceneName_;
-};
-
+std::unique_ptr<Scene> loadSceneFromName(std::string sceneName);
 std::unique_ptr<Scene> loadSceneFromDefinition(
     engine::ResourceRef<SceneDefinition> sceneDefinitionRef);
 

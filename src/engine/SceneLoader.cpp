@@ -21,14 +21,11 @@ struct SceneDefinition {
       util::TPair<util::TString<"actors">, std::vector<GameObjects>>>;
 };
 
-SceneLoaderFromResourceFile::SceneLoaderFromResourceFile(std::string sceneName)
-    : sceneName_(std::move(sceneName)) {}
-
-std::unique_ptr<Scene> SceneLoaderFromResourceFile::loadScene() const {
+std::unique_ptr<Scene> loadSceneFromName(std::string sceneName) {
   blocks::engine::ResourceRef<SceneDefinition> sceneDefinitionRef =
       GlobalSubSystemStack::get()
           .resourceManager()
-          .loadResource<SceneDefinition>(sceneName_);
+          .loadResource<SceneDefinition>(std::move(sceneName));
 
   return loadSceneFromDefinition(sceneDefinitionRef);
 }

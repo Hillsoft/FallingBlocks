@@ -45,8 +45,7 @@ Application& Application::getApplication() {
 
 void Application::run() {
   if (currentScene_ != mainScene_.get()) {
-    transitionToScene(
-        std::make_unique<SceneLoaderFromResourceFile>("Scene_MainMenu"));
+    transitionToScene("Scene_MainMenu");
   }
 
   auto& subsystems = GlobalSubSystemStack::get();
@@ -87,12 +86,7 @@ void Application::run() {
 }
 
 void Application::transitionToScene(std::string sceneName) {
-  transitionToScene(
-      std::make_unique<SceneLoaderFromResourceFile>(std::move(sceneName)));
-}
-
-void Application::transitionToScene(std::unique_ptr<SceneLoader> sceneLoader) {
-  loadThread_ = std::jthread{[this, sceneLoader = std::move(sceneLoader)]() {
+  loadThread_ = std::jthread{[this, sceneName = std::move(sceneName)]() {
     // Ensure we are in the main scene
     while (hasPendingScene_.load(std::memory_order_relaxed)) {
     }
@@ -108,12 +102,13 @@ void Application::transitionToScene(std::unique_ptr<SceneLoader> sceneLoader) {
 
     auto loadStart = std::chrono::high_resolution_clock::now();
 
-    mainScene_ = sceneLoader->loadScene();
+    mainScene_ = loadSceneFromName(sceneName);
 
     auto loadEnd = std::chrono::high_resolution_clock::now();
     auto loadTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         loadEnd - loadStart);
-    std::cout << "Loaded scene in " << loadTime.count() << "ms" << std::endl;
+    std::cout << "Loaded scene " << sceneName << " in " << loadTime.count()
+              << "ms" << std::endl;
 
     if (loadTime < kMinLoadTime) {
       std::this_thread::sleep_for(kMinLoadTime - loadTime);

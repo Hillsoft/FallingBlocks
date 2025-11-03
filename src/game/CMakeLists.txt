@@ -93,7 +93,6 @@ target_link_libraries(game.gameoverui
 	engine.fontresource
 	engine.resourceref
 	engine.scene
-	engine.sceneloader
 	game.uiactor
 	globalsubsystemstack
 	input.inputsubsystem
@@ -149,7 +148,6 @@ target_link_libraries(game.mainmenuui
 	engine.fontresource
 	engine.resourceref
 	engine.scene
-	engine.sceneloader
 	game.uiactor
 	globalsubsystemstack
 	math.vec
