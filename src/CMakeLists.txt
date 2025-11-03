@@ -38,6 +38,7 @@ target_link_libraries(resourcetypes INTERFACE
 	game.block
 	game.blocksscene
 	game.cameraactor
+	game.gameoverui
 	game.paddle
 	game.mainmenuui
 	game.scoreui

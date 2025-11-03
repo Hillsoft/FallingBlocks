@@ -1,0 +1,27 @@
+objectType: SceneDefinition
+data:
+  sceneObject:
+    variantTag: Scene
+    value:
+
+  actors:
+  -
+    variantTag: StaticImage
+    value:
+      prototype: Prototype_DefaultBackgroundImage
+      position:
+        x: 15
+        y: 15
+  -
+    variantTag: CameraActor
+    value:
+      centre:
+        x: 15
+        y: 15
+      extent:
+        x: 30
+        y: 30
+  -
+    variantTag: GameOverUI
+    value:
+      prototype: Prototype_DefaultGameOverUI

@@ -1,5 +1,4 @@
 add_subdirectory(resource)
-add_subdirectory(scenes)
 
 add_library(game.background "Background.hpp" "Background.cpp")
 target_link_libraries(game.background
@@ -64,7 +63,6 @@ target_link_libraries(game.blocksscene
 	engine.scene
 	game.ball
 	game.block
-	game.scenes.gameover
 	util.meta_utils)
 
 add_library(game.button "Button.hpp" "Button.cpp")
@@ -91,10 +89,14 @@ target_link_libraries(game.cameraactor
 
 add_library(game.gameoverui "GameOverUI.hpp" "GameOverUI.cpp")
 target_link_libraries(game.gameoverui
+	application
+	engine.fontresource
+	engine.resourceref
 	engine.scene
+	engine.sceneloader
 	game.uiactor
 	globalsubsystemstack
-	game.resource.defaultfont
+	input.inputsubsystem
 	render.font
 	ui.uiobject
 	ui.uitext
