@@ -10,6 +10,11 @@ class ResourceRef {
   T& operator*() const { return *ref_; }
   T* operator->() const { return ref_; }
 
+  template <typename U>
+  operator ResourceRef<U>() const {
+    return ResourceRef<U>{ref_};
+  }
+
  private:
   T* ref_;
 };

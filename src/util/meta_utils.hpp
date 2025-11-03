@@ -58,6 +58,9 @@ struct TArray {
   static void visit(Fn&& fn) {
     (fn(THolder<TArr>{}), ...);
   }
+
+  template <typename... TArr2>
+  using Append = TArray<TArr..., TArr2...>;
 };
 
 namespace detail {

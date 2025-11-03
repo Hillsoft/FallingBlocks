@@ -36,11 +36,13 @@ add_library(game.ballspawnblock "BallSpawnBlock.hpp" "BallSpawnBlock.cpp")
 target_link_libraries(game.ballspawnblock
 	engine.resourceref
 	engine.scene
+	engine.textureresource
 	game.ball
 	game.block
 	globalsubsystemstack
 	math.vec
-	util.debug)
+	util.debug
+	util.meta_utils)
 
 add_library(game.block "Block.hpp" "Block.cpp")
 target_link_libraries(game.block
