@@ -5,16 +5,11 @@
 #include "engine/Scene.hpp"
 #include "game/UIActor.hpp"
 #include "input/InputHandler.hpp"
+#include "util/meta_utils.hpp"
 
 namespace blocks::game {
 
 class GameOverUI;
-
-class GameOverUIResourceSentinel {
- public:
-  static void load();
-  static void unload();
-};
 
 struct GameOverUIPrototype {
   engine::ResourceRef<FontResource> fontResource;

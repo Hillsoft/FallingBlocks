@@ -14,12 +14,6 @@ namespace blocks::game {
 
 class Block;
 
-class BlockResourceSentinel {
- public:
-  static void load();
-  static void unload();
-};
-
 struct BlockPrototype {
   engine::ResourceRef<engine::TextureResource> texture;
   math::Vec2 size;
@@ -53,7 +47,6 @@ class Block : public Actor, public physics::RectCollider, public Drawable {
       math::Vec2 p0,
       math::Vec2 p1,
       engine::ResourceRef<BlockPrototype> prototype);
-  Block(Scene& scene, math::Vec2 p0, math::Vec2 p1);
 
   void draw() final;
 

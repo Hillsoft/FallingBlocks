@@ -1,7 +1,6 @@
 #include "game/Paddle.hpp"
 
 #include <algorithm>
-#include <optional>
 #include <GLFW/glfw3.h>
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Actor.hpp"
@@ -13,7 +12,6 @@
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
 #include "render/RenderSubSystem.hpp"
-#include "util/debug.hpp"
 
 namespace blocks::game {
 
@@ -24,32 +22,7 @@ constexpr float kPaddleHeight = 15.f * 0.1f;
 
 constexpr float kPaddleSpeed = 15.f * 1.0f;
 
-class PaddleResourceSentinelData {
- public:
-  PaddleResourceSentinelData()
-      : prototype(
-            GlobalSubSystemStack::get()
-                .resourceManager()
-                .loadResource<PaddlePrototype>("Prototype_DefaultPaddle")) {}
-
-  engine::ResourceRef<PaddlePrototype> getPrototype() { return prototype; }
-
- private:
-  engine::ResourceRef<PaddlePrototype> prototype;
-};
-
-constinit std::optional<PaddleResourceSentinelData> resourceSentinel;
-
 } // namespace
-
-void PaddleResourceSentinel::load() {
-  DEBUG_ASSERT(!resourceSentinel.has_value());
-  resourceSentinel.emplace();
-}
-
-void PaddleResourceSentinel::unload() {
-  resourceSentinel.reset();
-}
 
 Paddle::Paddle(Scene& scene, const PaddleDefinition& definition)
     : Actor(scene),
@@ -63,19 +36,6 @@ Paddle::Paddle(Scene& scene, const PaddleDefinition& definition)
       TickHandler(scene.getTickRegistry()),
       Drawable(scene.getDrawableScene()),
       prototype_(definition.prototype) {}
-
-Paddle::Paddle(Scene& scene)
-    : Actor(scene),
-      input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
-      physics::RectCollider(
-          scene.getPhysicsScene(),
-          math::Vec2{15.f + -kPaddleWidth / 2.f, 27.f},
-          math::Vec2{15.f + kPaddleWidth / 2.f, 28.5f},
-          0b1,
-          0),
-      TickHandler(scene.getTickRegistry()),
-      Drawable(scene.getDrawableScene()),
-      prototype_(resourceSentinel->getPrototype()) {}
 
 void Paddle::update(float deltaTimeSeconds) {
   math::Vec2 pos = getP0();

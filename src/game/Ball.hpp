@@ -15,12 +15,6 @@ namespace blocks::game {
 
 class Ball;
 
-class BallResourceSentinel {
- public:
-  static void load();
-  static void unload();
-};
-
 struct BallPrototype {
   engine::ResourceRef<engine::TextureResource> texture;
 
@@ -54,8 +48,6 @@ class Ball
       engine::ResourceRef<BallPrototype>,
       math::Vec2 pos,
       math::Vec2 vel);
-  Ball(Scene& scene, math::Vec2 pos, math::Vec2 vel);
-  Ball(Scene& scene);
 
   void update(float deltaTimeSeconds) final;
   void draw() final;

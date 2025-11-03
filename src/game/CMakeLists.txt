@@ -1,22 +1,8 @@
-add_subdirectory(resource)
-
-add_library(game.background "Background.hpp" "Background.cpp")
-target_link_libraries(game.background
-	engine.actor
-	engine.drawableregistry
-	engine.scene
-	globalsubsystemstack
-	math.vec
-	render.renderables.renderabletex2d
-	render.rendersubsystem
-	util.debug)
-
 add_library(game.ball "Ball.hpp" "Ball.cpp")
 target_link_libraries(game.ball
 	audio.audiosubsystem
 	engine.actor
 	engine.drawableregistry
-	engine.resourcemanager
 	engine.resourceref
 	engine.scene
 	engine.textureresource
@@ -27,9 +13,7 @@ target_link_libraries(game.ball
 	globalsubsystemstack
 	math.vec
 	physics.physicsscene
-	render.renderables.renderabletex2d
 	render.rendersubsystem
-	util.debug
 	util.meta_utils)
 
 add_library(game.ballspawnblock "BallSpawnBlock.hpp" "BallSpawnBlock.cpp")
@@ -39,9 +23,7 @@ target_link_libraries(game.ballspawnblock
 	engine.textureresource
 	game.ball
 	game.block
-	globalsubsystemstack
 	math.vec
-	util.debug
 	util.meta_utils)
 
 add_library(game.block "Block.hpp" "Block.cpp")
@@ -56,7 +38,6 @@ target_link_libraries(game.block
 	math.vec
 	physics.physicsscene
 	render.rendersubsystem
-	util.debug
 	util.meta_utils)
 
 add_library(game.blocksscene "BlocksScene.hpp" "BlocksScene.cpp")
@@ -66,20 +47,6 @@ target_link_libraries(game.blocksscene
 	game.ball
 	game.block
 	util.meta_utils)
-
-add_library(game.button "Button.hpp" "Button.cpp")
-target_link_libraries(game.button
-	engine.actor
-	engine.drawableregistry
-	engine.scene
-	globalsubsystemstack
-	input.inputsubsystem
-	math.vec
-	render.font
-	render.renderables.renderablecolor2d
-	render.rendersubsystem
-	game.resource.defaultfont
-	util.debug)
 
 add_library(game.cameraactor "CameraActor.hpp" "CameraActor.cpp")
 target_link_libraries(game.cameraactor
@@ -101,7 +68,7 @@ target_link_libraries(game.gameoverui
 	render.font
 	ui.uiobject
 	ui.uitext
-	util.debug
+	util.meta_utils
 	util.notnull)
 
 add_library(game.loadingscreen "LoadingScreen.hpp" "LoadingScreen.cpp")
@@ -129,7 +96,6 @@ target_link_libraries(game.paddle
 	math.vec
 	physics.physicsscene
 	render.rendersubsystem
-	util.debug
 	util.meta_utils)
 
 add_library(game.staticimage "StaticImage.hpp" "StaticImage.cpp")
@@ -160,7 +126,6 @@ target_link_libraries(game.mainmenuui
 	ui.uibutton
 	ui.uiobject
 	ui.uitext
-	util.debug
 	util.meta_utils
 	util.notnull)
 
@@ -180,15 +145,6 @@ target_link_libraries(game.scoreui
 	util.meta_utils
 	util.notnull
 	util.string)
-
-add_library(game.statictext "StaticText.hpp" "StaticText.cpp")
-target_link_libraries(game.statictext
-	engine.actor
-	engine.drawableregistry
-	engine.scene
-	game.resource.defaultfont
-	math.vec
-	render.font)
 
 add_library(game.testtext "TestText.hpp" "TestText.cpp")
 target_link_libraries(game.testtext

@@ -11,12 +11,6 @@ namespace blocks::game {
 
 class MainMenuUI;
 
-class MainMenuUIResourceSentinel {
- public:
-  static void load();
-  static void unload();
-};
-
 struct MainMenuUIPrototype {
   engine::ResourceRef<ColorRenderableResource> colorResource;
   engine::ResourceRef<FontResource> fontResource;
@@ -42,7 +36,6 @@ struct MainMenuUIDefinition {
 class MainMenuUI : public UIActor {
  public:
   MainMenuUI(Scene& scene, const MainMenuUIDefinition& definition);
-  MainMenuUI(Scene& scene);
 };
 
 } // namespace blocks::game

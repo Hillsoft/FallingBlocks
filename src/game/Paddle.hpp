@@ -15,12 +15,6 @@ namespace blocks::game {
 
 class Paddle;
 
-class PaddleResourceSentinel {
- public:
-  static void load();
-  static void unload();
-};
-
 struct PaddlePrototype {
   engine::ResourceRef<engine::TextureResource> texture;
 
@@ -46,7 +40,6 @@ class Paddle
       public Drawable {
  public:
   Paddle(Scene& scene, const PaddleDefinition& definition);
-  Paddle(Scene& scene);
 
   void update(float deltaTimeSeconds) final;
   void draw() final;

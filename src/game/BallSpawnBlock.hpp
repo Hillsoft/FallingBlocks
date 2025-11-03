@@ -11,12 +11,6 @@
 
 namespace blocks::game {
 
-class BallSpawnBlockResourceSentinel {
- public:
-  static void load();
-  static void unload();
-};
-
 class BallSpawnBlock;
 
 struct BallSpawnBlockPrototype : public BlockPrototype {

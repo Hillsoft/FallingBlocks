@@ -40,8 +40,6 @@ target_link_libraries(engine.resourcemanager
 
 add_library(engine.resourceref INTERFACE "ResourceRef.hpp")
 
-add_library(engine.resourcesentinelmanager STATIC "ResourceSentinelManager.hpp" "ResourceSentinelManager.cpp")
-
 add_library(engine.scene STATIC "Scene.hpp" "Scene.cpp")
 target_link_libraries(engine.scene
 	engine.actor

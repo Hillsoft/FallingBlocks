@@ -8,7 +8,6 @@
 #include "audio/AudioSubSystem.hpp"
 #include "engine/Actor.hpp"
 #include "engine/DrawableRegistry.hpp"
-#include "engine/ResourceManager.hpp"
 #include "engine/ResourceRef.hpp"
 #include "engine/Scene.hpp"
 #include "engine/TickRegistry.hpp"
@@ -18,8 +17,6 @@
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
 #include "render/RenderSubSystem.hpp"
-#include "render/renderables/RenderableTex2D.hpp"
-#include "util/debug.hpp"
 
 namespace blocks::game {
 
@@ -49,35 +46,7 @@ math::Vec2 reflect(math::Vec2 vel, math::Vec2 normal) {
   return vel - 2.f * (vel.dot(normal)) * normal;
 }
 
-class BallResourceSentinelData {
- public:
-  BallResourceSentinelData()
-      : resource_(GlobalSubSystemStack::get()
-                      .resourceManager()
-                      .loadResource<BallPrototype>("Prototype_DefaultBall")) {}
-
-  engine::ResourceRef<BallPrototype> getResourceRef() { return resource_; }
-
-  render::RenderableRef<render::RenderableTex2D::InstanceData> getSprite() {
-    return resource_->texture->get();
-  }
-
- private:
-  engine::ResourceRef<BallPrototype> resource_;
-};
-
-constinit std::optional<BallResourceSentinelData> resourceSentinel;
-
 } // namespace
-
-void BallResourceSentinel::load() {
-  DEBUG_ASSERT(!resourceSentinel.has_value());
-  resourceSentinel.emplace();
-}
-
-void BallResourceSentinel::unload() {
-  resourceSentinel.reset();
-}
 
 Ball::Ball(Scene& scene, const BallDefinition& definition)
     : Ball(
@@ -102,15 +71,6 @@ Ball::Ball(
       Drawable(scene.getDrawableScene()),
       prototype_(prototype),
       vel_(normalizeBallSpeed(vel)) {}
-
-Ball::Ball(Scene& scene, math::Vec2 pos, math::Vec2 vel)
-    : Ball(scene, resourceSentinel->getResourceRef(), pos, vel) {}
-
-Ball::Ball(Scene& scene)
-    : Ball(
-          scene,
-          math::Vec2{0.0f},
-          math::Vec2{randFloat(-0.25f, 0.25f), -1.0f}) {}
 
 void Ball::update(float deltaTimeSeconds) {
   math::Vec2 objSize(kBallSize, kBallSize);

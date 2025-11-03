@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <memory>
-#include <optional>
 #include <string>
 #include <vector>
 #include "Application.hpp"
@@ -18,28 +17,10 @@
 #include "ui/UIObject.hpp"
 #include "ui/UIText.hpp"
 #include "util/NotNull.hpp"
-#include "util/debug.hpp"
 
 namespace blocks::game {
 
 namespace {
-
-class MainMenuUIResourceSentinelData {
- public:
-  MainMenuUIResourceSentinelData()
-      : prototype_(
-            GlobalSubSystemStack::get()
-                .resourceManager()
-                .loadResource<MainMenuUIPrototype>(
-                    "Prototype_DefaultMainMenu")) {}
-
-  engine::ResourceRef<MainMenuUIPrototype> getPrototype() { return prototype_; }
-
- private:
-  engine::ResourceRef<MainMenuUIPrototype> prototype_;
-};
-
-constinit std::optional<MainMenuUIResourceSentinelData> resourceSentinel;
 
 std::unique_ptr<ui::UIObject> makeUI(
     render::RenderableRef<render::RenderableColor2D::InstanceData>
@@ -139,27 +120,11 @@ std::unique_ptr<ui::UIObject> makeUI(
 
 } // namespace
 
-void MainMenuUIResourceSentinel::load() {
-  DEBUG_ASSERT(!resourceSentinel.has_value());
-  resourceSentinel.emplace();
-}
-
-void MainMenuUIResourceSentinel::unload() {
-  resourceSentinel.reset();
-}
-
 MainMenuUI::MainMenuUI(Scene& scene, const MainMenuUIDefinition& definition)
     : UIActor(
           scene,
           makeUI(
               definition.prototype->colorResource->get(),
               definition.prototype->fontResource->get())) {}
-
-MainMenuUI::MainMenuUI(Scene& scene)
-    : UIActor(
-          scene,
-          makeUI(
-              resourceSentinel->getPrototype()->colorResource->get(),
-              resourceSentinel->getPrototype()->fontResource->get())) {}
 
 } // namespace blocks::game

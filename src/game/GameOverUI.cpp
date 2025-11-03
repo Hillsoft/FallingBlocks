@@ -2,7 +2,6 @@
 
 #include <chrono>
 #include <memory>
-#include <optional>
 #include <vector>
 #include <GLFW/glfw3.h>
 #include "Application.hpp"
@@ -14,18 +13,10 @@
 #include "ui/UIObject.hpp"
 #include "ui/UIText.hpp"
 #include "util/NotNull.hpp"
-#include "util/debug.hpp"
 
 namespace blocks::game {
 
 namespace {
-
-class GameOverUIResourceSentinelData {
- public:
-  GameOverUIResourceSentinelData() {}
-};
-
-constinit std::optional<GameOverUIResourceSentinelData> resourceSentinel;
 
 std::unique_ptr<ui::UIObject> makeUI(const render::Font& font) {
   auto& localisation = GlobalSubSystemStack::get().localisationManager();
@@ -71,15 +62,6 @@ void playGameOverSound(Scene& scene) {
 }
 
 } // namespace
-
-void GameOverUIResourceSentinel::load() {
-  DEBUG_ASSERT(!resourceSentinel.has_value());
-  resourceSentinel.emplace();
-}
-
-void GameOverUIResourceSentinel::unload() {
-  resourceSentinel.reset();
-}
 
 GameOverUI::GameOverUI(Scene& scene, const GameOverUIDefinition& definition)
     : UIActor(scene, makeUI(definition.prototype->fontResource->get())),
