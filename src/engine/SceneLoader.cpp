@@ -22,12 +22,15 @@ struct SceneDefinition {
 };
 
 std::unique_ptr<Scene> loadSceneFromName(std::string sceneName) {
-  blocks::engine::ResourceRef<SceneDefinition> sceneDefinitionRef =
-      GlobalSubSystemStack::get()
-          .resourceManager()
-          .loadResource<SceneDefinition>(std::move(sceneName));
+  return loadSceneFromDefinition(
+      loadSceneDefinitionFromName(std::move(sceneName)));
+}
 
-  return loadSceneFromDefinition(sceneDefinitionRef);
+engine::ResourceRef<SceneDefinition> loadSceneDefinitionFromName(
+    std::string sceneName) {
+  return GlobalSubSystemStack::get()
+      .resourceManager()
+      .loadResource<SceneDefinition>(std::move(sceneName));
 }
 
 std::unique_ptr<Scene> loadSceneFromDefinition(

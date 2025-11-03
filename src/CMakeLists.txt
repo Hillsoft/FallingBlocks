@@ -12,6 +12,7 @@ add_subdirectory(util)
 
 add_library(application STATIC "Application.cpp" "Application.hpp")
 target_link_libraries(application
+	engine.resourceref
 	engine.scene
 	engine.sceneloader
 	globalsubsystemstack

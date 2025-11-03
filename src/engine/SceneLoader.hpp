@@ -10,6 +10,8 @@ namespace blocks {
 struct SceneDefinition;
 
 std::unique_ptr<Scene> loadSceneFromName(std::string sceneName);
+engine::ResourceRef<SceneDefinition> loadSceneDefinitionFromName(
+    std::string sceneName);
 std::unique_ptr<Scene> loadSceneFromDefinition(
     engine::ResourceRef<SceneDefinition> sceneDefinitionRef);
 

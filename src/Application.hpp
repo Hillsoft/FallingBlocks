@@ -5,7 +5,9 @@
 #include <memory>
 #include <string>
 #include <thread>
+#include "engine/ResourceRef.hpp"
 #include "engine/Scene.hpp"
+#include "engine/SceneLoader.hpp"
 #include "input/InputHandler.hpp"
 
 namespace blocks {
@@ -29,6 +31,7 @@ class Application : public input::InputHandler {
   void update(std::chrono::microseconds deltaTimeSeconds);
   void drawFrame();
 
+  engine::ResourceRef<SceneDefinition> loadingSceneDefinition_;
   std::unique_ptr<Scene> loadingScene_;
   std::unique_ptr<Scene> mainScene_;
   Scene* currentScene_;

@@ -26,8 +26,9 @@ Application* currentApplication = nullptr;
 
 Application::Application()
     : input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
-      loadingScene_(loadSceneFromName("Scene_Loading")),
-      currentScene_(loadingScene_.get()),
+      loadingSceneDefinition_(loadSceneDefinitionFromName("Scene_Loading")),
+      loadingScene_(nullptr),
+      currentScene_(nullptr),
       loadThread_() {
   DEBUG_ASSERT(currentApplication == nullptr);
   currentApplication = this;
@@ -43,8 +44,12 @@ Application& Application::getApplication() {
 }
 
 void Application::run() {
-  if (currentScene_ != mainScene_.get()) {
+  if (currentScene_ == nullptr || currentScene_ != mainScene_.get()) {
     transitionToScene("Scene_MainMenu");
+
+    // wait for transition scene to be ready, main scene by null
+    while (!hasPendingScene_.load(std::memory_order_relaxed)) {
+    }
   }
 
   auto& subsystems = GlobalSubSystemStack::get();
@@ -55,6 +60,11 @@ void Application::run() {
     std::chrono::microseconds totalFrameTime{0};
 
     for (int i = 0; i < 1000 && !subsystems.window()->shouldClose(); i++) {
+      if (hasPendingScene_.load(std::memory_order_acquire)) {
+        currentScene_ = pendingScene_;
+        hasPendingScene_.store(false, std::memory_order_relaxed);
+      }
+
       auto start = std::chrono::high_resolution_clock::now();
       glfwPollEvents();
       update(prevFrameTime);
@@ -68,11 +78,6 @@ void Application::run() {
       minFrameTime = std::min(minFrameTime, curFrameTime);
 
       prevFrameTime = curFrameTime;
-
-      if (hasPendingScene_.load(std::memory_order_acquire)) {
-        currentScene_ = pendingScene_;
-        hasPendingScene_.store(false, std::memory_order_relaxed);
-      }
     }
 
     std::cout << "FPS: " << 1000000.0f / (totalFrameTime / 1000).count()
@@ -89,6 +94,9 @@ void Application::transitionToScene(std::string sceneName) {
     // Ensure we are in the main scene
     while (hasPendingScene_.load(std::memory_order_relaxed)) {
     }
+
+    // Create transition scene
+    loadingScene_ = loadSceneFromDefinition(loadingSceneDefinition_);
 
     // Switch to transition scene
     pendingScene_ = loadingScene_.get();
@@ -115,6 +123,12 @@ void Application::transitionToScene(std::string sceneName) {
 
     pendingScene_ = mainScene_.get();
     hasPendingScene_.store(true, std::memory_order_release);
+
+    while (hasPendingScene_.load(std::memory_order_relaxed)) {
+    }
+
+    // Cleanup transition scene
+    loadingScene_.reset();
   }};
 }
 
