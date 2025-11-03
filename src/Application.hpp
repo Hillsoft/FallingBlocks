@@ -14,7 +14,9 @@ namespace blocks {
 
 class Application : public input::InputHandler {
  public:
-  Application();
+  Application(
+      std::string loadingSceneResourceName,
+      std::string initialSceneResourceName);
   ~Application();
 
   static Application& getApplication();
@@ -37,6 +39,7 @@ class Application : public input::InputHandler {
   Scene* currentScene_;
   Scene* pendingScene_ = nullptr;
   std::atomic<bool> hasPendingScene_ = false;
+  std::string initialSceneResourceName_;
   std::jthread loadThread_;
 };
 

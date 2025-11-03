@@ -24,11 +24,14 @@ Application* currentApplication = nullptr;
 
 } // namespace
 
-Application::Application()
+Application::Application(
+    std::string loadingSceneResourceName, std::string initialSceneResourceName)
     : input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
-      loadingSceneDefinition_(loadSceneDefinitionFromName("Scene_Loading")),
+      loadingSceneDefinition_(
+          loadSceneDefinitionFromName(std::move(loadingSceneResourceName))),
       loadingScene_(nullptr),
       currentScene_(nullptr),
+      initialSceneResourceName_(std::move(initialSceneResourceName)),
       loadThread_() {
   DEBUG_ASSERT(currentApplication == nullptr);
   currentApplication = this;
@@ -45,7 +48,7 @@ Application& Application::getApplication() {
 
 void Application::run() {
   if (currentScene_ == nullptr || currentScene_ != mainScene_.get()) {
-    transitionToScene("Scene_MainMenu");
+    transitionToScene(initialSceneResourceName_);
 
     // wait for transition scene to be ready, main scene by null
     while (!hasPendingScene_.load(std::memory_order_relaxed)) {
