@@ -3,16 +3,42 @@ target_link_libraries(engine.actor
 	util.portability
 	util.raii_helpers)
 
+add_library(engine.colorrenderableresource STATIC "ColorRenderableResource.hpp" "ColorRenderableResource.cpp")
+target_link_libraries(engine.colorrenderableresource
+	globalsubsystemstack
+	render.rendersubsystem
+	render.renderables.renderablecolor2d
+	util.meta_utils)
+
 add_library(engine.drawableregistry STATIC "DrawableRegistry.hpp" "DrawableRegistry.cpp")
 target_link_libraries(engine.drawableregistry
 	util.registry)
+
+add_library(engine.fontresource STATIC "FontResource.hpp" "FontResource.cpp")
+target_link_libraries(engine.fontresource
+	globalsubsystemstack
+	loader.font.font
+	render.font
+	util.meta_utils
+	util.string)
 
 add_library(engine.localisation STATIC "Localisation.hpp" "Localisation.cpp")
 target_link_libraries(engine.localisation
 	loader.locale
 	util.string)
 
-add_library(engine.resourcesentinelmanager STATIC "ResourceSentinelManager.hpp" "ResourceSentinelManager.cpp")
+add_library(engine.resourcemanager STATIC "ResourceManager.hpp" "ResourceManager.cpp")
+target_link_libraries(engine.resourcemanager
+	engine.resourceref
+	globalsubsystemstack
+	serialization.serialization
+	serialization.yaml.yamlserializationprovider
+	util.typeeraseduniqueptr
+	util.file
+	util.meta_utils
+	util.string)
+
+add_library(engine.resourceref INTERFACE "ResourceRef.hpp")
 
 add_library(engine.scene STATIC "Scene.hpp" "Scene.cpp")
 target_link_libraries(engine.scene
@@ -21,11 +47,24 @@ target_link_libraries(engine.scene
 	engine.tickregistry
 	engine.timer
 	physics.physicsscene
-	util.debug)
+	util.debug
+	util.meta_utils)
 
-add_library(engine.sceneloader INTERFACE "SceneLoader.hpp")
-target_link_libraries(engine.sceneloader INTERFACE
-	engine.scene)
+add_library(engine.sceneloader STATIC "SceneLoader.hpp" "SceneLoader.cpp")
+target_link_libraries(engine.sceneloader
+	engine.resourceref
+	engine.scene
+	globalsubsystemstack
+	resourcetypes
+	util.meta_utils)
+
+add_library(engine.textureresource STATIC "TextureResource.hpp" "TextureResource.cpp")
+target_link_libraries(engine.textureresource
+	globalsubsystemstack
+	render.rendersubsystem
+	render.renderables.renderabletex2d
+	util.meta_utils
+	util.string)
 
 add_library(engine.tickregistry STATIC "TickRegistry.hpp" "TickRegistry.cpp")
 target_link_libraries(engine.tickregistry

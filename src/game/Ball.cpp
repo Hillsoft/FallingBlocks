@@ -8,6 +8,7 @@
 #include "audio/AudioSubSystem.hpp"
 #include "engine/Actor.hpp"
 #include "engine/DrawableRegistry.hpp"
+#include "engine/ResourceRef.hpp"
 #include "engine/Scene.hpp"
 #include "engine/TickRegistry.hpp"
 #include "game/Block.hpp"
@@ -16,16 +17,14 @@
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
 #include "render/RenderSubSystem.hpp"
-#include "render/renderables/RenderableTex2D.hpp"
-#include "util/debug.hpp"
 
 namespace blocks::game {
 
 namespace {
 
-constexpr float kBallSize = 0.05f;
+constexpr float kBallSize = 15.f * 0.05f;
 constexpr float kBounceDirectionalStrength = 15.f;
-constexpr float kBallSpeed = 1.5f;
+constexpr float kBallSpeed = 15.f * 1.5f;
 
 constexpr uint32_t kWallHitFrequency = 262;
 constexpr uint32_t kBlockHitFrequency = 330;
@@ -47,36 +46,20 @@ math::Vec2 reflect(math::Vec2 vel, math::Vec2 normal) {
   return vel - 2.f * (vel.dot(normal)) * normal;
 }
 
-class BallResourceSentinelData {
- public:
-  BallResourceSentinelData()
-      : sprite_(GlobalSubSystemStack::get()
-                    .renderSystem()
-                    .createRenderable<render::RenderableTex2D>(
-                        RESOURCE_DIR "/ball.png")) {}
-
-  render::RenderableRef<render::RenderableTex2D::InstanceData> getSprite() {
-    return sprite_.get();
-  }
-
- private:
-  render::UniqueRenderableHandle<render::RenderableTex2D::InstanceData> sprite_;
-};
-
-constinit std::optional<BallResourceSentinelData> resourceSentinel;
-
 } // namespace
 
-void BallResourceSentinel::load() {
-  DEBUG_ASSERT(!resourceSentinel.has_value());
-  resourceSentinel.emplace();
-}
+Ball::Ball(Scene& scene, const BallDefinition& definition)
+    : Ball(
+          scene,
+          definition.prototype,
+          definition.position.value_or({15.0f, 15.0f}),
+          definition.velocity.value_or({randFloat(-0.25f, 0.25f), -1.0f})) {}
 
-void BallResourceSentinel::unload() {
-  resourceSentinel.reset();
-}
-
-Ball::Ball(Scene& scene, math::Vec2 pos, math::Vec2 vel)
+Ball::Ball(
+    Scene& scene,
+    engine::ResourceRef<BallPrototype> prototype,
+    math::Vec2 pos,
+    math::Vec2 vel)
     : Actor(scene),
       physics::RectCollider(
           scene.getPhysicsScene(),
@@ -86,42 +69,37 @@ Ball::Ball(Scene& scene, math::Vec2 pos, math::Vec2 vel)
           0b11),
       TickHandler(scene.getTickRegistry()),
       Drawable(scene.getDrawableScene()),
+      prototype_(prototype),
       vel_(normalizeBallSpeed(vel)) {}
-
-Ball::Ball(Scene& scene)
-    : Ball(
-          scene,
-          math::Vec2{0.0f},
-          math::Vec2{randFloat(-0.25f, 0.25f), -1.0f}) {}
 
 void Ball::update(float deltaTimeSeconds) {
   math::Vec2 objSize(kBallSize, kBallSize);
   math::Vec2 newPos = getP0() + deltaTimeSeconds * vel_;
   math::Vec2 newPos2 = newPos + objSize;
 
-  if (newPos2.x() > 1.0f) {
+  if (newPos2.x() > 30.0f) {
     vel_.x() *= -1.0f;
-    newPos.x() = 1.0f - objSize.x();
+    newPos.x() = 30.0f - objSize.x();
     GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
         .frequency = kWallHitFrequency,
         .volume = 0.5f,
         .duration = kSoundDuration});
   }
-  if (newPos.x() < -1.0f) {
+  if (newPos.x() < 0.0f) {
     vel_.x() *= -1.0f;
-    newPos.x() = -1.0f;
+    newPos.x() = 0.0f;
     GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
         .frequency = kWallHitFrequency,
         .volume = 0.5f,
         .duration = kSoundDuration});
   }
 
-  if (newPos.y() > 1.0f) {
+  if (newPos.y() > 30.0f) {
     getScene()->destroyActor(this);
   }
-  if (newPos.y() < -1.0f) {
+  if (newPos.y() < 0.0f) {
     vel_.y() *= -1.0f;
-    newPos.y() = -1.0f;
+    newPos.y() = 0.0f;
     GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
         .frequency = kWallHitFrequency,
         .volume = 0.5f,
@@ -139,7 +117,7 @@ void Ball::draw() {
   render.drawObject(
       window,
       0,
-      resourceSentinel->getSprite(),
+      prototype_->texture->get(),
       {math::modelMatrixFromBounds(getP0(), getP1())});
 }
 

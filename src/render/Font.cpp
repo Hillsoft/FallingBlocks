@@ -315,7 +315,7 @@ void Font::drawStringASCII(
     Align align,
     VAlign valign,
     int zDepth,
-    Simple2DCamera* camera) {
+    Simple2DCamera* camera) const {
   switch (align) {
     case Align::LEFT:
       break;
@@ -362,7 +362,7 @@ void Font::drawStringUTF8(
     Align align,
     VAlign valign,
     int zDepth,
-    Simple2DCamera* camera) {
+    Simple2DCamera* camera) const {
   switch (align) {
     case Align::LEFT:
       break;

@@ -58,7 +58,7 @@ class Font {
       Align align = Align::LEFT,
       VAlign valign = VAlign::BASELINE,
       int zDepth = 10,
-      Simple2DCamera* camera = nullptr);
+      Simple2DCamera* camera = nullptr) const;
   void drawStringUTF8(
       std::string_view str,
       math::Vec2 pos,
@@ -66,7 +66,7 @@ class Font {
       Align align = Align::LEFT,
       VAlign valign = VAlign::BASELINE,
       int zDepth = 10,
-      Simple2DCamera* camera = nullptr);
+      Simple2DCamera* camera = nullptr) const;
 
   float stringWidth(
       Encoding encoding, std::string_view str, Size fontSize) const;

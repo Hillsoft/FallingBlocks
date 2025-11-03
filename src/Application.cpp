@@ -4,14 +4,13 @@
 #include <chrono>
 #include <iostream>
 #include <memory>
+#include <string>
 #include <thread>
 #include <utility>
 #include <GLFW/glfw3.h>
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Scene.hpp"
 #include "engine/SceneLoader.hpp"
-#include "game/LoadingScreen.hpp"
-#include "game/scenes/MainMenu.hpp"
 #include "input/InputHandler.hpp"
 #include "util/debug.hpp"
 
@@ -27,11 +26,12 @@ Application* currentApplication = nullptr;
 
 Application::Application()
     : input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
-      currentScene_(&loadingScene_),
+      loadingSceneDefinition_(loadSceneDefinitionFromName("Scene_Loading")),
+      loadingScene_(nullptr),
+      currentScene_(nullptr),
       loadThread_() {
   DEBUG_ASSERT(currentApplication == nullptr);
   currentApplication = this;
-  loadingScene_.createActor<game::LoadingScreen>();
 }
 
 Application::~Application() {
@@ -44,8 +44,12 @@ Application& Application::getApplication() {
 }
 
 void Application::run() {
-  if (currentScene_ != mainScene_.get()) {
-    transitionToScene(std::make_unique<game::MainMenu>());
+  if (currentScene_ == nullptr || currentScene_ != mainScene_.get()) {
+    transitionToScene("Scene_MainMenu");
+
+    // wait for transition scene to be ready, main scene by null
+    while (!hasPendingScene_.load(std::memory_order_relaxed)) {
+    }
   }
 
   auto& subsystems = GlobalSubSystemStack::get();
@@ -56,6 +60,12 @@ void Application::run() {
     std::chrono::microseconds totalFrameTime{0};
 
     for (int i = 0; i < 1000 && !subsystems.window()->shouldClose(); i++) {
+      if (hasPendingScene_.load(std::memory_order_acquire)) {
+        currentScene_ = pendingScene_;
+        hasPendingScene_.store(false, std::memory_order_relaxed);
+        currentScene_->activate();
+      }
+
       auto start = std::chrono::high_resolution_clock::now();
       glfwPollEvents();
       update(prevFrameTime);
@@ -69,11 +79,6 @@ void Application::run() {
       minFrameTime = std::min(minFrameTime, curFrameTime);
 
       prevFrameTime = curFrameTime;
-
-      if (hasPendingScene_.load(std::memory_order_acquire)) {
-        currentScene_ = pendingScene_;
-        hasPendingScene_.store(false, std::memory_order_relaxed);
-      }
     }
 
     std::cout << "FPS: " << 1000000.0f / (totalFrameTime / 1000).count()
@@ -85,14 +90,17 @@ void Application::run() {
   subsystems.renderSystem().waitIdle();
 }
 
-void Application::transitionToScene(std::unique_ptr<SceneLoader> sceneLoader) {
-  loadThread_ = std::jthread{[this, sceneLoader = std::move(sceneLoader)]() {
+void Application::transitionToScene(std::string sceneName) {
+  loadThread_ = std::jthread{[this, sceneName = std::move(sceneName)]() {
     // Ensure we are in the main scene
     while (hasPendingScene_.load(std::memory_order_relaxed)) {
     }
 
+    // Create transition scene
+    loadingScene_ = loadSceneFromDefinition(loadingSceneDefinition_);
+
     // Switch to transition scene
-    pendingScene_ = &loadingScene_;
+    pendingScene_ = loadingScene_.get();
     hasPendingScene_.store(true, std::memory_order_release);
 
     while (hasPendingScene_.load(std::memory_order_relaxed)) {
@@ -102,12 +110,13 @@ void Application::transitionToScene(std::unique_ptr<SceneLoader> sceneLoader) {
 
     auto loadStart = std::chrono::high_resolution_clock::now();
 
-    mainScene_ = sceneLoader->loadScene();
+    mainScene_ = loadSceneFromName(sceneName);
 
     auto loadEnd = std::chrono::high_resolution_clock::now();
     auto loadTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         loadEnd - loadStart);
-    std::cout << "Loaded scene in " << loadTime.count() << "ms" << std::endl;
+    std::cout << "Loaded scene " << sceneName << " in " << loadTime.count()
+              << "ms" << std::endl;
 
     if (loadTime < kMinLoadTime) {
       std::this_thread::sleep_for(kMinLoadTime - loadTime);
@@ -115,6 +124,12 @@ void Application::transitionToScene(std::unique_ptr<SceneLoader> sceneLoader) {
 
     pendingScene_ = mainScene_.get();
     hasPendingScene_.store(true, std::memory_order_release);
+
+    while (hasPendingScene_.load(std::memory_order_relaxed)) {
+    }
+
+    // Cleanup transition scene
+    loadingScene_.reset();
   }};
 }
 

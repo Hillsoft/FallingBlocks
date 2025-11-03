@@ -77,6 +77,11 @@ set_target_properties("${CMAKE_PROJECT_NAME}" PROPERTIES ADDITIONAL_CLEAN_FILES 
 add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/res/" COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/res/" "${CMAKE_CURRENT_BINARY_DIR}/res" DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/res/" "${CMAKE_CURRENT_SOURCE_DIR}/res/localisation/")
 add_custom_target(resources DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/res/")
 
-add_dependencies(FallingBlocks shader_bytecode resources)
+
+set_target_properties("${CMAKE_PROJECT_NAME}" PROPERTIES ADDITIONAL_CLEAN_FILES "${CMAKE_CURRENT_BINARY_DIR}/data")
+add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/data/" COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/data/" "${CMAKE_CURRENT_BINARY_DIR}/data" DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/data/")
+add_custom_target(datares DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/data/")
+
+add_dependencies(FallingBlocks shader_bytecode resources datares)
 
 # TODO: Add tests and install targets if needed.

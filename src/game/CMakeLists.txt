@@ -1,23 +1,11 @@
-add_subdirectory(resource)
-add_subdirectory(scenes)
-
-add_library(game.background "Background.hpp" "Background.cpp")
-target_link_libraries(game.background
-	engine.actor
-	engine.drawableregistry
-	engine.scene
-	globalsubsystemstack
-	math.vec
-	render.renderables.renderabletex2d
-	render.rendersubsystem
-	util.debug)
-
 add_library(game.ball "Ball.hpp" "Ball.cpp")
 target_link_libraries(game.ball
 	audio.audiosubsystem
 	engine.actor
 	engine.drawableregistry
+	engine.resourceref
 	engine.scene
+	engine.textureresource
 	engine.tickregistry
 	game.block
 	game.blocksscene
@@ -25,101 +13,110 @@ target_link_libraries(game.ball
 	globalsubsystemstack
 	math.vec
 	physics.physicsscene
-	render.renderables.renderabletex2d
 	render.rendersubsystem
-	util.debug)
+	util.meta_utils)
 
 add_library(game.ballspawnblock "BallSpawnBlock.hpp" "BallSpawnBlock.cpp")
 target_link_libraries(game.ballspawnblock
+	engine.resourceref
 	engine.scene
+	engine.textureresource
 	game.ball
 	game.block
-	globalsubsystemstack
 	math.vec
-	render.renderables.renderabletex2d
-	render.rendersubsystem
-	util.debug)
+	util.meta_utils)
 
 add_library(game.block "Block.hpp" "Block.cpp")
 target_link_libraries(game.block
 	engine.actor
 	engine.drawableregistry
+	engine.resourceref
 	engine.scene
+	engine.textureresource
 	game.blocksscene
 	globalsubsystemstack
 	math.vec
 	physics.physicsscene
-	render.renderables.renderabletex2d
 	render.rendersubsystem
-	util.debug)
+	util.meta_utils)
 
 add_library(game.blocksscene "BlocksScene.hpp" "BlocksScene.cpp")
 target_link_libraries(game.blocksscene
 	application
 	engine.scene
-	engine.sceneloader
 	game.ball
 	game.block
-	game.scenes.gameover)
+	util.meta_utils)
 
-add_library(game.button "Button.hpp" "Button.cpp")
-target_link_libraries(game.button
-	engine.actor
-	engine.drawableregistry
-	engine.scene
+add_library(game.cameraactor "CameraActor.hpp" "CameraActor.cpp")
+target_link_libraries(game.cameraactor
 	globalsubsystemstack
-	input.inputsubsystem
+	engine.actor
 	math.vec
-	render.font
-	render.renderables.renderablecolor2d
-	render.rendersubsystem
-	game.resource.defaultfont
-	util.debug)
+	render.simple2dcamera
+	util.meta_utils)
 
 add_library(game.gameoverui "GameOverUI.hpp" "GameOverUI.cpp")
 target_link_libraries(game.gameoverui
+	application
+	engine.fontresource
+	engine.resourceref
 	engine.scene
 	game.uiactor
 	globalsubsystemstack
-	game.resource.defaultfont
+	input.inputsubsystem
 	render.font
 	ui.uiobject
 	ui.uitext
-	util.debug
+	util.meta_utils
 	util.notnull)
 
 add_library(game.loadingscreen "LoadingScreen.hpp" "LoadingScreen.cpp")
 target_link_libraries(game.loadingscreen
 	engine.actor
 	engine.drawableregistry
+	engine.resourceref
 	engine.scene
+	engine.textureresource
 	engine.tickregistry
 	globalsubsystemstack
 	math.vec
-	render.renderables.renderabletex2d
-	render.rendersubsystem)
+	util.meta_utils)
 
 add_library(game.paddle "Paddle.hpp" "Paddle.cpp")
 target_link_libraries(game.paddle
 	engine.actor
 	engine.drawableregistry
+	engine.resourceref
 	engine.scene
+	engine.textureresource
 	engine.tickregistry
 	globalsubsystemstack
 	input.inputsubsystem
 	math.vec
 	physics.physicsscene
-	render.renderables.renderabletex2d
 	render.rendersubsystem
-	util.debug)
+	util.meta_utils)
+
+add_library(game.staticimage "StaticImage.hpp" "StaticImage.cpp")
+target_link_libraries(game.staticimage
+	engine.actor
+	engine.drawableregistry
+	engine.resourceref
+	engine.scene
+	engine.textureresource
+	globalsubsystemstack
+	math.vec
+	render.rendersubsystem
+	util.meta_utils)
 
 add_library(game.mainmenuui "MainMenuUI.hpp" "MainMenuUI.cpp")
 target_link_libraries(game.mainmenuui
 	application
+	engine.colorrenderableresource
+	engine.fontresource
+	engine.resourceref
 	engine.scene
-	game.resource.defaultfont
-	game.scenes.level1
-	game.scenes.mainmenu
 	game.uiactor
 	globalsubsystemstack
 	math.vec
@@ -129,32 +126,25 @@ target_link_libraries(game.mainmenuui
 	ui.uibutton
 	ui.uiobject
 	ui.uitext
-	util.debug
+	util.meta_utils
 	util.notnull)
 
 add_library(game.scoreui "ScoreUI.hpp" "ScoreUI.cpp")
 target_link_libraries(game.scoreui
 	engine.actor
+	engine.fontresource
+	engine.resourceref
 	engine.scene
 	game.blocksscene
-	game.resource.defaultfont
 	game.uiactor
 	globalsubsystemstack
 	render.font
 	ui.uiobject
 	ui.uitext
 	util.debug
+	util.meta_utils
 	util.notnull
 	util.string)
-
-add_library(game.statictext "StaticText.hpp" "StaticText.cpp")
-target_link_libraries(game.statictext
-	engine.actor
-	engine.drawableregistry
-	engine.scene
-	game.resource.defaultfont
-	math.vec
-	render.font)
 
 add_library(game.testtext "TestText.hpp" "TestText.cpp")
 target_link_libraries(game.testtext

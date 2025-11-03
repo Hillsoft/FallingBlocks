@@ -1,15 +1,18 @@
 #pragma once
 
 #include <memory>
+#include <string>
+#include "engine/ResourceRef.hpp"
 #include "engine/Scene.hpp"
 
 namespace blocks {
 
-class SceneLoader {
- public:
-  virtual ~SceneLoader() = default;
+struct SceneDefinition;
 
-  virtual std::unique_ptr<Scene> loadScene() const = 0;
-};
+std::unique_ptr<Scene> loadSceneFromName(std::string sceneName);
+engine::ResourceRef<SceneDefinition> loadSceneDefinitionFromName(
+    std::string sceneName);
+std::unique_ptr<Scene> loadSceneFromDefinition(
+    engine::ResourceRef<SceneDefinition> sceneDefinitionRef);
 
 } // namespace blocks

@@ -2,7 +2,7 @@
 
 #include "audio/AudioSubSystem.hpp"
 #include "engine/Localisation.hpp"
-#include "engine/ResourceSentinelManager.hpp"
+#include "engine/ResourceManager.hpp"
 #include "input/InputSubSystem.hpp"
 #include "render/RenderSubSystem.hpp"
 #include "util/debug.hpp"
@@ -50,8 +50,8 @@ audio::AudioSubSystem& GlobalSubSystemStack::audioSystem() {
   return audio_;
 }
 
-ResourceSentinelManager& GlobalSubSystemStack::sentinelManager() {
-  return sentinelManager_;
+engine::ResourceManager& GlobalSubSystemStack::resourceManager() {
+  return resourceManager_;
 }
 
 Localisation& GlobalSubSystemStack::localisationManager() {

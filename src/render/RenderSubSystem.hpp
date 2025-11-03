@@ -143,9 +143,9 @@ class UniqueRenderableHandle : private util::no_copy {
     return *this;
   }
 
-  RenderableRef<TInstanceData> get() { return ref_; }
-  RenderableRef<TInstanceData> operator*() { return ref_; }
-  RenderableRef<TInstanceData> operator->() { return ref_; }
+  RenderableRef<TInstanceData> get() const { return ref_; }
+  RenderableRef<TInstanceData> operator*() const { return ref_; }
+  RenderableRef<TInstanceData> operator->() const { return ref_; }
 
  private:
   RenderableRef<TInstanceData> ref_;

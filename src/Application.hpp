@@ -3,7 +3,9 @@
 #include <atomic>
 #include <chrono>
 #include <memory>
+#include <string>
 #include <thread>
+#include "engine/ResourceRef.hpp"
 #include "engine/Scene.hpp"
 #include "engine/SceneLoader.hpp"
 #include "input/InputHandler.hpp"
@@ -19,7 +21,7 @@ class Application : public input::InputHandler {
 
   void run();
 
-  void transitionToScene(std::unique_ptr<SceneLoader> sceneLoader);
+  void transitionToScene(std::string sceneName);
 
   void onKeyPress(int key) final;
 
@@ -29,7 +31,8 @@ class Application : public input::InputHandler {
   void update(std::chrono::microseconds deltaTimeSeconds);
   void drawFrame();
 
-  Scene loadingScene_;
+  engine::ResourceRef<SceneDefinition> loadingSceneDefinition_;
+  std::unique_ptr<Scene> loadingScene_;
   std::unique_ptr<Scene> mainScene_;
   Scene* currentScene_;
   Scene* pendingScene_ = nullptr;

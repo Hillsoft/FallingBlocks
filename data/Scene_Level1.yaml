@@ -1,0 +1,455 @@
+objectType: SceneDefinition
+data:
+  sceneObject:
+    variantTag: BlocksScene
+    value:
+      nextLevelName: Scene_Level2
+  actors:
+  -
+    variantTag: Ball
+    value:
+      prototype: Prototype_DefaultBall
+  -
+    variantTag: Paddle
+    value:
+      prototype: Prototype_DefaultPaddle
+  -
+    variantTag: StaticImage
+    value:
+      prototype: Prototype_DefaultBackgroundImage
+      position:
+        x: 15
+        y: 15
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 1
+        y: 4
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 3
+        y: 4
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 5
+        y: 4
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 7
+        y: 4
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 9
+        y: 4
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 11
+        y: 4
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 13
+        y: 4
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 15
+        y: 4
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 17
+        y: 4
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 19
+        y: 4
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 21
+        y: 4
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 23
+        y: 4
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 25
+        y: 4
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 27
+        y: 4
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 29
+        y: 4
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 1
+        y: 5
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 3
+        y: 5
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 5
+        y: 5
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 7
+        y: 5
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 9
+        y: 5
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 11
+        y: 5
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 13
+        y: 5
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 15
+        y: 5
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 17
+        y: 5
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 19
+        y: 5
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 21
+        y: 5
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 23
+        y: 5
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 25
+        y: 5
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 27
+        y: 5
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 29
+        y: 5
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 1
+        y: 6
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 3
+        y: 6
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 5
+        y: 6
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 7
+        y: 6
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 9
+        y: 6
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 11
+        y: 6
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 13
+        y: 6
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 15
+        y: 6
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 17
+        y: 6
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 19
+        y: 6
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 21
+        y: 6
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 23
+        y: 6
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 25
+        y: 6
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 27
+        y: 6
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 29
+        y: 6
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 1
+        y: 7
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 3
+        y: 7
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 5
+        y: 7
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 7
+        y: 7
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 9
+        y: 7
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 11
+        y: 7
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 13
+        y: 7
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 15
+        y: 7
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 17
+        y: 7
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 19
+        y: 7
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 21
+        y: 7
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 23
+        y: 7
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 25
+        y: 7
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 27
+        y: 7
+  -
+    variantTag: Block
+    value:
+      prototype: Prototype_DefaultBlock
+      position:
+        x: 29
+        y: 7
+  -
+    variantTag: CameraActor
+    value:
+      centre:
+        x: 15
+        y: 15
+      extent:
+        x: 30
+        y: 30
+  -
+    variantTag: ScoreUI
+    value:
+      prototype: Prototype_DefaultScoreUI

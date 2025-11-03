@@ -1,0 +1,20 @@
+objectType: SceneDefinition
+data:
+  sceneObject:
+    variantTag: Scene
+    value:
+
+  actors:
+  -
+    variantTag: LoadingScreen
+    value:
+      prototype: Prototype_DefaultLoadingScreen
+  -
+    variantTag: CameraActor
+    value:
+      centre:
+        x: 0
+        y: 0
+      extent:
+        x: 2
+        y: 2

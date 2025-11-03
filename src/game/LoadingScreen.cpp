@@ -6,7 +6,6 @@
 #include "engine/Scene.hpp"
 #include "engine/TickRegistry.hpp"
 #include "math/vec.hpp"
-#include "render/renderables/RenderableTex2D.hpp"
 
 namespace blocks::game {
 
@@ -16,18 +15,12 @@ constexpr float kSwitchTime = 1.f;
 
 }
 
-LoadingScreen::LoadingScreen(Scene& scene)
+LoadingScreen::LoadingScreen(
+    Scene& scene, const LoadingScreenDefinition& definition)
     : Actor(scene),
       Drawable(scene.getDrawableScene()),
       TickHandler(scene.getTickRegistry()),
-      image1_(GlobalSubSystemStack::get()
-                  .renderSystem()
-                  .createRenderable<render::RenderableTex2D>(
-                      RESOURCE_DIR "/loading0.png")),
-      image2_(GlobalSubSystemStack::get()
-                  .renderSystem()
-                  .createRenderable<render::RenderableTex2D>(
-                      RESOURCE_DIR "/loading1.png")) {}
+      prototype_(definition.prototype) {}
 
 void LoadingScreen::update(float deltaTimeSeconds) {
   toTransition -= deltaTimeSeconds;
@@ -43,14 +36,14 @@ void LoadingScreen::draw() {
     GlobalSubSystemStack::get().renderSystem().drawObject(
         window,
         0,
-        *image1_,
+        prototype_->texture1->get(),
         {math::modelMatrixFromBounds(
             math::Vec2{-1.f, -1.f}, math::Vec2{1.f, 1.f})});
   } else {
     GlobalSubSystemStack::get().renderSystem().drawObject(
         window,
         0,
-        *image2_,
+        prototype_->texture2->get(),
         {math::modelMatrixFromBounds(
             math::Vec2{-1.f, -1.f}, math::Vec2{1.f, 1.f})});
   }

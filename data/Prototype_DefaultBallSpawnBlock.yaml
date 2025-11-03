@@ -1,0 +1,7 @@
+objectType: BallSpawnBlockPrototype
+data:
+  ballPrototype: Prototype_DefaultBall
+  texture: Texture_BallSpawnBlock
+  size:
+    x: 2
+    y: 1

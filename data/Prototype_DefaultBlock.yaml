@@ -1,0 +1,6 @@
+objectType: BlockPrototype
+data:
+  texture: Texture_Block
+  size:
+    x: 2
+    y: 1

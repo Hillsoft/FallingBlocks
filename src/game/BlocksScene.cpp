@@ -5,7 +5,6 @@
 #include "Application.hpp"
 #include "game/Ball.hpp"
 #include "game/Block.hpp"
-#include "game/scenes/GameOver.hpp"
 
 namespace blocks::game {
 
@@ -32,7 +31,7 @@ void BlocksScene::onBallDestroyed(Ball& ball) {
       return;
     }
   }
-  Application::getApplication().transitionToScene(std::make_unique<GameOver>());
+  Application::getApplication().transitionToScene("Scene_GameOver");
 }
 
 } // namespace blocks::game

@@ -1,6 +1,21 @@
 #pragma once
 
-namespace utils {
+#include <string_view>
+
+namespace util {
+
+template <size_t i, typename Arg, typename... Args>
+struct ElementAtImpl {
+  using Value = ElementAtImpl<i - 1, Args...>::Value;
+};
+
+template <typename Arg, typename... Args>
+struct ElementAtImpl<0, Arg, Args...> {
+  using Value = Arg;
+};
+
+template <size_t i, typename... Args>
+using ElementAt = ElementAtImpl<i, Args...>::Value;
 
 template <unsigned N>
 struct FixedString {
@@ -32,10 +47,59 @@ struct THolder {
 
 template <typename... TArr>
 struct TArray {
+  constexpr static size_t size = sizeof...(TArr);
+
   template <typename ConstructType, typename ValueFn>
   static auto visitConstruct(ValueFn&& valueFn) {
     return ConstructType{valueFn(THolder<TArr>{})...};
   }
+
+  template <typename Fn>
+  static void visit(Fn&& fn) {
+    (fn(THolder<TArr>{}), ...);
+  }
+
+  template <typename... TArr2>
+  using Append = TArray<TArr..., TArr2...>;
 };
 
-} // namespace utils
+namespace detail {
+
+template <typename T>
+constexpr std::string_view getRawTypeName() {
+#ifdef _MSC_VER
+  return std::string_view{__FUNCSIG__};
+#else
+  static_assert(false, "getTypeName unsupported for this compiler");
+#endif
+}
+
+struct TypeNameJunk {
+  std::size_t leading = 0;
+  std::size_t total = 0;
+};
+constexpr TypeNameJunk typeJunkDetails = []() {
+  std::string_view rawIntName = getRawTypeName<int>();
+  auto pos = rawIntName.find("int");
+  return TypeNameJunk{.leading = pos, .total = rawIntName.size() - 3};
+}();
+
+template <typename T>
+constexpr std::string_view getTypeName() {
+  std::string_view rawTypeName = getRawTypeName<T>();
+  std::string_view fullTypeName = rawTypeName.substr(
+      typeJunkDetails.leading, rawTypeName.size() - typeJunkDetails.total);
+  size_t namespaceSepPos;
+  while (
+      (namespaceSepPos = fullTypeName.find("::")) != std::string_view::npos) {
+    fullTypeName = fullTypeName.substr(namespaceSepPos + 2);
+  }
+  return fullTypeName;
+}
+
+} // namespace detail
+
+template <typename T>
+constexpr std::string_view typeName = detail::getTypeName<T>();
+
+} // namespace util

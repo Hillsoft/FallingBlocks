@@ -8,7 +8,6 @@
 #include "engine/Scene.hpp"
 #include "game/BlocksScene.hpp"
 #include "game/UIActor.hpp"
-#include "game/resource/DefaultFont.hpp"
 #include "render/Font.hpp"
 #include "ui/UIObject.hpp"
 #include "ui/UIText.hpp"
@@ -18,14 +17,15 @@
 
 namespace blocks::game {
 
-ScoreUI::ScoreUI(Scene& scene) : UIActor(scene), scoreElement_(nullptr) {
+ScoreUI::ScoreUI(Scene& scene, const ScoreUIDefinition& definition)
+    : UIActor(scene) {
   auto uiRoot = std::make_unique<ui::UIObject>();
   uiRoot->childLayoutDirection_ = ui::LayoutDirection::VERTICAL;
   uiRoot->sizeStrategy_ = ui::SizeStrategy::PAD;
   uiRoot->innerPadding_ = 10;
 
   auto scoreElement = util::makeNotNullUnique<ui::UIText>(
-      DefaultFontResourceSentinel::get(), "", render::Font::Size::Line{100.f});
+      definition.prototype->font->get(), "", render::Font::Size::Line{100.f});
   scoreElement_ = scoreElement.get();
   scoreElement_->crossLayoutPosition_ = ui::Align::LEFT_TOP;
   scoreElement_->maxWidth_ = 0;

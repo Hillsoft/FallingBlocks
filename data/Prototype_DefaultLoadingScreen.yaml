@@ -1,0 +1,4 @@
+objectType: LoadingScreenPrototype
+data:
+  texture1: Texture_Loading1
+  texture2: Texture_Loading2
