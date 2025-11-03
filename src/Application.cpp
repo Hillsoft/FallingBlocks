@@ -4,6 +4,7 @@
 #include <chrono>
 #include <iostream>
 #include <memory>
+#include <string>
 #include <thread>
 #include <utility>
 #include <GLFW/glfw3.h>
@@ -83,6 +84,11 @@ void Application::run() {
   }
 
   subsystems.renderSystem().waitIdle();
+}
+
+void Application::transitionToScene(std::string sceneName) {
+  transitionToScene(
+      std::make_unique<SceneLoaderFromResourceFile>(std::move(sceneName)));
 }
 
 void Application::transitionToScene(std::unique_ptr<SceneLoader> sceneLoader) {

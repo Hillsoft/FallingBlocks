@@ -62,7 +62,6 @@ add_library(game.blocksscene "BlocksScene.hpp" "BlocksScene.cpp")
 target_link_libraries(game.blocksscene
 	application
 	engine.scene
-	engine.sceneloader
 	game.ball
 	game.block
 	game.scenes.gameover

@@ -3,6 +3,7 @@
 #include <atomic>
 #include <chrono>
 #include <memory>
+#include <string>
 #include <thread>
 #include "engine/Scene.hpp"
 #include "engine/SceneLoader.hpp"
@@ -19,6 +20,7 @@ class Application : public input::InputHandler {
 
   void run();
 
+  void transitionToScene(std::string sceneName);
   void transitionToScene(std::unique_ptr<SceneLoader> sceneLoader);
 
   void onKeyPress(int key) final;

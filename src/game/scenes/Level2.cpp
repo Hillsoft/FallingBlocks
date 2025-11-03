@@ -47,8 +47,6 @@ std::unique_ptr<Scene> Level2::loadScene() const {
     }
   }
 
-  scene->setNextScene(std::make_unique<Level2>());
-
   return scene;
 }
 
