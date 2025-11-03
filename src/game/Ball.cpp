@@ -63,8 +63,8 @@ Ball::Ball(
     : Actor(scene),
       physics::RectCollider(
           scene.getPhysicsScene(),
-          pos - math::Vec2{-kBallSize, -kBallSize} / 2.f,
-          pos + math::Vec2{-kBallSize, -kBallSize} / 2.f,
+          pos - math::Vec2{kBallSize, kBallSize} / 2.f,
+          pos + math::Vec2{kBallSize, kBallSize} / 2.f,
           0,
           0b11),
       TickHandler(scene.getTickRegistry()),
