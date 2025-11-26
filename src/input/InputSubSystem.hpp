@@ -2,6 +2,7 @@
 
 #include "math/vec.hpp"
 #include "render/glfw_wrapper/Window.hpp"
+#include "util/NotNull.hpp"
 #include "util/Registry.hpp"
 
 namespace blocks::input {
@@ -19,7 +20,7 @@ class InputSubSystem : public util::Registry<InputHandler, InputSubSystem> {
   void handleCursorPos(double xpos, double ypos);
   void handleMouseEvent(int button, int action, int mods);
 
-  render::glfw::Window* window_;
+  util::NotNullPtr<render::glfw::Window> window_;
   math::Vec2 mousePos_;
 };
 

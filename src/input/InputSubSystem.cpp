@@ -262,8 +262,7 @@ std::string_view getKeyName(int key) {
 
 } // namespace
 
-InputSubSystem::InputSubSystem(render::glfw::Window& window)
-    : window_(&window) {
+InputSubSystem::InputSubSystem(render::glfw::Window& window) : window_(window) {
   window.setKeyEventHandler([&](int key, int scancode, int action, int mods) {
     this->handleKeyEvent(key, scancode, action, mods);
   });
