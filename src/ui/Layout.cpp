@@ -385,7 +385,8 @@ void layoutAndDraw(
       0,
       resolvedDetails,
       camera,
-      {static_cast<uint16_t>(0), static_cast<uint16_t>(0)},
+      math::Vec<uint16_t, 2>{
+          static_cast<uint16_t>(0), static_cast<uint16_t>(0)},
       baseZ);
 }
 

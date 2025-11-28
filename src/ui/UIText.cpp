@@ -24,8 +24,9 @@ int UIText::draw(
     int baseZ) {
   font_->drawStringUTF8(
       text_,
-      {static_cast<float>(minPos.x() + maxPos.x()) / 2.f,
-       static_cast<float>(maxPos.y())},
+      math::Vec2{
+          static_cast<float>(minPos.x() + maxPos.x()) / 2.f,
+          static_cast<float>(maxPos.y())},
       fontSize_,
       render::Font::Align::CENTER,
       render::Font::VAlign::BOTTOM,

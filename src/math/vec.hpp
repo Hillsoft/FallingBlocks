@@ -40,18 +40,20 @@ using VecFieldNames = VecFieldNamesImpl<TNum, size>::Fields;
 template <typename TNum, size_t size>
 class Vec {
  public:
+  Vec() : data_{} {}
   constexpr Vec(const Vec& other) = default;
   constexpr Vec(Vec&& other) = default;
   constexpr Vec& operator=(const Vec& other) = default;
   constexpr Vec& operator=(Vec&& other) = default;
+  constexpr ~Vec() = default;
 
   template <typename... TArgs>
-  constexpr Vec(TArgs&&... args)
+  explicit constexpr Vec(TArgs&&... args)
     requires(std::conjunction_v<std::is_convertible<TArgs, TNum>...>)
       : data_{std::forward<TArgs>(args)...} {}
 
   template <typename TNum2>
-  constexpr Vec(const Vec<TNum2, size>& other)
+  explicit constexpr Vec(const Vec<TNum2, size>& other)
     requires(std::is_convertible_v<TNum2, TNum>)
       : data_() {
     for (int i = 0; i < size; i++) {
@@ -59,53 +61,53 @@ class Vec {
     }
   }
 
-  constexpr TNum& at(size_t index) {
+  [[nodiscard]] constexpr TNum& at(size_t index) {
     DEBUG_ASSERT(index < size);
     return data_[index];
   }
 
-  constexpr const TNum& at(size_t index) const {
+  [[nodiscard]] constexpr const TNum& at(size_t index) const {
     DEBUG_ASSERT(index < size);
     return data_[index];
   }
 
-  constexpr TNum& x()
+  [[nodiscard]] constexpr TNum& x()
     requires(size >= 1)
   {
     return at(0);
   }
 
-  constexpr const TNum& x() const
+  [[nodiscard]] constexpr const TNum& x() const
     requires(size >= 1)
   {
     return at(0);
   }
 
-  constexpr TNum& y()
+  [[nodiscard]] constexpr TNum& y()
     requires(size >= 2)
   {
     return at(1);
   }
 
-  constexpr const TNum& y() const
+  [[nodiscard]] constexpr const TNum& y() const
     requires(size >= 2)
   {
     return at(1);
   }
 
-  constexpr TNum& z()
+  [[nodiscard]] constexpr TNum& z()
     requires(size >= 3)
   {
     return at(2);
   }
 
-  constexpr const TNum& z() const
+  [[nodiscard]] constexpr const TNum& z() const
     requires(size >= 3)
   {
     return at(2);
   }
 
-  constexpr TNum mag2() const {
+  [[nodiscard]] constexpr TNum mag2() const {
     TNum mag2 = 0.0f;
     for (int i = 0; i < size; i++) {
       mag2 += data_[i] * data_[i];
@@ -113,9 +115,9 @@ class Vec {
     return mag2;
   }
 
-  constexpr TNum mag() const { return sqrt(mag2()); }
+  [[nodiscard]] constexpr TNum mag() const { return sqrt(mag2()); }
 
-  constexpr TNum dot(const Vec& other) {
+  [[nodiscard]] constexpr TNum dot(const Vec& other) {
     TNum dotVal = 0.0f;
     for (int i = 0; i < size; i++) {
       dotVal += data_[i] * other.data_[i];
@@ -215,18 +217,20 @@ constexpr Vec<TNum, size> abs(const Vec<TNum, size>& a)
 template <typename TNum, size_t sizeWidth, size_t sizeHeight>
 class Matrix {
  public:
+  Matrix() : data_{} {}
   constexpr Matrix(const Matrix& other) = default;
   constexpr Matrix(Matrix&& other) = default;
   constexpr Matrix& operator=(const Matrix& other) = default;
   constexpr Matrix& operator=(Matrix&& other) = default;
+  constexpr ~Matrix() = default;
 
   template <typename... TArgs>
-  constexpr Matrix(TArgs&&... args)
+  explicit constexpr Matrix(TArgs&&... args)
     requires(std::conjunction_v<std::is_convertible<TArgs, TNum>...>)
       : data_{std::forward<TArgs>(args)...} {}
 
   template <typename TNum2>
-  constexpr Matrix(const Matrix<TNum2, sizeWidth, sizeHeight>& other)
+  explicit constexpr Matrix(const Matrix<TNum2, sizeWidth, sizeHeight>& other)
     requires(std::is_convertible_v<TNum2, TNum>)
       : data_() {
     for (int i = 0; i < sizeWidth * sizeHeight; i++) {
@@ -410,7 +414,7 @@ constexpr Matrix<TNum, sizeC, sizeB> operator*(
     const Matrix<TNum, sizeA, sizeB>& l, const Matrix<TNum, sizeC, sizeA>& r)
   requires(std::is_arithmetic_v<TNum>)
 {
-  Matrix<TNum, sizeC, sizeB> result;
+  Matrix<TNum, sizeC, sizeB> result{};
   for (size_t y = 0; y < sizeB; y++) {
     for (size_t x = 0; x < sizeC; x++) {
       for (size_t z = 0; z < sizeA; z++) {

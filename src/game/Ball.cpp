@@ -52,8 +52,9 @@ Ball::Ball(Scene& scene, const BallDefinition& definition)
     : Ball(
           scene,
           definition.prototype,
-          definition.position.value_or({15.0f, 15.0f}),
-          definition.velocity.value_or({randFloat(-0.25f, 0.25f), -1.0f})) {}
+          definition.position.value_or(math::Vec2{15.0f, 15.0f}),
+          definition.velocity.value_or(
+              math::Vec2{randFloat(-0.25f, 0.25f), -1.0f})) {}
 
 Ball::Ball(
     Scene& scene,
@@ -80,18 +81,20 @@ void Ball::update(float deltaTimeSeconds) {
   if (newPos2.x() > 30.0f) {
     vel_.x() *= -1.0f;
     newPos.x() = 30.0f - objSize.x();
-    GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
-        .frequency = kWallHitFrequency,
-        .volume = 0.5f,
-        .duration = kSoundDuration});
+    GlobalSubSystemStack::get().audioSystem().playSineWave(
+        audio::SineWave{
+            .frequency = kWallHitFrequency,
+            .volume = 0.5f,
+            .duration = kSoundDuration});
   }
   if (newPos.x() < 0.0f) {
     vel_.x() *= -1.0f;
     newPos.x() = 0.0f;
-    GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
-        .frequency = kWallHitFrequency,
-        .volume = 0.5f,
-        .duration = kSoundDuration});
+    GlobalSubSystemStack::get().audioSystem().playSineWave(
+        audio::SineWave{
+            .frequency = kWallHitFrequency,
+            .volume = 0.5f,
+            .duration = kSoundDuration});
   }
 
   if (newPos.y() > 30.0f) {
@@ -100,10 +103,11 @@ void Ball::update(float deltaTimeSeconds) {
   if (newPos.y() < 0.0f) {
     vel_.y() *= -1.0f;
     newPos.y() = 0.0f;
-    GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
-        .frequency = kWallHitFrequency,
-        .volume = 0.5f,
-        .duration = kSoundDuration});
+    GlobalSubSystemStack::get().audioSystem().playSineWave(
+        audio::SineWave{
+            .frequency = kWallHitFrequency,
+            .volume = 0.5f,
+            .duration = kSoundDuration});
   }
 
   setP0(newPos);
@@ -139,17 +143,19 @@ void Ball::handleCollision(physics::RectCollider& other, math::Vec2 normal) {
 
     vel_ = normalizeBallSpeed(vel_);
 
-    GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
-        .frequency = kPaddleHitFrequency,
-        .volume = 0.5f,
-        .duration = kSoundDuration});
+    GlobalSubSystemStack::get().audioSystem().playSineWave(
+        audio::SineWave{
+            .frequency = kPaddleHitFrequency,
+            .volume = 0.5f,
+            .duration = kSoundDuration});
   } else if (auto block = dynamic_cast<Block*>(&other); block != nullptr) {
     getScene()->destroyActor(block);
 
-    GlobalSubSystemStack::get().audioSystem().playSineWave(audio::SineWave{
-        .frequency = kBlockHitFrequency,
-        .volume = 0.5f,
-        .duration = kSoundDuration});
+    GlobalSubSystemStack::get().audioSystem().playSineWave(
+        audio::SineWave{
+            .frequency = kBlockHitFrequency,
+            .volume = 0.5f,
+            .duration = kSoundDuration});
   }
 }
 

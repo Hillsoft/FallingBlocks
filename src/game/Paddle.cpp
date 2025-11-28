@@ -69,9 +69,9 @@ void Paddle::onKeyPress(int key) {
 
 void Paddle::onKeyRelease(int key) {
   if (key == GLFW_KEY_RIGHT && vel_.x() > 0.0f) {
-    vel_ = 0.0f;
+    vel_ = math::Vec2{0.0f};
   } else if (key == GLFW_KEY_LEFT && vel_.x() < 0.0f) {
-    vel_ = 0.0f;
+    vel_ = math::Vec2{0.0f};
   }
 }
 
