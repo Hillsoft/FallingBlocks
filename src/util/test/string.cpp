@@ -13,7 +13,7 @@ TEST(StringTest, BasicTest2) {
 }
 
 TEST(StringTest, StringViewTest) {
-  std::string_view a = "Hello";
-  std::string_view b = "World!";
+  constexpr std::string_view a = "Hello";
+  constexpr std::string_view b = "World!";
   EXPECT_EQ(util::toString(a, " ", b), "Hello World!");
 }

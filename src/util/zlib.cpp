@@ -1,5 +1,6 @@
 #include "util/zlib.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -7,7 +8,6 @@
 #include <span>
 #include <stdexcept>
 #include <type_traits>
-#include <utility>
 #include <vector>
 #include "util/debug.hpp"
 
@@ -17,25 +17,26 @@ namespace {
 
 class BitStream {
  public:
-  BitStream(std::span<const std::byte> data) : data_(data), byteOffset_(0) {}
+  explicit BitStream(std::span<const std::byte> data) : data_(data) {}
 
-  uint64_t peekBits(int bitCount) const {
+  [[nodiscard]] uint64_t peekBits(unsigned int bitCount) const {
+    DEBUG_ASSERT(bitCount > 0);
     DEBUG_ASSERT(bitCount <= 64);
 
-    int maxDataOffset = (byteOffset_ + bitCount - 1) / 8;
+    const unsigned int maxDataOffset = (byteOffset_ + bitCount - 1) / 8;
     if (maxDataOffset >= data_.size()) {
       throw std::runtime_error{"Out-of-bounds bitstream read"};
     }
 
-    int shift = 0;
+    unsigned int shift = 0;
     uint64_t result = 0;
     size_t dataOffset = 0;
-    int curByteOffset = byteOffset_;
+    unsigned int curByteOffset = byteOffset_;
 
     while (bitCount > 0) {
-      int curBitCount = std::min(8 - curByteOffset, bitCount);
-      uint8_t mask = 0xFF >> (8 - curBitCount - curByteOffset);
-      uint64_t curParts =
+      const unsigned int curBitCount = std::min(8 - curByteOffset, bitCount);
+      const uint8_t mask = 0xFFull >> (8 - curBitCount - curByteOffset);
+      const uint64_t curParts =
           static_cast<uint64_t>(
               mask & static_cast<uint8_t>(data_[dataOffset])) >>
           curByteOffset;
@@ -54,7 +55,7 @@ class BitStream {
   }
 
   uint64_t consumeBits(int bitCount) {
-    uint64_t result = peekBits(bitCount);
+    const uint64_t result = peekBits(bitCount);
 
     byteOffset_ += bitCount;
     data_ = data_.subspan(byteOffset_ / 8);
@@ -64,10 +65,11 @@ class BitStream {
   }
 
   bool consumeBit() {
-    if (data_.size() == 0) {
+    if (data_.empty()) {
       throw std::runtime_error{"Out-of-bounds bitstream read"};
     }
-    bool result = ((static_cast<uint8_t>(data_[0]) >> byteOffset_) & 0b1) > 0;
+    const bool result =
+        ((static_cast<uint32_t>(data_[0]) >> byteOffset_) & 0b1ull) > 0;
     byteOffset_ += 1;
     data_ = data_.subspan(byteOffset_ / 8);
     byteOffset_ %= 8;
@@ -83,7 +85,7 @@ class BitStream {
 
  private:
   std::span<const std::byte> data_;
-  int byteOffset_;
+  unsigned int byteOffset_ = 0;
 };
 
 constexpr size_t kMaxHuffmanCodeLength = 15;
@@ -99,10 +101,10 @@ class HuffmanTree {
 
  public:
   template <typename TIntegral>
-  HuffmanTree(std::span<const TIntegral> codeLengths)
+  explicit HuffmanTree(std::span<const TIntegral> codeLengths)
     requires(std::is_integral_v<TIntegral>)
-      : nodes_() {
-    nodes_.reserve(2 * codeLengths.size() - 1);
+  {
+    nodes_.reserve((2 * codeLengths.size()) - 1);
 
 #ifndef NDEBUG
     for (const auto& l : codeLengths) {
@@ -119,8 +121,8 @@ class HuffmanTree {
 
     std::array<size_t, kMaxHuffmanCodeLength + 1> nextCode{};
     size_t code = 0;
-    for (int bits = 1; bits <= kMaxHuffmanCodeLength; bits++) {
-      code = (code + blCount[bits - 1]) << 1;
+    for (unsigned int bits = 1; bits <= kMaxHuffmanCodeLength; bits++) {
+      code = (code + blCount[bits - 1]) << 1ull;
       nextCode[bits] = code;
       if (blCount[bits] > 0 && nextCode[bits] >= (1ULL << bits)) {
         throw std::runtime_error{"Corrupt zlib data"};
@@ -129,14 +131,15 @@ class HuffmanTree {
 
     nodes_.emplace_back();
     for (size_t i = 0; i < codeLengths.size(); i++) {
-      size_t len = codeLengths[i];
-      size_t c = nextCode[len];
+      const size_t len = codeLengths[i];
+      const size_t c = nextCode[len];
       nextCode[len]++;
 
       if (len != 0) {
         Node* curNode = &nodes_[0];
         for (int j = static_cast<int>(len) - 1; j >= 0; j--) {
-          bool isRight = ((c >> j) & 0b1) > 0;
+          const bool isRight =
+              ((c >> static_cast<unsigned int>(j)) & 0b1ull) > 0;
           short& nextNodeIndexRef = isRight ? curNode->r : curNode->l;
           short nextNodeIndex = nextNodeIndexRef;
           if (nextNodeIndexRef == std::numeric_limits<short>::max()) {
@@ -161,8 +164,8 @@ class HuffmanTree {
     const Node* curNode = &nodes_[0];
 
     while (!curNode->isLeaf) {
-      bool rightNext = stream.consumeBit();
-      short nextNodeIndex = rightNext ? curNode->r : curNode->l;
+      const bool rightNext = stream.consumeBit();
+      const short nextNodeIndex = rightNext ? curNode->r : curNode->l;
       if (nextNodeIndex == std::numeric_limits<short>::max()) {
         throw std::runtime_error{"Corrupt zlib data"};
       }
@@ -177,6 +180,9 @@ class HuffmanTree {
 };
 
 struct ExtraBitCode {
+  constexpr ExtraBitCode(unsigned short extraBits, unsigned short offset)
+      : extraBits(extraBits), offset(offset) {}
+
   unsigned short extraBits;
   unsigned short offset;
 };
@@ -201,7 +207,9 @@ struct CompressedBlockTrees {
   HuffmanTree distanceHuffmanEncoding;
 };
 
-CompressedBlockTrees fixedTrees = {
+// TODO: constexpr initialise this
+// NOLINTNEXTLINE(cert-err58-cpp)
+const CompressedBlockTrees fixedTrees = {
     .literalHuffmanEncoding =
         []() {
           std::array<short, 288> lengths{};
@@ -236,22 +244,23 @@ struct ZlibHeader {
 
 ZlibHeader readZlibHeader(
     std::byte compressionByte, std::byte additionalFlags) {
-  uint16_t combined = (static_cast<uint16_t>(compressionByte) << 8) |
-      static_cast<uint16_t>(additionalFlags);
+  const uint16_t combined = (static_cast<uint32_t>(compressionByte) << 8ull) |
+      static_cast<uint32_t>(additionalFlags);
   if (combined % 31 != 0) {
     throw std::runtime_error{"Corrupt zlib data"};
   }
 
   ZlibHeader header{};
-  header.compressionMethod = static_cast<uint8_t>(compressionByte) & 0b1111;
-  header.compressionInfo = static_cast<uint8_t>(compressionByte >> 4) & 0b1111;
+  header.compressionMethod = static_cast<uint8_t>(compressionByte) & 0b1111ull;
+  header.compressionInfo =
+      static_cast<uint8_t>(compressionByte >> 4) & 0b1111ull;
   header.presetDictionary =
-      (static_cast<uint8_t>(additionalFlags) & (1 << 5)) > 0;
+      (static_cast<uint8_t>(additionalFlags) & (1ull << 5ull)) > 0;
   return header;
 }
 
 struct BlockHeader {
-  enum class BlockType {
+  enum class BlockType : uint8_t {
     NO_COMPRESSION = 0,
     FIXED_CODES = 1,
     DYNAMIC_CODES = 2
@@ -263,7 +272,7 @@ struct BlockHeader {
 BlockHeader readBlockHeader(BitStream& stream) {
   BlockHeader header{};
   header.isFinal = stream.consumeBits(1) > 0;
-  uint8_t rawType = static_cast<uint8_t>(stream.consumeBits(2));
+  const auto rawType = static_cast<uint8_t>(stream.consumeBits(2));
   if (rawType > 2) {
     throw std::runtime_error{"Corrupt zlib data"};
   }
@@ -279,16 +288,16 @@ constexpr std::array<short, 19> kCodeLengthAlphabet{
     16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
 
 CompressedBlockTrees readDynamicCodesBlockHeader(BitStream& stream) {
-  short literalCodeCount = static_cast<short>(257 + stream.consumeBits(5));
+  const auto literalCodeCount = static_cast<short>(257 + stream.consumeBits(5));
   if (literalCodeCount > kMaxLiteralCount) {
     throw std::runtime_error{"Corrupt zlib data"};
   }
 
-  short distanceCodeCount = static_cast<short>(1 + stream.consumeBits(5));
+  const auto distanceCodeCount = static_cast<short>(1 + stream.consumeBits(5));
   if (distanceCodeCount > kMaxDistanceCodeCount) {
     throw std::runtime_error{"Corrupt zlib data"};
   }
-  short lengthCodeCount = static_cast<short>(4 + stream.consumeBits(4));
+  const auto lengthCodeCount = static_cast<short>(4 + stream.consumeBits(4));
   DEBUG_ASSERT(lengthCodeCount <= kMaxLengthCodeCount);
 
   std::array<short, kMaxLengthCodeCount> lengthCodeLengths{};
@@ -298,16 +307,16 @@ CompressedBlockTrees readDynamicCodesBlockHeader(BitStream& stream) {
         static_cast<short>(stream.consumeBits(3));
   }
 
-  HuffmanTree huffmanCodeLengths(
+  const HuffmanTree huffmanCodeLengths(
       std::span<const short>(lengthCodeLengths.begin(), kMaxLengthCodeCount));
 
   std::array<short, kMaxLiteralCount + kMaxDistanceCodeCount>
       literalCodeLengths{};
 
-  int codeLengthCount = literalCodeCount + distanceCodeCount;
+  const int codeLengthCount = literalCodeCount + distanceCodeCount;
   short prevCode = -1;
   for (int i = 0; i < codeLengthCount; i++) {
-    short alphabetSymbol = huffmanCodeLengths.lookup(stream);
+    const short alphabetSymbol = huffmanCodeLengths.lookup(stream);
     if (0 <= alphabetSymbol && alphabetSymbol <= 15) {
       literalCodeLengths[i] = alphabetSymbol;
       prevCode = alphabetSymbol;
@@ -315,7 +324,7 @@ CompressedBlockTrees readDynamicCodesBlockHeader(BitStream& stream) {
       if (prevCode == -1) {
         throw std::runtime_error{"Corrupt zlib data"};
       }
-      short repeatCount = 3 + static_cast<uint8_t>(stream.consumeBits(2));
+      const auto repeatCount = static_cast<short>(3 + stream.consumeBits(2));
       if (repeatCount + i > codeLengthCount) {
         throw std::runtime_error{"Corrupt zlib data"};
       }
@@ -326,9 +335,9 @@ CompressedBlockTrees readDynamicCodesBlockHeader(BitStream& stream) {
       i += repeatCount - 1;
     } else {
       prevCode = 0;
-      short repeatCount = alphabetSymbol == 17
-          ? 3 + static_cast<uint8_t>(stream.consumeBits(3))
-          : 11 + static_cast<uint8_t>(stream.consumeBits(7));
+      const short repeatCount = alphabetSymbol == 17
+          ? static_cast<short>(3 + stream.consumeBits(3))
+          : static_cast<short>(11 + stream.consumeBits(7));
 
       if (repeatCount + i > codeLengthCount) {
         throw std::runtime_error{"Corrupt zlib data"};
@@ -344,8 +353,10 @@ CompressedBlockTrees readDynamicCodesBlockHeader(BitStream& stream) {
   return {
       .literalHuffmanEncoding = HuffmanTree(
           std::span<const short>(literalCodeLengths.begin(), literalCodeCount)),
-      .distanceHuffmanEncoding = HuffmanTree(std::span<const short>(
-          literalCodeLengths.begin() + literalCodeCount, distanceCodeCount))};
+      .distanceHuffmanEncoding = HuffmanTree(
+          std::span<const short>(
+              literalCodeLengths.begin() + literalCodeCount,
+              distanceCodeCount))};
 }
 
 void decodeBlock(
@@ -353,26 +364,26 @@ void decodeBlock(
     BitStream& stream,
     std::vector<std::byte>& out) {
   while (true) {
-    short symbol = trees.literalHuffmanEncoding.lookup(stream);
+    const short symbol = trees.literalHuffmanEncoding.lookup(stream);
     if (symbol < 256) {
       out.emplace_back(static_cast<std::byte>(symbol));
     } else if (symbol == 256) {
       break;
     } else if (symbol > 256) {
-      ExtraBitCode lengthCode = kLengthCodes[symbol - 257];
-      unsigned short length = lengthCode.offset +
+      const ExtraBitCode lengthCode = kLengthCodes[symbol - 257];
+      const unsigned short length = lengthCode.offset +
           static_cast<unsigned short>(stream.consumeBits(lengthCode.extraBits));
-      ExtraBitCode distanceCode =
+      const ExtraBitCode distanceCode =
           kDistanceCodes[trees.distanceHuffmanEncoding.lookup(stream)];
-      unsigned short distance = distanceCode.offset +
+      const unsigned short distance = distanceCode.offset +
           static_cast<unsigned short>(stream.consumeBits(
               distanceCode.extraBits));
 
       if (distance > out.size()) {
         throw std::runtime_error{"Corrupt zlib data"};
       }
-      size_t readCursor = out.size() - distance;
-      for (int i = 0; i < length; i++) {
+      const size_t readCursor = out.size() - distance;
+      for (unsigned int i = 0; i < length; i++) {
         out.emplace_back(out[readCursor + i]);
       }
     }
@@ -393,7 +404,7 @@ std::vector<std::byte> zlibDecompress(std::span<const std::byte> data) {
   std::vector<std::byte> result;
 
   while (true) {
-    BlockHeader blockHead = readBlockHeader(stream);
+    const BlockHeader blockHead = readBlockHeader(stream);
 
     switch (blockHead.type) {
       case BlockHeader::BlockType::NO_COMPRESSION:
@@ -404,7 +415,8 @@ std::vector<std::byte> zlibDecompress(std::span<const std::byte> data) {
         break;
 
       case BlockHeader::BlockType::DYNAMIC_CODES:
-        CompressedBlockTrees dcHeader = readDynamicCodesBlockHeader(stream);
+        const CompressedBlockTrees dcHeader =
+            readDynamicCodesBlockHeader(stream);
         decodeBlock(dcHeader, stream, result);
         break;
     }

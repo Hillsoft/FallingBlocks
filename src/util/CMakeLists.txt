@@ -1,14 +1,11 @@
 add_subdirectory(test)
 
 add_library(util.arena STATIC "Arena.hpp" "Arena.cpp")
-target_link_libraries(util.arena
-	util.raii_helpers)
 
 add_library(util.array INTERFACE "array.hpp")
 
 add_library(util.atomiccircularbufferqueue INTERFACE "AtomicCircularBufferQueue.hpp")
 target_link_libraries(util.atomiccircularbufferqueue INTERFACE
-	util.raii_helpers
 	util.storage)
 
 add_library(util.blockforwardallocatedarena STATIC "BlockForwardAllocatedArena.hpp" "BlockForwardAllocatedArena.cpp")
@@ -21,8 +18,7 @@ add_library(util.file STATIC "file.cpp" "file.hpp")
 
 add_library(util.generator INTERFACE "Generator.hpp")
 target_link_libraries(util.generator INTERFACE
-	util.debug
-	util.raii_helpers)
+	util.debug)
 
 add_library(util.indexedresourcestorage INTERFACE "IndexedResourceStorage.hpp")
 target_link_libraries(util.indexedresourcestorage INTERFACE

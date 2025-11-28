@@ -1,5 +1,6 @@
 #include "util/BlockForwardAllocatedArena.hpp"
 
+#include <cstddef>
 #include <memory>
 #include <stdexcept>
 
@@ -7,12 +8,12 @@ namespace util {
 
 namespace {
 
-constexpr size_t kBlockSize = 4 * 1024;
+constexpr size_t kBlockSize = 4ull * 1024ull;
 
 } // namespace
 
-BlockForwardAllocatedArena::BlockForwardAllocatedArena()
-    : curBlock_(0), blockOffset_(0) {
+BlockForwardAllocatedArena::BlockForwardAllocatedArena() {
+  // NOLINTNEXTLINE(*-avoid-c-arrays)
   data_.emplace_back(std::make_unique<char[]>(kBlockSize));
 }
 
@@ -29,6 +30,7 @@ void* BlockForwardAllocatedArena::allocateRaw(size_t count, size_t align) {
       blockOffset_ = 0;
 
       if (curBlock_ == data_.size()) {
+        // NOLINTNEXTLINE(*-avoid-c-arrays)
         data_.emplace_back(std::make_unique<char[]>(kBlockSize));
       }
     }
@@ -40,8 +42,10 @@ void* BlockForwardAllocatedArena::allocateRaw(size_t count, size_t align) {
 void* BlockForwardAllocatedArena::allocateInCurrentBlock(
     size_t count, size_t align) {
   char* result = &data_[curBlock_][blockOffset_];
-  size_t alignOffset =
-      ((reinterpret_cast<size_t>(result) + (align - 1)) / align) * align -
+  const size_t alignOffset =
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+      (((reinterpret_cast<size_t>(result) + (align - 1)) / align) * align) -
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
       reinterpret_cast<size_t>(result);
 
   if (blockOffset_ + count + alignOffset > kBlockSize) {
@@ -50,6 +54,7 @@ void* BlockForwardAllocatedArena::allocateInCurrentBlock(
 
   blockOffset_ += count + alignOffset;
 
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
   return result + alignOffset;
 }
 

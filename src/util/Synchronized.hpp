@@ -61,7 +61,7 @@ class Synchronized {
   using writer_type = generic_writer_type<TVal>;
 
   template <typename... TArgs>
-  Synchronized(TArgs&&... args) : val_(std::forward<TArgs>(args)...) {}
+  explicit Synchronized(TArgs&&... args) : val_(std::forward<TArgs>(args)...) {}
 
   reader_type rlock() const {
     return {val_, typename detail::MutexDetails<TMutex>::shared_lock{mutex_}};

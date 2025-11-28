@@ -8,11 +8,15 @@
 #include "util/Generator.hpp"
 #include "util/vec_generators.hpp"
 
+namespace {
+
 util::Generator<int> iterateInts() {
   for (int i = 0; true; i++) {
     co_yield i;
   }
 }
+
+} // namespace
 
 TEST(GeneratorTest, iterateIntTest) {
   util::Generator<int> intGen = iterateInts();
@@ -21,12 +25,16 @@ TEST(GeneratorTest, iterateIntTest) {
   EXPECT_EQ(intGen(), 2);
 }
 
+namespace {
+
 util::Generator<int> iterateDoubles() {
   util::Generator<int> intGen = iterateInts();
   while (!intGen.isDone()) {
     co_yield 2 * intGen();
   }
 }
+
+} // namespace
 
 TEST(GeneratorTest, iterateDoubles) {
   util::Generator<int> intGen = iterateDoubles();
@@ -35,27 +43,35 @@ TEST(GeneratorTest, iterateDoubles) {
   EXPECT_EQ(intGen(), 4);
 }
 
+namespace {
+
 util::Generator<int> sharedPtrPassthrough(std::shared_ptr<int> ptr) {
   co_return;
 }
 
+} // namespace
+
 TEST(GeneratorTest, CleanupTest) {
-  std::shared_ptr<int> ptr = std::make_shared<int>(0);
+  const std::shared_ptr<int> ptr = std::make_shared<int>(0);
   EXPECT_EQ(ptr.use_count(), 1);
 
   {
-    util::Generator<int> genHolder = sharedPtrPassthrough(ptr);
+    const util::Generator<int> genHolder = sharedPtrPassthrough(ptr);
     EXPECT_EQ(ptr.use_count(), 2);
   }
 
   EXPECT_EQ(ptr.use_count(), 1);
 }
 
+namespace {
+
 util::Generator<int> upToThree() {
   co_yield 1;
   co_yield 2;
   co_yield 3;
 }
+
+} // namespace
 
 TEST(GeneratorTest, UpToThree) {
   util::Generator<int> intGen = upToThree();
@@ -87,10 +103,14 @@ TEST(GeneratorTest, vecSimpleGroups) {
   EXPECT_TRUE(groups.isDone());
 }
 
+namespace {
+
 util::Generator<int> throwException() {
   throw std::runtime_error{"Oops"};
   co_return;
 }
+
+} // namespace
 
 TEST(GeneratorTest, exceptionTest) {
   util::Generator<int> exceptionGenerator = throwException();

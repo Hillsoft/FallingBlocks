@@ -11,7 +11,8 @@ template <typename T>
 class Resettable {
  public:
   template <typename... TArgs>
-  Resettable(TArgs&&... args) : storage_(std::forward<TArgs>(args)...) {}
+  explicit Resettable(TArgs&&... args)
+      : storage_(std::forward<TArgs>(args)...) {}
 
   ~Resettable()
     requires(!std::is_trivially_destructible_v<T>)
@@ -24,6 +25,7 @@ class Resettable {
   = default;
 
   Resettable(const Resettable& other) : storage_(*other) {}
+  // NOLINTNEXTLINE(cert-oop54-cpp)
   Resettable& operator=(const Resettable& other) { *storage_ = *other; }
 
   Resettable(Resettable&& other) noexcept : storage_(std::move(*other)) {}
@@ -39,10 +41,10 @@ class Resettable {
     storage_.emplace(std::forward<TArgs>(args)...);
   }
 
-  T* get() { return storage_.get(); }
-  const T* get() const { return storage_.get(); }
-  T& operator*() { return *get(); }
-  const T& operator*() const { return *get(); }
+  [[nodiscard]] T* get() { return storage_.get(); }
+  [[nodiscard]] const T* get() const { return storage_.get(); }
+  [[nodiscard]] T& operator*() { return *get(); }
+  [[nodiscard]] const T& operator*() const { return *get(); }
   T* operator->() { return get(); }
   const T* operator->() const { return get(); }
 

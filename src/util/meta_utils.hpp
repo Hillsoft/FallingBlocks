@@ -19,14 +19,20 @@ using ElementAt = ElementAtImpl<i, Args...>::Value;
 
 template <unsigned N>
 struct FixedString {
+  // NOLINTNEXTLINE(*-avoid-c-arrays)
   char buf[N + 1]{};
+  // NOLINTNEXTLINE(hicpp-explicit-conversions)
   constexpr FixedString(char const* s) {
-    for (unsigned i = 0; i != N; ++i)
+    for (unsigned i = 0; i != N; ++i) {
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index,cppcoreguidelines-pro-bounds-pointer-arithmetic)
       buf[i] = s[i];
+    }
   }
+  // NOLINTNEXTLINE(hicpp-explicit-conversions)
   constexpr operator char const*() const { return buf; }
 };
 template <unsigned N>
+// NOLINTNEXTLINE(*-avoid-c-arrays)
 FixedString(char const (&)[N]) -> FixedString<N - 1>;
 
 template <FixedString TValue>
@@ -51,12 +57,12 @@ struct TArray {
 
   template <typename ConstructType, typename ValueFn>
   static auto visitConstruct(ValueFn&& valueFn) {
-    return ConstructType{valueFn(THolder<TArr>{})...};
+    return ConstructType{std::forward<ValueFn>(valueFn)(THolder<TArr>{})...};
   }
 
   template <typename Fn>
   static void visit(Fn&& fn) {
-    (fn(THolder<TArr>{}), ...);
+    (std::forward<Fn>(fn)(THolder<TArr>{}), ...);
   }
 
   template <typename... TArr2>
@@ -79,17 +85,17 @@ struct TypeNameJunk {
   std::size_t total = 0;
 };
 constexpr TypeNameJunk typeJunkDetails = []() {
-  std::string_view rawIntName = getRawTypeName<int>();
+  const std::string_view rawIntName = getRawTypeName<int>();
   auto pos = rawIntName.find("int");
   return TypeNameJunk{.leading = pos, .total = rawIntName.size() - 3};
 }();
 
 template <typename T>
 constexpr std::string_view getTypeName() {
-  std::string_view rawTypeName = getRawTypeName<T>();
+  const std::string_view rawTypeName = getRawTypeName<T>();
   std::string_view fullTypeName = rawTypeName.substr(
       typeJunkDetails.leading, rawTypeName.size() - typeJunkDetails.total);
-  size_t namespaceSepPos;
+  size_t namespaceSepPos = 0;
   while (
       (namespaceSepPos = fullTypeName.find("::")) != std::string_view::npos) {
     fullTypeName = fullTypeName.substr(namespaceSepPos + 2);

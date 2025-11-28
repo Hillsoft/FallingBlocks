@@ -5,12 +5,11 @@
 #include <optional>
 #include <type_traits>
 #include "util/debug.hpp"
-#include "util/raii_helpers.hpp"
 
 namespace util {
 
 template <typename T>
-class Generator : no_copy {
+class Generator {
  private:
   struct Promise {
     std::optional<T> value_;
@@ -61,14 +60,17 @@ class Generator : no_copy {
   };
 
  private:
-  Generator(handle_type h) : h_(h) {}
+  explicit Generator(handle_type h) : h_(h) {}
 
  public:
+  Generator(const Generator& other) = delete;
+  Generator& operator=(const Generator& other) = delete;
+
   Generator(Generator&& other) noexcept
       : h_(std::move(other.h_)), full_(other.full_) {
     other.h_ = nullptr;
   }
-  Generator& operator=(Generator&& other) {
+  Generator& operator=(Generator&& other) noexcept {
     std::swap(h_, other.h_);
     std::swap(full_, other.full_);
   }

@@ -7,17 +7,21 @@ namespace util {
 
 template <typename T>
 class StorageFor : private util::no_copy_move {
+ private:
+  struct DummyType {};
+
  public:
-  explicit constexpr StorageFor() {}
+  explicit constexpr StorageFor() : holder_(DummyType{}) {}
 
   template <typename... Args>
-  explicit constexpr StorageFor(Args&&... args) {
+  explicit constexpr StorageFor(Args&&... args) : holder_(DummyType{}) {
     emplace(std::forward<Args>(args)...);
   }
 
   template <typename... Args>
   void emplace(Args&&... args) {
-    new (buffer_) T(std::forward<Args>(args)...);
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access,bugprone-multi-level-implicit-pointer-conversion)
+    new (&holder_.value_) T(std::forward<Args>(args)...);
   }
 
   void destroy()
@@ -26,15 +30,30 @@ class StorageFor : private util::no_copy_move {
     get()->~T();
   }
 
-  T* get() { return reinterpret_cast<T*>(buffer_); }
-  const T* get() const { return reinterpret_cast<const T*>(buffer_); }
-  T& operator*() { return *get(); }
-  const T& operator*() const { return *get(); }
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+  [[nodiscard]] T* get() { return std::launder(&holder_.value_); }
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-union-access)
+  [[nodiscard]] const T* get() const { return std::launder(&holder_.value_); }
+  [[nodiscard]] T& operator*() { return *get(); }
+  [[nodiscard]] const T& operator*() const { return *get(); }
   T* operator->() { return get(); }
   const T* operator->() const { return get(); }
 
  private:
-  alignas(T) char buffer_[sizeof(T)]{0};
+  // NOLINTNEXTLINE(*-special-member-functions)
+  union Holder {
+    ~Holder()
+      requires(std::is_trivially_destructible_v<T>)
+    = default;
+    ~Holder()
+      requires(!std::is_trivially_destructible_v<T>)
+    {}
+
+    DummyType dummy_;
+    T value_;
+  };
+
+  Holder holder_;
 };
 
 } // namespace util

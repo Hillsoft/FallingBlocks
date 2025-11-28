@@ -15,8 +15,13 @@ class TaggedVariant {
   explicit TaggedVariant(ConstructArgs&&... args)
       : data_(std::forward<ConstructArgs>(args)...) {}
 
+  ~TaggedVariant() = default;
+
   TaggedVariant(const TaggedVariant& other) = default;
   TaggedVariant(TaggedVariant&& other) = default;
+
+  TaggedVariant& operator=(const TaggedVariant& other) = default;
+  TaggedVariant& operator=(TaggedVariant&& other) = default;
 
   template <typename Fn>
   static TaggedVariant visitConstruct(std::string_view tag, Fn&& fn) {
@@ -25,8 +30,9 @@ class TaggedVariant {
     TArray<Args...>::visit([&](auto typeHolder) {
       if (!result.has_value() &&
           tag == decltype(typeHolder)::Value::First::value) {
-        result.emplace(typename decltype(typeHolder)::Value::Second{
-            fn(THolder<typename decltype(typeHolder)::Value::Second>{})});
+        result.emplace(
+            typename decltype(typeHolder)::Value::Second{std::forward<Fn>(fn)(
+                THolder<typename decltype(typeHolder)::Value::Second>{})});
       }
     });
 

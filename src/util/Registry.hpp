@@ -13,10 +13,12 @@ namespace util {
 
 template <typename TItem, typename TActualRegistry>
 class Registry : private no_copy_move {
- public:
+ private:
   Registry()
       : pendingInserts_(std::make_unique<AtomicCircularBufferQueue<TItem*>>()) {
   }
+
+ public:
 #ifndef NDEBUG
   ~Registry() { DEBUG_ASSERT(items_.rlock()->empty()); }
 #endif
@@ -41,22 +43,41 @@ class Registry : private no_copy_move {
     return itemsLock;
   }
 
+  friend TActualRegistry;
+
  private:
   Synchronized<std::vector<TItem*>> items_;
   std::unique_ptr<AtomicCircularBufferQueue<TItem*>> pendingInserts_;
 };
 
 template <typename TRegistry, typename TActualItem>
-class RegistryItem : private no_copy_move {
- public:
-  RegistryItem(Registry<TActualItem, TRegistry>& registry)
+class RegistryItem {
+ private:
+  explicit RegistryItem(Registry<TActualItem, TRegistry>& registry)
       : registry_(&registry) {
     registry.registerItem(*static_cast<TActualItem*>(this));
   }
 
+ public:
   ~RegistryItem() {
-    registry_->unregisterItem(*static_cast<TActualItem*>(this));
+    try {
+      registry_->unregisterItem(*static_cast<TActualItem*>(this));
+    } catch (...) {
+      // Failing to unregister will result in UB as the item will be wrongly
+      // accessed later
+      std::abort();
+    }
   }
+
+  // NOLINTNEXTLINE(bugprone-crtp-constructor-accessibility)
+  RegistryItem(const RegistryItem& other) = delete;
+  // NOLINTNEXTLINE(bugprone-crtp-constructor-accessibility)
+  RegistryItem(RegistryItem&& other) = delete;
+
+  RegistryItem& operator=(const RegistryItem& other) = delete;
+  RegistryItem& operator=(RegistryItem&& other) = delete;
+
+  friend TActualItem;
 
  private:
   Registry<TActualItem, TRegistry>* registry_;

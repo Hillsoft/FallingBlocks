@@ -1,18 +1,19 @@
 #pragma once
 
 #include <utility>
-#include "util/raii_helpers.hpp"
 
 namespace util {
 
-class HeapArena : private util::no_copy {
+class HeapArena {
  public:
-  HeapArena(size_t size) : cursor_(0), size_(size) { data_ = new char[size]; }
-  ~HeapArena() {
-    if (data_ != nullptr) {
-      delete[] data_;
-    }
+  explicit HeapArena(size_t size) : size_(size) {
+    // NOLINTNEXTLINE(cppcoreguidelines-owning-memory,cppcoreguidelines-prefer-member-initializer)
+    data_ = new char[size];
   }
+  ~HeapArena() { delete[] data_; }
+
+  HeapArena(const HeapArena& other) = delete;
+  HeapArena& operator=(const HeapArena& other) = delete;
 
   HeapArena(HeapArena&& other) noexcept
       : data_(other.data_), cursor_(other.cursor_), size_(other.size_) {
@@ -31,10 +32,11 @@ class HeapArena : private util::no_copy {
   template <typename T>
   class Allocator {
    public:
-    typedef T value_type;
-    Allocator(HeapArena& arena) : arena_(&arena) {}
+    using value_type = T;
+    explicit Allocator(HeapArena& arena) : arena_(&arena) {}
 
     template <class U>
+    // NOLINTNEXTLINE(hicpp-explicit-conversions)
     Allocator(const Allocator<U>& other) noexcept : arena_(other.arena_) {}
 
     template <class U>
@@ -49,7 +51,7 @@ class HeapArena : private util::no_copy {
     T* allocate(size_t n) const {
       return static_cast<T*>(arena_->allocate(n * sizeof(T), alignof(T)));
     }
-    void deallocate(T* p, size_t) const { arena_->free(p); }
+    void deallocate(T* p, size_t /* size */) const { arena_->free(p); }
 
    private:
     HeapArena* arena_;
@@ -59,9 +61,9 @@ class HeapArena : private util::no_copy {
   };
 
  private:
-  char* data_;
-  size_t cursor_;
-  size_t size_;
+  char* data_ = nullptr;
+  size_t cursor_ = 0;
+  size_t size_ = 0;
 
   template <typename T>
   friend class Allocator;

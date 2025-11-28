@@ -53,21 +53,23 @@ class NotNullBase {
   explicit NotNullBase(TPtr val) : val_(std::move(val)) {
     DEBUG_ASSERT(val_ != nullptr);
   }
-  /* implicit */ NotNullBase(TTarget& val)
+  explicit NotNullBase(TTarget& val)
     requires(NotNullPointerTraits<TPtr>::enableImplicitConstructFromReference)
       : val_(&val) {}
 
   template <typename UPtr>
+  // NOLINTNEXTLINE(hicpp-explicit-conversions)
   operator NotNullBase<UPtr>() && {
     return NotNullBase<UPtr>(std::move(val_));
   }
 
   template <typename UPtr>
+  // NOLINTNEXTLINE(hicpp-explicit-conversions)
   operator NotNullBase<UPtr>() const& {
     return NotNullBase<UPtr>(val_);
   }
 
-  TTarget* get() const { return &*val_; }
+  [[nodiscard]] TTarget* get() const { return &*val_; }
 
   TTarget& operator*() const { return *val_; }
   TTarget* operator->() const { return &*val_; }

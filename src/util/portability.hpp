@@ -7,6 +7,7 @@
 #endif
 
 #if __clang__
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define UNUSEDPRIVATEMEMBER(x)                                       \
   _Pragma("clang diagnostic push")                                   \
       _Pragma("clang diagnostic ignored \"-Wunused-private-field\"") \

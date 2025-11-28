@@ -17,6 +17,7 @@ class BlockForwardAllocatedArena {
     requires std::is_trivially_destructible_v<T> &&
       std::is_constructible_v<T, TArgs&&...>
   T* allocate(TArgs&&... args) {
+    // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
     return new (allocateRaw(sizeof(T), alignof(T)))
         T(std::forward<TArgs>(args)...);
   }
@@ -24,9 +25,10 @@ class BlockForwardAllocatedArena {
  private:
   void* allocateInCurrentBlock(size_t count, size_t align);
 
+  // NOLINTNEXTLINE(*-avoid-c-arrays)
   std::vector<std::unique_ptr<char[]>> data_;
-  size_t curBlock_;
-  size_t blockOffset_;
+  size_t curBlock_ = 0;
+  size_t blockOffset_ = 0;
 };
 
 } // namespace util

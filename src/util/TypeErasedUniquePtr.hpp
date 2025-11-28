@@ -9,22 +9,25 @@ namespace util {
 class TypeErasedUniquePtr {
  public:
   TypeErasedUniquePtr()
+      // NOLINTNEXTLINE(modernize-redundant-void-arg)
       : ptr_(nullptr), typeIndex_(typeid(void)), deleter_(nullptr) {}
 
   template <typename T>
   explicit TypeErasedUniquePtr(std::unique_ptr<T> ptr)
       : ptr_(ptr.release()), typeIndex_(typeid(T)), deleter_([](void* ptr) {
+          // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,cppcoreguidelines-owning-memory)
           delete reinterpret_cast<T*>(ptr);
         }) {}
 
   TypeErasedUniquePtr(const TypeErasedUniquePtr& other) = delete;
   TypeErasedUniquePtr& operator=(const TypeErasedUniquePtr& other) = delete;
 
-  TypeErasedUniquePtr(TypeErasedUniquePtr&& other)
+  TypeErasedUniquePtr(TypeErasedUniquePtr&& other) noexcept
       : ptr_(other.ptr_),
         typeIndex_(other.typeIndex_),
         deleter_(other.deleter_) {
     other.ptr_ = nullptr;
+    // NOLINTNEXTLINE(modernize-redundant-void-arg)
     other.typeIndex_ = typeid(void);
     other.deleter_ = nullptr;
   }
@@ -42,13 +45,14 @@ class TypeErasedUniquePtr {
   }
 
   template <typename T>
-  bool holdsType() const {
+  [[nodiscard]] bool holdsType() const {
     return typeid(T) == typeIndex_;
   }
 
   template <typename T>
   T* get() const {
     DEBUG_ASSERT(holdsType<T>());
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     return reinterpret_cast<T*>(ptr_);
   }
 

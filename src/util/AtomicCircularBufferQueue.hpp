@@ -6,13 +6,12 @@
 #include <thread>
 
 #include <stdexcept>
-#include "util/raii_helpers.hpp"
 #include "util/storage.hpp"
 
 namespace util {
 
 template <typename T, uint32_t maxSize = 256>
-class AtomicCircularBufferQueue : util::no_copy_move {
+class AtomicCircularBufferQueue {
  public:
   AtomicCircularBufferQueue()
       : data_(), cursors_({0, 0}), frontPending_(0), backPending_(0) {}
@@ -28,6 +27,14 @@ class AtomicCircularBufferQueue : util::no_copy_move {
       data_[i].destroy();
     }
   }
+
+  AtomicCircularBufferQueue(const AtomicCircularBufferQueue& other) = delete;
+  AtomicCircularBufferQueue(AtomicCircularBufferQueue&& other) = delete;
+
+  AtomicCircularBufferQueue& operator=(const AtomicCircularBufferQueue& other) =
+      delete;
+  AtomicCircularBufferQueue& operator=(AtomicCircularBufferQueue&& other) =
+      delete;
 
   void pushBack(T&& val) {
     pushBackFn<false>([&](uint32_t target) {
@@ -50,7 +57,7 @@ class AtomicCircularBufferQueue : util::no_copy_move {
   }
 
   std::optional<T> tryPopFront() {
-    Cursors c;
+    Cursors c{};
     do {
       c = cursors_.load(std::memory_order_acquire);
       if (c.front == c.back) {
@@ -66,7 +73,7 @@ class AtomicCircularBufferQueue : util::no_copy_move {
     try {
       result.emplace(std::move(*data_[c.front]));
     } catch (...) {
-      uint32_t prevFrontPending;
+      uint32_t prevFrontPending = 0;
       do {
         prevFrontPending = c.front;
       } while (!frontPending_.compare_exchange_weak(
@@ -77,7 +84,7 @@ class AtomicCircularBufferQueue : util::no_copy_move {
       throw;
     }
 
-    uint32_t prevFrontPending;
+    uint32_t prevFrontPending = 0;
     do {
       prevFrontPending = c.front;
     } while (!frontPending_.compare_exchange_weak(
@@ -98,10 +105,10 @@ class AtomicCircularBufferQueue : util::no_copy_move {
     alignas(uint64_t) uint32_t front;
     uint32_t back;
 
-    Cursors stepFront() const {
+    [[nodiscard]] Cursors stepFront() const {
       return Cursors{.front = stepIndex(front), .back = back};
     }
-    Cursors stepBack() const {
+    [[nodiscard]] Cursors stepBack() const {
       return Cursors{.front = front, .back = stepIndex(back)};
     }
   };
@@ -128,7 +135,7 @@ class AtomicCircularBufferQueue : util::no_copy_move {
         std::memory_order_relaxed,
         std::memory_order_relaxed));
 
-    fn(target);
+    std::forward<Fn>(fn)(target);
 
     Cursors c = cursors_.load(std::memory_order_relaxed);
     do {

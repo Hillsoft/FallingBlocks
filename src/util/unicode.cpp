@@ -20,11 +20,13 @@ constexpr unsigned char kFourByteHeaderMask = 0b00000111;
 
 Generator<uint32_t> unicodeDecode(std::string_view str) {
   std::span<const unsigned char> strBytes{
-      reinterpret_cast<const unsigned char*>(str.data()), str.size()};
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+      reinterpret_cast<const unsigned char*>(str.data()),
+      str.size()};
 
-  while (strBytes.size() > 0) {
+  while (!strBytes.empty()) {
     auto leadingOnes = std::countl_one(strBytes[0]);
-    uint32_t curByte;
+    uint32_t curByte = 0;
     switch (leadingOnes) {
       case 0:
         curByte = strBytes[0];
@@ -32,36 +34,39 @@ Generator<uint32_t> unicodeDecode(std::string_view str) {
         break;
 
       case 2:
-        if (strBytes.size() < 2 || (strBytes[1] >> 6) != 0b10) {
+        if (strBytes.size() < 2 || (strBytes[1] >> 6ull) != 0b10) {
           throw std::runtime_error{"Invalid UTF-8 sequence"};
         }
         curByte =
-            (static_cast<uint32_t>(strBytes[0] & kTwoByteHeaderMask) << 6) |
+            (static_cast<uint32_t>(strBytes[0] & kTwoByteHeaderMask) << 6ull) |
             static_cast<uint32_t>(strBytes[1] & kContinuationByteMask);
         strBytes = strBytes.subspan(2);
         break;
 
       case 3:
-        if (strBytes.size() < 3 || (strBytes[1] >> 6) != 0b10 ||
-            (strBytes[2] >> 6) != 0b10) {
+        if (strBytes.size() < 3 || (strBytes[1] >> 6ull) != 0b10 ||
+            (strBytes[2] >> 6ull) != 0b10) {
           throw std::runtime_error{"Invalid UTF-8 sequence"};
         }
-        curByte =
-            (static_cast<uint32_t>(strBytes[0] & kThreeByteHeaderMask) << 12) |
-            (static_cast<uint32_t>(strBytes[1] & kContinuationByteMask) << 6) |
+        curByte = (static_cast<uint32_t>(strBytes[0] & kThreeByteHeaderMask)
+                   << 12ull) |
+            (static_cast<uint32_t>(strBytes[1] & kContinuationByteMask)
+             << 6ull) |
             static_cast<uint32_t>(strBytes[2] & kContinuationByteMask);
         strBytes = strBytes.subspan(3);
         break;
 
       case 4:
-        if (strBytes.size() < 4 || (strBytes[1] >> 6) != 0b10 ||
-            (strBytes[2] >> 6) != 0b10 || (strBytes[3] >> 6) != 0b10) {
+        if (strBytes.size() < 4 || (strBytes[1] >> 6ull) != 0b10 ||
+            (strBytes[2] >> 6ull) != 0b10 || (strBytes[3] >> 6ull) != 0b10) {
           throw std::runtime_error{"Invalid UTF-8 sequence"};
         }
-        curByte =
-            (static_cast<uint32_t>(strBytes[0] & kFourByteHeaderMask) << 18) |
-            (static_cast<uint32_t>(strBytes[1] & kContinuationByteMask) << 12) |
-            (static_cast<uint32_t>(strBytes[2] & kContinuationByteMask) << 6) |
+        curByte = (static_cast<uint32_t>(strBytes[0] & kFourByteHeaderMask)
+                   << 18ull) |
+            (static_cast<uint32_t>(strBytes[1] & kContinuationByteMask)
+             << 12ull) |
+            (static_cast<uint32_t>(strBytes[2] & kContinuationByteMask)
+             << 6ull) |
             static_cast<uint32_t>(strBytes[3] & kContinuationByteMask);
         strBytes = strBytes.subspan(4);
         break;
