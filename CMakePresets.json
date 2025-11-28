@@ -47,6 +47,7 @@
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "clang-cl.exe",
                 "CMAKE_CXX_COMPILER": "clang-cl.exe",
+                "CMAKE_CXX_CLANG_TIDY": "--extra-arg=/EHsc",
                 "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
             },
             "condition": {
@@ -54,7 +55,15 @@
                 "lhs": "${hostSystemName}",
                 "rhs": "Windows"
             },
-            "toolset": "clang_cl_x64"
+            "toolset": "clang_cl_x64",
+            "vendor": {
+                "microsoft.com/VisualStudioSettings/CMake/1.0": {
+                    "clangTidyChecks": "*",
+                    "enableClangTidyCodeAnalysis": true,
+                    "enableMicrosoftCodeAnalysis": true,
+                    "intelliSenseMode": "windows-clang-x64"
+                }
+            }
         },
         {
             "name": "x64-clang-debug",

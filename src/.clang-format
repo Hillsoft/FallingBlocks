@@ -120,7 +120,7 @@ SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
 SpaceBeforeSquareBrackets: false
-Standard: Latest
+Standard: c++20
 TabWidth: 8
 UseCRLF: false
 UseTab: Never
