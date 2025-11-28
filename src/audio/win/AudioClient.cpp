@@ -2,16 +2,20 @@
 
 #include <AudioSessionTypes.h>
 #include <Audioclient.h>
-#include <Windows.h>
 #include <combaseapi.h>
+#include <minwindef.h>
 #include <mmdeviceapi.h>
 #include <mmeapi.h>
 #include <mmreg.h>
+#include <winerror.h>
+#include <winnt.h>
 #include <chrono>
 #include <cstdint>
 #include <stdexcept>
 #include <thread>
+#ifndef NDEBUG
 #include "util/debug.hpp"
+#endif
 
 namespace blocks::audio {
 
@@ -20,8 +24,10 @@ namespace {
 constexpr std::chrono::milliseconds kDesiredBufferDuration{10};
 
 void fillBuffer(uint32_t frameCount, uint32_t channelCount, BYTE* data) {
-  float* frameData = reinterpret_cast<float*>(data);
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  auto* frameData = reinterpret_cast<float*>(data);
   for (uint32_t i = 0; i < frameCount * channelCount; i++) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     frameData[i] = 0.0f;
   }
 }
@@ -30,11 +36,12 @@ void fillBuffer(uint32_t frameCount, uint32_t channelCount, BYTE* data) {
 
 AudioClient::AudioClient() {
   WinSafeRelease<IMMDeviceEnumerator> enumerator{[](IMMDeviceEnumerator*& ptr) {
-    HRESULT result = CoCreateInstance(
+    const HRESULT result = CoCreateInstance(
         __uuidof(MMDeviceEnumerator),
         nullptr,
         CLSCTX_ALL,
         __uuidof(IMMDeviceEnumerator),
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
         reinterpret_cast<void**>(&ptr));
     if (result != S_OK) {
       throw std::runtime_error{"Failed to create audio device enumerator"};
@@ -42,7 +49,7 @@ AudioClient::AudioClient() {
   }};
 
   WinSafeRelease<IMMDevice> device{[&](IMMDevice*& ptr) {
-    HRESULT result = enumerator->GetDefaultAudioEndpoint(
+    const HRESULT result = enumerator->GetDefaultAudioEndpoint(
         EDataFlow::eRender, ERole::eMultimedia, &ptr);
     if (result != S_OK) {
       throw std::runtime_error{"Failed to get default audio device"};
@@ -50,10 +57,11 @@ AudioClient::AudioClient() {
   }};
 
   winClient_ = WinSafeRelease<IAudioClient>{[&](IAudioClient*& ptr) {
-    HRESULT result = device->Activate(
+    const HRESULT result = device->Activate(
         __uuidof(IAudioClient),
         CLSCTX_ALL,
         nullptr,
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
         reinterpret_cast<void**>(&ptr));
     if (result != S_OK) {
       throw std::runtime_error{"Failed to create audio client"};
@@ -61,7 +69,7 @@ AudioClient::AudioClient() {
   }};
 
   WinSafeFree<WAVEFORMATEX> wavFormat{[&](WAVEFORMATEX*& ptr) {
-    HRESULT result = winClient_->GetMixFormat(&ptr);
+    const HRESULT result = winClient_->GetMixFormat(&ptr);
     if (result != S_OK) {
       throw std::runtime_error{"Failed to create mix format"};
     }
@@ -70,13 +78,13 @@ AudioClient::AudioClient() {
   numChannels_ = wavFormat->nChannels;
   samplesPerSecond_ = wavFormat->nSamplesPerSec;
 
-  WAVEFORMATEXTENSIBLE* wavFormatEx =
-      reinterpret_cast<WAVEFORMATEXTENSIBLE*>(wavFormat.get());
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  auto* wavFormatEx = reinterpret_cast<WAVEFORMATEXTENSIBLE*>(wavFormat.get());
   if (wavFormatEx->SubFormat != KSDATAFORMAT_SUBTYPE_IEEE_FLOAT) {
     throw std::runtime_error{"Unsupported audio output format"};
   }
 
-  HRESULT result = winClient_->Initialize(
+  const HRESULT result = winClient_->Initialize(
       AUDCLNT_SHAREMODE_SHARED,
       0,
       std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -93,8 +101,10 @@ AudioClient::AudioClient() {
 
   renderClient_ =
       WinSafeRelease<IAudioRenderClient>{[&](IAudioRenderClient*& ptr) {
-        HRESULT result = winClient_->GetService(
-            __uuidof(IAudioRenderClient), reinterpret_cast<void**>(&ptr));
+        const HRESULT result = winClient_->GetService(
+            __uuidof(IAudioRenderClient),
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+            reinterpret_cast<void**>(&ptr));
         if (result != S_OK) {
           throw std::runtime_error{"Failed to create mix format"};
         }
@@ -120,7 +130,7 @@ void AudioClient::beginNextBlock(void*& buffer, uint32_t& samplesToWrite) {
   DEBUG_ASSERT(!blockInProgress_);
   blockInProgress_ = true;
 #endif
-  uint32_t padding;
+  uint32_t padding = 0;
   winClient_->GetCurrentPadding(&padding);
 
   uint32_t framesAvailable = bufferSize_ - padding;
@@ -131,7 +141,7 @@ void AudioClient::beginNextBlock(void*& buffer, uint32_t& samplesToWrite) {
     framesAvailable = bufferSize_ - padding;
   }
 
-  BYTE* data;
+  BYTE* data = nullptr;
   renderClient_->GetBuffer(framesAvailable, &data);
 
   samplesToWrite = framesAvailable;

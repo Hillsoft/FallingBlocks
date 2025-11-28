@@ -11,13 +11,19 @@ namespace blocks::audio {
 struct SineWave {
   unsigned int frequency = 0;
   float volume = 0.0f;
-  std::chrono::milliseconds duration;
+  std::chrono::milliseconds duration{};
 };
 
 class AudioSubSystem {
  public:
   AudioSubSystem();
   ~AudioSubSystem();
+
+  AudioSubSystem(const AudioSubSystem& other) = delete;
+  AudioSubSystem& operator=(const AudioSubSystem& other) = delete;
+
+  AudioSubSystem(AudioSubSystem&& other) = delete;
+  AudioSubSystem& operator=(AudioSubSystem&& other) = delete;
 
   void playSineWave(SineWave wave);
 

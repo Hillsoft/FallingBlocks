@@ -1,7 +1,9 @@
 #include "audio/AudioSubSystem.hpp"
 
 #include <algorithm>
+#include <atomic>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 
 namespace blocks::audio {
@@ -11,8 +13,10 @@ namespace {
 constexpr size_t kMaxSimultaneousWaves = 256;
 
 void blankBuffer(uint32_t frameCount, void* data, uint32_t numChannels) {
-  float* frameData = reinterpret_cast<float*>(data);
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  auto* frameData = reinterpret_cast<float*>(data);
   for (uint32_t i = 0; i < frameCount * numChannels; i++) {
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     frameData[i] = 0.0f;
   }
 }
@@ -24,17 +28,19 @@ void fillBuffer(
     void* data,
     uint32_t numChannels,
     uint32_t samplesPerSecond) {
-  size_t samplesPerCycle = samplesPerSecond / waveData.frequency;
+  const size_t samplesPerCycle = samplesPerSecond / waveData.frequency;
 
-  float* frameData = reinterpret_cast<float*>(data);
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  auto* frameData = reinterpret_cast<float*>(data);
   for (uint32_t i = 0; i < frameCount; i++) {
-    float vol = waveData.volume *
+    const float vol = waveData.volume *
         sinf(2 * 3.14f *
              static_cast<float>((i + frameCountOffset) % samplesPerCycle) /
              static_cast<float>(samplesPerCycle));
 
     for (uint32_t j = 0; j < numChannels; j++) {
-      frameData[i * numChannels + j] += vol;
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      frameData[(i * numChannels) + j] += vol;
     }
   }
 }
@@ -52,20 +58,21 @@ AudioSubSystem::~AudioSubSystem() {
 }
 
 void AudioSubSystem::playSineWave(SineWave wave) {
-  for (size_t i = 0; i < commands_.size(); i++) {
-    if (!commands_[i].active.load(std::memory_order_relaxed)) {
-      size_t currentFrameCount = frameCount_.load(std::memory_order_relaxed);
+  for (auto& command : commands_) {
+    if (!command.active.load(std::memory_order_relaxed)) {
+      const size_t currentFrameCount =
+          frameCount_.load(std::memory_order_relaxed);
       size_t frameDuration =
           (wave.duration.count() * audioClient_.getSamplesPerSecond() / 1000);
-      size_t samplesPerCycle =
+      const size_t samplesPerCycle =
           audioClient_.getSamplesPerSecond() / wave.frequency;
       frameDuration =
           ((frameDuration + samplesPerCycle - 1) / samplesPerCycle) *
           samplesPerCycle;
-      commands_[i].data = wave;
-      commands_[i].startFrameCount = currentFrameCount;
-      commands_[i].endFrameCount = currentFrameCount + frameDuration;
-      commands_[i].active.store(true, std::memory_order_release);
+      command.data = wave;
+      command.startFrameCount = currentFrameCount;
+      command.endFrameCount = currentFrameCount + frameDuration;
+      command.active.store(true, std::memory_order_release);
       return;
     }
   }
@@ -82,16 +89,16 @@ void AudioSubSystem::run() {
     blankBuffer(samplesToWrite, dataBuffer, audioClient_.getNumChannels());
     frameCount_.store(frameCount + samplesToWrite, std::memory_order_relaxed);
 
-    for (size_t i = 0; i < commands_.size(); i++) {
-      if (commands_[i].active.load(std::memory_order_acquire) &&
-          commands_[i].startFrameCount <= frameCount_) {
+    for (auto& command : commands_) {
+      if (command.active.load(std::memory_order_acquire) &&
+          command.startFrameCount <= frameCount_) {
         fillBuffer(
-            commands_[i].data,
+            command.data,
             static_cast<uint32_t>(std::min(
                 static_cast<long long>(samplesToWrite),
-                static_cast<long long>(commands_[i].endFrameCount) -
+                static_cast<long long>(command.endFrameCount) -
                     static_cast<long long>(frameCount))),
-            frameCount - commands_[i].startFrameCount,
+            frameCount - command.startFrameCount,
             dataBuffer,
             audioClient_.getNumChannels(),
             audioClient_.getSamplesPerSecond());
@@ -102,10 +109,10 @@ void AudioSubSystem::run() {
 
     frameCount += samplesToWrite;
 
-    for (size_t i = 0; i < commands_.size(); i++) {
-      if (commands_[i].active.load(std::memory_order_acquire) &&
-          commands_[i].endFrameCount < frameCount_) {
-        commands_[i].active.store(false, std::memory_order_relaxed);
+    for (auto& command : commands_) {
+      if (command.active.load(std::memory_order_acquire) &&
+          command.endFrameCount < frameCount_) {
+        command.active.store(false, std::memory_order_relaxed);
       }
     }
   }
