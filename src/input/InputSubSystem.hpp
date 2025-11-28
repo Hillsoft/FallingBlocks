@@ -11,9 +11,15 @@ class InputHandler;
 
 class InputSubSystem : public util::Registry<InputHandler, InputSubSystem> {
  public:
-  InputSubSystem(render::glfw::Window& window);
+  explicit InputSubSystem(render::glfw::Window& window);
 
   ~InputSubSystem();
+
+  InputSubSystem(const InputSubSystem& other) = delete;
+  InputSubSystem& operator=(const InputSubSystem& other) = delete;
+
+  InputSubSystem(InputSubSystem&& other) = delete;
+  InputSubSystem& operator=(InputSubSystem&& other) = delete;
 
  private:
   void handleKeyEvent(int key, int scancode, int action, int mods);

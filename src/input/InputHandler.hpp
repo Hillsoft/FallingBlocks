@@ -9,9 +9,15 @@ class InputSubSystem;
 
 class InputHandler : public util::RegistryItem<InputSubSystem, InputHandler> {
  public:
-  InputHandler(InputSubSystem& inputSystem);
+  explicit InputHandler(InputSubSystem& inputSystem);
 
-  virtual ~InputHandler() {}
+  virtual ~InputHandler() = default;
+
+  InputHandler(const InputHandler& other) = delete;
+  InputHandler& operator=(const InputHandler& other) = delete;
+
+  InputHandler(InputHandler&& other) = delete;
+  InputHandler& operator=(InputHandler&& other) = delete;
 
   virtual void onKeyPress(int keyCode) {}
   virtual void onKeyRelease(int keyCode) {}

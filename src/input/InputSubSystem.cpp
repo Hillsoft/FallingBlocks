@@ -1,6 +1,5 @@
 #include "input/InputSubSystem.hpp"
 
-#include <string_view>
 #include <utility>
 #include <GLFW/glfw3.h>
 #include "input/InputHandler.hpp"
@@ -280,7 +279,7 @@ InputSubSystem::~InputSubSystem() {
 }
 
 void InputSubSystem::handleKeyEvent(
-    int key, int scancode, int action, int mods) {
+    int key, int /* scancode */, int action, int /* mods */) {
   for (auto& h : *getRegisteredItems()) {
     if (action == GLFW_PRESS) {
       h->onKeyPress(key);
@@ -291,7 +290,7 @@ void InputSubSystem::handleKeyEvent(
 }
 
 void InputSubSystem::handleCursorPos(double xpos, double ypos) {
-  std::pair<int, int> windowSize = window_->getCurrentWindowSize();
+  const std::pair<int, int> windowSize = window_->getCurrentWindowSize();
   mousePos_ = math::Vec2{
       (2.f * static_cast<float>(xpos) / static_cast<float>(windowSize.first)) -
           1.f,
@@ -302,7 +301,7 @@ void InputSubSystem::handleCursorPos(double xpos, double ypos) {
   }
 }
 
-void InputSubSystem::handleMouseEvent(int button, int action, int mods) {
+void InputSubSystem::handleMouseEvent(int button, int action, int /* mods */) {
   if (button != GLFW_MOUSE_BUTTON_1) {
     return;
   }
