@@ -2,8 +2,8 @@
 
 #include <chrono>
 #include <cstdint>
-#include <cstdlib>
 #include <optional>
+#include <random>
 #include "GlobalSubSystemStack.hpp"
 #include "audio/AudioSubSystem.hpp"
 #include "engine/Actor.hpp"
@@ -32,10 +32,9 @@ constexpr uint32_t kPaddleHitFrequency = 392;
 constexpr std::chrono::milliseconds kSoundDuration{20};
 
 float randFloat(float lo, float hi) {
-  float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-  r *= (hi - lo);
-  r += lo;
-  return r;
+  static std::default_random_engine randomEngine{std::random_device{}()};
+  std::uniform_real_distribution<float> distribution{lo, hi};
+  return distribution(randomEngine);
 }
 
 math::Vec2 normalizeBallSpeed(const math::Vec2& speed) {
@@ -132,7 +131,7 @@ void Ball::handleCollision(physics::RectCollider& other, math::Vec2 normal) {
 
   vel_ = reflect(vel_, normal);
 
-  if (auto paddle = dynamic_cast<Paddle*>(&other); paddle != nullptr) {
+  if (const auto* paddle = dynamic_cast<Paddle*>(&other); paddle != nullptr) {
     math::Vec2 ballCenter = (getP0() + getP1()) / 2.f;
     math::Vec2 paddleCenter = (paddle->getP0() + paddle->getP1()) / 2.f;
 
@@ -148,7 +147,7 @@ void Ball::handleCollision(physics::RectCollider& other, math::Vec2 normal) {
             .frequency = kPaddleHitFrequency,
             .volume = 0.5f,
             .duration = kSoundDuration});
-  } else if (auto block = dynamic_cast<Block*>(&other); block != nullptr) {
+  } else if (auto* block = dynamic_cast<Block*>(&other); block != nullptr) {
     getScene()->destroyActor(block);
 
     GlobalSubSystemStack::get().audioSystem().playSineWave(
@@ -160,7 +159,7 @@ void Ball::handleCollision(physics::RectCollider& other, math::Vec2 normal) {
 }
 
 void Ball::onDestroy() {
-  BlocksScene* scene = dynamic_cast<BlocksScene*>(getScene());
+  auto* scene = dynamic_cast<BlocksScene*>(getScene());
   scene->onBallDestroyed(*this);
 }
 

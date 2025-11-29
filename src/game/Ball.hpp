@@ -24,7 +24,7 @@ struct BallPrototype {
 };
 
 struct BallDefinition {
-  engine::ResourceRef<BallPrototype> prototype;
+  engine::ResourceRef<BallPrototype> prototype{nullptr};
   std::optional<math::Vec2> position;
   std::optional<math::Vec2> velocity;
 
@@ -45,7 +45,7 @@ class Ball
   Ball(Scene& scene, const BallDefinition& definition);
   Ball(
       Scene& scene,
-      engine::ResourceRef<BallPrototype>,
+      engine::ResourceRef<BallPrototype> prototype,
       math::Vec2 pos,
       math::Vec2 vel);
 

@@ -29,8 +29,8 @@ Paddle::Paddle(Scene& scene, const PaddleDefinition& definition)
       input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
       physics::RectCollider(
           scene.getPhysicsScene(),
-          math::Vec2{15.f + -kPaddleWidth / 2.f, 27.f},
-          math::Vec2{15.f + kPaddleWidth / 2.f, 28.5f},
+          math::Vec2{15.f + (-kPaddleWidth / 2.f), 27.f},
+          math::Vec2{15.f + (kPaddleWidth / 2.f), 28.5f},
           0b1,
           0),
       TickHandler(scene.getTickRegistry()),
@@ -68,9 +68,8 @@ void Paddle::onKeyPress(int key) {
 }
 
 void Paddle::onKeyRelease(int key) {
-  if (key == GLFW_KEY_RIGHT && vel_.x() > 0.0f) {
-    vel_ = math::Vec2{0.0f};
-  } else if (key == GLFW_KEY_LEFT && vel_.x() < 0.0f) {
+  if ((key == GLFW_KEY_RIGHT && vel_.x() > 0.0f) ||
+      (key == GLFW_KEY_LEFT && vel_.x() < 0.0f)) {
     vel_ = math::Vec2{0.0f};
   }
 }

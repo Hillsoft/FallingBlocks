@@ -36,7 +36,7 @@ ScoreUI::ScoreUI(Scene& scene, const ScoreUIDefinition& definition)
 }
 
 void ScoreUI::draw() {
-  BlocksScene* scene = dynamic_cast<BlocksScene*>(getScene());
+  auto* scene = dynamic_cast<BlocksScene*>(getScene());
   DEBUG_ASSERT(scene != nullptr);
 
   std::string scoreString = util::toString(

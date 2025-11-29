@@ -22,7 +22,7 @@ struct CameraActorDefinition {
 class CameraActor : public Actor {
  public:
   CameraActor(Scene& scene, const CameraActorDefinition& definition);
-  CameraActor(Scene& scene, render::Simple2DCamera camera);
+  CameraActor(Scene& scene, const render::Simple2DCamera& camera);
 
   void onActivate() final;
 

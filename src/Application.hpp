@@ -17,7 +17,13 @@ class Application : public input::InputHandler {
   Application(
       std::string loadingSceneResourceName,
       std::string initialSceneResourceName);
-  ~Application();
+  ~Application() override;
+
+  Application(const Application& other) = delete;
+  Application& operator=(const Application& other) = delete;
+
+  Application(Application&& other) = delete;
+  Application& operator=(Application&& other) = delete;
 
   static Application& getApplication();
 

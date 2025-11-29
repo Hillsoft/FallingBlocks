@@ -9,7 +9,7 @@ namespace blocks::game {
 
 class TestText : public Actor, public Drawable {
  public:
-  TestText(Scene& scene);
+  explicit TestText(Scene& scene);
 
   void draw() final;
 

@@ -45,7 +45,7 @@ void Block::draw() {
 
 void Block::onDestroy() {
   Actor::onDestroy();
-  BlocksScene* scene = dynamic_cast<BlocksScene*>(getScene());
+  auto* scene = dynamic_cast<BlocksScene*>(getScene());
   scene->onBlockDestroyed(*this);
 }
 

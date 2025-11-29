@@ -26,7 +26,7 @@ float getUIScale(float windowHeight) {
     return 1.5f;
   }
 
-  return 1.5f - 0.7f * (2160.f - windowHeight) / (2160.f - 720.f);
+  return 1.5f - (0.7f * (2160.f - windowHeight) / (2160.f - 720.f));
 }
 
 } // namespace
@@ -52,8 +52,8 @@ void UIActor::draw() {
   }
 
   auto window = GlobalSubSystemStack::get().window();
-  std::pair<int, int> windowSizePair = window->getCurrentWindowSize();
-  float scale = getUIScale(static_cast<float>(windowSizePair.second));
+  const std::pair<int, int> windowSizePair = window->getCurrentWindowSize();
+  const float scale = getUIScale(static_cast<float>(windowSizePair.second));
   math::Vec<uint16_t, 2> windowSizeVec{
       static_cast<uint16_t>(static_cast<float>(windowSizePair.first) / scale),
       static_cast<uint16_t>(static_cast<float>(windowSizePair.second) / scale)};
