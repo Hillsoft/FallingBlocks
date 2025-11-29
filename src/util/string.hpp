@@ -91,8 +91,8 @@ template <typename TArg, typename... TArgs>
   requires std::is_same_v<std::remove_cvref_t<TArg>, std::string>
 struct StringConverter<TArg, TArgs...> : public StringConverter<TArgs...> {
   template <typename... TConstructArgs>
-  // NOLINTNEXTLINE(*-array-to-pointer-decay,hicpp-no-array-decay)
   explicit StringConverter(const std::string& c, TConstructArgs&&... rest)
+      // NOLINTNEXTLINE(*-array-to-pointer-decay,hicpp-no-array-decay)
       : StringConverter<TArgs...>(std::forward<TConstructArgs>(rest)...),
         estimatedSizeCache_(c.size()) {}
 

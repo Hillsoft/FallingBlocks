@@ -16,20 +16,31 @@ class RectCollider : public util::RegistryItem<PhysicsScene, RectCollider> {
       math::Vec2 p1,
       uint64_t produceEventLayers = ~0ull,
       uint64_t receiveEventLayers = ~0ull);
-  virtual ~RectCollider() {}
+  virtual ~RectCollider() = default;
 
-  std::optional<math::Vec2> testCollision(const RectCollider& other) const;
+  RectCollider(const RectCollider& other) = delete;
+  RectCollider& operator=(const RectCollider& other) = delete;
+
+  RectCollider(RectCollider&& other) = delete;
+  RectCollider& operator=(RectCollider&& other) = delete;
+
+  [[nodiscard]] std::optional<math::Vec2> testCollision(
+      const RectCollider& other) const;
 
   virtual void handleCollision(RectCollider& other, math::Vec2 normal) {}
 
-  math::Vec2 getP0() const { return p0_; }
+  [[nodiscard]] math::Vec2 getP0() const { return p0_; }
   void setP0(math::Vec2 newP0) { p0_ = newP0; }
 
-  math::Vec2 getP1() const { return p1_; }
+  [[nodiscard]] math::Vec2 getP1() const { return p1_; }
   void setP1(math::Vec2 newP1) { p1_ = newP1; }
 
-  uint64_t getProduceEventLayers() const { return produceEventsForLayers_; }
-  uint64_t getReceiveEventLayers() const { return receiveEventsForLayers_; }
+  [[nodiscard]] uint64_t getProduceEventLayers() const {
+    return produceEventsForLayers_;
+  }
+  [[nodiscard]] uint64_t getReceiveEventLayers() const {
+    return receiveEventsForLayers_;
+  }
 
  private:
   uint64_t produceEventsForLayers_;

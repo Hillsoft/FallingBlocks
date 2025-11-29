@@ -3,6 +3,7 @@
 #include <filesystem>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 #include "loader/Locale.hpp"
 #include "util/string.hpp"
@@ -23,6 +24,7 @@ void Localisation::setLocale(std::string locale) {
   localeCode_ = std::move(locale);
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 std::vector<std::string> Localisation::getAvailableLocales() const {
   std::vector<std::string> result;
 

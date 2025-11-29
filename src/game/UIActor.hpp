@@ -11,7 +11,7 @@ namespace blocks::game {
 
 class UIActor : public Actor, public Drawable {
  public:
-  UIActor(Scene& scene);
+  explicit UIActor(Scene& scene);
   UIActor(Scene& scene, std::unique_ptr<ui::UIObject> ui);
 
   void setUIObject(std::unique_ptr<ui::UIObject> newUI);

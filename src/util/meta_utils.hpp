@@ -29,7 +29,9 @@ struct FixedString {
     }
   }
   // NOLINTNEXTLINE(hicpp-explicit-conversions)
-  constexpr operator char const*() const { return buf; }
+  constexpr operator char const*() const {
+    return static_cast<const char*>(buf);
+  }
 };
 template <unsigned N>
 // NOLINTNEXTLINE(*-avoid-c-arrays)
@@ -56,13 +58,21 @@ struct TArray {
   constexpr static size_t size = sizeof...(TArr);
 
   template <typename ConstructType, typename ValueFn>
-  static auto visitConstruct(ValueFn&& valueFn) {
-    return ConstructType{std::forward<ValueFn>(valueFn)(THolder<TArr>{})...};
+  static auto visitConstruct(const ValueFn& valueFn) {
+    return ConstructType{valueFn(THolder<TArr>{})...};
+  }
+  template <typename ConstructType, typename ValueFn>
+  static auto visitConstruct(ValueFn& valueFn) {
+    return ConstructType{valueFn(THolder<TArr>{})...};
   }
 
   template <typename Fn>
-  static void visit(Fn&& fn) {
-    (std::forward<Fn>(fn)(THolder<TArr>{}), ...);
+  static void visit(const Fn& fn) {
+    (fn(THolder<TArr>{}), ...);
+  }
+  template <typename Fn>
+  static void visit(Fn& fn) {
+    (fn(THolder<TArr>{}), ...);
   }
 
   template <typename... TArr2>

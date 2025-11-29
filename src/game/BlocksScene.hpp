@@ -20,7 +20,7 @@ struct BlocksSceneDefinition {
 
 class BlocksScene : public Scene {
  public:
-  BlocksScene(const BlocksSceneDefinition& definition)
+  explicit BlocksScene(const BlocksSceneDefinition& definition)
       : nextScene_(definition.nextLevelName_) {}
   BlocksScene() = default;
 

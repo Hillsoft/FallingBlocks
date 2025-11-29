@@ -20,6 +20,7 @@ class ResourceManager {
   static ResourceManager& get();
 
   template <typename T>
+  // NOLINTNEXTLINE(bugprone-exception-escape)
   struct ResourceWrapper {
     std::string objectType;
     T data;
@@ -44,7 +45,7 @@ class ResourceManager {
     std::vector<char> fileContents = util::readFileChars(
         (std::filesystem::path("data") / resourceName)
             .replace_extension("yaml"));
-    ResourceWrapper<T> resource = serialization::deserialize<
+    auto resource = serialization::deserialize<
         ResourceWrapper<T>,
         serialization::yaml::YAMLSerializationProvider>(
         {fileContents.begin(), fileContents.end()});

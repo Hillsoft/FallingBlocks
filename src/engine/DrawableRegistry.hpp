@@ -13,7 +13,14 @@ class DrawableRegistry : public util::Registry<Drawable, DrawableRegistry> {
 
 class Drawable : public util::RegistryItem<DrawableRegistry, Drawable> {
  public:
-  Drawable(DrawableRegistry& registry) : RegistryItem(registry) {}
+  explicit Drawable(DrawableRegistry& registry) : RegistryItem(registry) {}
+  virtual ~Drawable() = default;
+
+  Drawable(const Drawable& other) = delete;
+  Drawable& operator=(const Drawable& other) = delete;
+
+  Drawable(Drawable&& other) = delete;
+  Drawable& operator=(Drawable&& other) = delete;
 
   virtual void draw() {}
 };

@@ -21,10 +21,16 @@ struct SceneObjectDefinition {
 
 class Scene {
  public:
-  Scene(const SceneObjectDefinition& definition) {}
-  Scene() {}
+  explicit Scene(const SceneObjectDefinition& /* definition */) {}
+  Scene() = default;
 
-  virtual ~Scene() {}
+  virtual ~Scene() = default;
+
+  Scene(const Scene& other) = delete;
+  Scene& operator=(const Scene& other) = delete;
+
+  Scene(Scene&& other) = delete;
+  Scene& operator=(Scene&& other) = delete;
 
   template <typename TActor, typename... TArgs>
   std::weak_ptr<TActor> createActor(TArgs... args) {
@@ -53,9 +59,7 @@ class Scene {
   Timer& getTimer() { return timer_; }
   const Timer& getTimer() const { return timer_; }
 
-  const std::vector<std::shared_ptr<Actor>> getActors() const {
-    return actors_;
-  }
+  std::vector<std::shared_ptr<Actor>> getActors() const { return actors_; }
 
   void activate();
 

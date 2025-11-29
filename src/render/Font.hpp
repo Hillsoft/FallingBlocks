@@ -13,6 +13,7 @@
 
 namespace blocks::render {
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 class Font {
  public:
   struct Size {

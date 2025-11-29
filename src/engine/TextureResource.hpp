@@ -11,7 +11,7 @@ class TextureResource {
  public:
   using Fields = util::TArray<util::TPair<util::TString<"path">, std::string>>;
 
-  TextureResource(const std::string& path);
+  explicit TextureResource(const std::string& path);
 
   render::RenderableRef<render::RenderableTex2D::InstanceData> get() {
     return renderable_.get();

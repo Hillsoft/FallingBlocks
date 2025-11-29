@@ -13,7 +13,14 @@ class TickRegistry : public util::Registry<TickHandler, TickRegistry> {
 
 class TickHandler : public util::RegistryItem<TickRegistry, TickHandler> {
  public:
-  TickHandler(TickRegistry& registry) : RegistryItem(registry) {}
+  explicit TickHandler(TickRegistry& registry) : RegistryItem(registry) {}
+  virtual ~TickHandler() = default;
+
+  TickHandler(const TickHandler& other) = delete;
+  TickHandler& operator=(const TickHandler& other) = delete;
+
+  TickHandler(TickHandler&& other) = delete;
+  TickHandler& operator=(TickHandler&& other) = delete;
 
   virtual void update(float deltaTimeSeconds) {}
 };

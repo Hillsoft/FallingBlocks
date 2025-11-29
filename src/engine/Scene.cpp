@@ -1,5 +1,6 @@
 #include "engine/Scene.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <memory>
 #include <utility>
@@ -29,7 +30,8 @@ void Scene::destroyActor(Actor* actor) {
 void Scene::stepSimulation(std::chrono::microseconds deltaTime) {
   DEBUG_ASSERT(isActive_);
 
-  float deltaTimeSeconds = static_cast<float>(deltaTime.count()) / 1000000.f;
+  const float deltaTimeSeconds =
+      static_cast<float>(deltaTime.count()) / 1000000.f;
 
   timer_.tick(deltaTime);
 

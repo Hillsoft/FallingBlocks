@@ -50,7 +50,7 @@ class TypeErasedUniquePtr {
   }
 
   template <typename T>
-  T* get() const {
+  [[nodiscard]] T* get() const {
     DEBUG_ASSERT(holdsType<T>());
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
     return reinterpret_cast<T*>(ptr_);

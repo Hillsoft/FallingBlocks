@@ -16,11 +16,12 @@ float Timer::getSceneUptimeSeconds() const {
 
 void Timer::schedule(
     std::chrono::microseconds delay, std::function<void()> callback) {
-  std::chrono::microseconds triggerTime = currentTime_ + delay;
+  const std::chrono::microseconds triggerTime = currentTime_ + delay;
   auto it = pendingCallbacks_.begin();
   for (; it < pendingCallbacks_.end() && it->triggerTime < triggerTime; it++) {
   }
-  pendingCallbacks_.insert(it, {triggerTime, std::move(callback)});
+  pendingCallbacks_.insert(
+      it, {.triggerTime = triggerTime, .callback = std::move(callback)});
 }
 
 void Timer::tick(std::chrono::microseconds durationTime) {
@@ -31,7 +32,8 @@ void Timer::tick(std::chrono::microseconds durationTime) {
        i++) {
     // Move to a local variable to avoid any invalidations if the
     // pendingCallbacks_ array is modified by curFunc
-    std::function<void()> curFunc = std::move(pendingCallbacks_[i].callback);
+    const std::function<void()> curFunc =
+        std::move(pendingCallbacks_[i].callback);
     curFunc();
   }
   pendingCallbacks_.erase(

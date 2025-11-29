@@ -139,7 +139,7 @@ template <typename... Args>
 struct deserializeArbitrary<util::TaggedVariant<Args...>> {
   template <typename TCursor>
   util::TaggedVariant<Args...> operator()(TCursor cursor) {
-    size_t fieldCount = cursor.getStructFieldCount();
+    const size_t fieldCount = cursor.getStructFieldCount();
     if (fieldCount != 2) {
       throw std::runtime_error{"Unrecognised fields"};
     }
@@ -149,7 +149,7 @@ struct deserializeArbitrary<util::TaggedVariant<Args...>> {
     if (!tagNameCursor.has_value()) {
       throw std::runtime_error{"Variant missing 'variantTag' field"};
     }
-    std::string tag = deserializeArbitrary<std::string>{}(*tagNameCursor);
+    const std::string tag = deserializeArbitrary<std::string>{}(*tagNameCursor);
 
     std::optional<TCursor> contentsCursor = cursor.getSubFieldCursor("value");
     if (!contentsCursor.has_value()) {
@@ -167,7 +167,7 @@ template <typename T, typename SerializationProvider>
 T deserialize(std::string_view dataStream) {
   SerializationProvider deserializer{dataStream};
 
-  typename SerializationProvider::TCursor rootCursor =
+  const typename SerializationProvider::TCursor rootCursor =
       deserializer.getRootCursor();
 
   return deserializeArbitrary<T>{}(rootCursor);

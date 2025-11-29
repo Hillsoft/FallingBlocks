@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 #include "GlobalSubSystemStack.hpp"
@@ -36,14 +37,16 @@ engine::ResourceRef<SceneDefinition> loadSceneDefinitionFromName(
 std::unique_ptr<Scene> loadSceneFromDefinition(
     engine::ResourceRef<SceneDefinition> sceneDefinitionRef) {
   std::unique_ptr<Scene> scene = sceneDefinitionRef->sceneObject.visit(
-      [&](auto sceneDefinition) -> std::unique_ptr<Scene> {
-        return std::make_unique<typename decltype(sceneDefinition)::SceneType>(
+      [&](const auto& sceneDefinition) -> std::unique_ptr<Scene> {
+        return std::make_unique<
+            typename std::remove_cvref_t<decltype(sceneDefinition)>::SceneType>(
             sceneDefinition);
       });
 
   for (auto& actor : sceneDefinitionRef->objects) {
-    actor.visit([&](auto actorDefinition) {
-      scene->createActor<typename decltype(actorDefinition)::ActorType>(
+    actor.visit([&](const auto& actorDefinition) {
+      scene->createActor<
+          typename std::remove_cvref_t<decltype(actorDefinition)>::ActorType>(
           actorDefinition);
     });
   }

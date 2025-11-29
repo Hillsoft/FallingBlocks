@@ -6,13 +6,14 @@
 
 namespace blocks {
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 class FontResource {
  public:
   using Fields = util::TArray<util::TPair<util::TString<"path">, std::string>>;
 
-  FontResource(const std::string& path);
+  explicit FontResource(const std::string& path);
 
-  const render::Font& get() const { return font_; }
+  [[nodiscard]] const render::Font& get() const { return font_; }
 
  private:
   render::Font font_;

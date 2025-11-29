@@ -9,20 +9,27 @@
 
 namespace blocks::ui {
 
-enum class LayoutDirection { HORIZONTAL, VERTICAL };
-enum class Align { LEFT_TOP, MIDDLE, RIGHT_BOTTOM };
-enum class SizeStrategy { GROW_CHILDREN, SHRINK_PARENT, PAD };
+enum class LayoutDirection : uint8_t { HORIZONTAL, VERTICAL };
+enum class Align : uint8_t { LEFT_TOP, MIDDLE, RIGHT_BOTTOM };
+enum class SizeStrategy : uint8_t { GROW_CHILDREN, SHRINK_PARENT, PAD };
 
 class UIObject {
  public:
+  UIObject() = default;
   virtual ~UIObject() = default;
+
+  UIObject(const UIObject& other) = default;
+  UIObject& operator=(const UIObject& other) = default;
+
+  UIObject(UIObject&& other) = default;
+  UIObject& operator=(UIObject&& other) = default;
 
   // Returns z-step
   virtual int draw(
-      math::Vec<uint16_t, 2> minPos,
-      math::Vec<uint16_t, 2> maxPos,
-      render::Simple2DCamera& camera,
-      int baseZ) {
+      math::Vec<uint16_t, 2> /* minPos */,
+      math::Vec<uint16_t, 2> /* maxPos */,
+      render::Simple2DCamera& /* camera */,
+      int /* baseZ */) {
     return 0;
   }
 

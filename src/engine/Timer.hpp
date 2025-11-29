@@ -10,8 +10,8 @@ class Timer {
  public:
   Timer() = default;
 
-  std::chrono::microseconds getSceneUptimeMicroseconds() const;
-  float getSceneUptimeSeconds() const;
+  [[nodiscard]] std::chrono::microseconds getSceneUptimeMicroseconds() const;
+  [[nodiscard]] float getSceneUptimeSeconds() const;
 
   void schedule(
       std::chrono::microseconds delay, std::function<void()> callback);
