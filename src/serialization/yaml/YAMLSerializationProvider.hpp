@@ -38,7 +38,7 @@ class YAMLSerializationCursor {
     YAMLSerializationCursor fieldCursor();
   };
 
-  YAMLSerializationCursor(YAMLDocument* document);
+  explicit YAMLSerializationCursor(YAMLDocument* document);
 
   size_t getStructFieldCount();
   std::optional<YAMLSerializationCursor> getSubFieldCursor(
@@ -60,7 +60,7 @@ class YAMLSerializationProvider {
  public:
   using TCursor = YAMLSerializationCursor;
 
-  YAMLSerializationProvider(std::string_view dataStream);
+  explicit YAMLSerializationProvider(std::string_view dataStream);
 
   TCursor getRootCursor();
 

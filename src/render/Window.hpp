@@ -2,6 +2,7 @@
 
 #include <utility>
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanInstance.hpp"
 #include "render/VulkanPresentStack.hpp"
@@ -25,25 +26,27 @@ class Window {
   Window(Window&& other) = delete;
   Window& operator=(Window&& other) = delete;
 
+  ~Window() = default;
+
   void close();
-  bool shouldClose() const;
-  std::pair<int, int> getCurrentWindowSize() const;
-  VkExtent2D getCurrentWindowExtent() const;
+  [[nodiscard]] bool shouldClose() const;
+  [[nodiscard]] std::pair<int, int> getCurrentWindowSize() const;
+  [[nodiscard]] VkExtent2D getCurrentWindowExtent() const;
 
   void toggleFullScreen();
 
   void resetSwapChain();
 
-  VulkanPresentStack& getPresentStack() { return presentStack_; }
+  [[nodiscard]] VulkanPresentStack& getPresentStack() { return presentStack_; }
 
-  bool requiresReset() const;
-  bool isDrawable() const;
+  [[nodiscard]] bool requiresReset() const;
+  [[nodiscard]] bool isDrawable() const;
 
  private:
   void onResize();
 
   VulkanPresentStack presentStack_;
-  bool requiresReset_;
+  bool requiresReset_{false};
   VkExtent2D lastWindowedExtent_{0, 0};
   int lastWindowedXPosition_{0};
   int lastWindowedYPosition_{0};

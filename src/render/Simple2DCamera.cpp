@@ -1,6 +1,6 @@
 #include "render/Simple2DCamera.hpp"
 
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "math/vec.hpp"
 
 namespace blocks::render {
@@ -8,16 +8,16 @@ namespace blocks::render {
 namespace {
 
 Simple2DCamera::Target targetFromBounds(math::Vec2 p0, math::Vec2 p1) {
-  return {(p0 + p1) / 2.0f, p1 - p0};
+  return {.centre = (p0 + p1) / 2.0f, .extent = p1 - p0};
 }
 
 math::Vec2 getAspectScaledWorldExtent(
     math::Vec2 worldExtent,
     VkExtent2D viewExtent,
     Simple2DCamera::AspectRatioHandling handlingMethod) {
-  float worldAspect = worldExtent.x() / worldExtent.y();
+  const float worldAspect = worldExtent.x() / worldExtent.y();
 
-  float viewAspect = static_cast<float>(viewExtent.width) /
+  const auto viewAspect = static_cast<float>(viewExtent.width) /
       static_cast<float>(viewExtent.height);
 
   switch (handlingMethod) {

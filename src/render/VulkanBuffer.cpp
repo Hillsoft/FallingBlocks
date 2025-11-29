@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <cstring>
 #include <span>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/VulkanGraphicsDevice.hpp"
 
 namespace blocks::render {
@@ -21,7 +21,7 @@ VulkanBuffer::VulkanBuffer(
       memory_.getRawMemory(),
       0);
 
-  void* buffData;
+  void* buffData = nullptr;
   vkMapMemory(
       device.getRawDevice(),
       memory_.getRawMemory(),

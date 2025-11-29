@@ -22,7 +22,7 @@ class AtomicCircularBufferQueue {
   ~AtomicCircularBufferQueue()
     requires(!std::is_trivially_destructible_v<T>)
   {
-    Cursors c = cursors_.load(std::memory_order_acquire);
+    const Cursors c = cursors_.load(std::memory_order_acquire);
     for (size_t i = c.front; i != c.back; i = (i + 1) % maxSize) {
       data_[i].destroy();
     }

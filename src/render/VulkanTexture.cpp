@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <stdexcept>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "loader/Image.hpp"
 #include "loader/LoadImage.hpp"
 #include "render/VulkanBuffer.hpp"
@@ -24,7 +24,7 @@ namespace {
 void transitionImageLayout(
     VkCommandBuffer commandBuffer,
     VkImage image,
-    VkFormat format,
+    VkFormat /* format */,
     VkImageLayout oldLayout,
     VkImageLayout newLayout,
     uint32_t mipLevels) {
@@ -115,15 +115,17 @@ void generateMipMaps(
         &barrier);
 
     VkImageBlit blit{};
-    blit.srcOffsets[0] = {0, 0, 0};
-    blit.srcOffsets[1] = {mipWidth, mipHeight, 1};
+    blit.srcOffsets[0] = {.x = 0, .y = 0, .z = 0};
+    blit.srcOffsets[1] = {.x = mipWidth, .y = mipHeight, .z = 1};
     blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     blit.srcSubresource.mipLevel = i - 1;
     blit.srcSubresource.baseArrayLayer = 0;
     blit.srcSubresource.layerCount = 1;
-    blit.dstOffsets[0] = {0, 0, 0};
+    blit.dstOffsets[0] = {.x = 0, .y = 0, .z = 0};
     blit.dstOffsets[1] = {
-        mipWidth > 1 ? mipWidth / 2 : 1, mipHeight > 1 ? mipHeight / 2 : 1, 1};
+        .x = mipWidth > 1 ? mipWidth / 2 : 1,
+        .y = mipHeight > 1 ? mipHeight / 2 : 1,
+        .z = 1};
     blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     blit.dstSubresource.mipLevel = i;
     blit.dstSubresource.baseArrayLayer = 0;
@@ -195,7 +197,7 @@ VulkanTexture::VulkanTexture(
       imageView_(nullptr, nullptr),
       sampler_(nullptr, nullptr) {
   loader::Image tex = loader::loadImage(source);
-  uint32_t mipLevels =
+  const auto mipLevels =
       static_cast<uint32_t>(
           std::floor(std::log2(std::max(tex.width, tex.height)))) +
       1;
@@ -203,7 +205,7 @@ VulkanTexture::VulkanTexture(
   VulkanBuffer stagingBuffer(
       device, tex.pixelData, VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
 
-  VkImage textureImage;
+  VkImage textureImage = nullptr;
 
   VkImageCreateInfo imageInfo{};
   imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -216,6 +218,7 @@ VulkanTexture::VulkanTexture(
   imageInfo.format = VK_FORMAT_B8G8R8A8_SRGB;
   imageInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
   imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+  // NOLINTNEXTLINE(hicpp-signed-bitwise)
   imageInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT |
       VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
   imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -242,7 +245,7 @@ VulkanTexture::VulkanTexture(
   allocInfo.memoryTypeIndex = findMemoryType(
       memRequirements, memProperties, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
-  VkDeviceMemory deviceMemory;
+  VkDeviceMemory deviceMemory = nullptr;
   if (vkAllocateMemory(
           device.getRawDevice(), &allocInfo, nullptr, &deviceMemory) !=
       VK_SUCCESS) {
@@ -257,8 +260,8 @@ VulkanTexture::VulkanTexture(
   bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
   bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-  VkBuffer buffer;
-  VkResult result =
+  VkBuffer buffer = nullptr;
+  const VkResult result =
       vkCreateBuffer(device.getRawDevice(), &bufferInfo, nullptr, &buffer);
   if (result != VK_SUCCESS) {
     throw std::runtime_error{"Failed to create buffer"};
@@ -270,7 +273,7 @@ VulkanTexture::VulkanTexture(
   vkBindImageMemory(
       device.getRawDevice(), textureImage, deviceMemory_.get(), 0);
 
-  vulkan::UniqueHandle<VkCommandBuffer> commandBuffer =
+  const vulkan::UniqueHandle<VkCommandBuffer> commandBuffer =
       vulkan::CommandBufferBuilder(
           commandPool.getRawCommandPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY)
           .build(device.getRawDevice());
@@ -293,9 +296,11 @@ VulkanTexture::VulkanTexture(
   region.imageSubresource.mipLevel = 0;
   region.imageSubresource.baseArrayLayer = 0;
   region.imageSubresource.layerCount = 1;
-  region.imageOffset = {0, 0, 0};
+  region.imageOffset = {.x = 0, .y = 0, .z = 0};
   region.imageExtent = {
-      static_cast<uint32_t>(tex.width), static_cast<uint32_t>(tex.height), 1};
+      .width = static_cast<uint32_t>(tex.width),
+      .height = static_cast<uint32_t>(tex.height),
+      .depth = 1};
   vkCmdCopyBufferToImage(
       commandBuffer.get(),
       stagingBuffer.getRawBuffer(),
@@ -311,11 +316,11 @@ VulkanTexture::VulkanTexture(
       static_cast<int32_t>(tex.width),
       static_cast<int32_t>(tex.height));
 
-  vulkan::UniqueHandle<VkFence> fence =
+  const vulkan::UniqueHandle<VkFence> fence =
       vulkan::FenceBuilder().build(device.getRawDevice());
   vulkan::endSingleTimeCommandBuffer(
       commandBuffer.get(), commandPool.getQueue(), {}, {}, fence.get());
-  vkWaitForFences(device.getRawDevice(), 1, &fence.get(), true, UINT32_MAX);
+  vkWaitForFences(device.getRawDevice(), 1, &fence.get(), VK_TRUE, UINT32_MAX);
   imageView_ =
       vulkan::ImageViewBuilder(textureImage, VK_FORMAT_B8G8R8A8_SRGB)
           .setMipLevels(mipLevels)
@@ -338,7 +343,7 @@ VulkanTexture::VulkanTexture(
   samplerInfo.minLod = 0.0f;
   samplerInfo.maxLod = VK_LOD_CLAMP_NONE;
 
-  VkSampler sampler;
+  VkSampler sampler = nullptr;
   if (vkCreateSampler(device.getRawDevice(), &samplerInfo, nullptr, &sampler) !=
       VK_SUCCESS) {
     throw std::runtime_error{"Failed to create sampler"};

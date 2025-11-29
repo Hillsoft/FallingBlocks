@@ -1,12 +1,13 @@
 #include "render/VulkanInstance.hpp"
 
-#include <string.h>
 #include <array>
 #include <cstdint>
+#include <cstring>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 
 #include "render/validationLayers.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
@@ -17,7 +18,7 @@ namespace {
 
 bool checkValidationLayers() {
   // Check supported
-  uint32_t layerCount;
+  uint32_t layerCount = 0;
   vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
   std::vector<VkLayerProperties> availableLayers{layerCount};
@@ -27,7 +28,9 @@ bool checkValidationLayers() {
     bool layerFound = false;
 
     for (const auto& layerProperty : availableLayers) {
-      if (std::strcmp(layerProperty.layerName, requestedLayer) == 0) {
+      if (std::strcmp(
+              static_cast<const char*>(layerProperty.layerName),
+              requestedLayer) == 0) {
         layerFound = true;
         break;
       }
@@ -60,7 +63,9 @@ bool validateRequiredExtensions(
     bool extensionFound = false;
 
     for (const auto& available : availableExtensions) {
-      if (std::strcmp(available.extensionName, requested) == 0) {
+      if (std::strcmp(
+              static_cast<const char*>(available.extensionName), requested) ==
+          0) {
         extensionFound = true;
         break;
       }
@@ -81,7 +86,8 @@ VulkanInstance::VulkanInstance() : instance_(nullptr) {
   std::cout << "Available Vulkan extensions:\n";
   const auto supportedExtensions = getSupportedExtensions();
   for (const auto& extension : supportedExtensions) {
-    std::cout << "  " << extension.extensionName << "\n";
+    std::cout << "  " << static_cast<const char*>(extension.extensionName)
+              << "\n";
   }
 
   VkApplicationInfo appInfo{};
@@ -113,7 +119,9 @@ VulkanInstance::VulkanInstance() : instance_(nullptr) {
       glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
   std::vector<const char*> extensions{
-      glfwExtensions, glfwExtensions + glfwExtensionCount};
+      glfwExtensions,
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      glfwExtensions + glfwExtensionCount};
   if (kEnableValidationLayers) {
     extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
   }
@@ -125,8 +133,8 @@ VulkanInstance::VulkanInstance() : instance_(nullptr) {
   createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
   createInfo.ppEnabledExtensionNames = extensions.data();
 
-  VkInstance instance;
-  VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
+  VkInstance instance = nullptr;
+  const VkResult result = vkCreateInstance(&createInfo, nullptr, &instance);
   if (result != VK_SUCCESS) {
     throw std::runtime_error{"Failed to initialise Vulkan instance"};
   }

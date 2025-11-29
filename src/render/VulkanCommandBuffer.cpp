@@ -1,10 +1,10 @@
 #include "render/VulkanCommandBuffer.hpp"
 
+#include <cstddef>
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
-#include <GLFW/glfw3.h>
-
+#include <vulkan/vulkan_core.h>
 #include "render/VulkanCommandPool.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/vulkan/CommandBufferBuilder.hpp"
@@ -13,9 +13,10 @@ namespace blocks::render {
 
 VulkanCommandBuffer::VulkanCommandBuffer(
     VulkanGraphicsDevice& device, VulkanCommandPool& commandPool)
-    : commandBuffer_(vulkan::CommandBufferBuilder{
-          commandPool.getRawCommandPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY}
-                         .build(device.getRawDevice())),
+    : commandBuffer_(
+          vulkan::CommandBufferBuilder{
+              commandPool.getRawCommandPool(), VK_COMMAND_BUFFER_LEVEL_PRIMARY}
+              .build(device.getRawDevice())),
       queue_(commandPool.getQueue()) {}
 
 void VulkanCommandBuffer::submit(

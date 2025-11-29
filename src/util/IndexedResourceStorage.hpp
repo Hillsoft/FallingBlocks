@@ -14,26 +14,27 @@ template <typename T>
 class IndexedResourceStorage {
  public:
   IndexedResourceStorage()
-      : pendingInserts_(std::make_unique<
-                        AtomicCircularBufferQueue<std::pair<size_t, T>>>()) {}
+      : pendingInserts_(
+            std::make_unique<
+                AtomicCircularBufferQueue<std::pair<size_t, T>>>()) {}
 
   size_t pushBack(T&& val) {
-    size_t index = nextIndex_.fetch_add(1, std::memory_order_relaxed);
+    const size_t index = nextIndex_.fetch_add(1, std::memory_order_relaxed);
     pendingInserts_->pushBack({index, std::move(val)});
     return index;
   }
   size_t pushBack(const T& val) {
-    size_t index = nextIndex_.fetch_add(1, std::memory_order_relaxed);
+    const size_t index = nextIndex_.fetch_add(1, std::memory_order_relaxed);
     pendingInserts_->pushBack({index, val});
     return index;
   }
   size_t pushBackBlocking(T&& val) {
-    size_t index = nextIndex_.fetch_add(1, std::memory_order_relaxed);
+    const size_t index = nextIndex_.fetch_add(1, std::memory_order_relaxed);
     pendingInserts_->pushBackBlocking({index, std::move(val)});
     return index;
   }
   size_t pushBackBlocking(const T& val) {
-    size_t index = nextIndex_.fetch_add(1, std::memory_order_relaxed);
+    const size_t index = nextIndex_.fetch_add(1, std::memory_order_relaxed);
     pendingInserts_->pushBackBlocking({index, val});
     return index;
   }

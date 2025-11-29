@@ -10,7 +10,7 @@
 #include <utility>
 #include <variant>
 #include <vector>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "GlobalSubSystemStack.hpp"
 #include "loader/font/Font.hpp"
 #include "math/vec.hpp"
@@ -49,7 +49,7 @@ VulkanBuffer makeFontBuffer(
   glyphRanges.clear();
 
   for (const auto& glyph : font.glyphs) {
-    int32_t glyphStart = static_cast<int32_t>(pointData.size());
+    const auto glyphStart = static_cast<int32_t>(pointData.size());
 
     if (std::holds_alternative<loader::SimpleGlyphData>(
             glyph.contourData.data)) {
@@ -59,7 +59,7 @@ VulkanBuffer makeFontBuffer(
           glyphData.onCurve.size() == glyphData.xCoords.size() &&
           glyphData.xCoords.size() == glyphData.yCoords.size());
 
-      if (glyphData.endPoints.size() == 0) {
+      if (glyphData.endPoints.empty()) {
         continue;
       }
 
@@ -127,6 +127,7 @@ VulkanBuffer makeFontBuffer(
   return VulkanBuffer{
       device,
       std::span<std::byte>{
+          // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
           reinterpret_cast<std::byte*>(pointData.data()),
           pointData.size() * sizeof(GlyphPoint)},
       VK_BUFFER_USAGE_STORAGE_BUFFER_BIT};
@@ -163,66 +164,70 @@ float drawChar(
             math::Mat3::translate(
                 pos +
                 math::Vec2{
-                    static_cast<float>(
-                        glyph.horizontalMetrics.leftSideBearing.rawValue) *
-                            fontScale +
-                        static_cast<float>(kerning) * fontScale,
+                    (static_cast<float>(
+                         glyph.horizontalMetrics.leftSideBearing.rawValue) *
+                     fontScale) +
+                        (static_cast<float>(kerning) * fontScale),
                     -static_cast<float>(glyph.contourData.yMax.rawValue) *
                         fontScale}) *
-                math::Mat3::scale(math::Vec2{
-                    static_cast<float>(
-                        glyph.contourData.xMax.rawValue -
-                        glyph.contourData.xMin.rawValue) *
-                        fontScale,
-                    static_cast<float>(
-                        glyph.contourData.yMax.rawValue -
-                        glyph.contourData.yMin.rawValue) *
-                        fontScale}),
+                math::Mat3::scale(
+                    math::Vec2{
+                        static_cast<float>(
+                            glyph.contourData.xMax.rawValue -
+                            glyph.contourData.xMin.rawValue) *
+                            fontScale,
+                        static_cast<float>(
+                            glyph.contourData.yMax.rawValue -
+                            glyph.contourData.yMin.rawValue) *
+                            fontScale}),
             glyphRanges[glyphIndex].first,
             glyphRanges[glyphIndex].second,
-            math::Mat3::translate(math::Vec2{
-                static_cast<float>(glyph.contourData.xMin.rawValue),
-                static_cast<float>(glyph.contourData.yMin.rawValue)}) *
-                math::Mat3::scale(math::Vec2{
-                    static_cast<float>(
-                        glyph.contourData.xMax.rawValue -
-                        glyph.contourData.xMin.rawValue),
-                    static_cast<float>(
-                        glyph.contourData.yMax.rawValue -
-                        glyph.contourData.yMin.rawValue)})});
+            math::Mat3::translate(
+                math::Vec2{
+                    static_cast<float>(glyph.contourData.xMin.rawValue),
+                    static_cast<float>(glyph.contourData.yMin.rawValue)}) *
+                math::Mat3::scale(
+                    math::Vec2{
+                        static_cast<float>(
+                            glyph.contourData.xMax.rawValue -
+                            glyph.contourData.xMin.rawValue),
+                        static_cast<float>(
+                            glyph.contourData.yMax.rawValue -
+                            glyph.contourData.yMin.rawValue)})});
   } else if (std::holds_alternative<std::vector<loader::CompoundGlyphData>>(
                  glyph.contourData.data)) {
     for (const auto& subGlyphDetails :
          std::get<std::vector<loader::CompoundGlyphData>>(
              glyph.contourData.data)) {
       const auto& subGlyph = fontData.glyphs[subGlyphDetails.glpyhIndex];
-      DEBUG_ASSERT(std::holds_alternative<loader::SimpleGlyphData>(
-          subGlyph.contourData.data));
+      DEBUG_ASSERT(
+          std::holds_alternative<loader::SimpleGlyphData>(
+              subGlyph.contourData.data));
 
       auto transformPos = [&](math::Vec2 pos) {
-        float m0 =
+        const float m0 =
             std::max(std::abs(subGlyphDetails.a), std::abs(subGlyphDetails.b));
-        float n0 =
+        const float n0 =
             std::max(std::abs(subGlyphDetails.c), std::abs(subGlyphDetails.d));
-        float m =
+        const float m =
             std::abs(
                 std::abs(subGlyphDetails.a) - std::abs(subGlyphDetails.c)) <=
                 (33.0f / 65536.0f)
             ? 2 * m0
             : m0;
-        float n =
+        const float n =
             std::abs(
                 std::abs(subGlyphDetails.c) - std::abs(subGlyphDetails.d)) <=
                 (33.0f / 65536.0f)
             ? 2 * n0
             : n0;
         return math::Vec2{
-            (subGlyphDetails.a / m) * pos.x() +
-                (subGlyphDetails.c / m) * pos.y() +
-                static_cast<float>(subGlyphDetails.e) * fontScale,
-            (subGlyphDetails.b / n) * pos.x() +
-                (subGlyphDetails.d / n) * pos.y() -
-                static_cast<float>(subGlyphDetails.f) * fontScale};
+            ((subGlyphDetails.a / m) * pos.x()) +
+                ((subGlyphDetails.c / m) * pos.y()) +
+                (static_cast<float>(subGlyphDetails.e) * fontScale),
+            ((subGlyphDetails.b / n) * pos.x()) +
+                ((subGlyphDetails.d / n) * pos.y()) -
+                (static_cast<float>(subGlyphDetails.f) * fontScale)};
       };
 
       render.drawObject(
@@ -233,40 +238,45 @@ float drawChar(
           RenderableFont::InstanceData{
               math::Mat3::translate(
                   pos +
-                  transformPos(math::Vec2{
-                      static_cast<float>(
-                          subGlyph.horizontalMetrics.leftSideBearing.rawValue) *
-                              fontScale +
-                          static_cast<float>(kerning) * fontScale,
-                      -static_cast<float>(subGlyph.contourData.yMax.rawValue) *
-                          fontScale})) *
-                  math::Mat3::scale(math::Vec2{
-                      static_cast<float>(
-                          subGlyph.contourData.xMax.rawValue -
-                          subGlyph.contourData.xMin.rawValue) *
-                          fontScale,
-                      static_cast<float>(
-                          subGlyph.contourData.yMax.rawValue -
-                          subGlyph.contourData.yMin.rawValue) *
-                          fontScale}),
+                  transformPos(
+                      math::Vec2{
+                          (static_cast<float>(subGlyph.horizontalMetrics
+                                                  .leftSideBearing.rawValue) *
+                           fontScale) +
+                              (static_cast<float>(kerning) * fontScale),
+                          -static_cast<float>(
+                              subGlyph.contourData.yMax.rawValue) *
+                              fontScale})) *
+                  math::Mat3::scale(
+                      math::Vec2{
+                          static_cast<float>(
+                              subGlyph.contourData.xMax.rawValue -
+                              subGlyph.contourData.xMin.rawValue) *
+                              fontScale,
+                          static_cast<float>(
+                              subGlyph.contourData.yMax.rawValue -
+                              subGlyph.contourData.yMin.rawValue) *
+                              fontScale}),
               glyphRanges[subGlyphDetails.glpyhIndex].first,
               glyphRanges[subGlyphDetails.glpyhIndex].second,
-              math::Mat3::translate(math::Vec2{
-                  static_cast<float>(subGlyph.contourData.xMin.rawValue),
-                  static_cast<float>(subGlyph.contourData.yMin.rawValue)}) *
-                  math::Mat3::scale(math::Vec2{
-                      static_cast<float>(
-                          subGlyph.contourData.xMax.rawValue -
-                          subGlyph.contourData.xMin.rawValue),
-                      static_cast<float>(
-                          subGlyph.contourData.yMax.rawValue -
-                          subGlyph.contourData.yMin.rawValue)})});
+              math::Mat3::translate(
+                  math::Vec2{
+                      static_cast<float>(subGlyph.contourData.xMin.rawValue),
+                      static_cast<float>(subGlyph.contourData.yMin.rawValue)}) *
+                  math::Mat3::scale(
+                      math::Vec2{
+                          static_cast<float>(
+                              subGlyph.contourData.xMax.rawValue -
+                              subGlyph.contourData.xMin.rawValue),
+                          static_cast<float>(
+                              subGlyph.contourData.yMax.rawValue -
+                              subGlyph.contourData.yMin.rawValue)})});
     }
   }
 
-  return static_cast<float>(kerning) * fontScale +
-      static_cast<float>(glyph.horizontalMetrics.advanceWidth.rawValue) *
-      fontScale;
+  return (static_cast<float>(kerning) * fontScale) +
+      (static_cast<float>(glyph.horizontalMetrics.advanceWidth.rawValue) *
+       fontScale);
 }
 
 loader::FWord getBaselineOffset(
@@ -293,8 +303,8 @@ float Font::Size::Em::getEmHeight(const Font& /* font */) const {
 }
 
 float Font::Size::Line::getEmHeight(const Font& font) const {
-  float unitsPerEm = font.fontData_.unitsPerEm;
-  float unitsPerLine = static_cast<float>(
+  const float unitsPerEm = font.fontData_.unitsPerEm;
+  const auto unitsPerLine = static_cast<float>(
       font.fontData_.ascenderHeight.rawValue -
       font.fontData_.descenderHeight.rawValue);
   return lineHeight_ * unitsPerEm / unitsPerLine;
@@ -303,7 +313,6 @@ float Font::Size::Line::getEmHeight(const Font& font) const {
 Font::Font(RenderSubSystem& renderSystem, loader::Font font)
     : render_(&renderSystem),
       fontData_(std::move(font)),
-      glyphRanges_(),
       renderableObject_(
           renderSystem.createRenderable<RenderableFont>(makeFontBuffer(
               renderSystem.getGraphicsDevice(), fontData_, glyphRanges_))) {}
@@ -327,7 +336,7 @@ void Font::drawStringASCII(
       break;
   }
 
-  float fontScale = getSizeScale(fontSize);
+  const float fontScale = getSizeScale(fontSize);
   pos.y() +=
       fontScale *
       static_cast<float>(
@@ -337,8 +346,8 @@ void Font::drawStringASCII(
 
   auto window = GlobalSubSystemStack::get().window();
   std::optional<uint16_t> previousGlyph;
-  for (unsigned char c : str) {
-    float advance = drawChar(
+  for (const unsigned char c : str) {
+    const float advance = drawChar(
         *render_,
         fontData_,
         glyphRanges_,
@@ -374,7 +383,7 @@ void Font::drawStringUTF8(
       break;
   }
 
-  float fontScale = getSizeScale(fontSize);
+  const float fontScale = getSizeScale(fontSize);
   pos.y() +=
       fontScale *
       static_cast<float>(
@@ -384,8 +393,8 @@ void Font::drawStringUTF8(
 
   auto window = GlobalSubSystemStack::get().window();
   std::optional<uint16_t> previousGlyph;
-  for (uint32_t c : util::unicodeDecode(str)) {
-    float advance = drawChar(
+  for (const uint32_t c : util::unicodeDecode(str)) {
+    const float advance = drawChar(
         *render_,
         fontData_,
         glyphRanges_,
@@ -404,7 +413,7 @@ void Font::drawStringUTF8(
 
 float Font::stringWidth(
     Encoding encoding, std::string_view str, Size fontSize) const {
-  if (str.size() == 0) {
+  if (str.empty()) {
     return 0.f;
   }
 
@@ -429,11 +438,11 @@ float Font::stringWidth(
   };
 
   if (encoding == Encoding::ASCII) {
-    for (unsigned char c : str) {
+    for (const unsigned char c : str) {
       processChar(c);
     }
   } else if (encoding == Encoding::UTF8) {
-    for (uint32_t c : util::unicodeDecode(str)) {
+    for (const uint32_t c : util::unicodeDecode(str)) {
       processChar(c);
     }
   } else {
@@ -444,7 +453,7 @@ float Font::stringWidth(
 }
 
 float Font::stringHeight(Size fontSize) const {
-  float unitsPerLine = static_cast<float>(
+  const auto unitsPerLine = static_cast<float>(
       fontData_.ascenderHeight.rawValue - fontData_.descenderHeight.rawValue);
   return unitsPerLine * fontSize.getEmHeight(*this) /
       static_cast<float>(fontData_.unitsPerEm);

@@ -4,7 +4,6 @@
 #include <type_traits>
 #include <utility>
 #include <GLFW/glfw3.h>
-#include "util/raii_helpers.hpp"
 
 namespace blocks::render::glfw {
 

@@ -11,9 +11,10 @@ namespace blocks {
 
 Localisation::Localisation(std::string locale)
     : localeCode_(std::move(locale)),
-      currentLocale_(loader::loadLocale(
-          std::filesystem::path{RESOURCE_DIR "/localisation/"} /
-          util::toString(localeCode_, ".txt"))) {}
+      currentLocale_(
+          loader::loadLocale(
+              std::filesystem::path{RESOURCE_DIR "/localisation/"} /
+              util::toString(localeCode_, ".txt"))) {}
 
 void Localisation::setLocale(std::string locale) {
   currentLocale_ = loader::loadLocale(
@@ -33,7 +34,7 @@ std::vector<std::string> Localisation::getAvailableLocales() const {
   return result;
 }
 
-std::string Localisation::getLocalisedString(std::string_view key) {
+std::string Localisation::getLocalisedString(std::string_view key) const {
   auto it = currentLocale_.strings.find(std::string{key});
   if (it != currentLocale_.strings.end()) {
     return it->second;

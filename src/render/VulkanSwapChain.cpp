@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <vector>
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/vulkan/ImageViewBuilder.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
@@ -43,7 +44,8 @@ VkExtent2D chooseSwapExtent(
     // Required to use given extent
     return capabilities.currentExtent;
   } else {
-    int width, height;
+    int width = 0;
+    int height = 0;
     glfwGetFramebufferSize(window, &width, &height);
 
     VkExtent2D actualExtent = {
@@ -82,7 +84,7 @@ SwapChainSupportDetails getSwapChainSupportDetails(
   vkGetPhysicalDeviceSurfaceCapabilitiesKHR(
       device, surface, &details.capabilities);
 
-  uint32_t formatCount;
+  uint32_t formatCount = 0;
   vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface, &formatCount, nullptr);
 
   if (formatCount != 0) {
@@ -91,7 +93,7 @@ SwapChainSupportDetails getSwapChainSupportDetails(
         device, surface, &formatCount, details.formats.data());
   }
 
-  uint32_t presentModeCount;
+  uint32_t presentModeCount = 0;
   vkGetPhysicalDeviceSurfacePresentModesKHR(
       device, surface, &presentModeCount, nullptr);
 
@@ -118,14 +120,16 @@ VulkanSwapChain::VulkanSwapChain(
     VulkanGraphicsDevice& graphicsDevice)
     : graphicsDevice_(&graphicsDevice),
       swapChain_(nullptr, nullptr),
+      extent_(0, 0),
       queue_(graphicsDevice.getPresentQueue()) {
   const SwapChainSupportDetails swapChainSupport =
       getSwapChainSupportDetails(graphicsDevice.physicalInfo().device, surface);
 
-  VkSurfaceFormatKHR surfaceFormat = swapChainSupport.preferredFormat;
-  VkPresentModeKHR presentMode =
+  const VkSurfaceFormatKHR surfaceFormat = swapChainSupport.preferredFormat;
+  const VkPresentModeKHR presentMode =
       chooseSwapPresentMode(swapChainSupport.presentModes);
-  VkExtent2D extent = chooseSwapExtent(window, swapChainSupport.capabilities);
+  const VkExtent2D extent =
+      chooseSwapExtent(window, swapChainSupport.capabilities);
 
   uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
   if (swapChainSupport.capabilities.maxImageCount > 0 &&
@@ -146,10 +150,14 @@ VulkanSwapChain::VulkanSwapChain(
   const VulkanGraphicsDevice::QueueFamilyIndices& queueFamilies =
       graphicsDevice.physicalInfo().queueFamilies;
   std::array<uint32_t, 2> queueFamilyIndices{
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       queueFamilies.graphicsFamily.value(),
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       queueFamilies.presentFamily.value()};
 
+  // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
   if (queueFamilies.graphicsFamily.value() !=
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       queueFamilies.presentFamily.value()) {
     createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
     createInfo.queueFamilyIndexCount = 2;
@@ -166,8 +174,8 @@ VulkanSwapChain::VulkanSwapChain(
   createInfo.clipped = VK_TRUE;
   createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-  VkSwapchainKHR swapChain;
-  VkResult result = vkCreateSwapchainKHR(
+  VkSwapchainKHR swapChain = nullptr;
+  const VkResult result = vkCreateSwapchainKHR(
       graphicsDevice.getRawDevice(), &createInfo, nullptr, &swapChain);
   if (result != VK_SUCCESS) {
     throw std::runtime_error{"Failed to create swap chain!"};
@@ -204,8 +212,8 @@ std::vector<vulkan::UniqueHandle<VkImageView>> VulkanSwapChain::getImageViews()
 
 std::optional<uint32_t> VulkanSwapChain::getNextImageIndex(
     VkSemaphore semaphore, VkFence fence) {
-  uint32_t imageIndex;
-  VkResult result = vkAcquireNextImageKHR(
+  uint32_t imageIndex = 0;
+  const VkResult result = vkAcquireNextImageKHR(
       graphicsDevice_->getRawDevice(),
       swapChain_.get(),
       UINT64_MAX,

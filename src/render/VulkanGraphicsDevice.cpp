@@ -1,18 +1,18 @@
 #include "render/VulkanGraphicsDevice.hpp"
 
-#include <string.h>
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <cstring>
 #include <iostream>
 #include <memory>
 #include <optional>
 #include <stdexcept>
-#include <type_traits>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 
 #include "render/VulkanInstance.hpp"
 #include "render/validationLayers.hpp"
@@ -30,7 +30,7 @@ VulkanGraphicsDevice::QueueFamilyIndices findQueueFamilies(
     VkInstance instance, VkPhysicalDevice device) {
   VulkanGraphicsDevice::QueueFamilyIndices indices;
 
-  uint32_t queueFamilyCount;
+  uint32_t queueFamilyCount = 0;
   vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
 
   std::vector<VkQueueFamilyProperties> queueFamilies{queueFamilyCount};
@@ -38,15 +38,16 @@ VulkanGraphicsDevice::QueueFamilyIndices findQueueFamilies(
       device, &queueFamilyCount, queueFamilies.data());
 
   for (int i = 0; i < queueFamilies.size(); i++) {
+    // NOLINTNEXTLINE(hicpp-signed-bitwise)
     if ((queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) > 0) {
       indices.graphicsFamily = i;
     }
-    VkBool32 presentSupport = false;
+    VkBool32 presentSupport = VK_FALSE;
     presentSupport =
         glfwGetPhysicalDevicePresentationSupport(instance, device, i);
     // vkGetPhysicalDeviceSurfaceSupportKHR(device, i, nullptr,
     // &presentSupport);
-    if (presentSupport) {
+    if (presentSupport == VK_TRUE) {
       indices.presentFamily = i;
     }
   }
@@ -55,7 +56,7 @@ VulkanGraphicsDevice::QueueFamilyIndices findQueueFamilies(
 }
 
 std::vector<VkPhysicalDevice> enumerateDevices(VulkanInstance& instance) {
-  uint32_t physicalDeviceCount;
+  uint32_t physicalDeviceCount = 0;
   vkEnumeratePhysicalDevices(
       instance.getRawInstance(), &physicalDeviceCount, nullptr);
 
@@ -67,7 +68,7 @@ std::vector<VkPhysicalDevice> enumerateDevices(VulkanInstance& instance) {
 }
 
 bool deviceHasRequiredExtensionSupport(VkPhysicalDevice device) {
-  uint32_t extensionCount;
+  uint32_t extensionCount = 0;
   vkEnumerateDeviceExtensionProperties(
       device, nullptr, &extensionCount, nullptr);
 
@@ -78,7 +79,8 @@ bool deviceHasRequiredExtensionSupport(VkPhysicalDevice device) {
   for (const auto& required : requiredDeviceExtensions) {
     bool found = false;
     for (const auto& available : availableExtensions) {
-      if (strcmp(required, available.extensionName) == 0) {
+      if (strcmp(required, static_cast<const char*>(available.extensionName)) ==
+          0) {
         found = true;
         break;
       }
@@ -93,7 +95,7 @@ bool deviceHasRequiredExtensionSupport(VkPhysicalDevice device) {
 }
 
 bool isDeviceSuitable(const VulkanGraphicsDevice::PhysicalDeviceInfo& device) {
-  if (!device.features.geometryShader) {
+  if (device.features.geometryShader == VK_FALSE) {
     return false;
   }
   if (!device.queueFamilies.graphicsFamily.has_value()) {
@@ -109,13 +111,13 @@ bool isDeviceSuitable(const VulkanGraphicsDevice::PhysicalDeviceInfo& device) {
   return true;
 }
 
-int deviceSuitabilityHeuristic(
+unsigned int deviceSuitabilityHeuristic(
     const VulkanGraphicsDevice::PhysicalDeviceInfo& device) {
   if (!isDeviceSuitable(device)) {
     return 0;
   }
 
-  int score = 0;
+  unsigned int score = 0;
 
   if (device.properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU) {
     score += 1000;
@@ -130,17 +132,19 @@ int deviceSuitabilityHeuristic(
 
 std::unique_ptr<VulkanGraphicsDevice::PhysicalDeviceInfo> choosePhysicalDevice(
     VulkanInstance& instance) {
-  std::vector<VkPhysicalDevice> devices = enumerateDevices(instance);
+  const std::vector<VkPhysicalDevice> devices = enumerateDevices(instance);
 
-  std::vector<
-      std::pair<std::unique_ptr<VulkanGraphicsDevice::PhysicalDeviceInfo>, int>>
+  std::vector<std::pair<
+      std::unique_ptr<VulkanGraphicsDevice::PhysicalDeviceInfo>,
+      unsigned int>>
       rankedDevices;
   rankedDevices.reserve(devices.size());
   for (const auto& device : devices) {
     auto deviceInfo =
         std::make_unique<VulkanGraphicsDevice::PhysicalDeviceInfo>(
             instance.getRawInstance(), device);
-    int suitabilityHeuristic = deviceSuitabilityHeuristic(*deviceInfo);
+    const unsigned int suitabilityHeuristic =
+        deviceSuitabilityHeuristic(*deviceInfo);
     if (suitabilityHeuristic > 0) {
       rankedDevices.emplace_back(std::move(deviceInfo), suitabilityHeuristic);
     }
@@ -152,10 +156,12 @@ std::unique_ptr<VulkanGraphicsDevice::PhysicalDeviceInfo> choosePhysicalDevice(
 
   std::cout << "Available Vulkan devices:\n";
   for (const auto& device : rankedDevices) {
-    std::cout << "  " << device.first->properties.deviceName << "\n";
+    std::cout << "  "
+              << static_cast<const char*>(device.first->properties.deviceName)
+              << "\n";
   }
 
-  if (rankedDevices.size() == 0 || rankedDevices[0].second == 0) {
+  if (rankedDevices.empty() || rankedDevices[0].second == 0) {
     throw std::runtime_error{"No suitable graphics devices"};
   }
 
@@ -164,6 +170,7 @@ std::unique_ptr<VulkanGraphicsDevice::PhysicalDeviceInfo> choosePhysicalDevice(
 
 struct VkDeviceQueueCreateInfoWrapper {
   VkDeviceQueueCreateInfoWrapper() = default;
+  ~VkDeviceQueueCreateInfoWrapper() = default;
   VkDeviceQueueCreateInfoWrapper(const VkDeviceQueueCreateInfoWrapper& other) =
       delete;
   VkDeviceQueueCreateInfoWrapper& operator=(
@@ -183,12 +190,12 @@ void makeQueueCreateInfo(
   DEBUG_ASSERT(result.createInfo.size() == 0);
   DEBUG_ASSERT(indices.graphicsFamily.has_value());
   DEBUG_ASSERT(indices.presentFamily.has_value());
-  std::unordered_set<uint32_t> uniqueIndices{
+  const std::unordered_set<uint32_t> uniqueIndices{
       *indices.graphicsFamily, *indices.presentFamily};
 
   result.createInfo.reserve(uniqueIndices.size());
 
-  for (uint32_t queueFamily : uniqueIndices) {
+  for (const uint32_t queueFamily : uniqueIndices) {
     VkDeviceQueueCreateInfo& queueCreateInfo = result.createInfo.emplace_back();
     queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     queueCreateInfo.queueFamilyIndex = queueFamily;
@@ -201,7 +208,7 @@ void makeQueueCreateInfo(
 
 VulkanGraphicsDevice::PhysicalDeviceInfo::PhysicalDeviceInfo(
     VkInstance instance, VkPhysicalDevice device)
-    : device(device) {
+    : device(device), properties(0), features(0) {
   vkGetPhysicalDeviceProperties(device, &properties);
   vkGetPhysicalDeviceFeatures(device, &features);
   queueFamilies = findQueueFamilies(instance, device);
@@ -223,13 +230,14 @@ VulkanGraphicsDevice VulkanGraphicsDevice::make(VulkanInstance& instance) {
   std::unique_ptr<PhysicalDeviceInfo> physicalDevice =
       choosePhysicalDevice(instance);
   DEBUG_ASSERT(physicalDevice != nullptr);
-  std::cout << "Using graphics device " << physicalDevice->properties.deviceName
+  std::cout << "Using graphics device "
+            << static_cast<const char*>(physicalDevice->properties.deviceName)
             << "\n";
 
   VkDeviceQueueCreateInfoWrapper queueCreateInfo{};
   makeQueueCreateInfo(queueCreateInfo, physicalDevice->queueFamilies);
 
-  VkPhysicalDeviceFeatures deviceFeatures{};
+  const VkPhysicalDeviceFeatures deviceFeatures{};
 
   VkDeviceCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -250,28 +258,33 @@ VulkanGraphicsDevice VulkanGraphicsDevice::make(VulkanInstance& instance) {
     createInfo.enabledLayerCount = 0;
   }
 
-  VkDevice device;
-  VkResult result =
+  VkDevice device = nullptr;
+  const VkResult result =
       vkCreateDevice(physicalDevice->device, &createInfo, nullptr, &device);
   if (result != VK_SUCCESS) {
     throw std::runtime_error{"Failed to create logical device"};
   }
 
-  VkQueue graphicsQueue;
+  VkQueue graphicsQueue = nullptr;
   vkGetDeviceQueue(
       device,
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       physicalDevice->queueFamilies.graphicsFamily.value(),
       0,
       &graphicsQueue);
-  VkQueue graphicsLoadingQueue;
+
+  VkQueue graphicsLoadingQueue = nullptr;
   vkGetDeviceQueue(
       device,
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       physicalDevice->queueFamilies.graphicsFamily.value(),
       1,
       &graphicsLoadingQueue);
-  VkQueue presentQueue;
+
+  VkQueue presentQueue = nullptr;
   vkGetDeviceQueue(
       device,
+      // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
       physicalDevice->queueFamilies.presentFamily.value(),
       0,
       &presentQueue);

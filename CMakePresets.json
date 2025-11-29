@@ -90,7 +90,7 @@
             "hidden": true,
             "inherits": "windows-clang-base",
             "cacheVariables": {
-                "CMAKE_CXX_CLANG_TIDY":  "clang-tidy"
+                "CMAKE_CXX_CLANG_TIDY": "clang-tidy"
             }
         }
     ]

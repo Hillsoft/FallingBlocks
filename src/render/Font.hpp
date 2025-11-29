@@ -20,7 +20,7 @@ class Font {
     struct Em {
       explicit Em(float height) : emHeight_(height) {}
 
-      float getEmHeight(const Font& font) const;
+      [[nodiscard]] float getEmHeight(const Font& font) const;
 
       float emHeight_;
     };
@@ -28,15 +28,17 @@ class Font {
     struct Line {
       explicit Line(float height) : lineHeight_(height) {}
 
-      float getEmHeight(const Font& font) const;
+      [[nodiscard]] float getEmHeight(const Font& font) const;
 
       float lineHeight_;
     };
 
-    /* implicit */ Size(Em sizeData) : sizeData_(sizeData) {}
-    /* implicit */ Size(Line sizeData) : sizeData_(sizeData) {}
+    // NOLINTNEXTLINE(hicpp-explicit-conversions)
+    Size(Em sizeData) : sizeData_(sizeData) {}
+    // NOLINTNEXTLINE(hicpp-explicit-conversions)
+    Size(Line sizeData) : sizeData_(sizeData) {}
 
-    float getEmHeight(const Font& font) const {
+    [[nodiscard]] float getEmHeight(const Font& font) const {
       return std::visit(
           [&](const auto& data) { return data.getEmHeight(font); }, sizeData_);
     }
@@ -45,9 +47,9 @@ class Font {
     std::variant<Em, Line> sizeData_;
   };
 
-  enum class Encoding { ASCII, UTF8 };
-  enum class Align { LEFT, CENTER, RIGHT };
-  enum class VAlign { BASELINE, BOTTOM, CENTER, TOP };
+  enum class Encoding : uint8_t { ASCII, UTF8 };
+  enum class Align : uint8_t { LEFT, CENTER, RIGHT };
+  enum class VAlign : uint8_t { BASELINE, BOTTOM, CENTER, TOP };
 
   Font(RenderSubSystem& renderSystem, loader::Font font);
 
@@ -68,12 +70,12 @@ class Font {
       int zDepth = 10,
       Simple2DCamera* camera = nullptr) const;
 
-  float stringWidth(
+  [[nodiscard]] float stringWidth(
       Encoding encoding, std::string_view str, Size fontSize) const;
-  float stringHeight(Size fontSize) const;
+  [[nodiscard]] float stringHeight(Size fontSize) const;
 
  private:
-  float getSizeScale(const Size& size) const;
+  [[nodiscard]] float getSizeScale(const Size& size) const;
 
   RenderSubSystem* render_;
   loader::Font fontData_;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 
 #include "render/VulkanDeviceMemory.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
@@ -20,7 +20,7 @@ class VulkanMappedBuffer {
  private:
   VulkanRawBuffer rawBuffer_;
   VulkanDeviceMemory memory_;
-  void* mappedBuffer_;
+  void* mappedBuffer_ = nullptr;
 };
 
 } // namespace blocks::render

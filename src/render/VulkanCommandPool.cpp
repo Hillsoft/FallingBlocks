@@ -1,7 +1,7 @@
 #include "render/VulkanCommandPool.hpp"
 
 #include <stdexcept>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
@@ -22,8 +22,8 @@ VulkanCommandPool::VulkanCommandPool(
   poolInfo.queueFamilyIndex =
       *device.physicalInfo().queueFamilies.graphicsFamily;
 
-  VkCommandPool commandPool;
-  VkResult result = vkCreateCommandPool(
+  VkCommandPool commandPool = nullptr;
+  const VkResult result = vkCreateCommandPool(
       device.getRawDevice(), &poolInfo, nullptr, &commandPool);
   if (result != VK_SUCCESS) {
     throw std::runtime_error{"Failed to create command pool"};

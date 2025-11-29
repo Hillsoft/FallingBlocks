@@ -1,24 +1,22 @@
 #include "render/ForwardAllocateMappedBuffer.hpp"
 
+#include <cstddef>
 #include <stdexcept>
 #include <vector>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/VulkanGraphicsDevice.hpp"
 
 namespace blocks::render {
 
 namespace {
 
-constexpr size_t kChunkSize = 16 * 1024;
+constexpr size_t kChunkSize = 16ull * 1024;
 
 }
 
 ForwardAllocateMappedBuffer::ForwardAllocateMappedBuffer(
     VulkanGraphicsDevice& device, VkBufferUsageFlags usageFlags)
-    : device_(&device),
-      usageFlags_(usageFlags),
-      curBuffer_(0),
-      bufferOffset_(0) {
+    : device_(&device), usageFlags_(usageFlags) {
   buffers_.emplace_back(*device_, kChunkSize, usageFlags_);
 }
 
@@ -39,9 +37,10 @@ ForwardAllocateMappedBuffer::Allocation ForwardAllocateMappedBuffer::alloc(
   Allocation result = {
       .buffer = buffers_[curBuffer_].getRawBuffer(),
       .bufferOffset = bufferOffset_,
-      .ptr = reinterpret_cast<void*>(
-          reinterpret_cast<size_t>(buffers_[curBuffer_].getMappedBuffer()) +
-          bufferOffset_)};
+      .ptr =
+          // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,cppcoreguidelines-pro-bounds-pointer-arithmetic)
+      reinterpret_cast<std::byte*>(buffers_[curBuffer_].getMappedBuffer()) +
+          bufferOffset_};
 
   bufferOffset_ += size;
 

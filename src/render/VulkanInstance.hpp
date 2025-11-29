@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 
 #include "render/vulkan/UniqueHandle.hpp"
 

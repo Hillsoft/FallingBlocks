@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <stdexcept>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanRawBuffer.hpp"
@@ -14,10 +14,10 @@ uint32_t findMemoryType(
     const VkMemoryRequirements& requirements,
     const VkPhysicalDeviceMemoryProperties& memProperties,
     VkMemoryPropertyFlags properties) {
-  uint32_t typeFilter = requirements.memoryTypeBits;
+  const uint32_t typeFilter = requirements.memoryTypeBits;
 
   for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
-    if (typeFilter & (1 << i) &&
+    if ((typeFilter & (1ull << i)) != 0 &&
         (memProperties.memoryTypes[i].propertyFlags &
          properties) == properties) {
       return i;
@@ -44,11 +44,12 @@ VulkanDeviceMemory::VulkanDeviceMemory(
   allocInfo.memoryTypeIndex = findMemoryType(
       memRequirements,
       memProperties,
+      // NOLINTNEXTLINE(hicpp-signed-bitwise)
       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 
-  VkDeviceMemory memory;
-  VkResult result =
+  VkDeviceMemory memory = nullptr;
+  const VkResult result =
       vkAllocateMemory(device.getRawDevice(), &allocInfo, nullptr, &memory);
   if (result != VK_SUCCESS) {
     throw std::runtime_error{"Failed to allocate memory"};

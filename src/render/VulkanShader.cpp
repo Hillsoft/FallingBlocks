@@ -3,9 +3,9 @@
 #include <cstdint>
 #include <filesystem>
 #include <stdexcept>
-#include <type_traits>
+#include <utility>
 #include <vector>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 
 #include <cstddef>
 #include "render/VulkanGraphicsDevice.hpp"
@@ -22,10 +22,11 @@ VulkanShader::VulkanShader(
   VkShaderModuleCreateInfo createInfo{};
   createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
   createInfo.codeSize = shaderData.size();
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   createInfo.pCode = reinterpret_cast<const uint32_t*>(shaderData.data());
 
-  VkShaderModule shaderModule;
-  VkResult result = vkCreateShaderModule(
+  VkShaderModule shaderModule = nullptr;
+  const VkResult result = vkCreateShaderModule(
       device.getRawDevice(), &createInfo, nullptr, &shaderModule);
   if (result != VK_SUCCESS) {
     throw std::runtime_error{"Failed to create shader"};

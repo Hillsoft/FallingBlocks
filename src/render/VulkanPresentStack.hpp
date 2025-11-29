@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <vector>
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanSwapChain.hpp"
 #include "render/glfw_wrapper/Window.hpp"
@@ -23,18 +24,20 @@ class VulkanPresentStack {
         FrameDataCreationTag /* tag */,
         uint32_t imageIndex,
         VulkanPresentStack* owner);
-    FrameData(FrameDataCreationTag /* tag */);
+    explicit FrameData(FrameDataCreationTag /* tag */);
 
-    bool refreshRequired() const { return refreshSwapChainRequired_; }
+    [[nodiscard]] bool refreshRequired() const {
+      return refreshSwapChainRequired_;
+    }
 
-    VkFramebuffer getFrameBuffer() const {
+    [[nodiscard]] VkFramebuffer getFrameBuffer() const {
       DEBUG_ASSERT(!refreshSwapChainRequired_);
       return owner_->getFrameBuffer(imageIndex_);
     }
 
     void present(VkSemaphore waitSemaphore) const {
       DEBUG_ASSERT(!refreshSwapChainRequired_);
-      return owner_->present(imageIndex_, waitSemaphore);
+      owner_->present(imageIndex_, waitSemaphore);
     }
 
    private:
@@ -59,12 +62,12 @@ class VulkanPresentStack {
     swapChainData_->swapChain.present(imageIndex, waitSemaphore);
   }
 
-  VkExtent2D extent() const {
+  [[nodiscard]] VkExtent2D extent() const {
     return swapChainData_->swapChain.getSwapchainExtent();
   }
 
-  glfw::Window& getWindow() { return window_; }
-  const glfw::Window& getWindow() const { return window_; }
+  [[nodiscard]] glfw::Window& getWindow() { return window_; }
+  [[nodiscard]] const glfw::Window& getWindow() const { return window_; }
 
   void reset();
 

@@ -3,7 +3,7 @@
 #include <array>
 #include <cstdint>
 #include <stdexcept>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanShader.hpp"
@@ -13,7 +13,7 @@ namespace blocks::render {
 
 VulkanGraphicsPipeline::VulkanGraphicsPipeline(
     VulkanGraphicsDevice& device,
-    VkFormat imageFormat,
+    VkFormat /* imageFormat */,
     VkRenderPass renderPass,
     VulkanVertexShader& vertexShader,
     VulkanShader& fragmentShader,
@@ -85,6 +85,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(
   multisampling.alphaToOneEnable = VK_FALSE;
 
   VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+  // NOLINTNEXTLINE(hicpp-signed-bitwise)
   colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT |
       VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT |
       VK_COLOR_COMPONENT_A_BIT;
@@ -122,8 +123,8 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(
   pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
   pipelineInfo.basePipelineIndex = 1;
 
-  VkPipeline pipeline;
-  VkResult result = vkCreateGraphicsPipelines(
+  VkPipeline pipeline = nullptr;
+  const VkResult result = vkCreateGraphicsPipelines(
       device.getRawDevice(),
       VK_NULL_HANDLE,
       1,

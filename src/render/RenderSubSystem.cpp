@@ -12,6 +12,7 @@
 #include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "math/vec.hpp"
 #include "render/ForwardAllocateMappedBuffer.hpp"
 #include "render/RenderableObject.hpp"
@@ -35,9 +36,11 @@ namespace {
 RenderSubSystem::PipelineSynchronisationSet makeSynchronisationSet(
     VulkanGraphicsDevice& device) {
   return {
-      vulkan::SemaphoreBuilder{}.build(device.getRawDevice()),
-      vulkan::SemaphoreBuilder{}.build(device.getRawDevice()),
-      vulkan::FenceBuilder{}.setInitiallySignalled(true).build(
+      .imageAvailableSemaphore =
+          vulkan::SemaphoreBuilder{}.build(device.getRawDevice()),
+      .renderFinishedSemaphore =
+          vulkan::SemaphoreBuilder{}.build(device.getRawDevice()),
+      .inFlightFence = vulkan::FenceBuilder{}.setInitiallySignalled(true).build(
           device.getRawDevice())};
 }
 
@@ -56,7 +59,7 @@ vulkan::UniqueHandle<VkRenderPass> makeMainRenderPass(VkDevice device) {
            .finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR},
           VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL);
 
-  uint32_t mainSubpassIndex = builder.addSubpassGetIndex(
+  const uint32_t mainSubpassIndex = builder.addSubpassGetIndex(
       VK_PIPELINE_BIND_POINT_GRAPHICS, {}, {&colorAttachmentRef, 1});
 
   builder.addSubpassDependency(
@@ -96,18 +99,16 @@ UniqueWindowHandle::~UniqueWindowHandle() {
 }
 
 RenderSubSystem::RenderSubSystem()
-    : instance_(),
+    :
 #ifndef NDEBUG
       debugMessenger_(instance_),
 #endif
       graphics_(VulkanGraphicsDevice::make(instance_)),
       commandPool_(graphics_, false),
       loadingCommandPool_(graphics_, true),
-      commandBuffers_(),
       mainRenderPass_(makeMainRenderPass(graphics_.getRawDevice())),
       shaderProgramManager_(graphics_, mainRenderPass_.get()),
       textureManager_(graphics_, {graphics_, true}),
-      synchronisationSets_(),
       instanceDataBuffers_([&]() {
         std::vector<ForwardAllocateMappedBuffer> result;
         result.reserve(kMaxFramesInFlight);
@@ -123,7 +124,7 @@ RenderSubSystem::RenderSubSystem()
 }
 
 RenderSubSystem::GLFWLifetimeScope::GLFWLifetimeScope() {
-  int result = glfwInit();
+  const int result = glfwInit();
   if (result == GLFW_FALSE) {
     throw std::runtime_error{"Failed to initialise GLFW"};
   }
@@ -136,14 +137,15 @@ RenderSubSystem::GLFWLifetimeScope::~GLFWLifetimeScope() {
 }
 
 UniqueWindowHandle RenderSubSystem::createWindow() {
-  size_t id = windows_.size();
-  windows_.emplace_back(std::make_unique<Window>(
-      instance_,
-      graphics_,
-      VkRenderPass{mainRenderPass_.get()},
-      800,
-      800,
-      "Vulkan"));
+  const size_t id = windows_.size();
+  windows_.emplace_back(
+      std::make_unique<Window>(
+          instance_,
+          graphics_,
+          VkRenderPass{mainRenderPass_.get()},
+          800,
+          800,
+          "Vulkan"));
 
   for (size_t i = 0; i < kMaxFramesInFlight; i++) {
     synchronisationSets_.emplace_back(makeSynchronisationSet(graphics_));
@@ -195,7 +197,7 @@ void RenderSubSystem::commitFrame() {
   fences.reserve(windows_.size());
   for (size_t i = 0; i < windows_.size(); i++) {
     fences.emplace_back(
-        synchronisationSets_[i * kMaxFramesInFlight + currentFrame_]
+        synchronisationSets_[(i * kMaxFramesInFlight) + currentFrame_]
             .inFlightFence.get());
   }
 
@@ -203,7 +205,7 @@ void RenderSubSystem::commitFrame() {
       graphics_.getRawDevice(),
       static_cast<uint32_t>(fences.size()),
       fences.data(),
-      true,
+      VK_TRUE,
       UINT64_MAX);
 
   instanceDataBuffers_[currentFrame_].reset();
@@ -253,8 +255,8 @@ void RenderSubSystem::drawWindow(
     std::vector<std::optional<RenderableObject>>& renderablesVec) {
   DEBUG_ASSERT(windowId < windows_.size() && windows_[windowId] != nullptr);
   Window& window = *windows_[windowId];
-  PipelineSynchronisationSet& synchronisationSet =
-      synchronisationSets_[windowId * kMaxFramesInFlight + currentFrame_];
+  const PipelineSynchronisationSet& synchronisationSet =
+      synchronisationSets_[(windowId * kMaxFramesInFlight) + currentFrame_];
   ForwardAllocateMappedBuffer& instanceDataAllocator =
       instanceDataBuffers_[currentFrame_];
 
@@ -266,7 +268,7 @@ void RenderSubSystem::drawWindow(
     glfwWaitEvents();
   }
 
-  VulkanPresentStack::FrameData presentFrame =
+  const VulkanPresentStack::FrameData presentFrame =
       window.getPresentStack().getNextImageIndex(
           synchronisationSet.imageAvailableSemaphore.get(), nullptr);
 
@@ -275,13 +277,13 @@ void RenderSubSystem::drawWindow(
     return;
   }
 
-  VkExtent2D extent = window.getCurrentWindowExtent();
+  const VkExtent2D extent = window.getCurrentWindowExtent();
 
   vkResetFences(
       graphics_.getRawDevice(), 1, &synchronisationSet.inFlightFence.get());
 
   VkCommandBuffer commandBuffer =
-      commandBuffers_[windowId * kMaxFramesInFlight + currentFrame_]
+      commandBuffers_[(windowId * kMaxFramesInFlight) + currentFrame_]
           .getRawBuffer();
   vkResetCommandBuffer(commandBuffer, 0);
 
@@ -298,10 +300,10 @@ void RenderSubSystem::drawWindow(
   renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
   renderPassInfo.renderPass = mainRenderPass_.get();
   renderPassInfo.framebuffer = presentFrame.getFrameBuffer();
-  renderPassInfo.renderArea.offset = {0, 0};
+  renderPassInfo.renderArea.offset = {.x = 0, .y = 0};
   renderPassInfo.renderArea.extent = extent;
 
-  VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+  const VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
   renderPassInfo.clearValueCount = 1;
   renderPassInfo.pClearValues = &clearColor;
 
@@ -318,7 +320,7 @@ void RenderSubSystem::drawWindow(
   vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
   VkRect2D scissor{};
-  scissor.offset = {0, 0};
+  scissor.offset = {.x = 0, .y = 0};
   scissor.extent = extent;
   vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
@@ -363,6 +365,7 @@ void RenderSubSystem::drawWindow(
     vkCmdBindPipeline(
         commandBuffer,
         VK_PIPELINE_BIND_POINT_GRAPHICS,
+        // NOLINTNEXTLINE(bugprone-unchecked-optional-access)
         renderablesVec[shaderGroup[0].obj_.id]
             ->shaderProgram_->pipeline_.getRawPipeline());
 
@@ -411,14 +414,14 @@ void RenderSubSystem::drawWindow(
               &viewMatrix);
         }
 
-        ForwardAllocateMappedBuffer::Allocation instanceAlloc =
+        const ForwardAllocateMappedBuffer::Allocation instanceAlloc =
             instanceDataAllocator.alloc(
                 renderable.instanceDataSize_ * cameraGroup.size());
         for (size_t i = 0; i < cameraGroup.size(); i++) {
           std::memcpy(
-              reinterpret_cast<void*>(
-                  reinterpret_cast<size_t>(instanceAlloc.ptr) +
-                  i * renderable.instanceDataSize_),
+              // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast,cppcoreguidelines-pro-bounds-pointer-arithmetic)
+              reinterpret_cast<char*>(instanceAlloc.ptr) +
+                  (i * renderable.instanceDataSize_),
               cameraGroup[i].instanceData_,
               renderable.instanceDataSize_);
         }
@@ -441,7 +444,7 @@ void RenderSubSystem::drawWindow(
     throw std::runtime_error{"Failed to record command buffer"};
   }
 
-  commandBuffers_[windowId * kMaxFramesInFlight + currentFrame_].submit(
+  commandBuffers_[(windowId * kMaxFramesInFlight) + currentFrame_].submit(
       {synchronisationSet.imageAvailableSemaphore.get()},
       {synchronisationSet.renderFinishedSemaphore.get()},
       synchronisationSet.inFlightFence.get());

@@ -35,7 +35,7 @@ YAMLSerializationCursor::getSubFieldCursor(std::string_view name) {
 
   for (auto& [fieldName, fieldValue] : mapping.entries) {
     if (fieldName == name) {
-      return &fieldValue;
+      return YAMLSerializationCursor{&fieldValue};
     }
   }
 
@@ -115,7 +115,7 @@ YAMLSerializationProvider::YAMLSerializationProvider(
     : document_(parseDocument(tokenizeYAML(dataStream))) {}
 
 YAMLSerializationProvider::TCursor YAMLSerializationProvider::getRootCursor() {
-  return &document_;
+  return YAMLSerializationCursor{&document_};
 }
 
 std::string_view YAMLSerializationCursor::FieldIterator::fieldName() {
@@ -125,15 +125,16 @@ std::string_view YAMLSerializationCursor::FieldIterator::fieldName() {
 }
 
 YAMLSerializationCursor YAMLSerializationCursor::FieldIterator::fieldCursor() {
-  return &(std::get<YAMLDocument::Mapping>(target->document_->value_)
-               .entries[i]
-               .second);
+  return YAMLSerializationCursor{&(
+      std::get<YAMLDocument::Mapping>(target->document_->value_)
+          .entries[i]
+          .second)};
 }
 
 YAMLSerializationCursor
 YAMLSerializationCursor::SequenceIterator::fieldCursor() {
-  return &(
-      std::get<YAMLDocument::Sequence>(target->document_->value_).entries[i]);
+  return YAMLSerializationCursor{&(
+      std::get<YAMLDocument::Sequence>(target->document_->value_).entries[i])};
 }
 
 } // namespace blocks::serialization::yaml

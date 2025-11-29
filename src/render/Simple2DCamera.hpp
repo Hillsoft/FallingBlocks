@@ -1,13 +1,13 @@
 #pragma once
 
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "math/vec.hpp"
 
 namespace blocks::render {
 
 class Simple2DCamera {
  public:
-  enum AspectRatioHandling { FIT, FILL, STRETCH };
+  enum AspectRatioHandling : uint8_t { FIT, FILL, STRETCH };
   struct Target {
     math::Vec2 centre;
     math::Vec2 extent;
@@ -19,7 +19,7 @@ class Simple2DCamera {
       AspectRatioHandling ratioHandling);
   Simple2DCamera(Target target, AspectRatioHandling ratioHandling);
 
-  math::Mat3 getViewMatrix(VkExtent2D screenExtent) const;
+  [[nodiscard]] math::Mat3 getViewMatrix(VkExtent2D screenExtent) const;
 
   void setWorldViewRect(math::Vec2 p0, math::Vec2 p1);
   void setWorldTarget(Target target);

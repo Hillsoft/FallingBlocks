@@ -34,3 +34,5 @@ HeaderFilterRegex: '.*'
 FormatStyle:     none
 ExtraArgsBefore:
     - "/EHsc"
+CheckOptions:
+    misc-include-cleaner.IgnoreHeaders: "WinUser.h;windef.h;minwindef.h"

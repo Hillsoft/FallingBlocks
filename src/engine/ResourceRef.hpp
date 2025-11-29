@@ -11,6 +11,7 @@ class ResourceRef {
   T* operator->() const { return ref_; }
 
   template <typename U>
+  // NOLINTNEXTLINE(hicpp-explicit-conversions)
   operator ResourceRef<U>() const {
     return ResourceRef<U>{ref_};
   }

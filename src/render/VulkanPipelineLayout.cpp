@@ -1,7 +1,7 @@
 #include "render/VulkanPipelineLayout.hpp"
 
 #include <stdexcept>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "math/vec.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
@@ -25,8 +25,8 @@ VulkanPipelineLayout::VulkanPipelineLayout(
   pipelineLayoutInfo.pushConstantRangeCount = 1;
   pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
-  VkPipelineLayout layout;
-  VkResult result = vkCreatePipelineLayout(
+  VkPipelineLayout layout = nullptr;
+  const VkResult result = vkCreatePipelineLayout(
       device.getRawDevice(), &pipelineLayoutInfo, nullptr, &layout);
 
   if (result != VK_SUCCESS) {

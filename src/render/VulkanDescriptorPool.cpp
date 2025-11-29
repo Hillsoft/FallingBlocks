@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <stdexcept>
 #include <vector>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 
@@ -28,7 +28,7 @@ VulkanDescriptorPool::VulkanDescriptorPool(
   poolInfo.pPoolSizes = poolSizes.data();
   poolInfo.maxSets = static_cast<uint32_t>(maxFramesInFlight);
 
-  VkDescriptorPool pool;
+  VkDescriptorPool pool = nullptr;
   if (vkCreateDescriptorPool(
           device.getRawDevice(), &poolInfo, nullptr, &pool) != VK_SUCCESS) {
     throw std::runtime_error{"Failed to create descriptor pool"};

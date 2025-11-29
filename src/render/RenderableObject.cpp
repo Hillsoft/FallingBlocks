@@ -1,5 +1,6 @@
 #include "render/RenderableObject.hpp"
 
+#include <cstddef>
 #include <memory>
 #include <utility>
 #include "render/VulkanBuffer.hpp"

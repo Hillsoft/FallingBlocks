@@ -1,13 +1,13 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include "render/Window.hpp"
 
-#include <Windows.h>
+#include <Windows.h> // IWYU pragma: keep
 #include <libloaderapi.h>
 #include <functional>
-#include <type_traits>
 #include <utility>
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
+#include <vulkan/vulkan_core.h>
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanInstance.hpp"
 #include "render/glfw_wrapper/Window.hpp"
@@ -28,7 +28,9 @@ glfw::Window makeWindow(
 
   HICON icon = LoadIconW(GetModuleHandle(nullptr), MAKEINTRESOURCEW(103));
   HWND hWnd = glfwGetWin32Window(window.getRawWindow());
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   SendMessage(hWnd, WM_SETICON, ICON_BIG, reinterpret_cast<LPARAM>(icon));
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   SendMessage(hWnd, WM_SETICON, ICON_SMALL, reinterpret_cast<LPARAM>(icon));
 
   return window;
@@ -47,8 +49,7 @@ Window::Window(
           instance.getRawInstance(),
           device,
           makeWindow(width, height, title, [&](int, int) { onResize(); }),
-          renderPass),
-      requiresReset_(false) {}
+          renderPass) {}
 
 void Window::close() {
   glfwSetWindowShouldClose(presentStack_.getWindow().getRawWindow(), GLFW_TRUE);
@@ -91,17 +92,17 @@ void Window::toggleFullScreen() {
         nullptr,
         lastWindowedXPosition_,
         lastWindowedYPosition_,
-        lastWindowedExtent_.width,
-        lastWindowedExtent_.height,
+        static_cast<int>(lastWindowedExtent_.width),
+        static_cast<int>(lastWindowedExtent_.height),
         GLFW_DONT_CARE);
 
-    lastWindowedExtent_ = {0, 0};
+    lastWindowedExtent_ = {.width = 0, .height = 0};
   }
 }
 
 void Window::resetSwapChain() {
-  std::pair<int, int> windowSize = getCurrentWindowSize();
-  if (!(windowSize.first == 0 || windowSize.second == 0)) {
+  const std::pair<int, int> windowSize = getCurrentWindowSize();
+  if (windowSize.first != 0 && windowSize.second != 0) {
     presentStack_.reset();
     requiresReset_ = false;
   }

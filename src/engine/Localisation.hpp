@@ -9,14 +9,14 @@ namespace blocks {
 
 class Localisation {
  public:
-  Localisation(std::string locale);
+  explicit Localisation(std::string locale);
 
   void setLocale(std::string locale);
-  std::vector<std::string> getAvailableLocales() const;
+  [[nodiscard]] std::vector<std::string> getAvailableLocales() const;
 
-  std::string getLocalisedString(std::string_view key);
-  std::string_view getLocaleCode() const;
-  std::string_view getLocaleName() const;
+  [[nodiscard]] std::string getLocalisedString(std::string_view key) const;
+  [[nodiscard]] std::string_view getLocaleCode() const;
+  [[nodiscard]] std::string_view getLocaleName() const;
 
  private:
   std::string localeCode_;

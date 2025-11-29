@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 
 #include "render/VulkanInstance.hpp"
 #include "render/vulkan/UniqueHandle.hpp"

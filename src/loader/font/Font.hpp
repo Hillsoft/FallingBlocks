@@ -106,6 +106,7 @@ class KerningTable {
   std::unordered_map<uint32_t, FWord> data_;
 };
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 struct Font {
   std::unique_ptr<CharToGlyphMap> charMap;
   std::vector<GlyphData> glyphs;

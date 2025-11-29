@@ -3,7 +3,7 @@
 #include <array>
 #include <cstddef>
 #include <span>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "math/vec.hpp"
 #include "render/VulkanBuffer.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
@@ -14,12 +14,12 @@ namespace blocks::render {
 namespace {
 
 constexpr std::array<UVVertex, 6> vertices{
-    UVVertex{math::Vec2{0.0f, 1.0f}, math::Vec2{0.0f, 1.0f}},
-    UVVertex{math::Vec2{0.0f, 0.0f}, math::Vec2{0.0f, 0.0f}},
-    UVVertex{math::Vec2{1.0f, 0.0f}, math::Vec2{1.0f, 0.0f}},
-    UVVertex{math::Vec2{1.0f, 1.0f}, math::Vec2{1.0f, 1.0f}},
-    UVVertex{math::Vec2{0.0f, 1.0f}, math::Vec2{0.0f, 1.0f}},
-    UVVertex{math::Vec2{1.0f, 0.0f}, math::Vec2{1.0f, 0.0f}}};
+    UVVertex{.position = math::Vec2{0.0f, 1.0f}, .uv = math::Vec2{0.0f, 1.0f}},
+    UVVertex{.position = math::Vec2{0.0f, 0.0f}, .uv = math::Vec2{0.0f, 0.0f}},
+    UVVertex{.position = math::Vec2{1.0f, 0.0f}, .uv = math::Vec2{1.0f, 0.0f}},
+    UVVertex{.position = math::Vec2{1.0f, 1.0f}, .uv = math::Vec2{1.0f, 1.0f}},
+    UVVertex{.position = math::Vec2{0.0f, 1.0f}, .uv = math::Vec2{0.0f, 1.0f}},
+    UVVertex{.position = math::Vec2{1.0f, 0.0f}, .uv = math::Vec2{1.0f, 0.0f}}};
 
 } // namespace
 
@@ -27,6 +27,7 @@ VulkanBuffer getQuadVertexAttributesBuffer(VulkanGraphicsDevice& device) {
   return VulkanBuffer{
       device,
       std::span{
+          // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
           reinterpret_cast<const std::byte*>(vertices.data()),
           sizeof(UVVertex) * vertices.size()},
       VK_BUFFER_USAGE_VERTEX_BUFFER_BIT};

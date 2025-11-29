@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanMappedBuffer.hpp"
 
@@ -26,8 +26,8 @@ class ForwardAllocateMappedBuffer {
   VkBufferUsageFlags usageFlags_;
 
   std::vector<VulkanMappedBuffer> buffers_;
-  size_t curBuffer_;
-  size_t bufferOffset_;
+  size_t curBuffer_ = 0;
+  size_t bufferOffset_ = 0;
 };
 
 } // namespace blocks::render

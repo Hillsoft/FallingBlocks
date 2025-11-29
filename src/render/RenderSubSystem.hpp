@@ -6,7 +6,7 @@
 #include <span>
 #include <utility>
 #include <vector>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/ForwardAllocateMappedBuffer.hpp"
 #include "render/RenderableObject.hpp"
 #include "render/Simple2DCamera.hpp"
@@ -22,7 +22,6 @@
 #include "util/IndexedResourceStorage.hpp"
 #include "util/debug.hpp"
 #include "util/portability.hpp"
-#include "util/raii_helpers.hpp"
 
 #ifndef NDEBUG
 #include "render/VulkanDebugMessenger.hpp"
@@ -46,15 +45,15 @@ struct WindowRef {
   friend class RenderSubSystem;
   friend class UniqueWindowHandle;
 
-  Window* get();
-  const Window* get() const;
+  [[nodiscard]] Window* get();
+  [[nodiscard]] const Window* get() const;
   Window& operator*() { return *get(); }
   const Window& operator*() const { return *get(); }
   Window* operator->() { return get(); }
   const Window* operator->() const { return get(); }
 };
 
-class UniqueWindowHandle : private util::no_copy {
+class UniqueWindowHandle {
  public:
   explicit UniqueWindowHandle(WindowRef ref) : ref_(ref) {}
   ~UniqueWindowHandle();
@@ -66,6 +65,9 @@ class UniqueWindowHandle : private util::no_copy {
     std::swap(ref_, other.ref_);
     return *this;
   }
+
+  UniqueWindowHandle(const UniqueWindowHandle& other) = delete;
+  UniqueWindowHandle& operator=(const UniqueWindowHandle& other) = delete;
 
   WindowRef get() { return ref_; }
   WindowRef operator*() { return ref_; }
@@ -90,8 +92,8 @@ struct GenericRenderableRef {
 
   RenderSubSystem* renderSystem() { return renderSystem_; }
 
-  RenderableObject* get();
-  const RenderableObject* get() const;
+  [[nodiscard]] RenderableObject* get();
+  [[nodiscard]] const RenderableObject* get() const;
   RenderableObject& operator*() { return *get(); }
   const RenderableObject& operator*() const { return *get(); }
   RenderableObject* operator->() { return get(); }
@@ -101,7 +103,7 @@ struct GenericRenderableRef {
 template <typename TInstanceData>
 struct RenderableRef {
  public:
-  explicit RenderableRef() : rawRef_() {}
+  explicit RenderableRef() = default;
   explicit RenderableRef(size_t id, RenderSubSystem& renderSystem)
       : rawRef_(id, renderSystem) {
     // Temporarily removed as it's only safe to call get() on the render thread
@@ -116,8 +118,8 @@ struct RenderableRef {
 
   RenderSubSystem* renderSystem() { return rawRef_.renderSystem(); }
 
-  RenderableObject* get() { return rawRef_.get(); }
-  const RenderableObject* get() const { return rawRef_.get(); }
+  [[nodiscard]] RenderableObject* get() { return rawRef_.get(); }
+  [[nodiscard]] const RenderableObject* get() const { return rawRef_.get(); }
   RenderableObject& operator*() { return *get(); }
   const RenderableObject& operator*() const { return *get(); }
   RenderableObject* operator->() { return get(); }
@@ -125,7 +127,7 @@ struct RenderableRef {
 };
 
 template <typename TInstanceData>
-class UniqueRenderableHandle : private util::no_copy {
+class UniqueRenderableHandle {
  public:
   explicit UniqueRenderableHandle(RenderableRef<TInstanceData> ref)
       : ref_(ref) {}
@@ -143,7 +145,11 @@ class UniqueRenderableHandle : private util::no_copy {
     return *this;
   }
 
-  RenderableRef<TInstanceData> get() const { return ref_; }
+  UniqueRenderableHandle(const UniqueRenderableHandle& other) = delete;
+  UniqueRenderableHandle& operator=(const UniqueRenderableHandle& other) =
+      delete;
+
+  [[nodiscard]] RenderableRef<TInstanceData> get() const { return ref_; }
   RenderableRef<TInstanceData> operator*() const { return ref_; }
   RenderableRef<TInstanceData> operator->() const { return ref_; }
 
@@ -154,6 +160,18 @@ class UniqueRenderableHandle : private util::no_copy {
 class RenderSubSystem {
  private:
   struct DrawCommand {
+    DrawCommand(
+        WindowRef target,
+        long z,
+        GenericRenderableRef obj,
+        Simple2DCamera* camera,
+        void* instanceData)
+        : target_(target),
+          z_(z),
+          obj_(obj),
+          camera_(camera),
+          instanceData_(instanceData) {}
+
     WindowRef target_;
     long z_;
     GenericRenderableRef obj_;
@@ -182,12 +200,13 @@ class RenderSubSystem {
   template <typename TConcreteRenderable, typename... TArgs>
   UniqueRenderableHandle<typename TConcreteRenderable::InstanceData>
   createRenderable(TArgs&&... args) {
-    size_t id = renderables_.pushBackBlocking(TConcreteRenderable::create(
-        std::forward<TArgs>(args)...,
-        graphics_,
-        shaderProgramManager_,
-        textureManager_,
-        kMaxFramesInFlight));
+    const size_t id = renderables_.pushBackBlocking(
+        TConcreteRenderable::create(
+            std::forward<TArgs>(args)...,
+            graphics_,
+            shaderProgramManager_,
+            textureManager_,
+            kMaxFramesInFlight));
     return UniqueRenderableHandle{
         RenderableRef<typename TConcreteRenderable::InstanceData>{id, *this}};
   }
@@ -248,6 +267,12 @@ class RenderSubSystem {
   struct GLFWLifetimeScope {
     GLFWLifetimeScope();
     ~GLFWLifetimeScope();
+
+    GLFWLifetimeScope(const GLFWLifetimeScope& other) = delete;
+    GLFWLifetimeScope& operator=(const GLFWLifetimeScope& other) = delete;
+
+    GLFWLifetimeScope(GLFWLifetimeScope&& other) = delete;
+    GLFWLifetimeScope& operator=(GLFWLifetimeScope&& other) = delete;
   };
 
   NO_UNIQUE_ADDRESS GLFWLifetimeScope lifetimeScope_;

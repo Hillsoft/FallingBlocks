@@ -4,6 +4,7 @@
 #include <optional>
 #include <vector>
 #include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
@@ -16,13 +17,14 @@ class VulkanSwapChain {
       VkSurfaceKHR surface,
       VulkanGraphicsDevice& graphicsDevice);
 
-  std::vector<vulkan::UniqueHandle<VkImageView>> getImageViews() const;
+  [[nodiscard]] std::vector<vulkan::UniqueHandle<VkImageView>> getImageViews()
+      const;
 
   // nullopt indicates out of date swapchain, recreation required
   std::optional<uint32_t> getNextImageIndex(
       VkSemaphore semaphore, VkFence fence);
 
-  VkExtent2D getSwapchainExtent() const { return extent_; }
+  [[nodiscard]] VkExtent2D getSwapchainExtent() const { return extent_; }
 
   void present(uint32_t imageIndex, VkSemaphore waitSemaphore);
 
