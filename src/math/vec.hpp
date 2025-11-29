@@ -238,16 +238,16 @@ class Matrix {
     }
   }
 
-  constexpr TNum& at(size_t x, size_t y) {
+  [[nodiscard]] constexpr TNum& at(size_t x, size_t y) {
     DEBUG_ASSERT(x < sizeWidth && y < sizeHeight);
     return data_[x].at(y);
   }
-  constexpr const TNum& at(size_t x, size_t y) const {
+  [[nodiscard]] constexpr const TNum& at(size_t x, size_t y) const {
     DEBUG_ASSERT(x < sizeWidth && y < sizeHeight);
     return data_[x].at(y);
   }
 
-  constexpr TNum determinant() const
+  [[nodiscard]] constexpr TNum determinant() const
     requires(sizeWidth == sizeHeight)
   {
     if constexpr (sizeWidth == 1) {
@@ -274,7 +274,7 @@ class Matrix {
     }
   }
 
-  constexpr Matrix invert() const
+  [[nodiscard]] constexpr Matrix invert() const
     requires(sizeWidth == sizeHeight)
   {
     Matrix result{};

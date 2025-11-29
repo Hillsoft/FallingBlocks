@@ -1,7 +1,7 @@
 #include "render/resource/ShaderProgramManager.hpp"
 
-#include <type_traits>
 #include <typeindex>
+#include <utility>
 #include "render/VulkanShaderProgram.hpp"
 #include "util/debug.hpp"
 

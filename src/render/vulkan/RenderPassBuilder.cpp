@@ -4,12 +4,12 @@
 #include <span>
 #include <stdexcept>
 #include <vector>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render::vulkan {
 
-RenderPassBuilder::RenderPassBuilder() {
+RenderPassBuilder::RenderPassBuilder() : createInfo_() {
   createInfo_.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
   createInfo_.pNext = nullptr;
   createInfo_.flags = 0;
@@ -32,7 +32,7 @@ RenderPassBuilder& RenderPassBuilder::addAttachment(
 
 VkAttachmentReference RenderPassBuilder::addAttachmentGetDescription(
     const VkAttachmentDescription& attachment, VkImageLayout inFlightLayout) {
-  uint32_t index = static_cast<uint32_t>(attachments_.size());
+  const auto index = static_cast<uint32_t>(attachments_.size());
   addAttachment(attachment);
   return VkAttachmentReference{.attachment = index, .layout = inFlightLayout};
 }
@@ -64,7 +64,7 @@ uint32_t RenderPassBuilder::addSubpassGetIndex(
     VkPipelineBindPoint bindPoint,
     std::span<const VkAttachmentReference> inputAttachments,
     std::span<const VkAttachmentReference> colorAttachments) {
-  uint32_t index = static_cast<uint32_t>(subpasses_.size());
+  const auto index = static_cast<uint32_t>(subpasses_.size());
   addSubpass(bindPoint, inputAttachments, colorAttachments);
   return index;
 }
@@ -78,7 +78,7 @@ RenderPassBuilder& RenderPassBuilder::addSubpassDependency(
 }
 
 UniqueHandle<VkRenderPass> RenderPassBuilder::build(VkDevice device) const {
-  VkRenderPass renderPass;
+  VkRenderPass renderPass = nullptr;
   if (vkCreateRenderPass(device, &createInfo_, nullptr, &renderPass) !=
       VK_SUCCESS) {
     throw std::runtime_error{"Failed to create render pass"};

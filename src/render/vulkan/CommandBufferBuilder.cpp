@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <span>
 #include <stdexcept>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render::vulkan {
@@ -19,7 +19,7 @@ CommandBufferBuilder::CommandBufferBuilder(
 
 UniqueHandle<VkCommandBuffer> CommandBufferBuilder::build(
     VkDevice device) const {
-  VkCommandBuffer commandBuffer;
+  VkCommandBuffer commandBuffer = nullptr;
   if (vkAllocateCommandBuffers(device, &allocInfo_, &commandBuffer) !=
       VK_SUCCESS) {
     throw std::runtime_error{"Failed to allocate command buffer"};

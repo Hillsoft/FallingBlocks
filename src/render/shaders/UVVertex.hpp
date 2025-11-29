@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <vector>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "math/vec.hpp"
 
 namespace blocks::render {

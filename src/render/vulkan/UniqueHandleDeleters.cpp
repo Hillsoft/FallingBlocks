@@ -1,6 +1,6 @@
 #include "render/vulkan/UniqueHandleDeleters.hpp"
 
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 
 #include "util/debug.hpp"
 
@@ -10,6 +10,7 @@ void destroyDebugUtilsMessengerEXT(
     VkInstance instance,
     VkDebugUtilsMessengerEXT debugMessenger,
     const VkAllocationCallbacks* pAllocator) {
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   static auto func = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(
       vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT"));
   if (func != nullptr) {

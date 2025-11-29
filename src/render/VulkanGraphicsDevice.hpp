@@ -28,7 +28,9 @@ class VulkanGraphicsDevice {
 
   static VulkanGraphicsDevice make(VulkanInstance& instance);
 
-  const PhysicalDeviceInfo& physicalInfo() const { return *physicalInfo_; }
+  [[nodiscard]] const PhysicalDeviceInfo& physicalInfo() const {
+    return *physicalInfo_;
+  }
 
   VkDevice getRawDevice() { return device_.get(); }
   VkQueue getGraphicsQueue() { return graphicsQueue_; }

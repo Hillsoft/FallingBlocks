@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <span>
 #include <vector>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render::vulkan {

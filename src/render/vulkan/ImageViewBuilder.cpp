@@ -2,7 +2,7 @@
 
 #include <cstdint>
 #include <stdexcept>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render::vulkan {
@@ -30,8 +30,8 @@ ImageViewBuilder& ImageViewBuilder::setMipLevels(uint32_t mipLevels) {
 }
 
 UniqueHandle<VkImageView> ImageViewBuilder::build(VkDevice device) {
-  VkImageView imageView;
-  VkResult result =
+  VkImageView imageView = nullptr;
+  const VkResult result =
       vkCreateImageView(device, &createInfo_, nullptr, &imageView);
   if (result != VK_SUCCESS) {
     throw std::runtime_error{"Failed to create image view"};

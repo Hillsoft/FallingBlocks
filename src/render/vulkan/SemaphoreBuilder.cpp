@@ -1,7 +1,7 @@
 #include "render/vulkan/SemaphoreBuilder.hpp"
 
 #include <stdexcept>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render::vulkan {

@@ -2,7 +2,6 @@
 
 #include <functional>
 #include <stdexcept>
-#include <type_traits>
 #include <utility>
 #include <GLFW/glfw3.h>
 
@@ -56,7 +55,7 @@ Window& Window::operator=(Window&& other) noexcept {
 }
 
 bool Window::shouldClose() const {
-  return glfwWindowShouldClose(window_);
+  return glfwWindowShouldClose(window_) != 0;
 }
 
 std::pair<int, int> Window::getCurrentWindowSize() const {
@@ -67,13 +66,15 @@ std::pair<int, int> Window::getCurrentWindowSize() const {
 
 void Window::frameBufferResizeCallback(
     GLFWwindow* window, int width, int height) {
-  auto appWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  auto* appWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
   appWindow->resizeHandler_(width, height);
 }
 
 void Window::keyCallback(
     GLFWwindow* window, int key, int scancode, int action, int mods) {
-  auto appWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  auto* appWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
   if (appWindow->keyEventHandler_) {
     appWindow->keyEventHandler_(key, scancode, action, mods);
   }
@@ -81,14 +82,16 @@ void Window::keyCallback(
 
 void Window::mouseButtonCallback(
     GLFWwindow* window, int button, int action, int mods) {
-  auto appWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  auto* appWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
   if (appWindow->mouseButtonHandler_) {
     appWindow->mouseButtonHandler_(button, action, mods);
   }
 }
 
 void Window::cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
-  auto appWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+  auto* appWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
   if (appWindow->cursorPosHandler_) {
     appWindow->cursorPosHandler_(xpos, ypos);
   }

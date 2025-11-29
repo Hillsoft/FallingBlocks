@@ -1,4 +1,4 @@
 root=true
 
 [*]
-cpp_include_cleanup_replacement_files=vulkan/vulkan_core.h:GLFW/glfw3.h,vulkan/vk_platform.h:GLFW/glfw3.h
+cpp_include_cleanup_replacement_files=

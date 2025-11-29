@@ -4,7 +4,7 @@
 #include <filesystem>
 #include <utility>
 #include <vector>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/Quad.hpp"
 #include "render/RenderableObject.hpp"
 #include "render/VulkanBuffer.hpp"

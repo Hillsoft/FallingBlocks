@@ -39,7 +39,7 @@ class UniqueHandle {
     return *this;
   }
 
-  const T& get() const { return handle_; }
+  [[nodiscard]] const T& get() const { return handle_; }
 
  private:
   T handle_;

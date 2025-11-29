@@ -13,7 +13,14 @@ class RenderableObject {
  public:
   class ResourceHolder {
    public:
+    ResourceHolder() = default;
     virtual ~ResourceHolder() = default;
+
+    ResourceHolder(const ResourceHolder& other) = default;
+    ResourceHolder& operator=(const ResourceHolder& other) = default;
+
+    ResourceHolder(ResourceHolder&& other) = default;
+    ResourceHolder& operator=(ResourceHolder&& other) = default;
   };
 
   RenderableObject(
@@ -23,8 +30,7 @@ class RenderableObject {
       size_t instanceDataSize,
       std::unique_ptr<ResourceHolder> extraResources = nullptr);
 
- public:
-  size_t getInstanceDataSize() const { return instanceDataSize_; }
+  [[nodiscard]] size_t getInstanceDataSize() const { return instanceDataSize_; }
 
  private:
   VulkanShaderProgram* shaderProgram_;

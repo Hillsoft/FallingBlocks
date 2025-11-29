@@ -3,7 +3,7 @@
 #include <concepts>
 #include <typeindex>
 #include <unordered_map>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanShaderProgram.hpp"
 
@@ -22,7 +22,7 @@ class ShaderProgramManager {
 
   template <ShaderProgramDefinition Shader>
   VulkanShaderProgram& getOrCreate() {
-    std::type_index index{typeid(Shader)};
+    const std::type_index index{typeid(Shader)};
     VulkanShaderProgram* program = get(index);
     if (program != nullptr) {
       return *program;

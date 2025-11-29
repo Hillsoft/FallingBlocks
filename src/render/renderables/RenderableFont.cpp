@@ -4,7 +4,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/Quad.hpp"
 #include "render/RenderableObject.hpp"
 #include "render/VulkanBuffer.hpp"
@@ -21,7 +21,7 @@ namespace {
 
 class ExtraFontResources : public RenderableObject::ResourceHolder {
  public:
-  ExtraFontResources(VulkanBuffer fontBuffer)
+  explicit ExtraFontResources(VulkanBuffer fontBuffer)
       : fontBuffer_(std::move(fontBuffer)) {}
 
  private:
@@ -34,7 +34,7 @@ RenderableObject RenderableFont::create(
     VulkanBuffer fontBuffer,
     VulkanGraphicsDevice& device,
     ShaderProgramManager& programManager,
-    TextureManager& textureManager,
+    TextureManager& /* textureManager */,
     int maxFramesInFlight) {
   VulkanShaderProgram* shaderProgram =
       &programManager.getOrCreate<FontShader>();
@@ -46,7 +46,7 @@ RenderableObject RenderableFont::create(
   std::vector<VkWriteDescriptorSet> descriptorWrites;
   descriptorWrites.reserve(descriptorSets.size());
 
-  VkDescriptorBufferInfo bufferInfo{
+  const VkDescriptorBufferInfo bufferInfo{
       .buffer = fontBuffer.getRawBuffer(),
       .offset = 0,
       .range = fontBuffer.size()};

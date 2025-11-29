@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <span>
 #include <stdexcept>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/vulkan/UniqueHandle.hpp"
 
 namespace blocks::render::vulkan {
@@ -26,7 +26,7 @@ FrameBufferBuilder::FrameBufferBuilder(
 }
 
 UniqueHandle<VkFramebuffer> FrameBufferBuilder::build(VkDevice device) const {
-  VkFramebuffer framebuffer;
+  VkFramebuffer framebuffer = nullptr;
   if (vkCreateFramebuffer(device, &createInfo_, nullptr, &framebuffer) !=
       VK_SUCCESS) {
     throw std::runtime_error{"Failed to create frame buffer"};

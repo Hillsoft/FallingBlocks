@@ -18,7 +18,7 @@ class VulkanBuffer {
 
   VkBuffer getRawBuffer() { return rawBuffer_.getRawBuffer(); }
   VkDeviceMemory getRawMemory() { return memory_.getRawMemory(); }
-  size_t size() const { return size_; }
+  [[nodiscard]] size_t size() const { return size_; }
 
  private:
   VulkanRawBuffer rawBuffer_;

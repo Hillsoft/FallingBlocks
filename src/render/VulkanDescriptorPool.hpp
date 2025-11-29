@@ -14,7 +14,7 @@ class VulkanDescriptorPool {
       VkDescriptorSetLayout layout,
       int maxFramesInFlight);
 
-  const std::vector<VkDescriptorSet>& getDescriptorSets() const {
+  [[nodiscard]] const std::vector<VkDescriptorSet>& getDescriptorSets() const {
     return descriptorSets_;
   }
 

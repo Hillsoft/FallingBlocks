@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "math/vec.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/VulkanShaderProgram.hpp"

@@ -8,7 +8,7 @@
 
 namespace blocks::render::glfw {
 
-class Window : private util::no_copy {
+class Window {
  public:
   Window(int width, int height, const char* title);
   ~Window();
@@ -16,9 +16,12 @@ class Window : private util::no_copy {
   Window(Window&& other) noexcept;
   Window& operator=(Window&& other) noexcept;
 
-  bool shouldClose() const;
+  Window(const Window& other) = delete;
+  Window& operator=(const Window& other) = delete;
 
-  std::pair<int, int> getCurrentWindowSize() const;
+  [[nodiscard]] bool shouldClose() const;
+
+  [[nodiscard]] std::pair<int, int> getCurrentWindowSize() const;
 
   void setResizeHandler(
       std::function<void(int width, int height)> resizeHandler) {

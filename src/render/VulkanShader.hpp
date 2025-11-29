@@ -28,12 +28,12 @@ class VulkanVertexShader {
       std::vector<VkVertexInputAttributeDescription> inputAttributeDescription,
       const std::filesystem::path& shaderPath);
 
-  const std::vector<VkVertexInputBindingDescription>&
+  [[nodiscard]] const std::vector<VkVertexInputBindingDescription>&
   getInputBindingDescriptions() const {
     return bindingDescriptions_;
   }
 
-  const std::vector<VkVertexInputAttributeDescription>&
+  [[nodiscard]] const std::vector<VkVertexInputAttributeDescription>&
   getInputAttributeDescriptions() const {
     return inputAttributeDescription_;
   }

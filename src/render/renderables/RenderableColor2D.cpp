@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <utility>
 #include <vector>
-#include <GLFW/glfw3.h>
+#include <vulkan/vulkan_core.h>
 #include "render/Quad.hpp"
 #include "render/RenderableObject.hpp"
 #include "render/VulkanBuffer.hpp"
@@ -19,7 +19,7 @@ namespace blocks::render {
 RenderableObject RenderableColor2D::create(
     VulkanGraphicsDevice& device,
     ShaderProgramManager& programManager,
-    TextureManager& textureManager,
+    TextureManager& /* textureManager */,
     int maxFramesInFlight) {
   VulkanShaderProgram* shaderProgram =
       &programManager.getOrCreate<Col2DShader>();
