@@ -25,6 +25,7 @@ target_link_libraries(render.forwardallocatemappedbuffer
 
 add_library(render.quad STATIC "Quad.cpp" "Quad.hpp")
 target_link_libraries(render.quad
+	math.vec
 	render.shaders.uvvertex
 	render.vulkanbuffer
 	render.vulkangraphicsdevice)
@@ -59,7 +60,6 @@ target_link_libraries(render.rendersubsystem
 	util.generator
 	util.indexedresourcestorage
 	util.portability
-	util.raii_helpers
 	util.vec_generators)
 
 add_library(render.simple2dcamera STATIC "Simple2DCamera.cpp" "Simple2DCamera.hpp")
