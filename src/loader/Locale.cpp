@@ -24,14 +24,16 @@ Locale loadLocale(std::span<const std::byte> dataBytes) {
   }
 
   std::span<const char> data{
-      reinterpret_cast<const char*>(dataBytes.data()), dataBytes.size()};
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+      reinterpret_cast<const char*>(dataBytes.data()),
+      dataBytes.size()};
 
   auto firstLineEnd = std::find(data.begin(), data.end(), '\n');
   std::string localeName{data.begin(), firstLineEnd};
   data = data.subspan(localeName.size() + 1);
 
   std::unordered_map<std::string, std::string> values;
-  while (data.size() > 0) {
+  while (!data.empty()) {
     auto keyEnd = std::find(data.begin(), data.end(), ':');
     std::string key{data.begin(), keyEnd};
     data = data.subspan(key.size() + 1);
@@ -43,7 +45,7 @@ Locale loadLocale(std::span<const std::byte> dataBytes) {
     values.emplace(std::move(key), std::move(value));
   }
 
-  return {std::move(localeName), std::move(values)};
+  return {.name = std::move(localeName), .strings = std::move(values)};
 }
 
 } // namespace blocks::loader

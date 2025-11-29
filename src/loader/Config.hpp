@@ -10,8 +10,8 @@ namespace blocks::loader {
 
 class Config {
  public:
-  Config(const std::filesystem::path& path);
-  Config(std::vector<char> rawData);
+  explicit Config(const std::filesystem::path& path);
+  explicit Config(std::vector<char> rawData);
 
   std::string_view readString(std::string_view key);
   std::string_view readStringWithDefault(

@@ -11,7 +11,7 @@
 namespace blocks::loader {
 
 Image loadImage(const std::filesystem::path& path) {
-  std::filesystem::path extension = path.extension();
+  const std::filesystem::path extension = path.extension();
 
   if (extension == ".bmp") {
     return loadBitmap(path);

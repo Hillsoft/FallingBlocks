@@ -12,6 +12,8 @@
 #include <string_view>
 #include <type_traits>
 #include <unordered_map>
+#include <utility>
+#include <variant>
 #include <vector>
 #include "util/debug.hpp"
 #include "util/file.hpp"
@@ -51,11 +53,12 @@ template <typename TVal>
   requires std::is_integral_v<TVal>
 TVal readBigEndian(std::span<const std::byte>& data) {
   DEBUG_ASSERT(data.size() >= sizeof(TVal));
-  std::array<std::byte, sizeof(TVal)> flippedData;
+  std::array<std::byte, sizeof(TVal)> flippedData{};
   for (int i = 0; i < sizeof(TVal); i++) {
     flippedData[sizeof(TVal) - 1 - i] = data[i];
   }
   data = data.subspan(sizeof(TVal));
+  // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
   return *reinterpret_cast<TVal*>(&*flippedData.begin());
 }
 
@@ -63,7 +66,7 @@ template <typename TVal>
   requires RawValueWrapper<TVal>
 TVal readBigEndian(std::span<const std::byte>& data) {
   using TRawType = decltype(TVal::rawValue);
-  TRawType rawValue = readBigEndian<TRawType>(data);
+  const auto rawValue = readBigEndian<TRawType>(data);
   return TVal{rawValue};
 }
 
@@ -106,23 +109,23 @@ TableDirectoryEntry readTableDirectory(std::span<const std::byte> data) {
 }
 
 struct HeadTable {
-  Fixed version;
-  Fixed fontRevision;
-  uint32_t checkSumAdjustment;
-  uint32_t magicNumber;
-  uint16_t flags;
-  uint16_t unitsPerEm;
-  uint64_t created;
-  uint64_t modified;
-  FWord xMin;
-  FWord yMin;
-  FWord xMax;
-  FWord yMax;
-  uint16_t style;
-  uint16_t lowestRecPPEM;
-  int16_t directionHint;
-  int16_t indexToLocFormat;
-  int16_t glyphDataFormat;
+  Fixed version{};
+  Fixed fontRevision{};
+  uint32_t checkSumAdjustment{};
+  uint32_t magicNumber{};
+  uint16_t flags{};
+  uint16_t unitsPerEm{};
+  uint64_t created{};
+  uint64_t modified{};
+  FWord xMin{};
+  FWord yMin{};
+  FWord xMax{};
+  FWord yMax{};
+  uint16_t style{};
+  uint16_t lowestRecPPEM{};
+  int16_t directionHint{};
+  int16_t indexToLocFormat{};
+  int16_t glyphDataFormat{};
 };
 
 HeadTable readHeadTable(std::span<const std::byte> data) {
@@ -189,19 +192,21 @@ NameTable readNameTable(std::span<const std::byte> data) {
       originalData.subspan(result.stringOffset);
 
   result.names.reserve(result.count);
-  for (int i = 0; i < result.count; i++) {
+  for (unsigned int i = 0; i < result.count; i++) {
     NameRecord curRecord{
         .platformId = readBigEndian<uint16_t>(data),
         .patformSpecificId = readBigEndian<uint16_t>(data),
         .language = readBigEndian<uint16_t>(data),
         .nameId = readBigEndian<uint16_t>(data)};
-    uint16_t length = readBigEndian<uint16_t>(data);
-    uint16_t offset = readBigEndian<uint16_t>(data);
+    const auto length = readBigEndian<uint16_t>(data);
+    const auto offset = readBigEndian<uint16_t>(data);
     if (offset + length > stringData.size()) {
       throw std::runtime_error{"Corrupt font file"};
     }
     curRecord.value = std::string_view{
-        reinterpret_cast<const char*>(&stringData[offset]), length};
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+        reinterpret_cast<const char*>(&stringData[offset]),
+        length};
     result.names.emplace_back(curRecord);
   }
 
@@ -234,9 +239,9 @@ class Format4Map : public CharToGlyphMap {
     if (unicodeChar > 0xFFFF) {
       return 0;
     }
-    uint16_t charValue = static_cast<uint16_t>(unicodeChar);
+    const auto charValue = static_cast<uint16_t>(unicodeChar);
 
-    int segmentIndex = 0;
+    unsigned int segmentIndex = 0;
     for (; segmentIndex < segCount_; segmentIndex++) {
       if (endCodes_[segmentIndex] >= charValue) {
         break;
@@ -248,7 +253,8 @@ class Format4Map : public CharToGlyphMap {
     }
 
     if (idRangeOffset_[segmentIndex] != 0) {
-      int glyphIndexArrayIndex = idRangeOffset_[segmentIndex] / 2 + charValue -
+      const unsigned int glyphIndexArrayIndex =
+          (idRangeOffset_[segmentIndex] / 2) + charValue -
           startCodes_[segmentIndex] - (segCount_ - segmentIndex);
       return glyphIndices_[glyphIndexArrayIndex];
     } else {
@@ -266,7 +272,7 @@ class Format4Map : public CharToGlyphMap {
 };
 
 Format4Map readCharMapSubtableFormat4(std::span<const std::byte> data) {
-  uint16_t length = readBigEndian<uint16_t>(data);
+  auto length = readBigEndian<uint16_t>(data);
   // We've already read the format and length
   if (length < 14 || data.size() < length - 4) {
     throw std::runtime_error{"Corrupt font file"};
@@ -275,7 +281,7 @@ Format4Map readCharMapSubtableFormat4(std::span<const std::byte> data) {
 
   // language code, unused
   readBigEndian<uint16_t>(data);
-  uint16_t segCount2 = readBigEndian<uint16_t>(data);
+  auto segCount2 = readBigEndian<uint16_t>(data);
   uint16_t segCount = segCount2 / 2;
   // search range, unused
   readBigEndian<uint16_t>(data);
@@ -291,7 +297,7 @@ Format4Map readCharMapSubtableFormat4(std::span<const std::byte> data) {
   auto readSegCountVec = [&]() {
     std::vector<uint16_t> result;
     result.reserve(segCount);
-    for (int i = 0; i < segCount; i++) {
+    for (unsigned int i = 0; i < segCount; i++) {
       result.emplace_back(readBigEndian<uint16_t>(data));
     }
     return result;
@@ -299,7 +305,7 @@ Format4Map readCharMapSubtableFormat4(std::span<const std::byte> data) {
 
   std::vector<uint16_t> endCodes = readSegCountVec();
 
-  uint16_t padding = readBigEndian<uint16_t>(data);
+  auto padding = readBigEndian<uint16_t>(data);
   if (padding != 0) {
     throw std::runtime_error{"Corrupt font file"};
   }
@@ -308,21 +314,21 @@ Format4Map readCharMapSubtableFormat4(std::span<const std::byte> data) {
   std::vector<uint16_t> idDelta = readSegCountVec();
   std::vector<uint16_t> idRangeOffset = readSegCountVec();
 
-  size_t glyphIndexCount = data.size() / 2;
+  const size_t glyphIndexCount = data.size() / 2;
   std::vector<uint16_t> glyphIndices;
   glyphIndices.reserve(glyphIndexCount);
-  for (int i = 0; i < glyphIndexCount; i++) {
+  for (size_t i = 0; i < glyphIndexCount; i++) {
     glyphIndices.emplace_back(readBigEndian<uint16_t>(data));
   }
 
-  for (int i = 0; i < segCount; i++) {
+  for (unsigned int i = 0; i < segCount; i++) {
     // validate glyph indices lookup
     if (idRangeOffset[i] == 0) {
       continue;
     }
 
-    int glyphIndexArrayIndex =
-        idRangeOffset[i] / 2 + startCodes[i] - startCodes[i] - (segCount - i);
+    unsigned long long glyphIndexArrayIndex =
+        (idRangeOffset[i] / 2) + startCodes[i] - startCodes[i] - (segCount - i);
     if (glyphIndexArrayIndex < 0 ||
         glyphIndexArrayIndex >= glyphIndices.size()) {
       throw std::runtime_error{"Corrupt font file"};
@@ -336,13 +342,13 @@ Format4Map readCharMapSubtableFormat4(std::span<const std::byte> data) {
     }
   }
 
-  return Format4Map(
+  return {
       segCount,
       std::move(endCodes),
       std::move(startCodes),
       std::move(idDelta),
       std::move(idRangeOffset),
-      std::move(glyphIndices));
+      std::move(glyphIndices)};
 }
 
 std::unique_ptr<CharToGlyphMap> readCharMapTable(
@@ -358,11 +364,11 @@ std::unique_ptr<CharToGlyphMap> readCharMapTable(
   if (data.size() < 4) {
     throw std::runtime_error{"Corrupt font file"};
   }
-  uint16_t version = readBigEndian<uint16_t>(data);
+  auto version = readBigEndian<uint16_t>(data);
   if (version != 0) {
     throw std::runtime_error{"Unsupported font file"};
   }
-  uint16_t subtableCount = readBigEndian<uint16_t>(data);
+  const int subtableCount = readBigEndian<uint16_t>(data);
 
   if (data.size() < 8 * static_cast<size_t>(subtableCount)) {
     throw std::runtime_error{"Corrupt font file"};
@@ -371,7 +377,7 @@ std::unique_ptr<CharToGlyphMap> readCharMapTable(
   std::optional<SubtableHeader> m_selectedSubtable;
 
   for (int i = 0; i < subtableCount; i++) {
-    SubtableHeader current{
+    const SubtableHeader current{
         .platformId = readBigEndian<uint16_t>(data),
         .platformSpecificId = readBigEndian<uint16_t>(data),
         .offset = readBigEndian<uint32_t>(data)};
@@ -391,13 +397,12 @@ std::unique_ptr<CharToGlyphMap> readCharMapTable(
     throw std::runtime_error{"Corrupt font file"};
   }
 
-  uint16_t format = readBigEndian<uint16_t>(data);
+  auto format = readBigEndian<uint16_t>(data);
 
-  switch (format) {
-    case 4:
-      return std::make_unique<Format4Map>(readCharMapSubtableFormat4(data));
-    default:
-      throw std::runtime_error{"Unsupported font file"};
+  if (format == 4) {
+    return std::make_unique<Format4Map>(readCharMapSubtableFormat4(data));
+  } else {
+    throw std::runtime_error{"Unsupported font file"};
   }
 }
 
@@ -459,8 +464,8 @@ GlyphLocations readGlyphLocationsImpl(
 
   GlyphLocations result;
   result.offsets.reserve(numGlyphs);
-  for (int i = 0; i < numGlyphs; i++) {
-    uint32_t curOffset = static_cast<uint32_t>(readBigEndian<TRawType>(data));
+  for (unsigned int i = 0; i < numGlyphs; i++) {
+    auto curOffset = static_cast<uint32_t>(readBigEndian<TRawType>(data));
     if constexpr (isShort) {
       curOffset *= 2;
     }
@@ -484,12 +489,12 @@ SimpleGlyphData readSimpleGlyph(
     int16_t numContours, std::span<const std::byte>& data) {
   struct GlyphFlags {
     uint8_t value;
-    bool onCurve() const { return (value & 0x1) > 0; }
-    bool xShort() const { return (value & 0x2) > 0; }
-    bool yShort() const { return (value & 0x4) > 0; }
-    bool repeat() const { return (value & 0x8) > 0; }
-    bool xSame() const { return (value & 0x10) > 0; }
-    bool ySame() const { return (value & 0x20) > 0; }
+    [[nodiscard]] bool onCurve() const { return (value & 0x1ull) > 0; }
+    [[nodiscard]] bool xShort() const { return (value & 0x2ull) > 0; }
+    [[nodiscard]] bool yShort() const { return (value & 0x4ull) > 0; }
+    [[nodiscard]] bool repeat() const { return (value & 0x8ull) > 0; }
+    [[nodiscard]] bool xSame() const { return (value & 0x10ull) > 0; }
+    [[nodiscard]] bool ySame() const { return (value & 0x20ull) > 0; }
   };
 
   DEBUG_ASSERT(numContours >= 0);
@@ -510,9 +515,9 @@ SimpleGlyphData readSimpleGlyph(
     }
   }
 
-  uint16_t numPoints = numContours > 0 ? 1 + endPoints.back() : 0;
+  const uint16_t numPoints = numContours > 0 ? 1 + endPoints.back() : 0;
 
-  uint16_t instructionLength = readBigEndian<uint16_t>(data);
+  auto instructionLength = readBigEndian<uint16_t>(data);
   if (data.size() < static_cast<size_t>(instructionLength)) {
     throw std::runtime_error{"Corrupt font file"};
   }
@@ -523,25 +528,29 @@ SimpleGlyphData readSimpleGlyph(
 
   size_t pointBytes = 0;
 
-  for (int i = 0; i < numPoints; i++) {
-    if (data.size() < 1) {
+  for (unsigned int i = 0; i < numPoints; i++) {
+    if (data.empty()) {
       throw std::runtime_error{"Corrupt font file"};
     }
-    GlyphFlags current{readBigEndian<uint8_t>(data)};
+    const GlyphFlags current{readBigEndian<uint8_t>(data)};
     flags.emplace_back(current);
 
+    // NOLINTNEXTLINE(readability-avoid-nested-conditional-operator)
     pointBytes += current.xShort() ? 1 : (current.xSame() ? 0 : 2);
+    // NOLINTNEXTLINE(readability-avoid-nested-conditional-operator)
     pointBytes += current.yShort() ? 1 : (current.ySame() ? 0 : 2);
 
     if (current.repeat()) {
-      if (data.size() < 1) {
+      if (data.empty()) {
         throw std::runtime_error{"Corrupt font file"};
       }
-      int repetitions = readBigEndian<uint8_t>(data);
+      const int repetitions = readBigEndian<uint8_t>(data);
 
       pointBytes += static_cast<size_t>(repetitions) *
+          // NOLINTNEXTLINE(readability-avoid-nested-conditional-operator)
           (current.xShort() ? 1 : (current.xSame() ? 0 : 2));
       pointBytes += static_cast<size_t>(repetitions) *
+          // NOLINTNEXTLINE(readability-avoid-nested-conditional-operator)
           (current.yShort() ? 1 : (current.ySame() ? 0 : 2));
 
       if (i + repetitions >= numPoints) {
@@ -561,17 +570,19 @@ SimpleGlyphData readSimpleGlyph(
   int16_t baseXCoord = 0;
   std::vector<int16_t> xCoords;
   xCoords.reserve(numPoints);
-  for (int i = 0; i < numPoints; i++) {
-    GlyphFlags current = flags[i];
+  for (unsigned int i = 0; i < numPoints; i++) {
+    const GlyphFlags current = flags[i];
     if (current.xShort()) {
-      int16_t curOffset = static_cast<int16_t>(readBigEndian<uint8_t>(data));
+      auto curOffset = static_cast<int16_t>(readBigEndian<uint8_t>(data));
       if (!current.xSame()) {
         curOffset *= -1;
       }
+      // NOLINTNEXTLINE(*-narrowing-conversions)
       baseXCoord += curOffset;
     } else {
       if (!current.xSame()) {
-        int16_t curOffset = readBigEndian<int16_t>(data);
+        auto curOffset = readBigEndian<int16_t>(data);
+        // NOLINTNEXTLINE(*-narrowing-conversions)
         baseXCoord += curOffset;
       }
     }
@@ -582,17 +593,19 @@ SimpleGlyphData readSimpleGlyph(
   int16_t baseYCoord = 0;
   std::vector<int16_t> yCoords;
   yCoords.reserve(numPoints);
-  for (int i = 0; i < numPoints; i++) {
-    GlyphFlags current = flags[i];
+  for (unsigned int i = 0; i < numPoints; i++) {
+    const GlyphFlags current = flags[i];
     if (current.yShort()) {
-      int16_t curOffset = static_cast<int16_t>(readBigEndian<uint8_t>(data));
+      auto curOffset = static_cast<int16_t>(readBigEndian<uint8_t>(data));
       if (!current.ySame()) {
         curOffset *= -1;
       }
+      // NOLINTNEXTLINE(*-narrowing-conversions)
       baseYCoord += curOffset;
     } else {
       if (!current.ySame()) {
-        int16_t curOffset = readBigEndian<int16_t>(data);
+        auto curOffset = readBigEndian<int16_t>(data);
+        // NOLINTNEXTLINE(*-narrowing-conversions)
         baseYCoord += curOffset;
       }
     }
@@ -607,30 +620,40 @@ SimpleGlyphData readSimpleGlyph(
   }
 
   return {
-      std::move(endPoints),
-      std::move(xCoords),
-      std::move(yCoords),
-      std::move(onCurve)};
+      .endPoints = std::move(endPoints),
+      .xCoords = std::move(xCoords),
+      .yCoords = std::move(yCoords),
+      .onCurve = std::move(onCurve)};
 }
 
 std::vector<CompoundGlyphData> readCompoundGlyph(
     std::span<const std::byte>& data) {
   struct CompoundFlag {
     uint16_t rawValue;
-    bool argsAreWords() const { return (rawValue & 0x1) > 0; }
-    bool argsAreXY() const { return (rawValue & 0x2) > 0; }
-    bool roundToGrid() const { return (rawValue & 0x4) > 0; }
-    bool hasSimpleScale() const { return (rawValue & 0x8) > 0; }
-    bool moreComponents() const { return (rawValue & 0x20) > 0; }
-    bool hasXYScale() const { return (rawValue & 0x40) > 0; }
-    bool hasTransform() const { return (rawValue & 0x80) > 0; }
-    bool hasInstructions() const { return (rawValue & 0x100) > 0; }
-    bool useMyMetrics() const { return (rawValue & 0x200) > 0; }
-    bool overlapCompound() const { return (rawValue & 0x400) > 0; }
+    [[nodiscard]] bool argsAreWords() const { return (rawValue & 0x1ull) > 0; }
+    [[nodiscard]] bool argsAreXY() const { return (rawValue & 0x2ull) > 0; }
+    [[nodiscard]] bool roundToGrid() const { return (rawValue & 0x4ull) > 0; }
+    [[nodiscard]] bool hasSimpleScale() const {
+      return (rawValue & 0x8ull) > 0;
+    }
+    [[nodiscard]] bool moreComponents() const {
+      return (rawValue & 0x20ull) > 0;
+    }
+    [[nodiscard]] bool hasXYScale() const { return (rawValue & 0x40ull) > 0; }
+    [[nodiscard]] bool hasTransform() const { return (rawValue & 0x80ull) > 0; }
+    [[nodiscard]] bool hasInstructions() const {
+      return (rawValue & 0x100ull) > 0;
+    }
+    [[nodiscard]] bool useMyMetrics() const {
+      return (rawValue & 0x200ull) > 0;
+    }
+    [[nodiscard]] bool overlapCompound() const {
+      return (rawValue & 0x400ull) > 0;
+    }
   };
 
   auto convertScaleFloat = [](int16_t rawValue) {
-    return static_cast<float>(rawValue) / static_cast<float>(1 << 14);
+    return static_cast<float>(rawValue) / static_cast<float>(1ull << 14ull);
   };
 
   std::vector<CompoundGlyphData> result;
@@ -645,15 +668,15 @@ std::vector<CompoundGlyphData> readCompoundGlyph(
     curFlags = {readBigEndian<uint16_t>(data)};
     hasInstructions |= curFlags.hasInstructions();
 
-    uint16_t glyphIndex = readBigEndian<uint16_t>(data);
+    auto glyphIndex = readBigEndian<uint16_t>(data);
 
     if ((curFlags.argsAreWords() && data.size() < 4) ||
         (!curFlags.argsAreWords() && data.size() < 2)) {
       throw std::runtime_error{"Corrupt font file"};
     }
 
-    int32_t argument1;
-    int32_t argument2;
+    int32_t argument1 = 0;
+    int32_t argument2 = 0;
     if (curFlags.argsAreWords() && curFlags.argsAreXY()) {
       argument1 = readBigEndian<int16_t>(data);
       argument2 = readBigEndian<int16_t>(data);
@@ -661,7 +684,9 @@ std::vector<CompoundGlyphData> readCompoundGlyph(
       argument1 = readBigEndian<uint16_t>(data);
       argument2 = readBigEndian<uint16_t>(data);
     } else if (!curFlags.argsAreWords() && curFlags.argsAreXY()) {
+      // NOLINTNEXTLINE(bugprone-signed-char-misuse,cert-str34-c)
       argument1 = readBigEndian<int8_t>(data);
+      // NOLINTNEXTLINE(bugprone-signed-char-misuse,cert-str34-c)
       argument2 = readBigEndian<int8_t>(data);
     } else {
       argument1 = readBigEndian<uint8_t>(data);
@@ -699,7 +724,7 @@ std::vector<CompoundGlyphData> readCompoundGlyph(
   } while (curFlags.moreComponents());
 
   if (hasInstructions) {
-    uint16_t instructionCount = readBigEndian<uint16_t>(data);
+    auto instructionCount = readBigEndian<uint16_t>(data);
     if (data.size() < instructionCount) {
       throw std::runtime_error{"Corrupt font file"};
     }
@@ -715,16 +740,21 @@ std::vector<GlyphContourData> readGlyphTable(
   result.reserve(glyphLocations.offsets.size());
 
   for (size_t i = 0; i < glyphLocations.offsets.size() - 1; i++) {
-    long long curSize =
-        static_cast<size_t>(i) + 1 < glyphLocations.offsets.size()
-        ? glyphLocations.offsets[i + 1] - glyphLocations.offsets[i]
-        : data.size() - glyphLocations.offsets[i];
+    const long long curSize = i + 1 < glyphLocations.offsets.size()
+        ? static_cast<long long>(glyphLocations.offsets[i + 1]) -
+            glyphLocations.offsets[i]
+        : static_cast<long long>(data.size()) - glyphLocations.offsets[i];
     if (curSize < 0) {
       throw std::runtime_error{"Corrupt font file"};
     }
     if (curSize == 0) {
       result.emplace_back(
-          GlyphContourData{{0}, {0}, {0}, {0}, std::monostate{}});
+          GlyphContourData{
+              .xMin{0},
+              .yMin{0},
+              .xMax{0},
+              .yMax{0},
+              .data = std::monostate{}});
       continue;
     }
 
@@ -734,19 +764,29 @@ std::vector<GlyphContourData> readGlyphTable(
     if (glyphData.size() < 10) {
       throw std::runtime_error{"Corrupt font file"};
     }
-    int16_t numContours = readBigEndian<int16_t>(glyphData);
+    auto numContours = readBigEndian<int16_t>(glyphData);
 
-    FWord xMin{readBigEndian<FWord>(glyphData)};
-    FWord yMin{readBigEndian<FWord>(glyphData)};
-    FWord xMax{readBigEndian<FWord>(glyphData)};
-    FWord yMax{readBigEndian<FWord>(glyphData)};
+    const FWord xMin{readBigEndian<FWord>(glyphData)};
+    const FWord yMin{readBigEndian<FWord>(glyphData)};
+    const FWord xMax{readBigEndian<FWord>(glyphData)};
+    const FWord yMax{readBigEndian<FWord>(glyphData)};
 
     if (numContours >= 0) {
-      result.emplace_back(GlyphContourData{
-          xMin, yMin, xMax, yMax, {readSimpleGlyph(numContours, glyphData)}});
+      result.emplace_back(
+          GlyphContourData{
+              .xMin = xMin,
+              .yMin = yMin,
+              .xMax = xMax,
+              .yMax = yMax,
+              .data{readSimpleGlyph(numContours, glyphData)}});
     } else {
-      result.emplace_back(GlyphContourData{
-          xMin, yMin, xMax, yMax, {readCompoundGlyph(glyphData)}});
+      result.emplace_back(
+          GlyphContourData{
+              .xMin = xMin,
+              .yMin = yMin,
+              .xMax = xMax,
+              .yMax = yMax,
+              .data{readCompoundGlyph(glyphData)}});
     }
     if (glyphData.size() >= 2) {
       throw std::runtime_error{"Corrupt font file"};
@@ -822,9 +862,10 @@ HorizontalMetrics readHorizontalMetrics(
   metrics.data.reserve(maxProfile.numGlyphs);
 
   UFWord lastAdvanceWidth{0};
-  for (int i = 0; i < hheader.numOfLongHorMetrics; i++) {
-    GlyphHorizontalMetrics cur{
-        readBigEndian<UFWord>(data), readBigEndian<FWord>(data)};
+  for (unsigned int i = 0; i < hheader.numOfLongHorMetrics; i++) {
+    const GlyphHorizontalMetrics cur{
+        .advanceWidth = readBigEndian<UFWord>(data),
+        .leftSideBearing = readBigEndian<FWord>(data)};
     lastAdvanceWidth = cur.advanceWidth;
     metrics.data.emplace_back(cur);
   }
@@ -898,9 +939,10 @@ VerticalMetrics readVerticalMetrics(
   metrics.data.reserve(maxProfile.numGlyphs);
 
   UFWord lastAdvanceHeight{0};
-  for (int i = 0; i < hheader.numOfLongVerMetrics; i++) {
-    GlyphVerticalMetrics cur{
-        readBigEndian<UFWord>(data), readBigEndian<FWord>(data)};
+  for (unsigned int i = 0; i < hheader.numOfLongVerMetrics; i++) {
+    const GlyphVerticalMetrics cur{
+        .advanceHeight = readBigEndian<UFWord>(data),
+        .topSideBearing = readBigEndian<FWord>(data)};
     lastAdvanceHeight = cur.advanceHeight;
     metrics.data.emplace_back(cur);
   }
@@ -913,7 +955,7 @@ VerticalMetrics readVerticalMetrics(
 }
 
 uint32_t kerningMapKey(uint16_t left, uint16_t right) {
-  return (static_cast<uint32_t>(left) << 16) + right;
+  return (static_cast<uint32_t>(left) << 16ull) + right;
 }
 
 void readKerningSubtable(
@@ -923,13 +965,13 @@ void readKerningSubtable(
     throw std::runtime_error{"Corrupt font file"};
   }
 
-  uint16_t version = readBigEndian<uint16_t>(data);
+  auto version = readBigEndian<uint16_t>(data);
   if (version != 0) {
     throw std::runtime_error{"Unsupported font file"};
   }
 
   readBigEndian<uint16_t>(data); // length
-  uint8_t format = readBigEndian<uint8_t>(data);
+  auto format = readBigEndian<uint8_t>(data);
   readBigEndian<uint8_t>(data); // flags
 
   if (format != 0) {
@@ -941,7 +983,7 @@ void readKerningSubtable(
     throw std::runtime_error{"Corrupt font file"};
   }
 
-  uint16_t numPairs = readBigEndian<uint16_t>(data);
+  auto numPairs = readBigEndian<uint16_t>(data);
   readBigEndian<uint16_t>(data); // search range
   readBigEndian<uint16_t>(data); // entry selector
   readBigEndian<uint16_t>(data); // range shift
@@ -951,12 +993,12 @@ void readKerningSubtable(
   }
 
   kernValues.reserve(kernValues.size() + numPairs);
-  for (int i = 0; i < numPairs; i++) {
-    uint16_t left = readBigEndian<uint16_t>(data);
-    uint16_t right = readBigEndian<uint16_t>(data);
-    FWord value = readBigEndian<FWord>(data);
+  for (unsigned int i = 0; i < numPairs; i++) {
+    auto left = readBigEndian<uint16_t>(data);
+    auto right = readBigEndian<uint16_t>(data);
+    auto value = readBigEndian<FWord>(data);
 
-    uint32_t mapKey = kerningMapKey(left, right);
+    const uint32_t mapKey = kerningMapKey(left, right);
 
     if (auto it = kernValues.find(mapKey); it != kernValues.end()) {
       it->second += value;
@@ -971,14 +1013,14 @@ KerningTable readKerningTable(std::span<const std::byte> data) {
     throw std::runtime_error{"Corrupt font file"};
   }
 
-  uint16_t version = readBigEndian<uint16_t>(data);
+  auto version = readBigEndian<uint16_t>(data);
   if (version != 0) {
     throw std::runtime_error{"Unsupported font file"};
   }
-  uint16_t numTables = readBigEndian<uint16_t>(data);
+  auto numTables = readBigEndian<uint16_t>(data);
 
   std::unordered_map<uint32_t, FWord> kernValues;
-  for (int i = 0; i < numTables; i++) {
+  for (unsigned int i = 0; i < numTables; i++) {
     readKerningSubtable(data, kernValues);
   }
 
@@ -1020,9 +1062,9 @@ OS2TableData readOS2TableVersion4(std::span<const std::byte> data) {
   readBigEndian<uint16_t>(data); // fsSelection
   readBigEndian<uint16_t>(data); // firstCharIndex
   readBigEndian<uint16_t>(data); // lastCharIndex
-  FWord ascender = readBigEndian<FWord>(data);
-  FWord descender = readBigEndian<FWord>(data);
-  FWord lineGap = readBigEndian<FWord>(data);
+  const auto ascender = readBigEndian<FWord>(data);
+  const auto descender = readBigEndian<FWord>(data);
+  const auto lineGap = readBigEndian<FWord>(data);
   readBigEndian<uint16_t>(data); // ascent padding
   readBigEndian<uint16_t>(data); // descent padding
   readBigEndian<uint32_t>(data); // codePageRange1
@@ -1044,7 +1086,7 @@ OS2TableData readOS2Table(std::span<const std::byte> data) {
     throw std::runtime_error{"Corrupt font file"};
   }
 
-  uint16_t version = readBigEndian<uint16_t>(data);
+  auto version = readBigEndian<uint16_t>(data);
 
   if (version >= 2 && version <= 4) {
     return readOS2TableVersion4(data);
@@ -1066,7 +1108,7 @@ std::span<const std::byte> getTableContents(
 std::span<const std::byte> getTableContentsWithPadding(
     std::span<const std::byte> data,
     const TableDirectoryEntry& tableDescriptor) {
-  size_t paddedLength = 4ull * ((tableDescriptor.length + 3ull) / 4ull);
+  const size_t paddedLength = 4ull * ((tableDescriptor.length + 3ull) / 4ull);
   auto result = data.subspan(tableDescriptor.offset, paddedLength);
   if (result.size() != paddedLength) {
     throw std::runtime_error{"Corrupt font file"};
@@ -1095,11 +1137,6 @@ const TableDirectoryEntry* lookupTable(
 
 } // namespace
 
-KerningTable::KerningTable() {}
-
-KerningTable::KerningTable(std::unordered_map<uint32_t, FWord> data)
-    : data_(std::move(data)) {}
-
 FWord KerningTable::apply(uint16_t leftGlyph, uint16_t rightGlyph) const {
   if (auto it = data_.find(kerningMapKey(leftGlyph, rightGlyph));
       it != data_.end()) {
@@ -1123,9 +1160,9 @@ Font loadFont(const std::span<const std::byte> data) {
 
   std::vector<TableDirectoryEntry> tableDirectory;
   tableDirectory.reserve(offsetSubtable.numTables);
-  for (int i = 0; i < offsetSubtable.numTables; i++) {
+  for (unsigned int i = 0; i < offsetSubtable.numTables; i++) {
     tableDirectory.emplace_back(readTableDirectory(data.subspan(
-        sizeof(OffsetSubtable) + i * sizeof(TableDirectoryEntry),
+        sizeof(OffsetSubtable) + (i * sizeof(TableDirectoryEntry)),
         sizeof(TableDirectoryEntry))));
   }
 
@@ -1147,7 +1184,7 @@ Font loadFont(const std::span<const std::byte> data) {
   }
 
   HeadTable headEntry = [&]() {
-    const auto entryPtr = lookupTable(tableDirectory, kTagHead);
+    const auto* const entryPtr = lookupTable(tableDirectory, kTagHead);
     if (entryPtr == nullptr) {
       throw std::runtime_error{"Corrupt font file"};
     }
@@ -1161,8 +1198,8 @@ Font loadFont(const std::span<const std::byte> data) {
     throw std::runtime_error{"Corrupt font file"};
   }
 
-  NameTable nameTable = [&]() {
-    const auto entryPtr = lookupTable(tableDirectory, kTagName);
+  const NameTable nameTable = [&]() {
+    const auto* const entryPtr = lookupTable(tableDirectory, kTagName);
     if (entryPtr == nullptr) {
       throw std::runtime_error{"Corrupt font file"};
     }
@@ -1170,7 +1207,7 @@ Font loadFont(const std::span<const std::byte> data) {
   }();
 
   std::unique_ptr<CharToGlyphMap> charMap = [&]() {
-    const auto entryPtr = lookupTable(tableDirectory, kTagCmap);
+    const auto* const entryPtr = lookupTable(tableDirectory, kTagCmap);
     if (entryPtr == nullptr) {
       throw std::runtime_error{"Corrupt font file"};
     }
@@ -1178,7 +1215,7 @@ Font loadFont(const std::span<const std::byte> data) {
   }();
 
   MaximumProfile maxProfile = [&]() {
-    const auto entryPtr = lookupTable(tableDirectory, kTagMaxp);
+    const auto* const entryPtr = lookupTable(tableDirectory, kTagMaxp);
     if (entryPtr == nullptr) {
       throw std::runtime_error{"Corrupt font file"};
     }
@@ -1186,7 +1223,7 @@ Font loadFont(const std::span<const std::byte> data) {
   }();
 
   GlyphLocations glyphLocations = [&]() {
-    const auto entryPtr = lookupTable(tableDirectory, kTagLoca);
+    const auto* const entryPtr = lookupTable(tableDirectory, kTagLoca);
     if (entryPtr == nullptr) {
       throw std::runtime_error{"Corrupt font file"};
     }
@@ -1195,7 +1232,7 @@ Font loadFont(const std::span<const std::byte> data) {
   }();
 
   std::vector<GlyphContourData> glyphs = [&]() {
-    const auto entryPtr = lookupTable(tableDirectory, kTagGlyf);
+    const auto* const entryPtr = lookupTable(tableDirectory, kTagGlyf);
     if (entryPtr == nullptr) {
       throw std::runtime_error{"Corrupt font file"};
     }
@@ -1203,7 +1240,7 @@ Font loadFont(const std::span<const std::byte> data) {
   }();
 
   HorizontalHeader horizontalHeader = [&]() {
-    const auto entryPtr = lookupTable(tableDirectory, kTagHhea);
+    const auto* const entryPtr = lookupTable(tableDirectory, kTagHhea);
     if (entryPtr == nullptr) {
       throw std::runtime_error{"Corrupt font file"};
     }
@@ -1211,7 +1248,7 @@ Font loadFont(const std::span<const std::byte> data) {
   }();
 
   HorizontalMetrics horizontalMetrics = [&]() {
-    const auto entryPtr = lookupTable(tableDirectory, kTagHmtx);
+    const auto* const entryPtr = lookupTable(tableDirectory, kTagHmtx);
     if (entryPtr == nullptr) {
       throw std::runtime_error{"Corrupt font file"};
     }
@@ -1221,7 +1258,7 @@ Font loadFont(const std::span<const std::byte> data) {
 
   std::optional<VerticalHeader> verticalHeader =
       [&]() -> std::optional<VerticalHeader> {
-    const auto entryPtr = lookupTable(tableDirectory, kTagVhea);
+    const auto* const entryPtr = lookupTable(tableDirectory, kTagVhea);
     if (entryPtr == nullptr) {
       return {};
     }
@@ -1233,7 +1270,7 @@ Font loadFont(const std::span<const std::byte> data) {
     if (!verticalHeader.has_value()) {
       return {};
     }
-    const auto entryPtr = lookupTable(tableDirectory, kTagVmtx);
+    const auto* const entryPtr = lookupTable(tableDirectory, kTagVmtx);
     if (entryPtr == nullptr) {
       return {};
     }
@@ -1242,7 +1279,7 @@ Font loadFont(const std::span<const std::byte> data) {
   }();
 
   KerningTable kerning = [&]() {
-    const auto entryPtr = lookupTable(tableDirectory, kTagKern);
+    const auto* const entryPtr = lookupTable(tableDirectory, kTagKern);
     if (entryPtr == nullptr) {
       return KerningTable{};
     }
@@ -1250,7 +1287,7 @@ Font loadFont(const std::span<const std::byte> data) {
   }();
 
   std::optional<OS2TableData> os2Data = [&]() -> std::optional<OS2TableData> {
-    const auto entryPtr = lookupTable(tableDirectory, kTagOS2);
+    const auto* const entryPtr = lookupTable(tableDirectory, kTagOS2);
     if (entryPtr == nullptr) {
       return std::nullopt;
     }
@@ -1266,10 +1303,11 @@ Font loadFont(const std::span<const std::byte> data) {
   for (size_t i = 0; i < glyphs.size(); i++) {
     joinedGlyphs.emplace_back(
         std::move(glyphs[i]),
-        std::move(horizontalMetrics.data[i]),
+        horizontalMetrics.data[i],
         verticalMetrics.has_value()
-            ? std::move(verticalMetrics->data[i])
-            : GlyphVerticalMetrics{{0}, glyphs[i].yMax});
+            ? verticalMetrics->data[i]
+            : GlyphVerticalMetrics{
+                  .advanceHeight = {0}, .topSideBearing = glyphs[i].yMax});
   }
 
   return Font{

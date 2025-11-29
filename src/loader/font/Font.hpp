@@ -12,9 +12,10 @@
 namespace blocks::loader {
 
 struct FWord {
-  int16_t rawValue;
+  int16_t rawValue = 0;
 
   FWord& operator+=(const FWord& other) {
+    // NOLINTNEXTLINE(*-narrowing-conversions)
     rawValue += other.rawValue;
     return *this;
   }
@@ -31,12 +32,20 @@ struct FWord {
 };
 
 struct UFWord {
-  uint16_t rawValue;
+  uint16_t rawValue = 0;
 };
 
 class CharToGlyphMap {
  public:
-  virtual ~CharToGlyphMap() {}
+  CharToGlyphMap() = default;
+
+  CharToGlyphMap(const CharToGlyphMap& other) = default;
+  CharToGlyphMap& operator=(const CharToGlyphMap& other) = default;
+
+  CharToGlyphMap(CharToGlyphMap&& other) = default;
+  CharToGlyphMap& operator=(CharToGlyphMap&& other) = default;
+
+  virtual ~CharToGlyphMap() = default;
 
   virtual uint16_t mapChar(uint32_t unicodeChar) = 0;
 };
@@ -49,21 +58,21 @@ struct SimpleGlyphData {
 };
 
 struct CompoundGlyphData {
-  uint16_t glpyhIndex;
-  float a;
-  float b;
-  float c;
-  float d;
-  int32_t e;
-  int32_t f;
-  bool areOffsets; // otherwise are points
+  uint16_t glpyhIndex = 0;
+  float a = 0.0f;
+  float b = 0.0f;
+  float c = 0.0f;
+  float d = 0.0f;
+  int32_t e = 0;
+  int32_t f = 0;
+  bool areOffsets = false; // otherwise are points
 };
 
 struct GlyphContourData {
-  FWord xMin;
-  FWord yMin;
-  FWord xMax;
-  FWord yMax;
+  FWord xMin{};
+  FWord yMin{};
+  FWord xMax{};
+  FWord yMax{};
   std::variant<std::monostate, SimpleGlyphData, std::vector<CompoundGlyphData>>
       data;
 };
@@ -84,12 +93,14 @@ struct GlyphData {
   GlyphVerticalMetrics verticalMetrics;
 };
 
+// NOLINTNEXTLINE(bugprone-exception-escape)
 class KerningTable {
  public:
-  KerningTable();
-  explicit KerningTable(std::unordered_map<uint32_t, FWord> data);
+  KerningTable() = default;
+  explicit KerningTable(std::unordered_map<uint32_t, FWord> data)
+      : data_(std::move(data)) {}
 
-  FWord apply(uint16_t leftGlyph, uint16_t rightGlyph) const;
+  [[nodiscard]] FWord apply(uint16_t leftGlyph, uint16_t rightGlyph) const;
 
  private:
   std::unordered_map<uint32_t, FWord> data_;

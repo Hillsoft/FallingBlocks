@@ -1,11 +1,12 @@
 #include "loader/Config.hpp"
 
+#include <cstddef>
 #include <filesystem>
 #include <stdexcept>
 #include <string_view>
-#include <type_traits>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 #include "util/file.hpp"
 #include "util/string.hpp"
@@ -20,15 +21,15 @@ std::unordered_map<std::string_view, std::vector<std::string_view>> getPairs(
 
   std::string_view remaining{rawData.begin(), rawData.end()};
 
-  while (remaining.size() > 0) {
-    size_t lineEnd = remaining.find('\n');
+  while (!remaining.empty()) {
+    const size_t lineEnd = remaining.find('\n');
     std::string_view line = lineEnd != std::string_view::npos
         ? remaining.substr(0, lineEnd)
         : remaining;
     remaining =
         lineEnd != std::string_view::npos ? remaining.substr(lineEnd + 1) : "";
 
-    if (line.size() == 0) {
+    if (line.empty()) {
       // Empty line
       continue;
     }
@@ -37,7 +38,7 @@ std::unordered_map<std::string_view, std::vector<std::string_view>> getPairs(
       continue;
     }
 
-    size_t split = line.find('=');
+    const size_t split = line.find('=');
     if (split == std::string_view::npos) {
       throw std::runtime_error{
           util::toString("Improperly formatted line: '", line, "'")};
@@ -51,7 +52,7 @@ std::unordered_map<std::string_view, std::vector<std::string_view>> getPairs(
     std::vector<std::string_view> values;
     std::string_view valuesList = line.substr(split + 1);
 
-    size_t valueSplit;
+    size_t valueSplit = 0;
     while ((valueSplit = valuesList.find(';')) != std::string_view::npos) {
       values.emplace_back(valuesList.substr(0, valueSplit));
       valuesList = valuesList.substr(valueSplit + 1);
@@ -74,10 +75,10 @@ T readKey(
     FnMissing&& missingHandler) {
   auto value = keyValuePairs.find(key);
   if (value == keyValuePairs.end()) {
-    return missingHandler();
+    return std::forward<FnMissing>(missingHandler)();
   }
 
-  T result = foundHandler(value->second);
+  T result = std::forward<FnFound>(foundHandler)(value->second);
 
   if (!foundKeys.contains(value->first)) {
     foundKeys.insert(value->first);
@@ -113,7 +114,7 @@ std::string_view extractString(
 }
 
 long parseInt(std::string_view str) {
-  if (str.size() == 0) {
+  if (str.empty()) {
     throw std::runtime_error{"Int parse error"};
   }
 
@@ -170,14 +171,10 @@ std::vector<long> extractIntList(
 } // namespace
 
 Config::Config(const std::filesystem::path& path)
-    : rawData_(util::readFileChars(path)),
-      keyValuePairs_(getPairs(rawData_)),
-      foundKeys_() {}
+    : rawData_(util::readFileChars(path)), keyValuePairs_(getPairs(rawData_)) {}
 
 Config::Config(std::vector<char> data)
-    : rawData_(std::move(data)),
-      keyValuePairs_(getPairs(rawData_)),
-      foundKeys_() {}
+    : rawData_(std::move(data)), keyValuePairs_(getPairs(rawData_)) {}
 
 std::string_view Config::readString(std::string_view key) {
   return readKey<std::string_view>(
