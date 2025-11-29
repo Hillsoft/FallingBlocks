@@ -20,7 +20,9 @@ class BitStream {
   explicit BitStream(std::span<const std::byte> data) : data_(data) {}
 
   [[nodiscard]] uint64_t peekBits(unsigned int bitCount) const {
-    DEBUG_ASSERT(bitCount > 0);
+    if (bitCount == 0) {
+      return 0;
+    }
     DEBUG_ASSERT(bitCount <= 64);
 
     const unsigned int maxDataOffset = (byteOffset_ + bitCount - 1) / 8;
