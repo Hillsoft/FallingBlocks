@@ -58,7 +58,7 @@
             "toolset": "clang_cl_x64",
             "vendor": {
                 "microsoft.com/VisualStudioSettings/CMake/1.0": {
-                    "clangTidyChecks": "*",
+                    "clangTidyChecks": "",
                     "enableClangTidyCodeAnalysis": true,
                     "enableMicrosoftCodeAnalysis": true,
                     "intelliSenseMode": "windows-clang-x64"
@@ -83,6 +83,14 @@
             "inherits": "x64-clang-debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
+        },
+        {
+            "name": "editor-lint",
+            "hidden": true,
+            "inherits": "windows-clang-base",
+            "cacheVariables": {
+                "CMAKE_CXX_CLANG_TIDY":  "clang-tidy"
             }
         }
     ]

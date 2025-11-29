@@ -32,3 +32,5 @@ Checks: "*,
 WarningsAsErrors: ''
 HeaderFilterRegex: '.*'
 FormatStyle:     none
+ExtraArgsBefore:
+    - "/EHsc"
