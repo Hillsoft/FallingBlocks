@@ -28,8 +28,8 @@ class UIButton : public UIObject, input::InputHandler {
       render::Simple2DCamera& camera,
       int baseZ) final;
 
-  void onMouseMove(math::Vec2 screenPos) final;
-  void onMouseUp(math::Vec2 screenPos) final;
+  void onMouseMove(math::Vec2 mousePos) final;
+  void onMouseUp(math::Vec2 mousePos) final;
 
  private:
   math::Vec4 color_;

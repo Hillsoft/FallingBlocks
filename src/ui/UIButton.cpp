@@ -62,7 +62,7 @@ void UIButton::onMouseMove(math::Vec2 mousePos) {
       mousePos.y() <= lastScreenMaxPos_.y();
 }
 
-void UIButton::onMouseUp(math::Vec2 mousePos) {
+void UIButton::onMouseUp(math::Vec2 /* mousePos */) {
   if (onClick_ && isHovered_) {
     onClick_();
   }

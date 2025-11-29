@@ -26,6 +26,7 @@ Checks: "*,
         -readability-container-data-pointer,
         -bugprone-easily-swappable-parameters,
         -readability-function-cognitive-complexity,
+        -misc-no-recursion,
         -modernize-use-nullptr,
         -hicpp-use-nullptr,
 "
