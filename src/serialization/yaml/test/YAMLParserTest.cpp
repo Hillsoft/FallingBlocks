@@ -6,17 +6,17 @@
 #include "serialization/yaml/YAMLTokenizer.hpp"
 
 TEST(YAMLTokenizerTest, Sequence) {
-  std::string_view inputYAML =
+  constexpr std::string_view inputYAML =
       "- Mark McGwire\n"
       "- Sammy Sosa\n"
       "- Ken Griffey";
 
-  std::vector<blocks::serialization::yaml::YAMLSymbol> tokens =
+  const std::vector<blocks::serialization::yaml::YAMLSymbol> tokens =
       blocks::serialization::yaml::tokenizeYAML(inputYAML);
-  blocks::serialization::yaml::YAMLDocument result =
+  const blocks::serialization::yaml::YAMLDocument result =
       blocks::serialization::yaml::parseDocument(tokens);
 
-  blocks::serialization::yaml::YAMLDocument expected{
+  const blocks::serialization::yaml::YAMLDocument expected{
       blocks::serialization::yaml::YAMLDocument::Sequence{std::vector<
           blocks::serialization::yaml::YAMLDocument>{
           blocks::serialization::yaml::YAMLDocument{
@@ -32,17 +32,17 @@ TEST(YAMLTokenizerTest, Sequence) {
 }
 
 TEST(YAMLTokenizerTest, Mapping) {
-  std::string_view inputYAML =
+  constexpr std::string_view inputYAML =
       "hr:  65    # Home runs\n"
       "avg: 0.278 # Batting average\n"
       "rbi: 147   # Runs batted in";
 
-  std::vector<blocks::serialization::yaml::YAMLSymbol> tokens =
+  const std::vector<blocks::serialization::yaml::YAMLSymbol> tokens =
       blocks::serialization::yaml::tokenizeYAML(inputYAML);
-  blocks::serialization::yaml::YAMLDocument result =
+  const blocks::serialization::yaml::YAMLDocument result =
       blocks::serialization::yaml::parseDocument(tokens);
 
-  blocks::serialization::yaml::YAMLDocument expected{
+  const blocks::serialization::yaml::YAMLDocument expected{
       blocks::serialization::yaml::YAMLDocument::Mapping{
           {{"hr",
             blocks::serialization::yaml::YAMLDocument{
@@ -59,7 +59,7 @@ TEST(YAMLTokenizerTest, Mapping) {
 }
 
 TEST(YAMLTokenizerTest, MappingToSequence) {
-  std::string_view inputYAML =
+  constexpr std::string_view inputYAML =
       "american:\n"
       "- Boston Red Sox\n"
       "- Detroit Tigers\n"
@@ -69,12 +69,12 @@ TEST(YAMLTokenizerTest, MappingToSequence) {
       "- Chicago Cubs\n"
       "- Atlanta Braves";
 
-  std::vector<blocks::serialization::yaml::YAMLSymbol> tokens =
+  const std::vector<blocks::serialization::yaml::YAMLSymbol> tokens =
       blocks::serialization::yaml::tokenizeYAML(inputYAML);
-  blocks::serialization::yaml::YAMLDocument result =
+  const blocks::serialization::yaml::YAMLDocument result =
       blocks::serialization::yaml::parseDocument(tokens);
 
-  blocks::serialization::yaml::YAMLDocument expected{
+  const blocks::serialization::yaml::YAMLDocument expected{
       blocks::serialization::yaml::YAMLDocument::Mapping{
           {{"american",
             blocks::serialization::yaml::YAMLDocument{
@@ -105,7 +105,7 @@ TEST(YAMLTokenizerTest, MappingToSequence) {
 }
 
 TEST(YAMLTokenizerTest, SequenceOfMappings) {
-  std::string_view inputYAML =
+  constexpr std::string_view inputYAML =
       "-\n"
       "  name: Mark McGwire\n"
       "  hr:   65\n"
@@ -115,12 +115,12 @@ TEST(YAMLTokenizerTest, SequenceOfMappings) {
       "  hr:   63\n"
       "  avg:  0.288";
 
-  std::vector<blocks::serialization::yaml::YAMLSymbol> tokens =
+  const std::vector<blocks::serialization::yaml::YAMLSymbol> tokens =
       blocks::serialization::yaml::tokenizeYAML(inputYAML);
-  blocks::serialization::yaml::YAMLDocument result =
+  const blocks::serialization::yaml::YAMLDocument result =
       blocks::serialization::yaml::parseDocument(tokens);
 
-  blocks::serialization::yaml::YAMLDocument expected{
+  const blocks::serialization::yaml::YAMLDocument expected{
       blocks::serialization::yaml::YAMLDocument::Sequence{
           {blocks::serialization::yaml::YAMLDocument{
                blocks::serialization::yaml::YAMLDocument::Mapping{

@@ -13,7 +13,7 @@ namespace blocks::serialization::yaml {
 namespace {
 
 int effectiveCurrentIndentation(std::span<const YAMLSymbol> symbols) {
-  if (symbols.size() == 0) {
+  if (symbols.empty()) {
     return 0;
   }
 
@@ -24,7 +24,7 @@ int effectiveCurrentIndentation(std::span<const YAMLSymbol> symbols) {
         : 0;
   }
 
-  const YAMLSymbol::WhiteSpace& whiteSpaceDetail =
+  const auto& whiteSpaceDetail =
       std::get<YAMLSymbol::WhiteSpace>(symbols[0].value_);
 
   if (symbols.size() == 1 ||
@@ -37,7 +37,7 @@ int effectiveCurrentIndentation(std::span<const YAMLSymbol> symbols) {
 }
 
 void consumeWhitespace(std::span<const YAMLSymbol>& symbols) {
-  while (symbols.size() > 0 &&
+  while (!symbols.empty() &&
          (std::holds_alternative<YAMLSymbol::WhiteSpace>(symbols[0].value_) ||
           std::holds_alternative<YAMLSymbol::Comment>(symbols[0].value_))) {
     symbols = symbols.subspan(1);
@@ -54,13 +54,12 @@ YAMLDocument emptyDocument() {
 YAMLDocument parseLeafValue(
     int indentLimit, std::span<const YAMLSymbol>& symbols) {
   consumeWhitespace(symbols);
-  if (symbols.size() == 0) {
+  if (symbols.empty()) {
     return YAMLDocument{YAMLDocument::LeafValue{std::string{""}}};
   }
 
   if (std::holds_alternative<YAMLSymbol::ScalarText>(symbols[0].value_)) {
-    const YAMLSymbol::ScalarText& textData =
-        std::get<YAMLSymbol::ScalarText>(symbols[0].value_);
+    const auto& textData = std::get<YAMLSymbol::ScalarText>(symbols[0].value_);
     symbols = symbols.subspan(1);
     return YAMLDocument{
         YAMLDocument::LeafValue{std::string{textData.contents}}};
@@ -78,8 +77,7 @@ YAMLDocument parseLeafValue(
   consumeWhitespace(symbols);
 
   if (std::holds_alternative<YAMLSymbol::ScalarText>(symbols[0].value_)) {
-    const YAMLSymbol::ScalarText& textData =
-        std::get<YAMLSymbol::ScalarText>(symbols[0].value_);
+    const auto& textData = std::get<YAMLSymbol::ScalarText>(symbols[0].value_);
     symbols = symbols.subspan(1);
     return YAMLDocument{
         YAMLDocument::LeafValue{std::string{textData.contents}}};
@@ -95,7 +93,7 @@ YAMLDocument parseSequence(
   consumeWhitespace(symbols);
 
   while (true) {
-    if (symbols.size() == 0) {
+    if (symbols.empty()) {
       return YAMLDocument{YAMLDocument::Sequence{std::move(elements)}};
     }
 
@@ -110,7 +108,7 @@ YAMLDocument parseSequence(
 
     consumeWhitespace(symbols);
 
-    if (symbols.size() == 0) {
+    if (symbols.empty()) {
       return YAMLDocument{YAMLDocument::Sequence{std::move(elements)}};
     }
 
@@ -118,7 +116,7 @@ YAMLDocument parseSequence(
       throw std::runtime_error{"Improperly formed sequence"};
     }
 
-    int nextIndent = effectiveCurrentIndentation(symbols.subspan(1));
+    const int nextIndent = effectiveCurrentIndentation(symbols.subspan(1));
     if (nextIndent > indentLimit) {
       throw std::runtime_error{"Improperly formed sequence"};
     } else if (nextIndent < indentLimit) {
@@ -137,7 +135,7 @@ YAMLDocument parseMapping(
   consumeWhitespace(symbols);
 
   while (true) {
-    if (symbols.size() == 0) {
+    if (symbols.empty()) {
       return YAMLDocument{YAMLDocument::Mapping{std::move(elements)}};
     }
 
@@ -150,7 +148,7 @@ YAMLDocument parseMapping(
     symbols = symbols.subspan(1);
     consumeWhitespace(symbols);
 
-    if (symbols.size() == 0 ||
+    if (symbols.empty() ||
         !std::holds_alternative<YAMLSymbol::MappingValueSeparator>(
             symbols[0].value_)) {
       throw std::runtime_error{"Expected mapping value"};
@@ -164,7 +162,7 @@ YAMLDocument parseMapping(
 
     consumeWhitespace(symbols);
 
-    if (symbols.size() == 0) {
+    if (symbols.empty()) {
       return YAMLDocument{YAMLDocument::Mapping{std::move(elements)}};
     }
 
@@ -172,7 +170,7 @@ YAMLDocument parseMapping(
       throw std::runtime_error{"Improperly formed mapping"};
     }
 
-    int nextIndent = effectiveCurrentIndentation(symbols.subspan(1));
+    const int nextIndent = effectiveCurrentIndentation(symbols.subspan(1));
     if (nextIndent > indentLimit) {
       throw std::runtime_error{"Improperly formed mapping"};
     } else if (nextIndent < indentLimit) {
@@ -188,7 +186,7 @@ YAMLDocument parseObject(
     int indentLimit, bool isMidLine, std::span<const YAMLSymbol>& symbols) {
   if (isMidLine) {
     consumeWhitespace(symbols);
-    if (symbols.size() == 0 ||
+    if (symbols.empty() ||
         !std::holds_alternative<YAMLSymbol::NewLine>(symbols[0].value_)) {
       return parseLeafValue(indentLimit, symbols);
     }
@@ -196,7 +194,7 @@ YAMLDocument parseObject(
     symbols = symbols.subspan(1);
   }
 
-  int currentIndent = effectiveCurrentIndentation(symbols);
+  const int currentIndent = effectiveCurrentIndentation(symbols);
   if (currentIndent < 0) {
     throw std::runtime_error{"Improper indentation; only spaces are valid"};
   }
@@ -208,7 +206,7 @@ YAMLDocument parseObject(
   indentLimit = currentIndent;
 
   consumeWhitespace(symbols);
-  if (symbols.size() == 0) {
+  if (symbols.empty()) {
     return emptyDocument();
   }
 
@@ -219,7 +217,7 @@ YAMLDocument parseObject(
 
   std::span<const YAMLSymbol> advance = symbols.subspan(1);
   consumeWhitespace(advance);
-  if (advance.size() > 0 &&
+  if (!advance.empty() &&
       std::holds_alternative<YAMLSymbol::MappingValueSeparator>(
           advance[0].value_)) {
     return parseMapping(indentLimit, symbols);

@@ -1,5 +1,6 @@
 #include "physics/PhysicsScene.hpp"
 
+#include <cstddef>
 #include <optional>
 #include "math/vec.hpp"
 #include "physics/RectCollider.hpp"
@@ -7,7 +8,7 @@
 
 namespace blocks::physics {
 
-PhysicsScene::PhysicsScene() {}
+PhysicsScene::PhysicsScene() = default;
 
 void PhysicsScene::run() {
   auto collidersLock = getRegisteredItems();

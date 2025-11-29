@@ -1,5 +1,6 @@
 #include "serialization/yaml/YAMLSerializationProvider.hpp"
 
+#include <cstddef>
 #include <optional>
 #include <stdexcept>
 #include <string_view>
@@ -18,8 +19,7 @@ size_t YAMLSerializationCursor::getStructFieldCount() {
     throw std::runtime_error{"Cannot get subfield of a non-map element"};
   }
 
-  YAMLDocument::Mapping& mapping =
-      std::get<YAMLDocument::Mapping>(document_->value_);
+  auto& mapping = std::get<YAMLDocument::Mapping>(document_->value_);
 
   return mapping.entries.size();
 }
@@ -30,8 +30,7 @@ YAMLSerializationCursor::getSubFieldCursor(std::string_view name) {
     throw std::runtime_error{"Cannot get subfield of a non-map element"};
   }
 
-  YAMLDocument::Mapping& mapping =
-      std::get<YAMLDocument::Mapping>(document_->value_);
+  auto& mapping = std::get<YAMLDocument::Mapping>(document_->value_);
 
   for (auto& [fieldName, fieldValue] : mapping.entries) {
     if (fieldName == name) {
@@ -48,7 +47,7 @@ YAMLSerializationCursor::getFieldStartIterator() {
     throw std::runtime_error{"Cannot get subfield of a non-map element"};
   }
 
-  return YAMLSerializationCursor::FieldIterator{this, 0};
+  return YAMLSerializationCursor::FieldIterator{.target = this, .i = 0};
 }
 
 YAMLSerializationCursor::FieldIterator
@@ -57,10 +56,10 @@ YAMLSerializationCursor::getFieldEndIterator() {
     throw std::runtime_error{"Cannot get subfield of a non-map element"};
   }
 
-  YAMLDocument::Mapping& mapping =
-      std::get<YAMLDocument::Mapping>(document_->value_);
+  auto& mapping = std::get<YAMLDocument::Mapping>(document_->value_);
 
-  return YAMLSerializationCursor::FieldIterator{this, mapping.entries.size()};
+  return YAMLSerializationCursor::FieldIterator{
+      .target = this, .i = mapping.entries.size()};
 }
 
 size_t YAMLSerializationCursor::getSequenceEntryCount() {
@@ -69,8 +68,7 @@ size_t YAMLSerializationCursor::getSequenceEntryCount() {
         "Cannot get sequence items of a non-sequence element"};
   }
 
-  YAMLDocument::Sequence& sequence =
-      std::get<YAMLDocument::Sequence>(document_->value_);
+  auto& sequence = std::get<YAMLDocument::Sequence>(document_->value_);
 
   return sequence.entries.size();
 }
@@ -82,7 +80,7 @@ YAMLSerializationCursor::getSequenceStartIterator() {
         "Cannot get sequence items of a non-sequence element"};
   }
 
-  return YAMLSerializationCursor::SequenceIterator{this, 0};
+  return YAMLSerializationCursor::SequenceIterator{.target = this, .i = 0};
 }
 
 YAMLSerializationCursor::SequenceIterator
@@ -92,11 +90,10 @@ YAMLSerializationCursor::getSequenceEndIterator() {
         "Cannot get sequence items of a non-sequence element"};
   }
 
-  YAMLDocument::Sequence& sequence =
-      std::get<YAMLDocument::Sequence>(document_->value_);
+  auto& sequence = std::get<YAMLDocument::Sequence>(document_->value_);
 
   return YAMLSerializationCursor::SequenceIterator{
-      this, sequence.entries.size()};
+      .target = this, .i = sequence.entries.size()};
 }
 
 std::string_view YAMLSerializationCursor::getStringValue() {
@@ -104,8 +101,7 @@ std::string_view YAMLSerializationCursor::getStringValue() {
     throw std::runtime_error{"Cannot get string value of non-leaf element"};
   }
 
-  YAMLDocument::LeafValue& leaf =
-      std::get<YAMLDocument::LeafValue>(document_->value_);
+  auto& leaf = std::get<YAMLDocument::LeafValue>(document_->value_);
 
   return leaf.value;
 }
@@ -118,12 +114,14 @@ YAMLSerializationProvider::TCursor YAMLSerializationProvider::getRootCursor() {
   return YAMLSerializationCursor{&document_};
 }
 
+// NOLINTNEXTLINE(readability-make-member-function-const)
 std::string_view YAMLSerializationCursor::FieldIterator::fieldName() {
   return std::get<YAMLDocument::Mapping>(target->document_->value_)
       .entries[i]
       .first;
 }
 
+// NOLINTNEXTLINE(readability-make-member-function-const)
 YAMLSerializationCursor YAMLSerializationCursor::FieldIterator::fieldCursor() {
   return YAMLSerializationCursor{&(
       std::get<YAMLDocument::Mapping>(target->document_->value_)
@@ -132,6 +130,7 @@ YAMLSerializationCursor YAMLSerializationCursor::FieldIterator::fieldCursor() {
 }
 
 YAMLSerializationCursor
+// NOLINTNEXTLINE(readability-make-member-function-const)
 YAMLSerializationCursor::SequenceIterator::fieldCursor() {
   return YAMLSerializationCursor{&(
       std::get<YAMLDocument::Sequence>(target->document_->value_).entries[i])};

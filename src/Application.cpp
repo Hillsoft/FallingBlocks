@@ -1,6 +1,7 @@
 #include "Application.hpp"
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <iostream>
 #include <memory>
@@ -20,6 +21,7 @@ namespace {
 
 constexpr std::chrono::milliseconds kMinLoadTime{500};
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 Application* currentApplication = nullptr;
 
 } // namespace
@@ -29,10 +31,7 @@ Application::Application(
     : input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
       loadingSceneDefinition_(
           loadSceneDefinitionFromName(std::move(loadingSceneResourceName))),
-      loadingScene_(nullptr),
-      currentScene_(nullptr),
-      initialSceneResourceName_(std::move(initialSceneResourceName)),
-      loadThread_() {
+      initialSceneResourceName_(std::move(initialSceneResourceName)) {
   DEBUG_ASSERT(currentApplication == nullptr);
   currentApplication = this;
 }
@@ -75,7 +74,7 @@ void Application::run() {
       drawFrame();
       auto end = std::chrono::high_resolution_clock::now();
 
-      std::chrono::microseconds curFrameTime =
+      const auto curFrameTime =
           std::chrono::duration_cast<std::chrono::microseconds>(end - start);
       totalFrameTime += curFrameTime;
       maxFrameTime = std::max(maxFrameTime, curFrameTime);
@@ -84,10 +83,12 @@ void Application::run() {
       prevFrameTime = curFrameTime;
     }
 
-    std::cout << "FPS: " << 1000000.0f / (totalFrameTime / 1000).count()
-              << "\nAverage frame time: " << totalFrameTime / 1000
-              << "\nMax frame time: " << maxFrameTime
-              << "\nMin frame time: " << minFrameTime << "\n";
+    std::cout
+        << "FPS: "
+        << 1000000.0f / static_cast<float>((totalFrameTime / 1000).count())
+        << "\nAverage frame time: " << totalFrameTime / 1000
+        << "\nMax frame time: " << maxFrameTime
+        << "\nMin frame time: " << minFrameTime << "\n";
   }
 
   subsystems.renderSystem().waitIdle();
@@ -119,7 +120,7 @@ void Application::transitionToScene(std::string sceneName) {
     auto loadTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         loadEnd - loadStart);
     std::cout << "Loaded scene " << sceneName << " in " << loadTime.count()
-              << "ms" << std::endl;
+              << "ms\n";
 
     if (loadTime < kMinLoadTime) {
       std::this_thread::sleep_for(kMinLoadTime - loadTime);
@@ -155,6 +156,7 @@ void Application::onKeyPress(int key) {
   }
 }
 
+// NOLINTNEXTLINE(readability-convert-member-functions-to-static)
 void Application::close() {
   GlobalSubSystemStack::get().window()->close();
 }

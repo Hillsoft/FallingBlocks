@@ -1,9 +1,10 @@
 #include "serialization/yaml/YAMLTokenizer.hpp"
 
+#include <algorithm>
+#include <cstddef>
 #include <optional>
 #include <stdexcept>
 #include <string_view>
-#include <utility>
 #include <vector>
 #include "util/array.hpp"
 #include "util/string.hpp"
@@ -19,12 +20,11 @@ struct ParseResult {
 
 bool isWhiteSpace(char c) {
   constexpr auto whiteSpaceChars = util::makeArray<char>(' ', '\t');
-  for (const auto& ws : whiteSpaceChars) {
-    if (ws == c) {
-      return true;
-    }
-  }
-  return false;
+
+  return std::any_of(
+      whiteSpaceChars.begin(), whiteSpaceChars.end(), [&](char ws) {
+        return ws == c;
+      });
 }
 
 bool isPrintable(char c) {
@@ -41,11 +41,11 @@ std::optional<ParseResult> parseNewLine(std::string_view yamlSource) {
 
   if (yamlSource.size() >= 2 && yamlSource[0] == carriageReturn &&
       yamlSource[1] == lineBreak) {
-    return ParseResult{2, {YAMLSymbol::NewLine{}}};
+    return ParseResult{.bytesParsed = 2, .symbol = {YAMLSymbol::NewLine{}}};
   }
 
   if (yamlSource[0] == lineBreak || yamlSource[0] == carriageReturn) {
-    return ParseResult{1, {YAMLSymbol::NewLine{}}};
+    return ParseResult{.bytesParsed = 1, .symbol = {YAMLSymbol::NewLine{}}};
   }
 
   return std::nullopt;
@@ -66,7 +66,8 @@ std::optional<ParseResult> parseWhiteSpace(std::string_view yamlSource) {
   }
 
   if (i > 0) {
-    return ParseResult{i, {YAMLSymbol::WhiteSpace{indentSize}}};
+    return ParseResult{
+        .bytesParsed = i, .symbol = {YAMLSymbol::WhiteSpace{indentSize}}};
   }
 
   return std::nullopt;
@@ -75,7 +76,8 @@ std::optional<ParseResult> parseWhiteSpace(std::string_view yamlSource) {
 std::optional<ParseResult> parseBlockSequenceIndicator(
     std::string_view yamlSource) {
   if (yamlSource[0] == '-') {
-    return ParseResult{1, {YAMLSymbol::BlockSequenceIndicator{}}};
+    return ParseResult{
+        .bytesParsed = 1, .symbol = {YAMLSymbol::BlockSequenceIndicator{}}};
   }
 
   return std::nullopt;
@@ -84,7 +86,8 @@ std::optional<ParseResult> parseBlockSequenceIndicator(
 std::optional<ParseResult> parseMappingKeyIndicator(
     std::string_view yamlSource) {
   if (yamlSource[0] == '?') {
-    return ParseResult{1, {YAMLSymbol::MappingKeyIndicator{}}};
+    return ParseResult{
+        .bytesParsed = 1, .symbol = {YAMLSymbol::MappingKeyIndicator{}}};
   }
 
   return std::nullopt;
@@ -93,7 +96,8 @@ std::optional<ParseResult> parseMappingKeyIndicator(
 std::optional<ParseResult> parseMappingValueSeparator(
     std::string_view yamlSource) {
   if (yamlSource[0] == ':') {
-    return ParseResult{1, {YAMLSymbol::MappingValueSeparator{}}};
+    return ParseResult{
+        .bytesParsed = 1, .symbol = {YAMLSymbol::MappingValueSeparator{}}};
   }
 
   return std::nullopt;
@@ -101,7 +105,7 @@ std::optional<ParseResult> parseMappingValueSeparator(
 
 std::optional<ParseResult> parsePlainScalar(std::string_view yamlSource) {
   // is first character unsafe
-  bool secondCharacterSafe =
+  const bool secondCharacterSafe =
       yamlSource.size() > 1 && isPlainSafe(yamlSource[1]);
 
   if (!isPrintable(yamlSource[0]) || isWhiteSpace(yamlSource[0]) ||
@@ -129,7 +133,9 @@ std::optional<ParseResult> parsePlainScalar(std::string_view yamlSource) {
   for (; isWhiteSpace(yamlSource[i - 1]); i--) {
   }
 
-  return ParseResult{i, {YAMLSymbol::ScalarText{yamlSource.substr(0, i)}}};
+  return ParseResult{
+      .bytesParsed = i,
+      .symbol = {YAMLSymbol::ScalarText{yamlSource.substr(0, i)}}};
 }
 
 std::optional<ParseResult> parseComment(std::string_view yamlSource) {
@@ -144,7 +150,7 @@ std::optional<ParseResult> parseComment(std::string_view yamlSource) {
     }
   }
 
-  return ParseResult{i, {YAMLSymbol::Comment{}}};
+  return ParseResult{.bytesParsed = i, .symbol = {YAMLSymbol::Comment{}}};
 }
 
 using Parser = std::optional<ParseResult> (*)(std::string_view);
@@ -164,7 +170,7 @@ std::vector<YAMLSymbol> tokenizeYAML(std::string_view yamlSource) {
   size_t pos = 0;
   std::vector<YAMLSymbol> result;
 
-  while (yamlSource.size() > 0) {
+  while (!yamlSource.empty()) {
     std::optional<ParseResult> nextSymbol;
 
     for (const auto& p : parserList) {
@@ -172,7 +178,7 @@ std::vector<YAMLSymbol> tokenizeYAML(std::string_view yamlSource) {
       if (curResult.has_value()) {
         if (!nextSymbol.has_value() ||
             curResult->bytesParsed > nextSymbol->bytesParsed) {
-          nextSymbol = std::move(curResult);
+          nextSymbol = curResult;
         }
       }
     }
@@ -183,7 +189,7 @@ std::vector<YAMLSymbol> tokenizeYAML(std::string_view yamlSource) {
 
     pos += nextSymbol->bytesParsed;
     yamlSource = yamlSource.substr(nextSymbol->bytesParsed);
-    result.emplace_back(std::move(nextSymbol->symbol));
+    result.emplace_back(nextSymbol->symbol);
   }
 
   return result;

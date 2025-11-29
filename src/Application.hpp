@@ -42,7 +42,7 @@ class Application : public input::InputHandler {
   engine::ResourceRef<SceneDefinition> loadingSceneDefinition_;
   std::unique_ptr<Scene> loadingScene_;
   std::unique_ptr<Scene> mainScene_;
-  Scene* currentScene_;
+  Scene* currentScene_ = nullptr;
   Scene* pendingScene_ = nullptr;
   std::atomic<bool> hasPendingScene_ = false;
   std::string initialSceneResourceName_;

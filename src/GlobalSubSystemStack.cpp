@@ -11,13 +11,13 @@ namespace blocks {
 
 namespace {
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 GlobalSubSystemStack* globalStack = nullptr;
 
 } // namespace
 
 GlobalSubSystemStack::GlobalSubSystemStack()
-    : render_(),
-      window_(render_.createWindow()),
+    : window_(render_.createWindow()),
       input_(window_->getPresentStack().getWindow()),
       localisation_("en_GB") {
   DEBUG_ASSERT(globalStack == nullptr);

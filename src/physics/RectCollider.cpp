@@ -1,8 +1,8 @@
 #include "physics/RectCollider.hpp"
 
+#include <algorithm>
 #include <cstdint>
 #include <optional>
-#include <utility>
 #include "math/vec.hpp"
 #include "physics/PhysicsScene.hpp"
 #include "util/Registry.hpp"
@@ -28,8 +28,8 @@ std::optional<math::Vec2> RectCollider::testCollision(
   math::Vec2 overlapP1{
       std::min(p1_.x(), other.p1_.x()), std::min(p1_.y(), other.p1_.y())};
 
-  float xDiff = overlapP1.x() - overlapP0.x();
-  float yDiff = overlapP1.y() - overlapP0.y();
+  const float xDiff = overlapP1.x() - overlapP0.x();
+  const float yDiff = overlapP1.y() - overlapP0.y();
 
   if (xDiff >= 0 && yDiff >= 0) {
     math::Vec2 centre = (p0_ + p1_) / 2.f;

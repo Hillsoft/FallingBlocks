@@ -4,6 +4,8 @@
 #include <vector>
 #include "serialization/yaml/YAMLTokenizer.hpp"
 
+namespace {
+
 template <typename... TArgs>
 std::vector<blocks::serialization::yaml::YAMLSymbol> makeSymbolSequence(
     TArgs... args) {
@@ -17,13 +19,15 @@ std::vector<blocks::serialization::yaml::YAMLSymbol> makeSymbolSequence(
   return result;
 }
 
+} // namespace
+
 TEST(YAMLTokenizerTest, Sequence) {
-  std::string_view inputYAML =
+  constexpr std::string_view inputYAML =
       "- Mark McGwire\n"
       "- Sammy Sosa\n"
       "- Ken Griffey";
 
-  std::vector<blocks::serialization::yaml::YAMLSymbol> result =
+  const std::vector<blocks::serialization::yaml::YAMLSymbol> result =
       blocks::serialization::yaml::tokenizeYAML(inputYAML);
   EXPECT_EQ(
       makeSymbolSequence(
@@ -42,12 +46,12 @@ TEST(YAMLTokenizerTest, Sequence) {
 }
 
 TEST(YAMLTokenizerTest, Mapping) {
-  std::string_view inputYAML =
+  constexpr std::string_view inputYAML =
       "hr:  65    # Home runs\n"
       "avg: 0.278 # Batting average\n"
       "rbi: 147   # Runs batted in";
 
-  std::vector<blocks::serialization::yaml::YAMLSymbol> result =
+  const std::vector<blocks::serialization::yaml::YAMLSymbol> result =
       blocks::serialization::yaml::tokenizeYAML(inputYAML);
   EXPECT_EQ(
       makeSymbolSequence(
@@ -75,7 +79,7 @@ TEST(YAMLTokenizerTest, Mapping) {
 }
 
 TEST(YAMLTokenizerTest, MappingToSequence) {
-  std::string_view inputYAML =
+  constexpr std::string_view inputYAML =
       "american:\n"
       "- Boston Red Sox\n"
       "- Detroit Tigers\n"
@@ -85,7 +89,7 @@ TEST(YAMLTokenizerTest, MappingToSequence) {
       "- Chicago Cubs\n"
       "- Atlanta Braves";
 
-  std::vector<blocks::serialization::yaml::YAMLSymbol> result =
+  const std::vector<blocks::serialization::yaml::YAMLSymbol> result =
       blocks::serialization::yaml::tokenizeYAML(inputYAML);
   EXPECT_EQ(
       makeSymbolSequence(
@@ -124,7 +128,7 @@ TEST(YAMLTokenizerTest, MappingToSequence) {
 }
 
 TEST(YAMLTokenizerTest, SequenceOfMappings) {
-  std::string_view inputYAML =
+  constexpr std::string_view inputYAML =
       "-\n"
       "  name: Mark McGwire\n"
       "  hr:   65\n"
@@ -134,7 +138,7 @@ TEST(YAMLTokenizerTest, SequenceOfMappings) {
       "  hr:   63\n"
       "  avg:  0.288";
 
-  std::vector<blocks::serialization::yaml::YAMLSymbol> result =
+  const std::vector<blocks::serialization::yaml::YAMLSymbol> result =
       blocks::serialization::yaml::tokenizeYAML(inputYAML);
   EXPECT_EQ(
       makeSymbolSequence(

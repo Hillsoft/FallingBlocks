@@ -35,36 +35,37 @@ struct PlayerDetails {
 };
 
 TEST(YAMLSerializationTest, Sequence) {
-  std::string_view inputYAML =
+  constexpr std::string_view inputYAML =
       "- Mark McGwire\n"
       "- Sammy Sosa\n"
       "- Ken Griffey";
 
-  std::vector<std::string> result = blocks::serialization::deserialize<
+  const auto result = blocks::serialization::deserialize<
       std::vector<std::string>,
       blocks::serialization::yaml::YAMLSerializationProvider>(inputYAML);
 
-  std::vector<std::string> expected{
+  const std::vector<std::string> expected{
       "Mark McGwire", "Sammy Sosa", "Ken Griffey"};
   EXPECT_EQ(expected, result);
 }
 
 TEST(YAMLSerializationTest, Mapping) {
-  std::string_view inputYAML =
+  constexpr std::string_view inputYAML =
       "hr:  65    # Home runs\n"
       "avg: 0.278 # Batting average\n"
       "rbi: 147   # Runs batted in";
 
-  ScoreDetails result = blocks::serialization::deserialize<
+  const auto result = blocks::serialization::deserialize<
       ScoreDetails,
       blocks::serialization::yaml::YAMLSerializationProvider>(inputYAML);
 
-  ScoreDetails expected{"65", "0.278", "147"};
+  const ScoreDetails expected{
+      .homeRuns = "65", .average = "0.278", .runs = "147"};
   EXPECT_EQ(expected, result);
 }
 
 TEST(YAMLSerializationTest, MappingToSequence) {
-  std::string_view inputYAML =
+  constexpr std::string_view inputYAML =
       "american:\n"
       "- Boston Red Sox\n"
       "- Detroit Tigers\n"
@@ -74,19 +75,18 @@ TEST(YAMLSerializationTest, MappingToSequence) {
       "- Chicago Cubs\n"
       "- Atlanta Braves";
 
-  std::unordered_map<std::string, std::vector<std::string>> result =
-      blocks::serialization::deserialize<
-          std::unordered_map<std::string, std::vector<std::string>>,
-          blocks::serialization::yaml::YAMLSerializationProvider>(inputYAML);
+  const auto result = blocks::serialization::deserialize<
+      std::unordered_map<std::string, std::vector<std::string>>,
+      blocks::serialization::yaml::YAMLSerializationProvider>(inputYAML);
 
-  std::unordered_map<std::string, std::vector<std::string>> expected{
+  const std::unordered_map<std::string, std::vector<std::string>> expected{
       {"american", {"Boston Red Sox", "Detroit Tigers", "New York Yankees"}},
       {"national", {"New York Mets", "Chicago Cubs", "Atlanta Braves"}}};
   EXPECT_EQ(expected, result);
 }
 
 TEST(YAMLSerializationTest, SequenceToMapping) {
-  std::string_view inputYAML =
+  constexpr std::string_view inputYAML =
       "-\n"
       "  name: Mark McGwire\n"
       "  hr:   65\n"
@@ -96,11 +96,12 @@ TEST(YAMLSerializationTest, SequenceToMapping) {
       "  hr:   63\n"
       "  avg:  0.288";
 
-  std::vector<PlayerDetails> result = blocks::serialization::deserialize<
+  const auto result = blocks::serialization::deserialize<
       std::vector<PlayerDetails>,
       blocks::serialization::yaml::YAMLSerializationProvider>(inputYAML);
 
-  std::vector<PlayerDetails> expected{
-      {"Mark McGwire", "65", "0.278"}, {"Sammy Sosa", "63", "0.288"}};
+  const std::vector<PlayerDetails> expected{
+      {.name = "Mark McGwire", .homeRuns = "65", .average = "0.278"},
+      {.name = "Sammy Sosa", .homeRuns = "63", .average = "0.288"}};
   EXPECT_EQ(expected, result);
 }

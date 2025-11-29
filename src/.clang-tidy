@@ -32,6 +32,7 @@ Checks: "*,
 "
 WarningsAsErrors: ''
 HeaderFilterRegex: '.*'
+ExcludeHeaderFilterRegex: '(gtest\.h)|(vulkan_video_codecs_common\.h)'
 FormatStyle:     none
 ExtraArgsBefore:
     - "/EHsc"
