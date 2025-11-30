@@ -23,6 +23,7 @@ target_link_libraries(globalsubsystemstack
 	audio.audiosubsystem
 	engine.localisation
 	engine.resourcemanager
+	engine.settings
 	input.inputsubsystem
 	render.rendersubsystem
 	util.debug

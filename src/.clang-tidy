@@ -32,9 +32,9 @@ Checks: "*,
 "
 WarningsAsErrors: ''
 HeaderFilterRegex: '.*'
-ExcludeHeaderFilterRegex: '(gtest\.h)|(vulkan_video_codecs_common\.h)'
+ExcludeHeaderFilterRegex: '(gtest\.h)|(vulkan_core\.h)|(vulkan_video_codecs_common\.h)|(KnownFolders\.h)'
 FormatStyle:     none
 ExtraArgsBefore:
     - "/EHsc"
 CheckOptions:
-    misc-include-cleaner.IgnoreHeaders: "WinUser.h;windef.h;minwindef.h"
+    misc-include-cleaner.IgnoreHeaders: "Windows.h;WinUser.h;windef.h;minwindef.h;KnownFolders.h;winnt.h;winerror.h;combaseapi.h"

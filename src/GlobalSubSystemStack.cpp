@@ -1,8 +1,11 @@
 #include "GlobalSubSystemStack.hpp"
 
+#include <string>
+#include <string_view>
 #include "audio/AudioSubSystem.hpp"
 #include "engine/Localisation.hpp"
 #include "engine/ResourceManager.hpp"
+#include "engine/Settings.hpp"
 #include "input/InputSubSystem.hpp"
 #include "render/RenderSubSystem.hpp"
 #include "util/debug.hpp"
@@ -14,12 +17,16 @@ namespace {
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 GlobalSubSystemStack* globalStack = nullptr;
 
+std::string_view getLocaleCodeFromSettings() {
+  return getSettings().localeCode;
+}
+
 } // namespace
 
 GlobalSubSystemStack::GlobalSubSystemStack()
     : window_(render_.createWindow()),
       input_(window_->getPresentStack().getWindow()),
-      localisation_("en_GB") {
+      localisation_(std::string{getLocaleCodeFromSettings()}) {
   DEBUG_ASSERT(globalStack == nullptr);
   globalStack = this;
 }
