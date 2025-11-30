@@ -1,13 +1,13 @@
 #include "render/VulkanPresentStack.hpp"
 
 #include <cstdint>
-#include <iostream>
 #include <optional>
 #include <span>
 #include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan_core.h>
+#include "log/Logger.hpp"
 #include "render/VulkanGraphicsDevice.hpp"
 #include "render/glfw_wrapper/Window.hpp"
 #include "render/vulkan/FrameBufferBuilder.hpp"
@@ -74,7 +74,7 @@ VulkanPresentStack::FrameData VulkanPresentStack::getNextImageIndex(
 }
 
 void VulkanPresentStack::reset() {
-  std::cout << "Resetting swap chain\n";
+  log::LoggerSystem::logToDefault(log::LogLevel::INFO, "Resetting swap chain");
   vkDeviceWaitIdle(device_->getRawDevice());
   swapChainData_.reset(
       *device_, window_.getRawWindow(), surface_.get(), renderPass_);

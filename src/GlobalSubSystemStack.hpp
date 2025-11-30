@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include "audio/AudioSubSystem.hpp"
 #include "engine/Localisation.hpp"
 #include "engine/ResourceManager.hpp"
@@ -31,7 +32,7 @@ class GlobalSubSystemStack : private util::no_copy_move {
   Localisation& localisationManager();
 
  private:
-  log::LoggerSystem logger_;
+  std::unique_ptr<log::LoggerSystem> logger_;
   render::RenderSubSystem render_;
   render::UniqueWindowHandle window_;
   input::InputSubSystem input_;

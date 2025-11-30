@@ -4,7 +4,6 @@
 #include <array>
 #include <cstdint>
 #include <cstring>
-#include <iostream>
 #include <memory>
 #include <optional>
 #include <span>
@@ -13,6 +12,7 @@
 #include <vector>
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan_core.h>
+#include "log/Logger.hpp"
 #include "math/vec.hpp"
 #include "render/ForwardAllocateMappedBuffer.hpp"
 #include "render/RenderableObject.hpp"
@@ -129,7 +129,7 @@ RenderSubSystem::GLFWLifetimeScope::GLFWLifetimeScope() {
     throw std::runtime_error{"Failed to initialise GLFW"};
   }
 
-  std::cout << "GLFW initialised\n";
+  log::LoggerSystem::logToDefault(log::LogLevel::INFO, "GLFW initialised");
 }
 
 RenderSubSystem::GLFWLifetimeScope::~GLFWLifetimeScope() {

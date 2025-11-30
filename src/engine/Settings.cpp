@@ -3,12 +3,13 @@
 #include <Windows.h>
 #include <shlobj_core.h>
 #include <filesystem>
-#include <iostream>
 #include <string_view>
 #include <vector>
+#include "log/Logger.hpp"
 #include "serialization/Serialization.hpp"
 #include "serialization/yaml/YAMLSerializationProvider.hpp"
 #include "util/file.hpp"
+#include "util/string.hpp"
 
 namespace blocks {
 
@@ -24,7 +25,8 @@ Settings loadSettings() {
       SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, nullptr, &path);
 
   if (result != S_OK) {
-    std::cout << "Failed to get AppData path for settings\n";
+    log::LoggerSystem::logToDefault(
+        log::LogLevel::WARNING, "Failed to get AppData path for settings");
     return defaultSettings();
   }
 
@@ -33,7 +35,10 @@ Settings loadSettings() {
   CoTaskMemFree(path);
 
   if (!std::filesystem::exists(settingsPath)) {
-    std::cout << "Failed to load settings from " << settingsPath << "\n";
+    log::LoggerSystem::logToDefault(
+        log::LogLevel::WARNING,
+        util::toString(
+            "Failed to read settings file ", settingsPath.generic_string()));
     return defaultSettings();
   }
 

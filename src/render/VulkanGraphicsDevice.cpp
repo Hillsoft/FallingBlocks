@@ -4,20 +4,22 @@
 #include <array>
 #include <cstdint>
 #include <cstring>
-#include <iostream>
 #include <memory>
 #include <optional>
 #include <stdexcept>
+#include <string>
+#include <string_view>
 #include <unordered_set>
 #include <utility>
 #include <vector>
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan_core.h>
-
+#include "log/Logger.hpp"
 #include "render/VulkanInstance.hpp"
 #include "render/validationLayers.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
 #include "util/debug.hpp"
+#include "util/string.hpp"
 
 namespace blocks::render {
 
@@ -154,12 +156,17 @@ std::unique_ptr<VulkanGraphicsDevice::PhysicalDeviceInfo> choosePhysicalDevice(
       rankedDevices.end(),
       [](const auto& a, const auto& b) { return a.second > b.second; });
 
-  std::cout << "Available Vulkan devices:\n";
+  std::string availableVulkanDeviceList = "Available Vulkan devices:\n";
   for (const auto& device : rankedDevices) {
-    std::cout << "  "
-              << static_cast<const char*>(device.first->properties.deviceName)
-              << "\n";
+    availableVulkanDeviceList += util::toString(
+        "  ",
+        static_cast<const char*>(device.first->properties.deviceName),
+        "\n");
   }
+  log::LoggerSystem::logToDefault(
+      log::LogLevel::INFO,
+      std::string_view{availableVulkanDeviceList}.substr(
+          0, availableVulkanDeviceList.size() - 1));
 
   if (rankedDevices.empty() || rankedDevices[0].second == 0) {
     throw std::runtime_error{"No suitable graphics devices"};
@@ -230,9 +237,11 @@ VulkanGraphicsDevice VulkanGraphicsDevice::make(VulkanInstance& instance) {
   std::unique_ptr<PhysicalDeviceInfo> physicalDevice =
       choosePhysicalDevice(instance);
   DEBUG_ASSERT(physicalDevice != nullptr);
-  std::cout << "Using graphics device "
-            << static_cast<const char*>(physicalDevice->properties.deviceName)
-            << "\n";
+  log::LoggerSystem::logToDefault(
+      log::LogLevel::INFO,
+      util::toString(
+          "Using graphics device ",
+          static_cast<const char*>(physicalDevice->properties.deviceName)));
 
   VkDeviceQueueCreateInfoWrapper queueCreateInfo{};
   makeQueueCreateInfo(queueCreateInfo, physicalDevice->queueFamilies);

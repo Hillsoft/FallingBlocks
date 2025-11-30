@@ -38,6 +38,7 @@ target_link_libraries(render.renderableobject
 
 add_library(render.rendersubsystem STATIC "RenderSubSystem.cpp" "RenderSubSystem.hpp")
 target_link_libraries(render.rendersubsystem
+	log.logger
 	math.vec
 	render.forwardallocatemappedbuffer
 	render.renderableobject
@@ -105,10 +106,12 @@ target_link_libraries(render.vulkandevicememory
 
 add_library(render.vulkangraphicsdevice STATIC "VulkanGraphicsDevice.cpp" "VulkanGraphicsDevice.hpp")
 target_link_libraries(render.vulkangraphicsdevice
+	log.logger
 	render.validationlayers
 	render.vulkaninstance
 	render.vulkan.uniquehandle
-	util.debug)
+	util.debug
+	util.string)
 
 add_library(render.vulkangraphicspipeline STATIC "VulkanGraphicsPipeline.cpp" "VulkanGraphicsPipeline.hpp")
 target_link_libraries(render.vulkangraphicspipeline
@@ -119,8 +122,10 @@ target_link_libraries(render.vulkangraphicspipeline
 
 add_library(render.vulkaninstance STATIC "VulkanInstance.cpp" "VulkanInstance.hpp")
 target_link_libraries(render.vulkaninstance INTERFACE
+	log.logger
 	render.validationlayers
-	render.vulkan.uniquehandle)
+	render.vulkan.uniquehandle
+	util.string)
 
 add_library(render.vulkanmappedbuffer STATIC "VulkanMappedBuffer.cpp" "VulkanMappedBuffer.hpp")
 target_link_libraries(render.vulkanmappedbuffer
@@ -136,6 +141,7 @@ target_link_libraries(render.vulkanpipelinelayout
 
 add_library(render.vulkanpresentstack STATIC "VulkanPresentStack.cpp" "VulkanPresentStack.hpp")
 target_link_libraries(render.vulkanpresentstack
+	log.logger
 	render.glfw_wrapper.window
 	render.vulkangraphicsdevice
 	render.vulkanswapchain

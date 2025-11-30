@@ -62,10 +62,12 @@ target_link_libraries(engine.sceneloader
 
 add_library(engine.settings STATIC "Settings.hpp" "Settings.cpp")
 target_link_libraries(engine.settings
+	log.logger
 	serialization.serialization
 	serialization.yaml.yamlserializationprovider
 	util.file
-	util.meta_utils)
+	util.meta_utils
+	util.string)
 
 add_library(engine.textureresource STATIC "TextureResource.hpp" "TextureResource.cpp")
 target_link_libraries(engine.textureresource

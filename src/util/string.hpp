@@ -155,6 +155,35 @@ struct StringConverter<TArg, TArgs...> : public StringConverter<TArgs...> {
   size_t estimatedSizeCache_;
 };
 
+template <typename TArg>
+  requires std::is_floating_point_v<TArg>
+static size_t floatStringSizeEstimate(TArg /* a */) {
+  return 10;
+}
+
+template <typename TArg, typename... TArgs>
+  requires std::is_floating_point_v<std::remove_cvref_t<TArg>>
+struct StringConverter<TArg, TArgs...> : public StringConverter<TArgs...> {
+  template <typename... TConstructArgs>
+  explicit StringConverter(
+      const std::remove_cvref_t<TArg>& a, TConstructArgs&&... rest)
+      // NOLINTNEXTLINE(*-array-to-pointer-decay,hicpp-no-array-decay)
+      : StringConverter<TArgs...>(std::forward<TConstructArgs>(rest)...),
+        estimatedSizeCache_(floatStringSizeEstimate(a)) {}
+
+  [[nodiscard]] size_t estimateSize() const {
+    return estimatedSizeCache_ + StringConverter<TArgs...>::estimateSize();
+  }
+
+  void append(std::string& output, const TArg& a, TArgs&&... rest) const {
+    output.append(std::to_string(a));
+    // NOLINTNEXTLINE(*-array-to-pointer-decay,hicpp-no-array-decay)
+    StringConverter<TArgs...>::append(output, std::forward<TArgs>(rest)...);
+  }
+
+  size_t estimatedSizeCache_;
+};
+
 } // namespace detail
 
 template <typename... TArgs>

@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
-#include <iostream>
 #include <memory>
 #include <string>
 #include <thread>
@@ -83,12 +82,21 @@ void Application::run() {
       prevFrameTime = curFrameTime;
     }
 
-    std::cout
-        << "FPS: "
-        << 1000000.0f / static_cast<float>((totalFrameTime / 1000).count())
-        << "\nAverage frame time: " << totalFrameTime / 1000
-        << "\nMax frame time: " << maxFrameTime
-        << "\nMin frame time: " << minFrameTime << "\n";
+    log::LoggerSystem::logToDefault(
+        log::LogLevel::INFO,
+        util::toString(
+            "FPS: ",
+            1000000.0f / static_cast<float>((totalFrameTime / 1000).count())));
+    log::LoggerSystem::logToDefault(
+        log::LogLevel::INFO,
+        util::toString(
+            "Average frame time: ", (totalFrameTime / 1000).count(), "us"));
+    log::LoggerSystem::logToDefault(
+        log::LogLevel::INFO,
+        util::toString("Max frame time: ", maxFrameTime.count(), "us"));
+    log::LoggerSystem::logToDefault(
+        log::LogLevel::INFO,
+        util::toString("Min frame time: ", minFrameTime.count(), "us"));
   }
 
   subsystems.renderSystem().waitIdle();

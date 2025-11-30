@@ -3,14 +3,16 @@
 #include <array>
 #include <cstdint>
 #include <cstring>
-#include <iostream>
 #include <stdexcept>
+#include <string>
+#include <string_view>
 #include <vector>
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan_core.h>
-
+#include "log/Logger.hpp"
 #include "render/validationLayers.hpp"
 #include "render/vulkan/UniqueHandle.hpp"
+#include "util/string.hpp"
 
 namespace blocks::render {
 
@@ -82,13 +84,17 @@ bool validateRequiredExtensions(
 } // namespace
 
 VulkanInstance::VulkanInstance() : instance_(nullptr) {
-  std::cout << "Initialising Vulkan\n";
-  std::cout << "Available Vulkan extensions:\n";
+  log::LoggerSystem::logToDefault(log::LogLevel::INFO, "Initialising Vulkan");
+  std::string availableExtensionsString = "Available Vulkan extensions:\n";
   const auto supportedExtensions = getSupportedExtensions();
   for (const auto& extension : supportedExtensions) {
-    std::cout << "  " << static_cast<const char*>(extension.extensionName)
-              << "\n";
+    availableExtensionsString += util::toString(
+        "  ", static_cast<const char*>(extension.extensionName), "\n");
   }
+  log::LoggerSystem::logToDefault(
+      log::LogLevel::INFO,
+      std::string_view{availableExtensionsString}.substr(
+          0, availableExtensionsString.size() - 1));
 
   VkApplicationInfo appInfo{};
   appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -103,14 +109,16 @@ VulkanInstance::VulkanInstance() : instance_(nullptr) {
   createInfo.pApplicationInfo = &appInfo;
 
   if (kEnableValidationLayers) {
-    std::cout << "Using validation layers\n";
+    log::LoggerSystem::logToDefault(
+        log::LogLevel::INFO, "Using validation layers");
     if (checkValidationLayers()) {
       createInfo.enabledLayerCount =
           static_cast<uint32_t>(kValidationLayers.size());
       createInfo.ppEnabledLayerNames = kValidationLayers.data();
     } else {
-      std::cout
-          << "WARNING: requested validation layers not available, validation will not be used\n";
+      log::LoggerSystem::logToDefault(
+          log::LogLevel::WARNING,
+          "Requested validation layers not available, validation will not be used");
     }
   }
 
@@ -140,7 +148,7 @@ VulkanInstance::VulkanInstance() : instance_(nullptr) {
   }
   instance_ = vulkan::UniqueHandle<VkInstance>{instance};
 
-  std::cout << "Vulkan initialised\n";
+  log::LoggerSystem::logToDefault(log::LogLevel::INFO, "Vulkan initialised");
 }
 
 } // namespace blocks::render

@@ -20,9 +20,13 @@ namespace {
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 GlobalSubSystemStack* globalStack = nullptr;
 
-log::LoggerSystem buildLogger() {
-  log::LoggerSystem logger;
-  logger.registerBackend(std::make_unique<log::StdoutLoggerBackend>());
+std::unique_ptr<log::LoggerSystem> buildLogger() {
+  std::unique_ptr<log::LoggerSystem> logger =
+      std::make_unique<log::LoggerSystem>();
+  logger->registerBackend(std::make_unique<log::StdoutLoggerBackend>());
+
+  log::LoggerSystem::setDefaultLoggerSystem(logger.get());
+
   return logger;
 }
 
@@ -39,8 +43,6 @@ GlobalSubSystemStack::GlobalSubSystemStack()
       localisation_(std::string{getLocaleCodeFromSettings()}) {
   DEBUG_ASSERT(globalStack == nullptr);
   globalStack = this;
-
-  log::LoggerSystem::setDefaultLoggerSystem(&logger_);
 }
 
 GlobalSubSystemStack::~GlobalSubSystemStack() {
