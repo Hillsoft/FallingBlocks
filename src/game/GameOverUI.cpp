@@ -26,14 +26,16 @@ std::unique_ptr<ui::UIObject> makeUI(const render::Font& font) {
   uiRoot->sizeStrategy_ = ui::SizeStrategy::PAD;
   uiRoot->alongLayoutChildPosition_ = ui::Align::MIDDLE;
 
-  uiRoot->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
-      font,
-      localisation.getLocalisedString("GAME_OVER"),
-      render::Font::Size::Line{160.f}));
-  uiRoot->children_.emplace_back(util::makeNotNullUnique<ui::UIText>(
-      font,
-      localisation.getLocalisedString("PLAY_AGAIN"),
-      render::Font::Size::Line{50.f}));
+  uiRoot->children_.emplace_back(
+      util::makeNotNullUnique<ui::UIText>(
+          font,
+          localisation.getLocalisedString("GAME_OVER"),
+          render::Font::Size::Line{160.f}));
+  uiRoot->children_.emplace_back(
+      util::makeNotNullUnique<ui::UIText>(
+          font,
+          localisation.getLocalisedString("PLAY_AGAIN"),
+          render::Font::Size::Line{50.f}));
 
   return uiRoot;
 }
@@ -65,7 +67,7 @@ void playGameOverSound(Scene& scene) {
 
 GameOverUI::GameOverUI(Scene& scene, const GameOverUIDefinition& definition)
     : UIActor(scene, makeUI(definition.prototype->fontResource->get())),
-      input::InputHandler(GlobalSubSystemStack::get().inputSystem()) {
+      input::InputHandler(scene.getInputRegistry()) {
   playGameOverSound(scene);
 }
 

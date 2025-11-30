@@ -9,7 +9,16 @@ namespace blocks::input {
 
 class InputHandler;
 
-class InputSubSystem : public util::Registry<InputHandler, InputSubSystem> {
+class InputRegistry : public util::Registry<InputHandler, InputRegistry> {
+ public:
+  InputRegistry() = default;
+
+  void handleKeyEvent(int key, int scancode, int action, int mods);
+  void handleCursorPos(math::Vec2 mousePos);
+  void handleMouseEvent(math::Vec2 mousePos, int action);
+};
+
+class InputSubSystem {
  public:
   explicit InputSubSystem(render::glfw::Window& window);
 
@@ -21,11 +30,15 @@ class InputSubSystem : public util::Registry<InputHandler, InputSubSystem> {
   InputSubSystem(InputSubSystem&& other) = delete;
   InputSubSystem& operator=(InputSubSystem&& other) = delete;
 
+  void setActiveRegistry(InputRegistry* registry);
+  void unsetActiveRegistry(InputRegistry* registry);
+
  private:
   void handleKeyEvent(int key, int scancode, int action, int mods);
   void handleCursorPos(double xpos, double ypos);
   void handleMouseEvent(int button, int action, int mods);
 
+  InputRegistry* activeRegistry_ = nullptr;
   util::NotNullPtr<render::glfw::Window> window_;
   math::Vec2 mousePos_;
 };

@@ -7,6 +7,7 @@
 #include "engine/DrawableRegistry.hpp"
 #include "engine/TickRegistry.hpp"
 #include "engine/Timer.hpp"
+#include "input/InputSubSystem.hpp"
 #include "physics/PhysicsScene.hpp"
 #include "util/meta_utils.hpp"
 
@@ -24,7 +25,7 @@ class Scene {
   explicit Scene(const SceneObjectDefinition& /* definition */) {}
   Scene() = default;
 
-  virtual ~Scene() = default;
+  virtual ~Scene();
 
   Scene(const Scene& other) = delete;
   Scene& operator=(const Scene& other) = delete;
@@ -52,6 +53,8 @@ class Scene {
 
   physics::PhysicsScene& getPhysicsScene() { return physics_; }
   const physics::PhysicsScene& getPhysicsScene() const { return physics_; }
+  input::InputRegistry& getInputRegistry() { return input_; }
+  const input::InputRegistry& getInputRegistry() const { return input_; }
   TickRegistry& getTickRegistry() { return tick_; }
   const TickRegistry& getTickRegistry() const { return tick_; }
   DrawableRegistry& getDrawableScene() { return drawableScene_; }
@@ -67,6 +70,7 @@ class Scene {
   void cleanupPendingDestruction();
 
   physics::PhysicsScene physics_;
+  input::InputRegistry input_;
   TickRegistry tick_;
   DrawableRegistry drawableScene_;
   Timer timer_;

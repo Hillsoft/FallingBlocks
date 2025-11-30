@@ -15,7 +15,7 @@ namespace blocks::ui {
 class UIButton : public UIObject, input::InputHandler {
  public:
   UIButton(
-      input::InputSubSystem& inputSystem,
+      input::InputRegistry& inputSystem,
       math::Vec4 color,
       math::Vec4 hoverColor,
       render::RenderableRef<render::RenderableColor2D::InstanceData>

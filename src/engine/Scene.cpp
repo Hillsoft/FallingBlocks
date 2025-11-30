@@ -4,10 +4,15 @@
 #include <chrono>
 #include <memory>
 #include <utility>
+#include "GlobalSubSystemStack.hpp"
 #include "engine/Actor.hpp"
 #include "util/debug.hpp"
 
 namespace blocks {
+
+Scene::~Scene() {
+  GlobalSubSystemStack::get().inputSystem().unsetActiveRegistry(&input_);
+}
 
 void Scene::destroyActor(Actor* actor) {
   if (!actor->isAlive()) {
@@ -61,6 +66,8 @@ void Scene::activate() {
   for (auto& actor : actors_) {
     actor->onActivate();
   }
+
+  GlobalSubSystemStack::get().inputSystem().setActiveRegistry(&input_);
 }
 
 } // namespace blocks

@@ -8,16 +8,15 @@
 #include "engine/ResourceRef.hpp"
 #include "engine/Scene.hpp"
 #include "engine/SceneLoader.hpp"
-#include "input/InputHandler.hpp"
 
 namespace blocks {
 
-class Application : public input::InputHandler {
+class Application {
  public:
   Application(
       std::string loadingSceneResourceName,
       std::string initialSceneResourceName);
-  ~Application() override;
+  ~Application();
 
   Application(const Application& other) = delete;
   Application& operator=(const Application& other) = delete;
@@ -30,8 +29,6 @@ class Application : public input::InputHandler {
   void run();
 
   void transitionToScene(std::string sceneName);
-
-  void onKeyPress(int key) final;
 
   void close();
 

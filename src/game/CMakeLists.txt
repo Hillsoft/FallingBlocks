@@ -119,6 +119,7 @@ target_link_libraries(game.mainmenuui
 	engine.scene
 	game.uiactor
 	globalsubsystemstack
+	input.inputsubsystem
 	math.vec
 	render.font
 	render.rendersubsystem

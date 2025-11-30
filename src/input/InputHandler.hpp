@@ -5,11 +5,11 @@
 
 namespace blocks::input {
 
-class InputSubSystem;
+class InputRegistry;
 
-class InputHandler : public util::RegistryItem<InputSubSystem, InputHandler> {
+class InputHandler : public util::RegistryItem<InputRegistry, InputHandler> {
  public:
-  explicit InputHandler(InputSubSystem& inputSystem);
+  explicit InputHandler(InputRegistry& inputSystem);
 
   virtual ~InputHandler() = default;
 

@@ -16,7 +16,6 @@ target_link_libraries(application
 	engine.scene
 	engine.sceneloader
 	globalsubsystemstack
-	input.inputsubsystem
 	util.debug)
 
 add_library(globalsubsystemstack STATIC "GlobalSubSystemStack.cpp" "GlobalSubSystemStack.hpp")

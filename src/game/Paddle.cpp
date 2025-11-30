@@ -26,7 +26,7 @@ constexpr float kPaddleSpeed = 15.f * 1.0f;
 
 Paddle::Paddle(Scene& scene, const PaddleDefinition& definition)
     : Actor(scene),
-      input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
+      input::InputHandler(scene.getInputRegistry()),
       physics::RectCollider(
           scene.getPhysicsScene(),
           math::Vec2{15.f + (-kPaddleWidth / 2.f), 27.f},

@@ -46,6 +46,8 @@ target_link_libraries(engine.scene
 	engine.drawableregistry
 	engine.tickregistry
 	engine.timer
+	globalsubsystemstack
+	input.inputsubsystem
 	physics.physicsscene
 	util.debug
 	util.meta_utils)

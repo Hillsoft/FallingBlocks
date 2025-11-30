@@ -12,7 +12,6 @@
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Scene.hpp"
 #include "engine/SceneLoader.hpp"
-#include "input/InputHandler.hpp"
 #include "util/debug.hpp"
 
 namespace blocks {
@@ -28,8 +27,7 @@ Application* currentApplication = nullptr;
 
 Application::Application(
     std::string loadingSceneResourceName, std::string initialSceneResourceName)
-    : input::InputHandler(GlobalSubSystemStack::get().inputSystem()),
-      loadingSceneDefinition_(
+    : loadingSceneDefinition_(
           loadSceneDefinitionFromName(std::move(loadingSceneResourceName))),
       initialSceneResourceName_(std::move(initialSceneResourceName)) {
   DEBUG_ASSERT(currentApplication == nullptr);
@@ -145,15 +143,6 @@ void Application::drawFrame() {
   auto& render = GlobalSubSystemStack::get().renderSystem();
   currentScene_->drawAll();
   render.commitFrame();
-}
-
-void Application::onKeyPress(int key) {
-  if (key == GLFW_KEY_ESCAPE) {
-    close();
-  }
-  if (key == GLFW_KEY_F) {
-    GlobalSubSystemStack::get().window()->toggleFullScreen();
-  }
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)

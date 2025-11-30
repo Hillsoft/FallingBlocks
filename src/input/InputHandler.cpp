@@ -5,7 +5,7 @@
 
 namespace blocks::input {
 
-InputHandler::InputHandler(InputSubSystem& inputSystem)
+InputHandler::InputHandler(InputRegistry& inputSystem)
     : RegistryItem(inputSystem) {}
 
 } // namespace blocks::input

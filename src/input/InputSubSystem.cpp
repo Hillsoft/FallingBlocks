@@ -261,6 +261,33 @@ std::string_view getKeyName(int key) {
 
 } // namespace
 
+void InputRegistry::handleKeyEvent(
+    int key, int /* scancode */, int action, int /* mods */) {
+  for (auto& h : *getRegisteredItems()) {
+    if (action == GLFW_PRESS) {
+      h->onKeyPress(key);
+    } else if (action == GLFW_RELEASE) {
+      h->onKeyRelease(key);
+    }
+  }
+}
+
+void InputRegistry::handleCursorPos(math::Vec2 mousePos) {
+  for (auto& h : *getRegisteredItems()) {
+    h->onMouseMove(mousePos);
+  }
+}
+
+void InputRegistry::handleMouseEvent(math::Vec2 mousePos, int action) {
+  for (auto& h : *getRegisteredItems()) {
+    if (action == GLFW_PRESS) {
+      h->onMouseDown(mousePos);
+    } else if (action == GLFW_RELEASE) {
+      h->onMouseUp(mousePos);
+    }
+  }
+}
+
 InputSubSystem::InputSubSystem(render::glfw::Window& window) : window_(window) {
   window.setKeyEventHandler([&](int key, int scancode, int action, int mods) {
     this->handleKeyEvent(key, scancode, action, mods);
@@ -278,14 +305,20 @@ InputSubSystem::~InputSubSystem() {
   });
 }
 
+void InputSubSystem::setActiveRegistry(InputRegistry* activeRegistry) {
+  activeRegistry_ = activeRegistry;
+}
+
+void InputSubSystem::unsetActiveRegistry(InputRegistry* activeRegistry) {
+  if (activeRegistry_ == activeRegistry) {
+    activeRegistry_ = nullptr;
+  }
+}
+
 void InputSubSystem::handleKeyEvent(
-    int key, int /* scancode */, int action, int /* mods */) {
-  for (auto& h : *getRegisteredItems()) {
-    if (action == GLFW_PRESS) {
-      h->onKeyPress(key);
-    } else if (action == GLFW_RELEASE) {
-      h->onKeyRelease(key);
-    }
+    int key, int scancode, int action, int mods) {
+  if (activeRegistry_ != nullptr) {
+    activeRegistry_->handleKeyEvent(key, scancode, action, mods);
   }
 }
 
@@ -296,8 +329,9 @@ void InputSubSystem::handleCursorPos(double xpos, double ypos) {
           1.f,
       (2.f * static_cast<float>(ypos) / static_cast<float>(windowSize.second)) -
           1.f};
-  for (auto& h : *getRegisteredItems()) {
-    h->onMouseMove(mousePos_);
+
+  if (activeRegistry_ != nullptr) {
+    activeRegistry_->handleCursorPos(mousePos_);
   }
 }
 
@@ -305,12 +339,8 @@ void InputSubSystem::handleMouseEvent(int button, int action, int /* mods */) {
   if (button != GLFW_MOUSE_BUTTON_1) {
     return;
   }
-  for (auto& h : *getRegisteredItems()) {
-    if (action == GLFW_PRESS) {
-      h->onMouseDown(mousePos_);
-    } else if (action == GLFW_RELEASE) {
-      h->onMouseUp(mousePos_);
-    }
+  if (activeRegistry_ != nullptr) {
+    activeRegistry_->handleMouseEvent(mousePos_, action);
   }
 }
 
