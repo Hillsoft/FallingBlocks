@@ -3,6 +3,7 @@ add_subdirectory(engine)
 add_subdirectory(game)
 add_subdirectory(input)
 add_subdirectory(loader)
+add_subdirectory(log)
 add_subdirectory(math)
 add_subdirectory(physics)
 add_subdirectory(render)
@@ -16,7 +17,9 @@ target_link_libraries(application
 	engine.scene
 	engine.sceneloader
 	globalsubsystemstack
-	util.debug)
+	log.logger
+	util.debug
+	util.string)
 
 add_library(globalsubsystemstack STATIC "GlobalSubSystemStack.cpp" "GlobalSubSystemStack.hpp")
 target_link_libraries(globalsubsystemstack
@@ -25,6 +28,8 @@ target_link_libraries(globalsubsystemstack
 	engine.resourcemanager
 	engine.settings
 	input.inputsubsystem
+	log.logger
+	log.stdoutloggerbackend
 	render.rendersubsystem
 	util.debug
 	util.raii_helpers)

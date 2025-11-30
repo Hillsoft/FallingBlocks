@@ -1,5 +1,6 @@
 #include "GlobalSubSystemStack.hpp"
 
+#include <memory>
 #include <string>
 #include <string_view>
 #include "audio/AudioSubSystem.hpp"
@@ -7,6 +8,8 @@
 #include "engine/ResourceManager.hpp"
 #include "engine/Settings.hpp"
 #include "input/InputSubSystem.hpp"
+#include "log/Logger.hpp"
+#include "log/StdoutLoggerBackend.hpp"
 #include "render/RenderSubSystem.hpp"
 #include "util/debug.hpp"
 
@@ -17,6 +20,12 @@ namespace {
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 GlobalSubSystemStack* globalStack = nullptr;
 
+log::LoggerSystem buildLogger() {
+  log::LoggerSystem logger;
+  logger.registerBackend(std::make_unique<log::StdoutLoggerBackend>());
+  return logger;
+}
+
 std::string_view getLocaleCodeFromSettings() {
   return getSettings().localeCode;
 }
@@ -24,14 +33,19 @@ std::string_view getLocaleCodeFromSettings() {
 } // namespace
 
 GlobalSubSystemStack::GlobalSubSystemStack()
-    : window_(render_.createWindow()),
+    : logger_(buildLogger()),
+      window_(render_.createWindow()),
       input_(window_->getPresentStack().getWindow()),
       localisation_(std::string{getLocaleCodeFromSettings()}) {
   DEBUG_ASSERT(globalStack == nullptr);
   globalStack = this;
+
+  log::LoggerSystem::setDefaultLoggerSystem(&logger_);
 }
 
 GlobalSubSystemStack::~GlobalSubSystemStack() {
+  log::LoggerSystem::setDefaultLoggerSystem(nullptr);
+
   DEBUG_ASSERT(globalStack == this);
   globalStack = nullptr;
 }

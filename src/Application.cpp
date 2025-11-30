@@ -12,7 +12,9 @@
 #include "GlobalSubSystemStack.hpp"
 #include "engine/Scene.hpp"
 #include "engine/SceneLoader.hpp"
+#include "log/Logger.hpp"
 #include "util/debug.hpp"
+#include "util/string.hpp"
 
 namespace blocks {
 
@@ -117,8 +119,10 @@ void Application::transitionToScene(std::string sceneName) {
     auto loadEnd = std::chrono::high_resolution_clock::now();
     auto loadTime = std::chrono::duration_cast<std::chrono::milliseconds>(
         loadEnd - loadStart);
-    std::cout << "Loaded scene " << sceneName << " in " << loadTime.count()
-              << "ms\n";
+    log::LoggerSystem::logToDefault(
+        log::LogLevel::INFO,
+        util::toString(
+            "Loaded scene ", sceneName, " in ", loadTime.count(), "ms"));
 
     if (loadTime < kMinLoadTime) {
       std::this_thread::sleep_for(kMinLoadTime - loadTime);
