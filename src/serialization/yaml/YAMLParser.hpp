@@ -30,4 +30,6 @@ struct YAMLDocument {
 
 YAMLDocument parseDocument(std::span<const YAMLSymbol> symbols);
 
+std::string writeDocument(const YAMLDocument& document);
+
 } // namespace blocks::serialization::yaml

@@ -1,5 +1,6 @@
 #include "serialization/yaml/YAMLParser.hpp"
 
+#include <algorithm>
 #include <span>
 #include <stdexcept>
 #include <string>
@@ -7,6 +8,7 @@
 #include <variant>
 #include <vector>
 #include "serialization/yaml/YAMLTokenizer.hpp"
+#include "util/debug.hpp"
 
 namespace blocks::serialization::yaml {
 
@@ -226,6 +228,40 @@ YAMLDocument parseObject(
   return parseLeafValue(indentLimit, symbols);
 }
 
+std::string paddingString(int length) {
+  std::string result;
+  result.resize(length, ' ');
+  return result;
+}
+
+void writeDocumentImpl(
+    std::string& out, int indent, const YAMLDocument& document) {
+  if (std::holds_alternative<YAMLDocument::Mapping>(document.value_)) {
+    const std::string indentString = paddingString(indent);
+    const auto& value = std::get<YAMLDocument::Mapping>(document.value_);
+    for (const auto& [key, mapElem] : value.entries) {
+      out.append(indentString);
+      out.append(key);
+      out.append(":\n");
+      writeDocumentImpl(out, indent + 2, mapElem);
+    }
+  } else if (std::holds_alternative<YAMLDocument::Sequence>(document.value_)) {
+    const std::string indentString =
+        paddingString(std::max(0, indent - 2)) + "- \n";
+    const auto& value = std::get<YAMLDocument::Sequence>(document.value_);
+    for (const auto& seqElem : value.entries) {
+      out.append(indentString);
+      writeDocumentImpl(out, indent + 2, seqElem);
+    }
+  } else if (std::holds_alternative<YAMLDocument::LeafValue>(document.value_)) {
+    out.append(paddingString(indent));
+    out.append(std::get<YAMLDocument::LeafValue>(document.value_).value);
+    out.append("\n");
+  } else {
+    DEBUG_ASSERT(false);
+  }
+}
+
 } // namespace
 
 YAMLDocument parseDocument(std::span<const YAMLSymbol> symbols) {
@@ -239,6 +275,12 @@ YAMLDocument parseDocument(std::span<const YAMLSymbol> symbols) {
     }
   }
 
+  return result;
+}
+
+std::string writeDocument(const YAMLDocument& document) {
+  std::string result;
+  writeDocumentImpl(result, 0, document);
   return result;
 }
 

@@ -153,3 +153,123 @@ TEST(YAMLTokenizerTest, SequenceOfMappings) {
 
   EXPECT_EQ(expected, result);
 }
+
+TEST(YAMLSerializerTest, Sequence) {
+  const blocks::serialization::yaml::YAMLDocument doc{
+      blocks::serialization::yaml::YAMLDocument::Sequence{std::vector<
+          blocks::serialization::yaml::YAMLDocument>{
+          blocks::serialization::yaml::YAMLDocument{
+              blocks::serialization::yaml::YAMLDocument::LeafValue{
+                  "Mark McGwire"}},
+          blocks::serialization::yaml::YAMLDocument{
+              blocks::serialization::yaml::YAMLDocument::LeafValue{
+                  "Sammy Sosa"}},
+          blocks::serialization::yaml::YAMLDocument{
+              blocks::serialization::yaml::YAMLDocument::LeafValue{
+                  "Ken Griffey"}}}}};
+
+  const blocks::serialization::yaml::YAMLDocument result =
+      blocks::serialization::yaml::parseDocument(
+          blocks::serialization::yaml::tokenizeYAML(
+              blocks::serialization::yaml::writeDocument(doc)));
+
+  EXPECT_EQ(doc, result);
+}
+
+TEST(YAMLSerializerTest, Mapping) {
+  const blocks::serialization::yaml::YAMLDocument doc{
+      blocks::serialization::yaml::YAMLDocument::Mapping{
+          {{"hr",
+            blocks::serialization::yaml::YAMLDocument{
+                blocks::serialization::yaml::YAMLDocument::LeafValue{"65"}}},
+           {"avg",
+            blocks::serialization::yaml::YAMLDocument{
+                blocks::serialization::yaml::YAMLDocument::LeafValue{"0.278"}}},
+           {"rbi",
+            blocks::serialization::yaml::YAMLDocument{
+                blocks::serialization::yaml::YAMLDocument::LeafValue{
+                    "147"}}}}}};
+
+  const blocks::serialization::yaml::YAMLDocument result =
+      blocks::serialization::yaml::parseDocument(
+          blocks::serialization::yaml::tokenizeYAML(
+              blocks::serialization::yaml::writeDocument(doc)));
+
+  EXPECT_EQ(doc, result);
+}
+
+TEST(YAMLSerializerTest, MappingToSequence) {
+  const blocks::serialization::yaml::YAMLDocument doc{
+      blocks::serialization::yaml::YAMLDocument::Mapping{
+          {{"american",
+            blocks::serialization::yaml::YAMLDocument{
+                blocks::serialization::yaml::YAMLDocument::Sequence{
+                    {blocks::serialization::yaml::YAMLDocument{
+                         blocks::serialization::yaml::YAMLDocument::LeafValue{
+                             "Boston Red Sox"}},
+                     blocks::serialization::yaml::YAMLDocument{
+                         blocks::serialization::yaml::YAMLDocument::LeafValue{
+                             "Detroit Tigers"}},
+                     blocks::serialization::yaml::YAMLDocument{
+                         blocks::serialization::yaml::YAMLDocument::LeafValue{
+                             "New York Yankees"}}}}}},
+           {"national",
+            blocks::serialization::yaml::YAMLDocument{
+                blocks::serialization::yaml::YAMLDocument::Sequence{
+                    {blocks::serialization::yaml::YAMLDocument{
+                         blocks::serialization::yaml::YAMLDocument::LeafValue{
+                             "New York Mets"}},
+                     blocks::serialization::yaml::YAMLDocument{
+                         blocks::serialization::yaml::YAMLDocument::LeafValue{
+                             "Chicago Cubs"}},
+                     blocks::serialization::yaml::YAMLDocument{
+                         blocks::serialization::yaml::YAMLDocument::LeafValue{
+                             "Atlanta Braves"}}}}}}}}};
+
+  const blocks::serialization::yaml::YAMLDocument result =
+      blocks::serialization::yaml::parseDocument(
+          blocks::serialization::yaml::tokenizeYAML(
+              blocks::serialization::yaml::writeDocument(doc)));
+
+  EXPECT_EQ(doc, result);
+}
+
+TEST(YAMLSerializerTest, SequenceOfMappings) {
+  const blocks::serialization::yaml::YAMLDocument doc{
+      blocks::serialization::yaml::YAMLDocument::Sequence{
+          {blocks::serialization::yaml::YAMLDocument{
+               blocks::serialization::yaml::YAMLDocument::Mapping{
+                   {{"name",
+                     blocks::serialization::yaml::YAMLDocument{
+                         blocks::serialization::yaml::YAMLDocument::LeafValue{
+                             "Mark McGwire"}}},
+                    {"hr",
+                     blocks::serialization::yaml::YAMLDocument{
+                         blocks::serialization::yaml::YAMLDocument::LeafValue{
+                             "65"}}},
+                    {"avg",
+                     blocks::serialization::yaml::YAMLDocument{
+                         blocks::serialization::yaml::YAMLDocument::LeafValue{
+                             "0.278"}}}}}},
+           blocks::serialization::yaml::YAMLDocument{
+               blocks::serialization::yaml::YAMLDocument::Mapping{
+                   {{"name",
+                     blocks::serialization::yaml::YAMLDocument{
+                         blocks::serialization::yaml::YAMLDocument::LeafValue{
+                             "Sammy Sosa"}}},
+                    {"hr",
+                     blocks::serialization::yaml::YAMLDocument{
+                         blocks::serialization::yaml::YAMLDocument::LeafValue{
+                             "63"}}},
+                    {"avg",
+                     blocks::serialization::yaml::YAMLDocument{
+                         blocks::serialization::yaml::YAMLDocument::LeafValue{
+                             "0.288"}}}}}}}}};
+
+  const blocks::serialization::yaml::YAMLDocument result =
+      blocks::serialization::yaml::parseDocument(
+          blocks::serialization::yaml::tokenizeYAML(
+              blocks::serialization::yaml::writeDocument(doc)));
+
+  EXPECT_EQ(doc, result);
+}
