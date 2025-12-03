@@ -12,6 +12,7 @@
 #include <vector>
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan_core.h>
+#include "engine/Settings.hpp"
 #include "log/Logger.hpp"
 #include "math/vec.hpp"
 #include "render/ForwardAllocateMappedBuffer.hpp"
@@ -137,14 +138,15 @@ RenderSubSystem::GLFWLifetimeScope::~GLFWLifetimeScope() {
 }
 
 UniqueWindowHandle RenderSubSystem::createWindow() {
+  const Settings& settings = getSettings();
   const size_t id = windows_.size();
   windows_.emplace_back(
       std::make_unique<Window>(
           instance_,
           graphics_,
           VkRenderPass{mainRenderPass_.get()},
-          800,
-          800,
+          settings.resolution.x(),
+          settings.resolution.y(),
           "Vulkan"));
 
   for (size_t i = 0; i < kMaxFramesInFlight; i++) {

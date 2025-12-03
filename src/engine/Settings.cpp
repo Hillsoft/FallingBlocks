@@ -8,6 +8,7 @@
 #include <string_view>
 #include <vector>
 #include "log/Logger.hpp"
+#include "math/vec.hpp"
 #include "serialization/Serialization.hpp"
 #include "serialization/yaml/YAMLSerializationProvider.hpp"
 #include "util/file.hpp"
@@ -35,7 +36,7 @@ std::filesystem::path getSettingsPath() {
 }
 
 Settings defaultSettings() {
-  return {.localeCode = "en_GB"};
+  return {.localeCode = "en_GB", .resolution = math::Vec<int, 2>{800, 800}};
 }
 
 Settings loadSettings() {

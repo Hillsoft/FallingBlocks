@@ -1,15 +1,18 @@
 #pragma once
 
 #include <string>
+#include "math/vec.hpp"
 #include "util/meta_utils.hpp"
 
 namespace blocks {
 
 struct Settings {
   std::string localeCode;
+  math::Vec<int, 2> resolution;
 
-  using Fields =
-      util::TArray<util::TPair<util::TString<"localeCode">, std::string>>;
+  using Fields = util::TArray<
+      util::TPair<util::TString<"localeCode">, std::string>,
+      util::TPair<util::TString<"resolution">, math::Vec<int, 2>>>;
 
   template <size_t i>
   [[nodiscard]] const Fields::At<i>::Second& get() const;
@@ -17,6 +20,11 @@ struct Settings {
   template <>
   [[nodiscard]] const std::string& get<0>() const {
     return localeCode;
+  }
+
+  template <>
+  [[nodiscard]] const math::Vec<int, 2>& get<1>() const {
+    return resolution;
   }
 
   template <typename Fn>

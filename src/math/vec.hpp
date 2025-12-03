@@ -71,6 +71,17 @@ class Vec {
     return data_[index];
   }
 
+  template <size_t index>
+    requires(index < size)
+  [[nodiscard]] constexpr TNum& get() {
+    return at(index);
+  }
+  template <size_t index>
+    requires(index < size)
+  [[nodiscard]] constexpr const TNum& get() const {
+    return at(index);
+  }
+
   [[nodiscard]] constexpr TNum& x()
     requires(size >= 1)
   {

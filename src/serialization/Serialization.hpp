@@ -65,6 +65,14 @@ struct deserializeArbitrary<int> {
 };
 
 template <>
+struct deserializeArbitrary<unsigned long long> {
+  template <typename TCursor>
+  unsigned long long operator()(TCursor cursor) {
+    return std::stoull(std::string{cursor.getStringValue()});
+  }
+};
+
+template <>
 struct deserializeArbitrary<float> {
   template <typename TCursor>
   float operator()(TCursor cursor) {
@@ -187,13 +195,14 @@ struct serializeArbitrary<std::string> {
   }
 };
 
-template <>
-struct serializeArbitrary<int> {
+template <typename TIntegral>
+  requires(std::is_integral_v<TIntegral>)
+struct serializeArbitrary<TIntegral> {
   template <typename SerializationProvider>
   void operator()(
       SerializationProvider& /* provider */,
       SerializationProvider::TObject& curObject,
-      int value) {
+      const TIntegral& value) {
     curObject.setLeafValue(util::toString(value));
   }
 };
