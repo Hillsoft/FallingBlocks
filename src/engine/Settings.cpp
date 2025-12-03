@@ -3,6 +3,8 @@
 #include <Windows.h>
 #include <shlobj_core.h>
 #include <filesystem>
+#include <fstream>
+#include <stdexcept>
 #include <string_view>
 #include <vector>
 #include "log/Logger.hpp"
@@ -15,11 +17,7 @@ namespace blocks {
 
 namespace {
 
-Settings defaultSettings() {
-  return {.localeCode = "en_GB"};
-}
-
-Settings loadSettings() {
+std::filesystem::path getSettingsPath() {
   PWSTR path = nullptr;
   const HRESULT result =
       SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, nullptr, &path);
@@ -27,32 +25,71 @@ Settings loadSettings() {
   if (result != S_OK) {
     log::LoggerSystem::logToDefault(
         log::LogLevel::WARNING, "Failed to get AppData path for settings");
-    return defaultSettings();
+    throw std::runtime_error{"Failed to get AppData path for settings"};
   }
 
   const std::filesystem::path settingsPath =
       std::filesystem::path{path} / "Blocks" / "engineConfig.yaml";
   CoTaskMemFree(path);
+  return settingsPath;
+}
 
-  if (!std::filesystem::exists(settingsPath)) {
+Settings defaultSettings() {
+  return {.localeCode = "en_GB"};
+}
+
+Settings loadSettings() {
+  try {
+    const std::filesystem::path settingsPath = getSettingsPath();
+
+    if (!std::filesystem::exists(settingsPath)) {
+      log::LoggerSystem::logToDefault(
+          log::LogLevel::WARNING,
+          util::toString(
+              "Failed to read settings file ", settingsPath.generic_string()));
+      return defaultSettings();
+    }
+
+    std::vector<char> rawContents = util::readFileChars(settingsPath);
+    return serialization::
+        deserialize<Settings, serialization::yaml::YAMLDeserializationProvider>(
+            std::string_view{rawContents.begin(), rawContents.end()});
+  } catch (...) {
     log::LoggerSystem::logToDefault(
         log::LogLevel::WARNING,
-        util::toString(
-            "Failed to read settings file ", settingsPath.generic_string()));
+        "Failed to load settings, falling back to default");
     return defaultSettings();
   }
+}
 
-  std::vector<char> rawContents = util::readFileChars(settingsPath);
-  return serialization::
-      deserialize<Settings, serialization::yaml::YAMLSerializationProvider>(
-          std::string_view{rawContents.begin(), rawContents.end()});
+Settings& getSettingsStorage() {
+  static Settings settings = loadSettings();
+  return settings;
 }
 
 } // namespace
 
+void Settings::save() const {
+  try {
+    const std::filesystem::path settingsPath = getSettingsPath();
+
+    std::ofstream outStream{settingsPath};
+
+    outStream << serialization::serialize<
+        Settings,
+        serialization::yaml::YAMLSerializationProvider>(*this);
+  } catch (...) {
+    log::LoggerSystem::logToDefault(
+        log::LogLevel::WARNING, "Failed to save settings changes");
+  }
+}
+
+Settings& Settings::getInternal() {
+  return getSettingsStorage();
+}
+
 const Settings& getSettings() {
-  const static Settings settings = loadSettings();
-  return settings;
+  return getSettingsStorage();
 }
 
 } // namespace blocks

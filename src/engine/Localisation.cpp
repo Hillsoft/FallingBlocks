@@ -5,6 +5,7 @@
 #include <string_view>
 #include <utility>
 #include <vector>
+#include "engine/Settings.hpp"
 #include "loader/Locale.hpp"
 #include "util/string.hpp"
 
@@ -22,6 +23,10 @@ void Localisation::setLocale(std::string locale) {
       std::filesystem::path{RESOURCE_DIR "/localisation/"} /
       util::toString(locale, ".txt"));
   localeCode_ = std::move(locale);
+
+  Settings::update([&](Settings& settings) {
+    settings.localeCode = localeCode_;
+  });
 }
 
 // NOLINTNEXTLINE(readability-convert-member-functions-to-static)

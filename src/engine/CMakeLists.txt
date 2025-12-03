@@ -24,6 +24,7 @@ target_link_libraries(engine.fontresource
 
 add_library(engine.localisation STATIC "Localisation.hpp" "Localisation.cpp")
 target_link_libraries(engine.localisation
+	engine.settings
 	loader.locale
 	util.string)
 
