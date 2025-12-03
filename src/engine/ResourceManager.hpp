@@ -47,7 +47,7 @@ class ResourceManager {
             .replace_extension("yaml"));
     auto resource = serialization::deserialize<
         ResourceWrapper<T>,
-        serialization::yaml::YAMLSerializationProvider>(
+        serialization::yaml::YAMLDeserializationProvider>(
         {fileContents.begin(), fileContents.end()});
 
     if (resource.objectType != util::typeName<T>) {

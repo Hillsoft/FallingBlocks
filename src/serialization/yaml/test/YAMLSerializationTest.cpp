@@ -42,7 +42,7 @@ TEST(YAMLSerializationTest, Sequence) {
 
   const auto result = blocks::serialization::deserialize<
       std::vector<std::string>,
-      blocks::serialization::yaml::YAMLSerializationProvider>(inputYAML);
+      blocks::serialization::yaml::YAMLDeserializationProvider>(inputYAML);
 
   const std::vector<std::string> expected{
       "Mark McGwire", "Sammy Sosa", "Ken Griffey"};
@@ -57,7 +57,7 @@ TEST(YAMLSerializationTest, Mapping) {
 
   const auto result = blocks::serialization::deserialize<
       ScoreDetails,
-      blocks::serialization::yaml::YAMLSerializationProvider>(inputYAML);
+      blocks::serialization::yaml::YAMLDeserializationProvider>(inputYAML);
 
   const ScoreDetails expected{
       .homeRuns = "65", .average = "0.278", .runs = "147"};
@@ -77,7 +77,7 @@ TEST(YAMLSerializationTest, MappingToSequence) {
 
   const auto result = blocks::serialization::deserialize<
       std::unordered_map<std::string, std::vector<std::string>>,
-      blocks::serialization::yaml::YAMLSerializationProvider>(inputYAML);
+      blocks::serialization::yaml::YAMLDeserializationProvider>(inputYAML);
 
   const std::unordered_map<std::string, std::vector<std::string>> expected{
       {"american", {"Boston Red Sox", "Detroit Tigers", "New York Yankees"}},
@@ -98,7 +98,7 @@ TEST(YAMLSerializationTest, SequenceToMapping) {
 
   const auto result = blocks::serialization::deserialize<
       std::vector<PlayerDetails>,
-      blocks::serialization::yaml::YAMLSerializationProvider>(inputYAML);
+      blocks::serialization::yaml::YAMLDeserializationProvider>(inputYAML);
 
   const std::vector<PlayerDetails> expected{
       {.name = "Mark McGwire", .homeRuns = "65", .average = "0.278"},

@@ -173,4 +173,77 @@ T deserialize(std::string_view dataStream) {
   return deserializeArbitrary<T>{}(rootCursor);
 }
 
+template <typename T>
+struct serializeArbitrary;
+
+template <>
+struct serializeArbitrary<std::string> {
+  template <typename SerializationProvider>
+  void operator()(
+      SerializationProvider& /* provider */,
+      SerializationProvider::TObject& curObject,
+      const std::string& value) {
+    curObject.setLeafValue(value);
+  }
+};
+
+template <>
+struct serializeArbitrary<int> {
+  template <typename SerializationProvider>
+  void operator()(
+      SerializationProvider& /* provider */,
+      SerializationProvider::TObject& curObject,
+      int value) {
+    curObject.setLeafValue(util::toString(value));
+  }
+};
+
+template <>
+struct serializeArbitrary<float> {
+  template <typename SerializationProvider>
+  void operator()(
+      SerializationProvider& /* provider */,
+      SerializationProvider::TObject& curObject,
+      float value) {
+    curObject.setLeafValue(util::toString(value));
+  }
+};
+
+template <typename T>
+  requires(SerializableStruct<T>)
+struct serializeArbitrary<T> {
+  template <typename SerializationProvider>
+  void operator()(
+      SerializationProvider& provider,
+      SerializationProvider::TObject& curObject,
+      const T& value) {
+    static_assert(T::Fields::size > 0);
+    T::Fields::visitIndexed([&](auto index, auto tholder) {
+      typename SerializationProvider::TObject fieldValueObject =
+          provider.makeSubObject();
+      // Recurse
+      serializeArbitrary<typename decltype(tholder)::Value::Second>{}(
+          provider,
+          fieldValueObject,
+          value.template get<decltype(index)::value>());
+
+      curObject.pushMappingEntry(
+          std::string{decltype(tholder)::Value::First::value},
+          std::move(fieldValueObject));
+    });
+  }
+};
+
+template <typename T, typename SerializationProvider>
+std::string serialize(const T& data) {
+  SerializationProvider serializer{};
+
+  typename SerializationProvider::TObject& rootObject =
+      serializer.getRootObject();
+
+  serializeArbitrary<T>{}(serializer, rootObject, data);
+
+  return std::move(serializer).write();
+}
+
 } // namespace blocks::serialization

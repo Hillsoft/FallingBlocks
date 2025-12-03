@@ -1,16 +1,17 @@
 #pragma once
 
 #include <optional>
+#include <string>
 #include <string_view>
 #include <vector>
 #include "serialization/yaml/YAMLParser.hpp"
 
 namespace blocks::serialization::yaml {
 
-class YAMLSerializationCursor {
+class YAMLDeserializationCursor {
  public:
   struct FieldIterator {
-    YAMLSerializationCursor* target;
+    YAMLDeserializationCursor* target;
     size_t i;
 
     auto operator<=>(const FieldIterator& other) const = default;
@@ -21,11 +22,11 @@ class YAMLSerializationCursor {
     }
 
     std::string_view fieldName();
-    YAMLSerializationCursor fieldCursor();
+    YAMLDeserializationCursor fieldCursor();
   };
 
   struct SequenceIterator {
-    YAMLSerializationCursor* target;
+    YAMLDeserializationCursor* target;
     size_t i;
 
     auto operator<=>(const SequenceIterator& other) const = default;
@@ -35,13 +36,13 @@ class YAMLSerializationCursor {
       return *this;
     }
 
-    YAMLSerializationCursor fieldCursor();
+    YAMLDeserializationCursor fieldCursor();
   };
 
-  explicit YAMLSerializationCursor(YAMLDocument* document);
+  explicit YAMLDeserializationCursor(YAMLDocument* document);
 
   size_t getStructFieldCount();
-  std::optional<YAMLSerializationCursor> getSubFieldCursor(
+  std::optional<YAMLDeserializationCursor> getSubFieldCursor(
       std::string_view name);
   FieldIterator getFieldStartIterator();
   FieldIterator getFieldEndIterator();
@@ -56,16 +57,45 @@ class YAMLSerializationCursor {
   YAMLDocument* document_;
 };
 
-class YAMLSerializationProvider {
+class YAMLDeserializationProvider {
  public:
-  using TCursor = YAMLSerializationCursor;
+  using TCursor = YAMLDeserializationCursor;
 
-  explicit YAMLSerializationProvider(std::string_view dataStream);
+  explicit YAMLDeserializationProvider(std::string_view dataStream);
 
   TCursor getRootCursor();
 
  private:
   YAMLDocument document_;
+};
+
+class YAMLSerializationObject {
+ public:
+  YAMLSerializationObject() = default;
+
+  void setLeafValue(std::string value);
+  void pushSequenceElement(YAMLSerializationObject element);
+  void pushMappingEntry(std::string key, YAMLSerializationObject value);
+
+  friend class YAMLSerializationProvider;
+
+ private:
+  std::optional<YAMLDocument> document_;
+};
+
+class YAMLSerializationProvider {
+ public:
+  using TObject = YAMLSerializationObject;
+
+  YAMLSerializationProvider() = default;
+
+  YAMLSerializationObject& getRootObject();
+  YAMLSerializationObject makeSubObject();
+
+  std::string write() &&;
+
+ private:
+  YAMLSerializationObject rootObject_;
 };
 
 } // namespace blocks::serialization::yaml
