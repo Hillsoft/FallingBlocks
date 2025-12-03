@@ -4,8 +4,11 @@
 
 namespace util {
 
+template <size_t i, typename... Args>
+struct ElementAtImpl;
+
 template <size_t i, typename Arg, typename... Args>
-struct ElementAtImpl {
+struct ElementAtImpl<i, Arg, Args...> {
   using Value = ElementAtImpl<i - 1, Args...>::Value;
 };
 
@@ -53,6 +56,11 @@ struct THolder {
   using Value = T;
 };
 
+template <size_t i>
+struct SizeTHolder {
+  static constexpr size_t value = i;
+};
+
 template <typename... TArr>
 struct TArray {
   constexpr static size_t size = sizeof...(TArr);
@@ -75,8 +83,25 @@ struct TArray {
     (fn(THolder<TArr>{}), ...);
   }
 
+ private:
+  template <typename Fn, std::size_t... Indexes>
+  static void visitIndexedImpl(
+      const Fn& fn, std::integer_sequence<size_t, Indexes...> /* unused */) {
+    (fn(SizeTHolder<Indexes>{}, THolder<TArr>{}), ...);
+  }
+
+ public:
+  template <typename Fn>
+  static void visitIndexed(const Fn& fn) {
+    visitIndexedImpl(fn, std::index_sequence_for<TArr...>{});
+  }
+
   template <typename... TArr2>
   using Append = TArray<TArr..., TArr2...>;
+
+  template <size_t i>
+    requires(i < size)
+  using At = ElementAt<i, TArr...>;
 };
 
 namespace detail {
