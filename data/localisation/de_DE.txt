@@ -1,0 +1,7 @@
+﻿Deutsch
+BLOCKS_TITLE:Blöcke
+START_GAME_BUTTON:Spielen
+QUIT_GAME_BUTTON:Verlassen
+GAME_POINTS:Punkte: 
+GAME_OVER:Spiel Vorbei
+PLAY_AGAIN:Drücken Sie die Leertaste, um die Wiedergabe erneut zu starten

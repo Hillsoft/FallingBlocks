@@ -15,12 +15,12 @@ Localisation::Localisation(std::string locale)
     : localeCode_(std::move(locale)),
       currentLocale_(
           loader::loadLocale(
-              std::filesystem::path{RESOURCE_DIR "/localisation/"} /
+              std::filesystem::path("data") / "localisation" /
               util::toString(localeCode_, ".txt"))) {}
 
 void Localisation::setLocale(std::string locale) {
   currentLocale_ = loader::loadLocale(
-      std::filesystem::path{RESOURCE_DIR "/localisation/"} /
+      std::filesystem::path("data") / "localisation" /
       util::toString(locale, ".txt"));
   localeCode_ = std::move(locale);
 
@@ -33,8 +33,8 @@ void Localisation::setLocale(std::string locale) {
 std::vector<std::string> Localisation::getAvailableLocales() const {
   std::vector<std::string> result;
 
-  for (const auto& dirEntry :
-       std::filesystem::directory_iterator{RESOURCE_DIR "/localisation"}) {
+  for (const auto& dirEntry : std::filesystem::directory_iterator{
+           std::filesystem::path("data") / "localisation"}) {
     result.push_back(dirEntry.path().filename().replace_extension().string());
   }
 

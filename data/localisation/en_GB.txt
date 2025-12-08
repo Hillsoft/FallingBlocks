@@ -1,0 +1,7 @@
+English
+BLOCKS_TITLE:Blocks
+START_GAME_BUTTON:Play
+QUIT_GAME_BUTTON:Quit
+GAME_POINTS:Score: 
+GAME_OVER:Game Over
+PLAY_AGAIN:Press space to play again
